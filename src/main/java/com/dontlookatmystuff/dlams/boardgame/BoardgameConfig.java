@@ -14,15 +14,15 @@ public class BoardgameConfig {
     @Bean
     CommandLineRunner commandLineRunner(BoardgameRepository repository) {
         return args -> {
-            Boardgame theLegendOfZelda = new Boardgame(
-                    "The Legend of Zelda", false, LocalDate.of(2013, Month.JANUARY, 1)
+            Boardgame machiKoro = new Boardgame(
+                    "Machi Koro", true, LocalDate.of(2020, Month.JANUARY, 1), LocalDate.of(2021, Month.AUGUST, 12)
             );
 
-            Boardgame theAdventureOfLink = new Boardgame(
-                    "The Adventure of Link", false, LocalDate.of(2013, Month.AUGUST, 10)
+            Boardgame queendomino = new Boardgame(
+                    "Queendomino", true, LocalDate.of(2020, Month.AUGUST, 10)
             );
 
-            repository.saveAll(List.of(theLegendOfZelda, theAdventureOfLink));
+            repository.saveAll(List.of(machiKoro, queendomino));
         };
     }
 }
