@@ -10,47 +10,41 @@ import java.time.Period;
 @Table
 public class Boardgame extends Collectable {
 
-    private boolean isOwned;
     private LocalDate dateAcquired;
     private LocalDate dateLastPlayed;
+    @Transient
+    private boolean isOwned;
     @Transient
     private String timeSinceLastPlayed;
 
     public Boardgame() {
     }
 
-    public Boardgame(Long id, String name, boolean isOwned, LocalDate dateAcquired) {
-        super(id, name);
-        this.isOwned = isOwned;
-        this.dateAcquired = dateAcquired;
-    }
-
-    public Boardgame(String name, boolean isOwned, LocalDate dateAcquired) {
+    public Boardgame(String name, boolean isOwned) {
         super(name);
         this.isOwned = isOwned;
+    }
+
+    public Boardgame(Long id, String name, LocalDate dateAcquired) {
+        super(id, name);
         this.dateAcquired = dateAcquired;
     }
 
-    public Boardgame(Long id, String name, boolean isOwned, LocalDate dateAcquired, LocalDate dateLastPlayed) {
+    public Boardgame(String name, LocalDate dateAcquired) {
+        super(name);
+        this.dateAcquired = dateAcquired;
+    }
+
+    public Boardgame(Long id, String name, LocalDate dateAcquired, LocalDate dateLastPlayed) {
         super(id, name);
-        this.isOwned = isOwned;
         this.dateAcquired = dateAcquired;
         this.dateLastPlayed = dateLastPlayed;
     }
 
-    public Boardgame(String name, boolean isOwned, LocalDate dateAcquired, LocalDate dateLastPlayed) {
+    public Boardgame(String name, LocalDate dateAcquired, LocalDate dateLastPlayed) {
         super(name);
-        this.isOwned = isOwned;
         this.dateAcquired = dateAcquired;
         this.dateLastPlayed = dateLastPlayed;
-    }
-
-    public boolean isOwned() {
-        return isOwned;
-    }
-
-    public void setOwned(boolean owned) {
-        isOwned = owned;
     }
 
     public LocalDate getDateAcquired() {
@@ -69,7 +63,7 @@ public class Boardgame extends Collectable {
         this.dateLastPlayed = dateLastPlayed;
     }
 
-    public String getDaysSinceLastPlayed() {
+    public String getTimeSinceLastPlayed() {
         if (this.dateLastPlayed == null) {
             return null;
         }
@@ -95,5 +89,9 @@ public class Boardgame extends Collectable {
         }
 
         return timeToDisplay;
+    }
+
+    public boolean getIsOwned() {
+        return this.dateAcquired != null;
     }
 }

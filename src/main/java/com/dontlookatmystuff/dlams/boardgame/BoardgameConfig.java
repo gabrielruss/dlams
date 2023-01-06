@@ -15,14 +15,18 @@ public class BoardgameConfig {
     CommandLineRunner commandLineRunner(BoardgameRepository repository) {
         return args -> {
             Boardgame machiKoro = new Boardgame(
-                    "Machi Koro", true, LocalDate.of(2020, Month.JANUARY, 1), LocalDate.of(2021, Month.AUGUST, 12)
+                    "Machi Koro", LocalDate.of(2020, Month.JANUARY, 1), LocalDate.of(2021, Month.AUGUST, 12)
             );
 
             Boardgame queendomino = new Boardgame(
-                    "Queendomino", true, LocalDate.of(2020, Month.AUGUST, 10)
+                    "Queendomino", LocalDate.of(2020, Month.AUGUST, 10)
             );
 
-            repository.saveAll(List.of(machiKoro, queendomino));
+            Boardgame onMars = new Boardgame(
+                    "On Mars", false
+            );
+
+            repository.saveAll(List.of(machiKoro, queendomino, onMars));
         };
     }
 }
