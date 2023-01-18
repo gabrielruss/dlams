@@ -38,6 +38,10 @@ public abstract class Collectable {
         this.name = name;
     }
 
+    public Long getId() {
+        return id;
+    }
+
     @Override
     public String toString() {
         return "Collectable{" +

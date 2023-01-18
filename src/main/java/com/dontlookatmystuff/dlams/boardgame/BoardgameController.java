@@ -23,6 +23,16 @@ public class BoardgameController {
 
     @PostMapping
     public void addNewBoardgame(@RequestBody Boardgame boardgame) {
-        boardgameService.addNewBoardgame(boardgame);
+        boardgameService.addBoardgame(boardgame);
+    }
+
+    @DeleteMapping(path = "{boardgameId}")
+    public void deleteBoardgame(@PathVariable("boardgameId") Long boardgameId) {
+        boardgameService.deleteBoardgame(boardgameId);
+    }
+
+    @PutMapping(path = "{boardgameId}")
+    public void updateBoardgame(@PathVariable("boardgameId") Long boardgameId, @RequestParam(required = false) String name, @RequestParam(required = false) String dateAcquired) {
+        boardgameService.updateBoardgame(boardgameId, name, dateAcquired);
     }
 }

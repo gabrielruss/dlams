@@ -20,9 +20,8 @@ public class Boardgame extends Collectable {
     public Boardgame() {
     }
 
-    public Boardgame(String name, boolean isOwned) {
+    public Boardgame(String name) {
         super(name);
-        this.isOwned = isOwned;
     }
 
     public Boardgame(Long id, String name, LocalDate dateAcquired) {

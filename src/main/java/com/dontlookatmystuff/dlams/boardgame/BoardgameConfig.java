@@ -23,7 +23,7 @@ public class BoardgameConfig {
             );
 
             Boardgame onMars = new Boardgame(
-                    "On Mars", false
+                    "On Mars"
             );
 
             repository.saveAll(List.of(machiKoro, queendomino, onMars));
