@@ -1,0 +1,6 @@
+spring:
+  datasource:
+    url: 'jdbc:postgresql://dlams-db-server.postgres.database.azure.com:5432/collectable?sslmode=require'
+    username: postgres
+    password: Gabe6483
+    name: collectable
