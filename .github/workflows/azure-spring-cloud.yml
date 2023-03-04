@@ -4,6 +4,7 @@ env:
   ASC_PACKAGE_PATH: ${{ github.workspace }}
   JAVA_VERSION: 17
   AZURE_SUBSCRIPTION: 7a7d2aff-5871-4e15-b782-3d4eeda3fb60
+  SPRING_PROFILES_ACTIVE: azure
 
 jobs:
   deploy_to_production:
@@ -20,7 +21,7 @@ jobs:
 
       - name: maven build, clean
         run: |
-          mvn clean -Pazure package -DskipTests
+          mvn clean package -DskipTests
 
       - name: Login via Azure CLI
         uses: azure/login@v1
