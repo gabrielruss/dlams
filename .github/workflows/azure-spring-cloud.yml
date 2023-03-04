@@ -1,0 +1,38 @@
+name: AzureSpringCloud
+on: push
+env:
+  ASC_PACKAGE_PATH: ${{ github.workspace }}
+  JAVA_VERSION: 17
+  AZURE_SUBSCRIPTION: 7a7d2aff-5871-4e15-b782-3d4eeda3fb60
+
+jobs:
+  deploy_to_production:
+    runs-on: ubuntu-latest
+    name: deploy to production with artifact
+    steps:
+      - name: Checkout GitHub Action
+        uses: actions/checkout@v2
+
+      - name: Set up ${{ env.JAVA_VERSION }}
+        uses: actions/setup-java@v1
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+
+      - name: maven build, clean
+        run: |
+          mvn clean package -DskipTests
+
+      - name: Login via Azure CLI
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: deploy to production with artifact
+        uses: azure/spring-cloud-deploy@v1
+        with:
+          azure-subscription: ${{ env.AZURE_SUBSCRIPTION }}
+          action: Deploy
+          service-name: dlams-web-api
+          app-name: dlams
+          use-staging-deployment: false
+          package: ${{ env.ASC_PACKAGE_PATH }}/**/*.jar

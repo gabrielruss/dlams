@@ -1,0 +1,17 @@
+services:
+  app:
+    container_name: api
+    build: ./
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+  db:
+    image: postgres:alpine
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_PASSWORD: gabe6483
+      POSTGRES_DB: collectable
+    expose:
+      - 5432
