@@ -1,5 +1,7 @@
-package com.dontlookatmystuff.dlams.boardgame;
+package com.dontlookatmystuff.dlams.config;
 
+import com.dontlookatmystuff.dlams.boardgame.Boardgame;
+import com.dontlookatmystuff.dlams.boardgame.BoardgameRepository;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -12,7 +14,7 @@ import java.util.List;
 public class BoardgameConfig {
 
     @Bean
-    CommandLineRunner commandLineRunner(BoardgameRepository repository) {
+    CommandLineRunner boardgameCommandLineRunner(BoardgameRepository repository) {
         return args -> {
             Boardgame machiKoro = new Boardgame(
                     "Machi Koro", LocalDate.of(2020, Month.JANUARY, 1), LocalDate.of(2021, Month.AUGUST, 12)
