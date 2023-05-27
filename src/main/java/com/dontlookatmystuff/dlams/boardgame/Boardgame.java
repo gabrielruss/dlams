@@ -8,6 +8,7 @@ import java.time.Period;
 
 @Entity
 @Table
+// TODO: update with lombok
 public class Boardgame extends Collectable {
 
     private LocalDate dateAcquired;
