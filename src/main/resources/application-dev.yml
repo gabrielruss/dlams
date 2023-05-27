@@ -1,5 +1,5 @@
 spring:
   datasource:
-    url: 'jdbc:postgresql://localhost:5432/collectable'
+    url: 'jdbc:postgresql://db:5432/collectable'
     username: postgres
     password: gabe6483
