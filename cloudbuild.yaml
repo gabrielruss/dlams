@@ -1,7 +1,0 @@
-steps:
-  - name: maven:3-eclipse-temurin-17-alpine
-    entrypoint: mvn
-    args: [ 'package','-Dmaven.test.skip=true' ]
-  - name: gcr.io/cloud-builders/docker
-    args: [ 'build', '-t', 'us-east1-docker.pkg.dev/wired-caldron-346603/dlams-docker-repo/dlams-app', '--build-arg=JAR_FILE=target/dlams-0.0.1-SNAPSHOT.jar', '.']
-images: [ 'us-east1-docker.pkg.dev/wired-caldron-346603/dlams-docker-repo/dlams-app' ]
