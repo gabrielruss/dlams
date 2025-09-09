@@ -15,7 +15,8 @@ router = APIRouter()
 temp_fake_user = {
     "jeff": {
         "username": "jeff",
-        "hash_password": "$2b$12$kwvW0D8pRr6xMg.s1JmpBeRWjiIYLcrSjNGy87696TJuwT5SrkTVa",
+        # testpass123
+        "hash_password": "$2b$12$lRC.8pWKcnZ1EjSA25Rp/ecdH7xXVfWjmasqnnDE8EYB0K57wRbdS",
     }
 }
 
