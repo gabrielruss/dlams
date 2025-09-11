@@ -1,0 +1,25 @@
+services:
+  db:
+    image: postgres:14-alpine
+    restart: always
+    environment:
+      POSTGRES_USER: gabrielruss
+      POSTGRES_PASSWORD: Test1234!
+      POSTGRES_DB: dlams_fastapi
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  app:
+    build: .
+    restart: always
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+    environment:
+      DATABASE_URL: postgresql://gabrielruss:Test1234!@db/dlams_fastapi
+
+volumes:
+  postgres_data:
