@@ -8,34 +8,18 @@ from datetime import timedelta
 from fastapi import APIRouter, Response, status, HTTPException, Depends
 
 from sqlalchemy.orm import Session
-from app.db import SessionLocal
 from app.auth.schemas import LoginRequest
-from app.auth.utils import create_access_token
+from app.auth.utils import create_access_token, get_current_user, get_user_by_username
 from app.models import User
 from app.auth.utils import pwd_context
+from app.utils import get_db
 
 router = APIRouter()
-
-temp_fake_user = {
-    "jeff": {
-        "username": "jeff",
-        # testpass123
-        "hash_password": "$2b$12$lRC.8pWKcnZ1EjSA25Rp/ecdH7xXVfWjmasqnnDE8EYB0K57wRbdS",
-    }
-}
-
-def get_db():
-    """ This function creates a new database session for each request and closes it afterward. """
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
 
 @router.post("/register")
 def register(user: LoginRequest, db: Session = Depends(get_db)):
     """ register new users """
-    existing_user = db.query(User).filter(User.username == user.username).first()
+    existing_user = get_user_by_username(user.username, db)
 
     if existing_user:
         raise HTTPException(
@@ -68,7 +52,7 @@ def login(
         dict: A dictionary containing the access token and token type.
     """
 
-    db_user = db.query(User).filter(User.username == login_data.username).first()
+    db_user = get_user_by_username(login_data.username, db)
 
     if db_user is None:
         raise HTTPException(
@@ -97,3 +81,12 @@ def login(
         path="/",
     )
     return {"message": "Login successful"}
+
+@router.get("/protected")
+async def protected_route(current_user: User = Depends(get_current_user)
+                          ) -> dict[str, str]:
+    """ Test route to check if protected routes are working """
+    return {
+        "message": "Protected route using current user",
+        "user": str(current_user.username)
+    }
