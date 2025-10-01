@@ -1,6 +1,6 @@
 """
-models.py
-This file contains all models until this trash gets out of hand.
+user.py
+This file contains all models for Users until this trash gets out of hand.
 """
 from sqlalchemy import Column, Integer, String
 from app.db import Base

@@ -33,3 +33,48 @@ To stop the PostgreSQL service:
 ```bash
 brew services stop postgresql@14
 ```
+
+## Database Migration Workflow
+
+### Local Development
+
+1. Make changes to your SQLAlchemy models in `app/models/`
+2. Generate and test migrations locally:
+
+```bash
+# Connect to local app container
+docker exec -it dlams-fastapi-app-1 bash
+
+# Create migration
+alembic revision --autogenerate -m "Description of your changes"
+
+# Review migration in alembic/versions/
+# Apply migration
+alembic upgrade head
+```
+
+3. Commit and push changes:
+   - Modified model files
+   - New migration files in `alembic/versions/`
+   - Any related code changes
+
+### Production Deployment (Pi)
+
+1. Pull latest changes from GitHub
+2. Run database migrations:
+
+```bash
+# Connect to production app container
+docker exec -it dlams-fastapi-app-1 bash
+
+# Apply pending migrations
+alembic upgrade head
+```
+
+### Best Practices
+
+- Always commit migration files to version control
+- Review migrations before applying them
+- Test migrations locally before pushing
+- Consider adding migration steps to your Pi's deployment script
+- Back up production database before running migrations
