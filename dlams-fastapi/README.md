@@ -58,23 +58,6 @@ alembic upgrade head
    - New migration files in `alembic/versions/`
    - Any related code changes
 
-### Production Deployment (Pi)
+### Todo long term
 
-1. Pull latest changes from GitHub
-2. Run database migrations:
-
-```bash
-# Connect to production app container
-docker exec -it dlams-fastapi-app-1 bash
-
-# Apply pending migrations
-alembic upgrade head
-```
-
-### Best Practices
-
-- Always commit migration files to version control
-- Review migrations before applying them
-- Test migrations locally before pushing
-- Consider adding migration steps to your Pi's deployment script
 - Back up production database before running migrations

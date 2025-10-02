@@ -16,5 +16,7 @@ COPY . .
 # Expose the port the app runs on
 EXPOSE 8000
 
-# Define the command to run the application using Uvicorn
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+# Define the command to run the application
+# first run any alembic migrations
+# then start the app with uvicorn
+CMD alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port 8000
