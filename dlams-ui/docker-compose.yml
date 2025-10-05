@@ -1,0 +1,12 @@
+services:
+  ui:
+    build: .
+    restart: always
+    ports:
+      - "3000"
+    networks:
+      - dlams-network
+
+networks:
+  dlams-network:
+    external: true
