@@ -10,9 +10,9 @@ deactivate
 
 uvicorn app.main:app --reload
 
-# Run the app - Docker
+# Run the app locally - Docker
 
-docker-compose up -d --build
+docker compose -f docker-compose.local.yml up -d --build
 
 # Proper imports
 

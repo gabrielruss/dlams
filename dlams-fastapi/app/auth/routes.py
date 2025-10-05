@@ -8,7 +8,7 @@ from datetime import timedelta
 from fastapi import APIRouter, Response, status, HTTPException, Depends
 
 from sqlalchemy.orm import Session
-from app.auth.schemas import LoginRequest
+from app.auth.schemas import LoginRequest, AuthResponse, UserResponse
 from app.auth.utils import create_access_token, get_current_user, get_user_by_username
 from app.models import User
 from app.auth.utils import pwd_context
@@ -36,11 +36,11 @@ def register(user: LoginRequest, db: Session = Depends(get_db)):
 
     return {"message": "User created successfully"}
 
-@router.post("/login")
+@router.post("/login", response_model=AuthResponse)
 def login(
     response: Response,
     login_data: LoginRequest,
-    db: Session = Depends(get_db)) -> dict[str, str]:
+    db: Session = Depends(get_db)):
     """
     Handle user login.
 
@@ -80,7 +80,19 @@ def login(
         max_age=1800,  # 30 minutes
         path="/",
     )
-    return {"message": "Login successful"}
+
+    return AuthResponse(
+        message="Login successful",
+        user=UserResponse.model_validate(db_user)
+    )
+
+@router.get("/verify", response_model=AuthResponse)
+async def verify_user(current_user: User = Depends(get_current_user)):
+    """ Verify current user is auth'd """
+    return AuthResponse(
+        message="Verify successful",
+        user=current_user
+    )
 
 @router.get("/protected")
 async def protected_route(current_user: User = Depends(get_current_user)
