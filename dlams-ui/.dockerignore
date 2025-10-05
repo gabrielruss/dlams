@@ -10,3 +10,4 @@ dist
 docker-compose*.yml
 nginx*.conf
 certs
+Dockerfile.local
