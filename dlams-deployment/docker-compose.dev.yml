@@ -1,0 +1,60 @@
+services:
+  db:
+    image: postgres:14-alpine
+    environment:
+      POSTGRES_USER: dlams_dev
+      POSTGRES_PASSWORD: dlams_dev
+      POSTGRES_DB: dlams_dev
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U dlams_dev -d dlams_dev"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+    ports:
+      - "127.0.0.1:5433:5432"
+    volumes:
+      - dev_postgres_data:/var/lib/postgresql/data
+
+  api:
+    build:
+      context: ../dlams-fastapi
+      dockerfile: Dockerfile
+    environment:
+      DATABASE_URL: postgresql://dlams_dev:dlams_dev@db:5432/dlams_dev
+      SECRET_KEY: ${DLAMS_DEV_SECRET_KEY:-local-development-only-secret}
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/docs')",
+        ]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+      start_period: 10s
+    ports:
+      - "127.0.0.1:8001:8000"
+
+  ui:
+    build:
+      context: ../dlams-ui
+      dockerfile: Dockerfile.local
+    environment:
+      API_PROXY_TARGET: http://api:8000
+      VITE_API_URL: /api
+    volumes:
+      - ../dlams-ui:/app
+      - /app/node_modules
+    depends_on:
+      api:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:5174:5173"
+
+volumes:
+  dev_postgres_data:
