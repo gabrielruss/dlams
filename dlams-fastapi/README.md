@@ -1,63 +1,9 @@
-# Start the virtual env
+# DLAMS API
 
-source .venv/bin/activate
+FastAPI backend with PostgreSQL and Alembic migrations.
 
-# Stop the virtual env
+Use the [deployment guide](../dlams-deployment/README.md) to run the API with
+the UI. Install API dependencies with `python -m pip install -r requirements.txt`.
 
-deactivate
-
-# Run the app - manually
-
-uvicorn app.main:app --reload
-
-# Run the app locally - Docker
-
-docker compose -f docker-compose.local.yml up -d --build
-
-# Proper imports
-
-First party on top
-Third party below that
-Local imports below that
-
-## Local PostgreSQL Setup (Homebrew) - if not using Docker
-
-To start the PostgreSQL service:
-
-```bash
-brew services start postgresql@14
-```
-
-To stop the PostgreSQL service:
-
-```bash
-brew services stop postgresql@14
-```
-
-## Database Migration Workflow
-
-### Local Development
-
-1. Make changes to your SQLAlchemy models in `app/models/`
-2. Generate and test migrations locally:
-
-```bash
-# Connect to local app container
-docker exec -it dlams-fastapi-app-1 bash
-
-# Create migration
-alembic revision --autogenerate -m "Description of your changes"
-
-# Review migration in alembic/versions/
-# Apply migration
-alembic upgrade head
-```
-
-3. Commit and push changes:
-   - Modified model files
-   - New migration files in `alembic/versions/`
-   - Any related code changes
-
-### Todo long term
-
-- Back up production database before running migrations
+After changing a database model, create and apply a migration with Alembic.
+Back up production data before applying production migrations.
