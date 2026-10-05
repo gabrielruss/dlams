@@ -49,6 +49,27 @@ The `-d` option keeps the services running in the background, so you can close
 the terminal. Open <http://localhost:5174>. API docs:
 <http://localhost:8001/docs>.
 
+### Try collections and access grants
+
+Rebuild/restart the stack first so the database applies the newest migration.
+If an account previously had the global `demo` role, the migration changes
+that role to `user`; grant it `demo` access to a collection instead.
+Then open <http://localhost:8001/docs> and use `POST /register` to create two
+local accounts, such as `collection-owner` and `demo-user`. Log in as
+`collection-owner` with `POST /login`, then:
+
+1. Call `POST /collections` with `{"name":"Demo collection"}` and note its ID.
+2. Call `POST /collections/{collection_id}/grants` with that ID and
+   `{"username":"demo-user","mode":"demo"}`.
+3. Log in as `demo-user` with `POST /login`.
+4. Call `GET /collections` and confirm the demo collection appears with
+   `"access":"demo"`.
+
+The other supported grant modes are `view-only` and `edit`. Collection items
+are not implemented yet, so there are no item changes to try. At present, the
+API permission checks are covered by focused tests rather than a live item
+write endpoint.
+
 To view the service logs:
 
 ```bash
@@ -77,6 +98,16 @@ In DBeaver, create a PostgreSQL connection with:
 - Password: `dlams_dev`
 
 These are local development credentials, not your DLAMS app login.
+
+New accounts have the `user` role. To give your own local account the `admin`
+role, run this in DBeaver's SQL editor after registering:
+
+```sql
+UPDATE users SET role = 'admin' WHERE username = 'your_username';
+```
+
+Replace `your_username` with your account name and confirm that one row was
+updated. Do not give the `admin` role to demo or visitor accounts.
 
 ## Production
 
