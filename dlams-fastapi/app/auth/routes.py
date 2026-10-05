@@ -8,16 +8,16 @@ from datetime import timedelta
 from fastapi import APIRouter, Response, status, HTTPException, Depends
 
 from sqlalchemy.orm import Session
-from app.auth.schemas import LoginRequest, AuthResponse, UserResponse
+from app.auth.schemas import LoginRequest, RegisterRequest, AuthResponse, UserResponse
 from app.auth.utils import create_access_token, get_current_user, get_user_by_username
-from app.models import User
+from app.models import User, UserRole
 from app.auth.utils import pwd_context
 from app.utils import get_db
 
 router = APIRouter()
 
 @router.post("/register")
-def register(user: LoginRequest, db: Session = Depends(get_db)):
+def register(user: RegisterRequest, db: Session = Depends(get_db)):
     """ register new users """
     existing_user = get_user_by_username(user.username, db)
 
@@ -28,7 +28,11 @@ def register(user: LoginRequest, db: Session = Depends(get_db)):
         )
 
     hashed_password = pwd_context.hash(user.password)
-    new_user = User(username=user.username, hashed_password=hashed_password)
+    new_user = User(
+        username=user.username,
+        hashed_password=hashed_password,
+        role=UserRole.USER.value,
+    )
 
     db.add(new_user)
     db.commit()
