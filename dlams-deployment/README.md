@@ -37,6 +37,48 @@ npm ci
 npm run dev:local
 ```
 
+## Hybrid Dev: Run API and database in Docker, UI on your Mac
+
+This setup runs only PostgreSQL and the API in Docker. The UI runs directly on
+your Mac with Vite hot reload, and Vite proxies `/api` requests to the
+containerized API. The API container applies pending Alembic migrations when
+it starts.
+
+From this folder, start the database and API:
+
+```bash
+docker compose -p dlams-dev -f docker-compose.dev.yml up --build -d db api
+```
+
+In a terminal in `../dlams-ui`, install dependencies once if needed, then
+start Vite with the hybrid development script:
+
+```bash
+npm ci
+npm run dev:hybrid
+```
+
+Open <http://localhost:5173>. API docs are at <http://localhost:8001/docs>.
+The `dev:hybrid` script sets the API proxy target to `127.0.0.1:8001` and
+reuses the `dev:local` script for the remaining Vite settings. The proxy
+target matters because this Docker Compose setup publishes the API on port
+`8001`, rather than the `8000` used by the Mac-only API workflow.
+
+Stop the UI with `Ctrl+C` in its terminal. Stop the Docker API and database
+from this folder with:
+
+```bash
+docker compose -p dlams-dev -f docker-compose.dev.yml down
+```
+
+The shared development database volume and its saved data are preserved.
+If the full Docker development stack is already running, stop its UI service
+before using this hybrid setup:
+
+```bash
+docker compose -p dlams-dev -f docker-compose.dev.yml stop ui
+```
+
 ## Local Docker Dev: Run UI and API in Docker
 
 From this folder, run:
@@ -49,9 +91,10 @@ The `-d` option keeps the services running in the background, so you can close
 the terminal. Open <http://localhost:5174>. API docs:
 <http://localhost:8001/docs>.
 
-### Try collections and access grants
+### Try collections, access grants, and video-game API
 
-Rebuild/restart the stack first so the database applies the newest migration.
+Rebuild/restart the stack first so the local database applies the newest
+migration.
 If an account previously had the global `demo` role, the migration changes
 that role to `user`; grant it `demo` access to a collection instead.
 Then open <http://localhost:8001/docs> and use `POST /register` to create two
@@ -65,10 +108,33 @@ local accounts, such as `collection-owner` and `demo-user`. Log in as
 4. Call `GET /collections` and confirm the demo collection appears with
    `"access":"demo"`.
 
-The other supported grant modes are `view-only` and `edit`. Collection items
-are not implemented yet, so there are no item changes to try. At present, the
-API permission checks are covered by focused tests rather than a live item
-write endpoint.
+For a writable collection, log in as its owner (or a user with an `edit`
+grant), then use these endpoints in the API docs:
+
+1. Create a physical console with `POST /collections/{collection_id}/consoles`:
+   `{"label":"Xbox 360","edition":"Original white","condition":"CIB"}`.
+   Save the returned `console_label_id`.
+2. Add a second console with the same `label` and a different `edition`.
+   `GET /collections/{collection_id}/console-labels` should still return one
+   Xbox 360 label.
+3. Create a game with `POST /collections/{collection_id}/games`, using the
+   saved ID:
+   `{"name":"Example game","condition":"Loose","console_label_id":1,"last_played":null,"completed":false}`.
+   Replace `1` with the ID from step 1.
+4. Confirm `GET /collections/{collection_id}/games` returns the game and that
+   the Xbox 360 label and each console response report `game_count: 1`.
+5. Delete one console edition. It should succeed while the other edition
+   remains. Deleting the final edition while a game uses its label should
+   return HTTP 409. Delete the game first; then deleting the final console
+   should succeed and remove the now-unused label.
+6. Log in as `demo-user`, then try creating a console or game in the demo
+   collection. The API should deny the write with HTTP 403 while allowing
+   reads. Browser-local demo editing is not implemented yet.
+
+Console and game conditions are `Loose`, `CIB`, `New`, and `Item & Box`.
+Optional `last_played` uses `YYYY-MM-DD`. In the UI, collection and item
+create/edit forms open in a right-side drawer, and deleting a game asks for
+confirmation. API deletes take effect immediately.
 
 To view the service logs:
 
