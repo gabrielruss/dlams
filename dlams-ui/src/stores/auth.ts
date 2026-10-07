@@ -1,6 +1,6 @@
 import { create } from "zustand"
 
-import { authApi } from "@/lib/api"
+import { authApi } from "@/lib/api/auth"
 import type { User } from "@/types"
 import { AUTH_USER } from "@/lib/localStorage"
 
