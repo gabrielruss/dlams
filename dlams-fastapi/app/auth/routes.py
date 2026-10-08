@@ -90,6 +90,21 @@ def login(
         user=UserResponse.model_validate(db_user)
     )
 
+
+@router.post("/logout", status_code=status.HTTP_204_NO_CONTENT)
+def logout(response: Response) -> Response:
+    """Clear the authentication cookie for this browser session."""
+    response.delete_cookie(
+        key="access_token",
+        httponly=True,
+        secure=False,
+        samesite="lax",
+        path="/",
+    )
+    response.status_code = status.HTTP_204_NO_CONTENT
+    return response
+
+
 @router.get("/verify", response_model=AuthResponse)
 async def verify_user(current_user: User = Depends(get_current_user)):
     """ Verify current user is auth'd """

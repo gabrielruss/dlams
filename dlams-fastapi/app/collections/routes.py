@@ -21,6 +21,7 @@ from app.models import (
     Collection,
     CollectionAccess,
     CollectionGrant,
+    CollectionType,
     GrantMode,
     User,
 )
@@ -58,6 +59,7 @@ def _collection_response(
         id=collection.id,
         owner_id=collection.owner_id,
         name=collection.name,
+        type=CollectionType(collection.type),
         access=access,
     )
 
@@ -72,7 +74,11 @@ def create_collection(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ) -> CollectionResponse:
-    collection = Collection(owner_id=current_user.id, name=request.name)
+    collection = Collection(
+        owner_id=current_user.id,
+        name=request.name,
+        type=request.type.value,
+    )
     db.add(collection)
     db.commit()
     db.refresh(collection)

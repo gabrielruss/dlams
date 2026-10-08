@@ -16,6 +16,8 @@ from app.collections.video_games_schemas import (
     GameListResponse,
     GameResponse,
     GameUpdate,
+    VideoGameCollectionStats,
+    VideoGameCollectionStatsListResponse,
 )
 from app.collections.permissions import (
     get_readable_collection,
@@ -23,14 +25,86 @@ from app.collections.permissions import (
 )
 from app.models import (
     Collection,
+    CollectionGrant,
+    CollectionType,
     Console,
     ConsoleLabel,
     Game,
+    User,
     VideoGameCondition,
 )
+from app.auth.utils import get_current_user
 from app.utils import get_db
 
 router = APIRouter(prefix="/collections/{collection_id}", tags=["video games"])
+stats_router = APIRouter(prefix="/collections", tags=["video games"])
+
+
+@stats_router.get(
+    "/video-game-stats",
+    response_model=VideoGameCollectionStatsListResponse,
+)
+def list_video_game_collection_stats(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+) -> VideoGameCollectionStatsListResponse:
+    owned_ids = [
+        collection_id
+        for (collection_id,) in (
+            db.query(Collection.id)
+            .filter(
+                Collection.owner_id == current_user.id,
+                Collection.type == CollectionType.VIDEO_GAME.value,
+            )
+            .all()
+        )
+    ]
+    granted_ids = [
+        collection_id
+        for (collection_id,) in (
+            db.query(Collection.id)
+            .join(
+                CollectionGrant,
+                CollectionGrant.collection_id == Collection.id,
+            )
+            .filter(
+                CollectionGrant.user_id == current_user.id,
+                Collection.type == CollectionType.VIDEO_GAME.value,
+            )
+            .all()
+        )
+    ]
+    collection_ids = sorted(set(owned_ids + granted_ids))
+    counts = {collection_id: [0, 0] for collection_id in collection_ids}
+    if collection_ids:
+        for collection_id, count in (
+            db.query(ConsoleLabel.collection_id, func.count(Console.id))
+            .join(Console, Console.console_label_id == ConsoleLabel.id)
+            .filter(ConsoleLabel.collection_id.in_(collection_ids))
+            .group_by(ConsoleLabel.collection_id)
+            .all()
+        ):
+            counts[collection_id][1] = count
+
+        for collection_id, count in (
+            db.query(ConsoleLabel.collection_id, func.count(Game.id))
+            .join(Game, Game.console_label_id == ConsoleLabel.id)
+            .filter(ConsoleLabel.collection_id.in_(collection_ids))
+            .group_by(ConsoleLabel.collection_id)
+            .all()
+        ):
+            counts[collection_id][0] = count
+
+    return VideoGameCollectionStatsListResponse(
+        stats=[
+            VideoGameCollectionStats(
+                collection_id=collection_id,
+                game_count=item_counts[0],
+                console_count=item_counts[1],
+            )
+            for collection_id, item_counts in counts.items()
+        ]
+    )
 
 
 def _get_console_label(

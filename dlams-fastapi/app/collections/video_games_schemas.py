@@ -70,3 +70,13 @@ class GameResponse(BaseModel):
 
 class GameListResponse(BaseModel):
     games: list[GameResponse]
+
+
+class VideoGameCollectionStats(BaseModel):
+    collection_id: int
+    game_count: int
+    console_count: int
+
+
+class VideoGameCollectionStatsListResponse(BaseModel):
+    stats: list[VideoGameCollectionStats]

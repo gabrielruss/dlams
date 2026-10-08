@@ -22,6 +22,12 @@ class CollectionAccess(str, Enum):
     DEMO = "demo"
 
 
+class CollectionType(str, Enum):
+    """Content type supported by a collection."""
+
+    VIDEO_GAME = "video_game"
+
+
 class GrantMode(str, Enum):
     """Modes that can be assigned on a collection grant."""
 
@@ -34,6 +40,12 @@ class Collection(Base):
     """A named collection owned by one user."""
 
     __tablename__ = "collections"
+    __table_args__ = (
+        CheckConstraint(
+            "type IN ('video_game')",
+            name="ck_collections_type",
+        ),
+    )
 
     id: Mapped[int] = mapped_column(primary_key=True, index=True)
     owner_id: Mapped[int] = mapped_column(
@@ -42,6 +54,12 @@ class Collection(Base):
         index=True,
     )
     name: Mapped[str] = mapped_column(String(100), nullable=False)
+    type: Mapped[str] = mapped_column(
+        String(30),
+        nullable=False,
+        default=CollectionType.VIDEO_GAME.value,
+        server_default=CollectionType.VIDEO_GAME.value,
+    )
 
 
 class CollectionGrant(Base):

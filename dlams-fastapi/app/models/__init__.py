@@ -4,6 +4,7 @@ from app.models.collection import (
     Collection,
     CollectionAccess,
     CollectionGrant,
+    CollectionType,
     GrantMode,
 )
 from app.models.video_games import (
@@ -18,6 +19,7 @@ __all__ = [
     "Collection",
     "CollectionAccess",
     "CollectionGrant",
+    "CollectionType",
     "ConsoleLabel",
     "Game",
     "GrantMode",
