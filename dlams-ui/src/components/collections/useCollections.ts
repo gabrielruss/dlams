@@ -1,7 +1,10 @@
 import { useEffect, useState } from "react"
 
 import { collectionsApi } from "@/lib/api/collections"
-import type { Collection } from "@/types/collections"
+import {
+  defaultCollectionType,
+  type Collection,
+} from "@/types/collections"
 
 function useCollections() {
   const [collections, setCollections] = useState<Collection[]>([])
@@ -47,7 +50,10 @@ function useCollections() {
     setCreateError(null)
     setIsCreating(true)
     try {
-      const collection = await collectionsApi.create(name)
+      const collection = await collectionsApi.create({
+        name,
+        type: defaultCollectionType,
+      })
       setCollections((current) => [...current, collection])
       setSelectedCollectionId(collection.id)
       return true

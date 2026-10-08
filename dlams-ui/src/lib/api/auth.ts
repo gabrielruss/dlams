@@ -9,4 +9,9 @@ export const authApi = {
     }),
 
   verify: () => apiRequest<{ user: User }>("/verify"),
+
+  logout: () =>
+    apiRequest<void>("/logout", {
+      method: "POST",
+    }),
 }

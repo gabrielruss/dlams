@@ -6,12 +6,20 @@ import useVideoGamesCollection from "./useVideoGamesCollection"
 
 interface VideoGamesWorkspaceProps {
   collection: Collection
+  onStatsChanged: () => Promise<void>
 }
 
-function VideoGamesWorkspace({ collection }: VideoGamesWorkspaceProps) {
+function VideoGamesWorkspace({
+  collection,
+  onStatsChanged,
+}: VideoGamesWorkspaceProps) {
   const { consoles, games, isLoading, error, loadItems } =
     useVideoGamesCollection(collection)
   const canWrite = canWriteCollection(collection.access)
+  const handleChanged = async () => {
+    await loadItems()
+    await onStatsChanged()
+  }
 
   if (isLoading) return <p>Loading collection items...</p>
 
@@ -33,14 +41,14 @@ function VideoGamesWorkspace({ collection }: VideoGamesWorkspaceProps) {
           collectionId={collection.id}
           consoles={consoles}
           canWrite={canWrite}
-          onChanged={loadItems}
+          onChanged={handleChanged}
         />
         <GameManager
           collectionId={collection.id}
           consoles={consoles}
           games={games}
           canWrite={canWrite}
-          onChanged={loadItems}
+          onChanged={handleChanged}
         />
       </div>
     </div>

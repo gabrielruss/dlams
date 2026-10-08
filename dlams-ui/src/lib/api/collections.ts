@@ -1,11 +1,11 @@
 import { apiRequest } from "./client"
-import type { Collection } from "@/types/collections"
+import type { Collection, CollectionCreate } from "@/types/collections"
 
 export const collectionsApi = {
   list: () => apiRequest<{ collections: Collection[] }>("/collections"),
-  create: (name: string) =>
+  create: (data: CollectionCreate) =>
     apiRequest<Collection>("/collections", {
       method: "POST",
-      body: JSON.stringify({ name }),
+      body: JSON.stringify(data),
     }),
 }

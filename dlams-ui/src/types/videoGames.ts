@@ -32,6 +32,12 @@ export interface GameRecord {
   completed: boolean
 }
 
+export interface VideoGameCollectionStats {
+  collection_id: number
+  game_count: number
+  console_count: number
+}
+
 export interface GameCreate {
   name: string
   condition: VideoGameCondition

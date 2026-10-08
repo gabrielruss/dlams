@@ -8,6 +8,7 @@ interface AuthState {
   user: User | null
   isLoading: boolean
   login: (username: string, password: string) => Promise<void>
+  logout: () => Promise<void>
   checkAuth: () => void
 }
 
@@ -28,6 +29,12 @@ const useAuth = create<AuthState>((set) => ({
       set({ isLoading: false })
       throw error
     }
+  },
+
+  logout: async () => {
+    await authApi.logout()
+    localStorage.removeItem(AUTH_USER)
+    set({ user: null })
   },
 
   checkAuth: async () => {
