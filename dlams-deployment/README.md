@@ -94,19 +94,23 @@ the terminal. Open <http://localhost:5174>. API docs:
 ### Try collections, access grants, and video-game API
 
 Rebuild/restart the stack first so the local database applies the newest
-migration.
+migration. The collection-type migration assigns existing collections the
+`video_game` type.
 If an account previously had the global `demo` role, the migration changes
 that role to `user`; grant it `demo` access to a collection instead.
 Then open <http://localhost:8001/docs> and use `POST /register` to create two
 local accounts, such as `collection-owner` and `demo-user`. Log in as
 `collection-owner` with `POST /login`, then:
 
-1. Call `POST /collections` with `{"name":"Demo collection"}` and note its ID.
+1. Call `POST /collections` with
+   `{"name":"Demo collection","type":"video_game"}` and note its ID.
 2. Call `POST /collections/{collection_id}/grants` with that ID and
    `{"username":"demo-user","mode":"demo"}`.
 3. Log in as `demo-user` with `POST /login`.
 4. Call `GET /collections` and confirm the demo collection appears with
    `"access":"demo"`.
+5. Call `GET /collections/video-game-stats` to retrieve game and console
+   counts for every collection the signed-in user can access.
 
 For a writable collection, log in as its owner (or a user with an `edit`
 grant), then use these endpoints in the API docs:
