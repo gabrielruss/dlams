@@ -1,0 +1,22 @@
+# OS / editor
+.DS_Store
+.idea
+.vscode/*
+!.vscode/extensions.json
+
+# Secrets and local environment (commit only *.example)
+.env
+.env.local
+.env.*.local
+!.env.example
+
+# Python
+.venv/
+venv/
+__pycache__/
+
+# Node
+node_modules/
+dist/
+dist-ssr/
+*.log

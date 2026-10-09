@@ -1,0 +1,18 @@
+name: Deploy to Raspberry Pi
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: [self-hosted, deploy-pi]
+    steps:
+      - name: Pull and rebuild
+        run: |
+          cd ~/dlams
+          git pull origin main
+          cd dlams-deployment
+          docker compose up -d --build api ui nginx
+          docker compose exec -T nginx nginx -s reload
+          docker compose ps
