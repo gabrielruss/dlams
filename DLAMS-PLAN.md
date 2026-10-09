@@ -1296,3 +1296,13 @@ performed). Link to relevant files where useful.
   `dlams-api` successfully and confirmed the app loads in the browser (an
   apparent old UI was a browser cache). Runner re-registration (step 6)
   remains.
+- **2026-10-09 — Pi runner re-registered to the monorepo:** Old per-repo
+  runner directories (`actions-runner-api`, `-ui`) and `~/dlams-old` were
+  removed from the Pi. `~/actions-runner-deployment` was reconfigured for
+  `gabrielruss/dlams` with label `deploy-pi` and installed as the systemd
+  service `actions.runner.gabrielruss-dlams.raspberrypi`. Reconfiguration
+  required deleting the `*_migrated` config marker files (for example
+  `.runner_migrated`), which `config.sh` treats as "already configured".
+  Verified from the owner's output: service active, `Connected to GitHub`,
+  `Listening for Jobs`. The first automated deploy and the cleanup of the old
+  public repositories remain.
