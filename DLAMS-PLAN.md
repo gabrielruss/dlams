@@ -719,7 +719,9 @@ secrets or sensitive data into this document.
   `index-C8_WIgyk.js`. Fix: Nginx now proxies `/` to the UI container's own
   server on port 3000, and the `ui_build` volume was removed from Compose.
   The orphaned Pi volume `dlams-deployment_ui_build` can be deleted after the
-  new config is live.
+  new config is live. **Verified live 2026-10-09:** after the Pi pulled and
+  rebuilt, the served asset names matched the image's
+  (`index-C8_WIgyk.js`, `index-DkSKe2GN.css`).
 
 ## Work log
 
@@ -1286,3 +1288,9 @@ performed). Link to relevant files where useful.
   stub upstream hosts. Not verified: live behavior on the Pi. Also confirmed
   on the Pi that `https://dontlookatmystuff.com/api/verify` returns 401
   (prefix strip working) after the manual cutover deploy.
+- **2026-10-09 — Pi cutover steps 2-5 completed by owner:** Old runners
+  stopped, `~/dlams` replaced by a clone of the monorepo, `SECRET_KEY` created
+  in `dlams-deployment/.env`, and services rebuilt manually. Verified on the
+  Pi: `/api/verify` returns 401, and the served UI assets now match the built
+  image after the Nginx proxy fix. Login through the browser and runner
+  re-registration (step 6) remain to be confirmed.
