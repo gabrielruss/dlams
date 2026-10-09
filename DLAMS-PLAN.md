@@ -1292,5 +1292,7 @@ performed). Link to relevant files where useful.
   stopped, `~/dlams` replaced by a clone of the monorepo, `SECRET_KEY` created
   in `dlams-deployment/.env`, and services rebuilt manually. Verified on the
   Pi: `/api/verify` returns 401, and the served UI assets now match the built
-  image after the Nginx proxy fix. Login through the browser and runner
-  re-registration (step 6) remain to be confirmed.
+  image after the Nginx proxy fix. Owner then ran `python -m app.auth.bootstrap_admin` in
+  `dlams-api` successfully and confirmed the app loads in the browser (an
+  apparent old UI was a browser cache). Runner re-registration (step 6)
+  remains.
