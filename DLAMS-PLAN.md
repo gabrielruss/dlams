@@ -230,12 +230,13 @@ Compose file has the same missing-config pattern for its Nginx service.
   The leaked `dlams-fastapi/.env` DB values belong to the legacy local
   database, not production; its leaked `SECRET_KEY` is what production signs
   JWTs with (read from the `.env` baked into the API image).
-- The Pi's `dlams-deployment` checkout looks behind origin: its
-  `docker-compose.yml`, `nginx.conf`, and README differ in size and carry 2025
-  dates, and there is no `docker-compose.dev.yml`. The old `api`/`ui`
-  workflows pull only their own repo. Unverified until
-  `git -C ~/dlams/dlams-deployment log -1` is checked; if confirmed,
-  production Nginx may still lack the `/api/` prefix fix.
+- **Confirmed 2026-10-09:** the Pi's `dlams-deployment` checkout is at
+  `85c48b8` ("nginx trouble", Oct 2025) and is 5 commits behind origin. The old
+  `api`/`ui` workflows pull only their own repo, so production Nginx and
+  Compose are running pre-fix configuration, including no `/api/` prefix
+  stripping. The API and UI containers were rebuilt recently (about 28 minutes
+  before the inspection) from their own, newer checkouts. Whether production
+  login currently works was not tested.
 
 ### Runbook (not yet executed)
 
@@ -1265,3 +1266,6 @@ performed). Link to relevant files where useful.
   `dlams-deployment/.env` under "Raspberry Pi cutover", with a runbook.
   Nothing on the Pi was changed. The assistant's SSH attempt failed because
   the key is not accepted without a passphrase/agent.
+- **2026-10-09 — Pi `dlams-deployment` checkout confirmed stale:** Owner ran
+  `git log -1` and `git fetch`/`status` on the Pi: HEAD `85c48b8`, behind
+  origin by 5 commits. Recorded under "Raspberry Pi cutover"; no change made.
