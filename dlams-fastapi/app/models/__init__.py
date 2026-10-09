@@ -1,5 +1,5 @@
 """ init for exporting all models """
-from app.models.user import User, UserRole
+from app.models.user import RegistrationInvitation, User, UserRole
 from app.models.collection import (
     Collection,
     CollectionAccess,
@@ -23,6 +23,7 @@ __all__ = [
     "ConsoleLabel",
     "Game",
     "GrantMode",
+    "RegistrationInvitation",
     "VideoGameCondition",
     "User",
     "UserRole",

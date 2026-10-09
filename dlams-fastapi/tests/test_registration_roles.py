@@ -1,5 +1,7 @@
-import unittest
+import hashlib
 import os
+import unittest
+from datetime import datetime, timedelta, timezone
 from unittest.mock import patch
 
 from pydantic import ValidationError
@@ -13,7 +15,7 @@ os.environ.setdefault("SECRET_KEY", "test-only-secret")
 from app.auth.routes import register
 from app.auth.schemas import RegisterRequest, UserResponse
 from app.db import Base
-from app.models import User, UserRole
+from app.models import RegistrationInvitation, User, UserRole
 
 
 class RegistrationRoleTests(unittest.TestCase):
@@ -21,6 +23,13 @@ class RegistrationRoleTests(unittest.TestCase):
         self.engine = create_engine("sqlite:///:memory:")
         Base.metadata.create_all(self.engine)
         self.db = Session(self.engine)
+        self.admin = User(
+            username="admin",
+            hashed_password="hashed-admin-password",
+            role=UserRole.ADMIN.value,
+        )
+        self.db.add(self.admin)
+        self.db.commit()
 
     def tearDown(self) -> None:
         self.db.close()
@@ -34,12 +43,30 @@ class RegistrationRoleTests(unittest.TestCase):
                         {
                             "username": "visitor",
                             "password": "password",
+                            "invitation_code": "valid-invitation",
                             "role": role,
                         }
                     )
 
     def test_new_accounts_are_regular_users(self) -> None:
-        request = RegisterRequest(username="visitor", password="password")
+        invitation_code = "valid-invitation"
+        now = datetime.now(timezone.utc)
+        self.db.add(
+            RegistrationInvitation(
+                token_hash=hashlib.sha256(
+                    invitation_code.encode("utf-8")
+                ).hexdigest(),
+                created_by_id=self.admin.id,
+                created_at=now,
+                expires_at=now + timedelta(days=7),
+            )
+        )
+        self.db.commit()
+        request = RegisterRequest(
+            username="visitor",
+            password="password",
+            invitation_code=invitation_code,
+        )
 
         with patch(
             "app.auth.routes.pwd_context.hash",

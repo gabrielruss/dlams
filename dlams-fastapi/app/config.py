@@ -13,3 +13,4 @@ if _secret is None:
     raise ValueError("SECRET_KEY is not set in the environment variables.")
 
 SECRET_KEY: str = _secret
+COOKIE_SECURE: bool = os.getenv("COOKIE_SECURE", "false").lower() == "true"
