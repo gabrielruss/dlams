@@ -26,3 +26,6 @@ dist-ssr
 .env.local
 .env.*.local
 .env
+
+# needed by dlams-deployment/docker-compose.dev.yml
+!Dockerfile.local

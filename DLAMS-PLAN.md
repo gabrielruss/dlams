@@ -1198,3 +1198,7 @@ performed). Link to relevant files where useful.
   passes for dev, and prod fails clearly without `SECRET_KEY`. Not verified:
   GitHub push, the new workflow, and a Pi deployment. Pi migration steps are
   recorded in the README.
+- **2026-10-09 — Fixed untracked `dlams-ui/Dockerfile.local`:** The UI
+  `.gitignore` pattern `*.local` had silently excluded it, though
+  `docker-compose.dev.yml` builds from it, so a fresh clone could not start
+  the Docker dev stack. Added a `!Dockerfile.local` exception and committed it.
