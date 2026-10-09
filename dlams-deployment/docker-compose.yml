@@ -21,6 +21,7 @@ services:
     container_name: dlams-api
     environment:
       DATABASE_URL: postgresql://${POSTGRES_USER:-dlams_user}:${POSTGRES_PASSWORD:-dlams_password}@db:5432/${POSTGRES_DB:-dlams_db}
+      COOKIE_SECURE: "true"
     volumes:
       - api_static:/app/static
     networks:

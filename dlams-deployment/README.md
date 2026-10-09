@@ -98,9 +98,17 @@ migration. The collection-type migration assigns existing collections the
 `video_game` type.
 If an account previously had the global `demo` role, the migration changes
 that role to `user`; grant it `demo` access to a collection instead.
-Then open <http://localhost:8001/docs> and use `POST /register` to create two
-local accounts, such as `collection-owner` and `demo-user`. Log in as
-`collection-owner` with `POST /login`, then:
+Registration requires a one-time invitation. On an empty development database,
+create its first admin from the API container:
+
+```bash
+docker compose -p dlams-dev -f docker-compose.dev.yml exec api python -m app.auth.bootstrap_admin
+```
+
+Log in to <http://localhost:5174> as that admin, create two invitations in the
+“Invite someone” panel, then open each invitation link to register accounts
+such as `collection-owner` and `demo-user`. Log in as `collection-owner` in
+the API docs at <http://localhost:8001/docs>, then:
 
 1. Call `POST /collections` with
    `{"name":"Demo collection","type":"video_game"}` and note its ID.
@@ -154,8 +162,9 @@ docker compose -p dlams-dev -f docker-compose.dev.yml down
 
 This stops the UI and API but keeps the shared development database and its
 data. The Mac-only setup can still use that database. To erase it too, add
-`--volumes` to the `down` command. The database is empty the first time you
-start it, so register a development user before logging in.
+`--volumes` to the `down` command. On a new empty database, bootstrap its
+first admin from the API container, then use that account to issue registration
+invitations.
 
 ### Connect to the development database
 
@@ -170,7 +179,7 @@ In DBeaver, create a PostgreSQL connection with:
 These are local development credentials, not your DLAMS app login.
 
 New accounts have the `user` role. To give your own local account the `admin`
-role, run this in DBeaver's SQL editor after registering:
+role manually, run this in DBeaver's SQL editor:
 
 ```sql
 UPDATE users SET role = 'admin' WHERE username = 'your_username';
@@ -182,6 +191,27 @@ updated. Do not give the `admin` role to demo or visitor accounts.
 ## Production
 
 Production is separate; do not use it for local development. It requires the
-configured domain names, HTTPS certificates, and production secrets.
-Production login is not verified and has a known API route mismatch. Do not
-deploy until that mismatch is fixed and tested.
+configured domain names, HTTPS certificates, and production secrets. Back up
+the production database before deploying schema changes. The API container
+applies Alembic migrations on startup.
+
+Registration is invitation-only: the API rejects registration without a
+valid, unused invitation. To bootstrap the first admin after deploying the
+updated API image, SSH to the Pi and run:
+
+```bash
+docker exec -it dlams-api python -m app.auth.bootstrap_admin
+```
+
+This command creates an admin account only if no admin exists, prompts for a
+username and password without echoing the password, and stores the password
+hash. Log into the site as that admin and use the “Invite someone” panel to
+create a registration link. Each invitation works once and expires after
+seven days. Share it privately; anyone holding an unused link can create one
+regular account.
+
+The production Nginx `/api/` proxy is configured to strip the prefix before
+forwarding to FastAPI, and the production auth cookie is configured as
+Secure. These source changes still need deployment and a live end-to-end check;
+do not treat production login or registration as verified until tested on the
+Pi.
