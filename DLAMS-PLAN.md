@@ -1304,5 +1304,8 @@ performed). Link to relevant files where useful.
   required deleting the `*_migrated` config marker files (for example
   `.runner_migrated`), which `config.sh` treats as "already configured".
   Verified from the owner's output: service active, `Connected to GitHub`,
-  `Listening for Jobs`. The first automated deploy and the cleanup of the old
-  public repositories remain.
+  `Listening for Jobs`. **First automated deploy verified:** the
+  `Deploy to Raspberry Pi` run for the docs-only push succeeded (all build
+  layers cached, containers left running, Nginx reloaded, four services up).
+  Earlier queued jobs had delayed it while the runner worked through them.
+  Cleanup of the old public repositories remains.
