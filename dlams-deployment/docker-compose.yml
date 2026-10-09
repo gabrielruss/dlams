@@ -1,0 +1,68 @@
+version: "3.8"
+
+services:
+  db:
+    image: postgres:15
+    container_name: dlams-db
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-dlams_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-dlams_password}
+      POSTGRES_DB: ${POSTGRES_DB:-dlams_db}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - dlams-network
+    restart: unless-stopped
+
+  api:
+    build:
+      context: ../dlams-fastapi
+      dockerfile: Dockerfile
+    container_name: dlams-api
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-dlams_user}:${POSTGRES_PASSWORD:-dlams_password}@db:5432/${POSTGRES_DB:-dlams_db}
+      COOKIE_SECURE: "true"
+    volumes:
+      - api_static:/app/static
+    networks:
+      - dlams-network
+    restart: unless-stopped
+    depends_on:
+      - db
+
+  ui:
+    build:
+      context: ../dlams-ui
+      dockerfile: Dockerfile
+    container_name: dlams-ui
+    volumes:
+      - ui_build:/usr/share/nginx/html
+    networks:
+      - dlams-network
+
+  nginx:
+    image: nginx:alpine
+    container_name: dlams-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ui_build:/usr/share/nginx/html:ro
+      - api_static:/app/static:ro
+      - /etc/letsencrypt:/etc/letsencrypt:ro
+    networks:
+      - dlams-network
+    restart: unless-stopped
+    depends_on:
+      - api
+      - ui
+
+networks:
+  dlams-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  ui_build:
+  api_static:
