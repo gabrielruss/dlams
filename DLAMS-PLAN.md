@@ -1202,3 +1202,8 @@ performed). Link to relevant files where useful.
   `.gitignore` pattern `*.local` had silently excluded it, though
   `docker-compose.dev.yml` builds from it, so a fresh clone could not start
   the Docker dev stack. Added a `!Dockerfile.local` exception and committed it.
+- **2026-10-09 — Monorepo build verified from a fresh clone:** Cloned the
+  local monorepo and built the `api` and `ui` images from
+  `dlams-deployment/docker-compose.dev.yml` under an isolated project name;
+  both built successfully and the test images were removed. The stack was not
+  started, and the Pi workflow was not exercised.
