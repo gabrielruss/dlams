@@ -711,6 +711,16 @@ secrets or sensitive data into this document.
   the leaked password, the database password; then make the old repos private
   or delete them rather than only archiving.
 
+- **Production UI served from a stale volume (found and fixed in source
+  2026-10-09, rollout pending):** Production Nginx served the UI from the
+  named volume `ui_build`, which Docker fills from the image only when empty,
+  so rebuilt UI images never reached users. Confirmed on the Pi: the site
+  served `index-DqhyNlt7.js` while the freshly built image contained
+  `index-C8_WIgyk.js`. Fix: Nginx now proxies `/` to the UI container's own
+  server on port 3000, and the `ui_build` volume was removed from Compose.
+  The orphaned Pi volume `dlams-deployment_ui_build` can be deleted after the
+  new config is live.
+
 ## Work log
 
 Append a short dated entry for each substantive contribution. State the
@@ -1269,3 +1279,10 @@ performed). Link to relevant files where useful.
 - **2026-10-09 — Pi `dlams-deployment` checkout confirmed stale:** Owner ran
   `git log -1` and `git fetch`/`status` on the Pi: HEAD `85c48b8`, behind
   origin by 5 commits. Recorded under "Raspberry Pi cutover"; no change made.
+- **2026-10-09 — Stale UI volume fixed in source:** Replaced the shared
+  `ui_build` volume with an Nginx `proxy_pass` to the `ui` service
+  (`dlams-deployment/nginx.conf`, `docker-compose.yml`). Verified: `docker
+  compose config` passes; `nginx -t` passes using throwaway certificates and
+  stub upstream hosts. Not verified: live behavior on the Pi. Also confirmed
+  on the Pi that `https://dontlookatmystuff.com/api/verify` returns 401
+  (prefix strip working) after the manual cutover deploy.
