@@ -209,6 +209,59 @@ proxy, start only `db` and `app`. To use the Nginx service, replace the
 generated empty directory with a valid Nginx configuration file. The UI local
 Compose file has the same missing-config pattern for its Nginx service.
 
+## Raspberry Pi cutover (monorepo migration)
+
+### Pi state observed 2026-10-09 (owner-pasted `ls`/`docker` output)
+
+- Three sibling clones in `~/dlams/`: `dlams-deployment`, `dlams-fastapi`,
+  `dlams-ui`, each tracking its old repo.
+- Three self-hosted runners, one per old repo: `~/actions-runner-api`,
+  `~/actions-runner-deployment`, `~/actions-runner-ui`.
+- Production containers (fixed names): `dlams-db` (postgres:15, up 3 months),
+  `dlams-api`, `dlams-ui`, `dlams-nginx`. Production volumes:
+  `dlams-deployment_postgres_data`, `_ui_build`, `_api_static`.
+- Unrelated or legacy: `homeassistant` (not DLAMS; do not touch),
+  `dlams-ui-ui-1` (legacy `dlams-ui/docker-compose.local.yml` container),
+  volume `dlams-fastapi_postgres_data` (legacy local compose; contents
+  unchecked), and a stopped `hello-world`.
+- **`~/dlams/dlams-deployment/.env` does not exist.** Production therefore
+  uses the Compose defaults (`dlams_user` / `dlams_password` / `dlams_db`),
+  which are public in the repo. The DB is not published on a host port.
+  The leaked `dlams-fastapi/.env` DB values belong to the legacy local
+  database, not production; its leaked `SECRET_KEY` is what production signs
+  JWTs with (read from the `.env` baked into the API image).
+- The Pi's `dlams-deployment` checkout looks behind origin: its
+  `docker-compose.yml`, `nginx.conf`, and README differ in size and carry 2025
+  dates, and there is no `docker-compose.dev.yml`. The old `api`/`ui`
+  workflows pull only their own repo. Unverified until
+  `git -C ~/dlams/dlams-deployment log -1` is checked; if confirmed,
+  production Nginx may still lack the `/api/` prefix fix.
+
+### Runbook (not yet executed)
+
+Do not put `POSTGRES_*` values in a new `.env` without first changing the
+role password inside Postgres: the existing volume keeps its original
+password, so a mismatched `.env` leaves the API unable to connect.
+
+1. Push the monorepo to a new empty `gabrielruss/dlams` repo.
+2. On the Pi, stop and unregister the three old runners (their repos will be
+   archived); keep one runner directory to re-register.
+3. `mv ~/dlams ~/dlams-old`, then `git clone` the new repo to `~/dlams`.
+   Keep `dlams-deployment` as the folder name so the Compose project name,
+   containers, and volumes are unchanged.
+4. Create `~/dlams/dlams-deployment/.env` containing only a fresh
+   `SECRET_KEY` (`openssl rand -hex 32`). Leave `POSTGRES_*` unset for now so
+   the defaults keep matching the existing database. Expect all sessions to be
+   invalidated.
+5. From `~/dlams/dlams-deployment`, run
+   `docker compose up -d --build api ui nginx` manually and verify login
+   through the real hostname before relying on the workflow.
+6. Register the kept runner to `gabrielruss/dlams` with the `deploy-pi`
+   label and install it as a service; then a push to `main` should deploy.
+7. Separately: change the DB role password with `ALTER USER`, then set
+   `POSTGRES_PASSWORD` in `.env`. Review the legacy container/volume before
+   deleting anything. Make private or delete the old public repos.
+
 ## Product direction captured during planning
 
 The following product behaviors were clarified on 2026-10-02:
@@ -1196,8 +1249,8 @@ performed). Link to relevant files where useful.
   commit history merged, no `.env` or `.DS_Store` in history (except
   `dlams-ui/.env`, which only holds `VITE_API_URL`), `docker compose config`
   passes for dev, and prod fails clearly without `SECRET_KEY`. Not verified:
-  GitHub push, the new workflow, and a Pi deployment. Pi migration steps are
-  recorded in the README.
+  GitHub push, the new workflow, and a Pi deployment. The Pi cutover runbook is in the
+  "Raspberry Pi cutover" section.
 - **2026-10-09 — Fixed untracked `dlams-ui/Dockerfile.local`:** The UI
   `.gitignore` pattern `*.local` had silently excluded it, though
   `docker-compose.dev.yml` builds from it, so a fresh clone could not start
@@ -1207,3 +1260,8 @@ performed). Link to relevant files where useful.
   `dlams-deployment/docker-compose.dev.yml` under an isolated project name;
   both built successfully and the test images were removed. The stack was not
   started, and the Pi workflow was not exercised.
+- **2026-10-09 — Pi inspected (owner-supplied output; assistant SSH refused):**
+  Recorded the Pi layout, containers, volumes, runners, and the missing
+  `dlams-deployment/.env` under "Raspberry Pi cutover", with a runbook.
+  Nothing on the Pi was changed. The assistant's SSH attempt failed because
+  the key is not accepted without a passphrase/agent.
