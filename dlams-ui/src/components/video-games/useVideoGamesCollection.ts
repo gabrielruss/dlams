@@ -1,42 +1,20 @@
-import { useCallback, useEffect, useState } from "react"
+import { useQuery } from "@tanstack/react-query"
 
-import { consolesApi } from "@/lib/api/consoles"
-import { gamesApi } from "@/lib/api/games"
-import type { Collection } from "@/types/collections"
-import type { ConsoleRecord, GameRecord } from "@/types/videoGames"
+import {
+  consoleListQueryOptions,
+} from "@/lib/api/consoles"
+import { gameListQueryOptions } from "@/lib/api/games"
 
-function useVideoGamesCollection(collection: Collection) {
-  const [consoles, setConsoles] = useState<ConsoleRecord[]>([])
-  const [games, setGames] = useState<GameRecord[]>([])
-  const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+function useVideoGamesCollection(collectionId: number) {
+  const consolesQuery = useQuery(consoleListQueryOptions(collectionId))
+  const gamesQuery = useQuery(gameListQueryOptions(collectionId))
 
-  const loadItems = useCallback(async () => {
-    setError(null)
-    try {
-      const [consoleResponse, gameResponse] = await Promise.all([
-        consolesApi.list(collection.id),
-        gamesApi.list(collection.id),
-      ])
-      setConsoles(consoleResponse.consoles)
-      setGames(gameResponse.games)
-    } catch (loadError) {
-      setError(
-        loadError instanceof Error
-          ? loadError.message
-          : "Could not load collection items",
-      )
-    } finally {
-      setIsLoading(false)
-    }
-  }, [collection.id])
-
-  useEffect(() => {
-    setIsLoading(true)
-    loadItems()
-  }, [loadItems])
-
-  return { consoles, games, isLoading, error, loadItems }
+  return {
+    consoles: consolesQuery.data?.consoles ?? [],
+    games: gamesQuery.data?.games ?? [],
+    isPending: consolesQuery.isPending || gamesQuery.isPending,
+    error: consolesQuery.error ?? gamesQuery.error,
+  }
 }
 
 export default useVideoGamesCollection

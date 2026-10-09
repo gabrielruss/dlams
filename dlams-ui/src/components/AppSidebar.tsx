@@ -1,32 +1,17 @@
-import { type ReactNode, useState } from "react"
+import type { ReactNode } from "react"
 import { LogOut } from "lucide-react"
 import { Link } from "react-router-dom"
 
 import { Button } from "@/components/ui/button"
-import useAuth from "@/stores/auth"
+import { useCurrentUser, useLogout } from "@/components/auth/useAuthQueries"
 
 interface AppSidebarProps {
   children: ReactNode
 }
 
 function AppSidebar({ children }: AppSidebarProps) {
-  const { user, logout } = useAuth()
-  const [logoutError, setLogoutError] = useState<string | null>(null)
-  const [isLoggingOut, setIsLoggingOut] = useState(false)
-
-  const handleLogout = async () => {
-    setLogoutError(null)
-    setIsLoggingOut(true)
-    try {
-      await logout()
-    } catch (error) {
-      setLogoutError(
-        error instanceof Error ? error.message : "Could not log out"
-      )
-    } finally {
-      setIsLoggingOut(false)
-    }
-  }
+  const { data: user } = useCurrentUser()
+  const logoutMutation = useLogout()
 
   return (
     <aside
@@ -50,20 +35,20 @@ function AppSidebar({ children }: AppSidebarProps) {
         <p className="truncate px-2 pb-3 text-sm font-medium">
           {user?.username}
         </p>
-        {logoutError && (
+        {logoutMutation.error && (
           <p role="alert" className="px-2 pb-3 text-sm text-destructive">
-            {logoutError}
+            {logoutMutation.error.message}
           </p>
         )}
         <Button
           className="w-full justify-start"
           variant="ghost"
           type="button"
-          onClick={handleLogout}
-          disabled={isLoggingOut}
+          onClick={() => logoutMutation.mutate()}
+          disabled={logoutMutation.isPending}
         >
           <LogOut aria-hidden="true" />
-          {isLoggingOut ? "Logging out..." : "Log out"}
+          {logoutMutation.isPending ? "Logging out..." : "Log out"}
         </Button>
       </div>
     </aside>

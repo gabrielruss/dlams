@@ -1,5 +1,13 @@
 import { apiRequest } from "./client"
+import { queryOptions } from "@tanstack/react-query"
 import type { GameCreate, GameRecord } from "@/types/videoGames"
+
+export const gameKeys = {
+  all: ["games"] as const,
+  lists: () => [...gameKeys.all, "list"] as const,
+  list: (collectionId: number) =>
+    [...gameKeys.lists(), { collectionId }] as const,
+}
 
 export const gamesApi = {
   list: (collectionId: number) =>
@@ -21,3 +29,9 @@ export const gamesApi = {
       method: "DELETE",
     }),
 }
+
+export const gameListQueryOptions = (collectionId: number) =>
+    queryOptions({
+      queryKey: gameKeys.list(collectionId),
+      queryFn: () => gamesApi.list(collectionId),
+    })

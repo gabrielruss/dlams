@@ -16,14 +16,12 @@ interface ConsoleManagerProps {
   collectionId: number
   consoles: ConsoleRecord[]
   canWrite: boolean
-  onChanged: () => Promise<void>
 }
 
 function ConsoleManager({
   collectionId,
   consoles,
   canWrite,
-  onChanged,
 }: ConsoleManagerProps) {
   const {
     form,
@@ -31,12 +29,13 @@ function ConsoleManager({
     formError,
     listError,
     isDrawerOpen,
+    isSaving,
     resetForm,
     saveConsole,
     editConsole,
     startNewConsole,
     deleteConsole,
-  } = useConsoleManager({ collectionId, onChanged })
+  } = useConsoleManager({ collectionId })
   const label = form.watch("label")
 
   return (
@@ -141,11 +140,9 @@ function ConsoleManager({
             <div className="flex gap-2">
               <button
                 className="h-9 rounded-md bg-primary px-4 text-primary-foreground disabled:opacity-50"
-                disabled={
-                  form.formState.isSubmitting || !label?.trim()
-                }
+                disabled={isSaving || !label?.trim()}
               >
-                {form.formState.isSubmitting ? "Saving..." : "Save console"}
+                {isSaving ? "Saving..." : "Save console"}
               </button>
               <button
                 className="h-9 rounded-md border px-4"

@@ -6,7 +6,6 @@ import { collectionTypes } from "@/types/collections"
 
 interface CollectionWorkspaceProps {
   collection: Collection
-  onStatsChanged: () => Promise<void>
 }
 
 type CollectionWorkspaceComponent = ComponentType<CollectionWorkspaceProps>

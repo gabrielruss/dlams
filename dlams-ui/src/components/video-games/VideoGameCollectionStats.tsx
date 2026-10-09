@@ -1,18 +1,31 @@
-import type { VideoGameCollectionStats as VideoGameCollectionStatsData } from "@/types/videoGames"
+import type { Collection } from "@/types/collections"
+import useVideoGameCollectionStats from "./useVideoGameCollectionStats"
 
 interface VideoGameCollectionStatsProps {
-  stats: VideoGameCollectionStatsData | undefined
-  isLoading: boolean
+  collection: Collection
 }
 
 function VideoGameCollectionStats({
-  stats,
-  isLoading,
+  collection,
 }: VideoGameCollectionStatsProps) {
+  const { data: stats, isPending, isError, error } =
+    useVideoGameCollectionStats(collection.id)
+
   if (!stats) {
     return (
-      <span className="text-xs text-muted-foreground">
-        {isLoading ? "Loading stats..." : "Stats unavailable"}
+      <span
+        className={
+          isError
+            ? "text-xs text-destructive"
+            : "text-xs text-muted-foreground"
+        }
+        role={isError ? "alert" : undefined}
+      >
+        {isPending
+          ? "Loading stats..."
+          : isError
+            ? `Stats unavailable: ${error.message}`
+            : "Stats unavailable"}
       </span>
     )
   }

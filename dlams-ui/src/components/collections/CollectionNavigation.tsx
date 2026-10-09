@@ -1,7 +1,6 @@
 import { useState } from "react"
 import { useForm } from "react-hook-form"
 import { Plus } from "lucide-react"
-import type { ReactNode } from "react"
 
 import {
   Drawer,
@@ -10,35 +9,17 @@ import {
   DrawerHeader,
   DrawerTitle,
 } from "@/components/ui/drawer"
-import type { Collection } from "@/types/collections"
+import CollectionStats from "./CollectionStats"
+import useCollections from "./useCollections"
 
-interface CollectionNavigationProps {
-  collections: Collection[]
-  renderStats: (collection: Collection) => ReactNode
-  selectedCollectionId: number | undefined
-  setSelectedCollectionId: (id: number | undefined) => void
-  isLoading: boolean
-  statsError: string | null
-  isCreating: boolean
-  createError: string | null
-  clearCreateError: () => void
-  createCollection: (name: string) => Promise<boolean>
-  onCollectionCreated: () => Promise<void>
-}
-
-function CollectionNavigation({
-  collections,
-  renderStats,
-  selectedCollectionId,
-  setSelectedCollectionId,
-  isLoading,
-  statsError,
-  isCreating,
-  createError,
-  clearCreateError,
-  createCollection,
-  onCollectionCreated,
-}: CollectionNavigationProps) {
+function CollectionNavigation() {
+  const {
+    collections,
+    selectedCollectionId,
+    setSelectedCollectionId,
+    collectionsQuery,
+    createCollectionMutation,
+  } = useCollections()
   const [isCreateDrawerOpen, setIsCreateDrawerOpen] = useState(false)
   const form = useForm<{ name: string }>({ defaultValues: { name: "" } })
   const newCollectionName = form.watch("name")
@@ -46,18 +27,19 @@ function CollectionNavigation({
   const closeCreateDrawer = () => {
     setIsCreateDrawerOpen(false)
     form.reset()
-    clearCreateError()
+    createCollectionMutation.reset()
   }
 
-  const handleCreateCollection = async ({ name }: { name: string }) => {
+  const handleCreateCollection = ({ name }: { name: string }) => {
     const trimmedName = name.trim()
     if (!trimmedName) return
 
-    if (await createCollection(trimmedName)) {
-      await onCollectionCreated()
-      form.reset()
-      setIsCreateDrawerOpen(false)
-    }
+    createCollectionMutation.mutate(trimmedName, {
+      onSuccess: () => {
+        form.reset()
+        setIsCreateDrawerOpen(false)
+      },
+    })
   }
 
   return (
@@ -71,7 +53,7 @@ function CollectionNavigation({
           className="inline-flex h-9 items-center gap-2 rounded-md bg-primary px-3 text-sm font-medium text-primary-foreground hover:bg-primary/90"
           type="button"
           onClick={() => {
-            clearCreateError()
+            createCollectionMutation.reset()
             setIsCreateDrawerOpen(true)
           }}
         >
@@ -80,13 +62,13 @@ function CollectionNavigation({
         </button>
       </div>
 
-      {statsError && (
+      {collectionsQuery.isError && (
         <p role="alert" className="px-3 pb-2 text-xs text-destructive">
-          Could not refresh collection stats: {statsError}
+          {collectionsQuery.error.message}
         </p>
       )}
 
-      {isLoading && collections.length === 0 ? (
+      {collectionsQuery.isPending ? (
         <p className="px-3 py-2 text-sm text-muted-foreground">
           Loading collections...
         </p>
@@ -118,7 +100,7 @@ function CollectionNavigation({
                       {collection.access}
                     </span>
                   </span>
-                  {renderStats(collection)}
+                  <CollectionStats collection={collection} />
                 </button>
               </li>
             )
@@ -170,17 +152,22 @@ function CollectionNavigation({
                   {form.formState.errors.name.message}
                 </p>
               )}
-              {createError && (
+              {createCollectionMutation.error && (
                 <p role="alert" className="text-sm text-destructive">
-                  {createError}
+                  {createCollectionMutation.error.message}
                 </p>
               )}
               <button
                 className="h-9 rounded-md bg-primary px-4 text-primary-foreground disabled:opacity-50"
                 type="submit"
-                disabled={isCreating || !newCollectionName.trim()}
+                disabled={
+                  createCollectionMutation.isPending ||
+                  !newCollectionName.trim()
+                }
               >
-                {isCreating ? "Creating..." : "Create collection"}
+                {createCollectionMutation.isPending
+                  ? "Creating..."
+                  : "Create collection"}
               </button>
             </form>
           </div>

@@ -1,4 +1,5 @@
 import { useState } from "react"
+import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { useForm } from "react-hook-form"
 
 import { gamesApi } from "@/lib/api/games"
@@ -9,6 +10,7 @@ import type {
   VideoGameCondition,
 } from "@/types/videoGames"
 import { isVideoGameCondition } from "./videoGameOptions"
+import { invalidateVideoGameCollection } from "./invalidateVideoGameCollection"
 
 interface GameFormValues {
   name: string
@@ -21,21 +23,20 @@ interface GameFormValues {
 interface UseGameManagerOptions {
   collectionId: number
   consoles: ConsoleRecord[]
-  onChanged: () => Promise<void>
 }
 
 function useGameManager({
   collectionId,
   consoles,
-  onChanged,
 }: UseGameManagerOptions) {
+  const queryClient = useQueryClient()
   const consoleLabels = Array.from(
     new Map(
       consoles.map((consoleRecord) => [
         consoleRecord.console_label_id,
         { id: consoleRecord.console_label_id, name: consoleRecord.label },
-      ]),
-    ).values(),
+      ])
+    ).values()
   )
   const form = useForm<GameFormValues>({
     defaultValues: {
@@ -47,39 +48,47 @@ function useGameManager({
     },
   })
   const [editingId, setEditingId] = useState<number | null>(null)
-  const [formError, setFormError] = useState<string | null>(null)
-  const [listError, setListError] = useState<string | null>(null)
   const [isDrawerOpen, setIsDrawerOpen] = useState(false)
+
+  const saveMutation = useMutation({
+    mutationFn: ({
+      id,
+      data,
+    }: {
+      id: number | null
+      data: GameCreate
+    }) =>
+      id === null
+        ? gamesApi.create(collectionId, data)
+        : gamesApi.update(collectionId, id, data),
+    onSuccess: () =>
+      invalidateVideoGameCollection(queryClient, collectionId),
+  })
+  const deleteMutation = useMutation({
+    mutationFn: (gameId: number) => gamesApi.delete(collectionId, gameId),
+    onSuccess: () =>
+      invalidateVideoGameCollection(queryClient, collectionId),
+  })
 
   const resetForm = () => {
     form.reset()
     setEditingId(null)
     setIsDrawerOpen(false)
-    setFormError(null)
+    saveMutation.reset()
   }
 
-  const saveGame = async (values: GameFormValues) => {
-    setFormError(null)
-    try {
-      const data: GameCreate = {
-        name: values.name.trim(),
-        condition: values.condition,
-        console_label_id: Number(values.consoleLabelId),
-        last_played: values.lastPlayed || null,
-        completed: values.completed,
-      }
-      if (editingId === null) {
-        await gamesApi.create(collectionId, data)
-      } else {
-        await gamesApi.update(collectionId, editingId, data)
-      }
-      resetForm()
-      await onChanged()
-    } catch (saveError) {
-      setFormError(
-        saveError instanceof Error ? saveError.message : "Could not save game",
-      )
+  const saveGame = (values: GameFormValues) => {
+    const data: GameCreate = {
+      name: values.name.trim(),
+      condition: values.condition,
+      console_label_id: Number(values.consoleLabelId),
+      last_played: values.lastPlayed || null,
+      completed: values.completed,
     }
+    saveMutation.mutate(
+      { id: editingId, data },
+      { onSuccess: resetForm }
+    )
   }
 
   const editGame = (game: GameRecord) => {
@@ -91,7 +100,7 @@ function useGameManager({
       lastPlayed: game.last_played ?? "",
       completed: game.completed,
     })
-    setFormError(null)
+    saveMutation.reset()
     setIsDrawerOpen(true)
   }
 
@@ -100,29 +109,20 @@ function useGameManager({
     setIsDrawerOpen(true)
   }
 
-  const deleteGame = async (game: GameRecord) => {
+  const deleteGame = (game: GameRecord) => {
     if (!window.confirm(`Delete "${game.name}"? This cannot be undone.`)) return
-
-    setListError(null)
-    try {
-      await gamesApi.delete(collectionId, game.id)
-      await onChanged()
-    } catch (deleteError) {
-      setListError(
-        deleteError instanceof Error
-          ? deleteError.message
-          : "Could not delete game",
-      )
-    }
+    deleteMutation.reset()
+    deleteMutation.mutate(game.id)
   }
 
   return {
     consoleLabels,
     form,
     editingId,
-    formError,
-    listError,
+    formError: saveMutation.error?.message ?? null,
+    listError: deleteMutation.error?.message ?? null,
     isDrawerOpen,
+    isSaving: saveMutation.isPending,
     resetForm,
     saveGame,
     editGame,

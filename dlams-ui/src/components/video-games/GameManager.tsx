@@ -14,7 +14,6 @@ interface GameManagerProps {
   consoles: ConsoleRecord[]
   games: GameRecord[]
   canWrite: boolean
-  onChanged: () => Promise<void>
 }
 
 function GameManager({
@@ -22,7 +21,6 @@ function GameManager({
   consoles,
   games,
   canWrite,
-  onChanged,
 }: GameManagerProps) {
   const {
     consoleLabels,
@@ -31,13 +29,14 @@ function GameManager({
     formError,
     listError,
     isDrawerOpen,
+    isSaving,
     resetForm,
     saveGame,
     editGame,
     startNewGame,
     deleteGame,
     isVideoGameCondition,
-  } = useGameManager({ collectionId, consoles, onChanged })
+  } = useGameManager({ collectionId, consoles })
   const name = form.watch("name")
 
   return (
@@ -154,12 +153,12 @@ function GameManager({
                   <button
                     className="h-9 rounded-md bg-primary px-4 text-primary-foreground disabled:opacity-50"
                     disabled={
-                      form.formState.isSubmitting ||
+                      isSaving ||
                       !name?.trim() ||
                       consoleLabels.length === 0
                     }
                   >
-                    {form.formState.isSubmitting ? "Saving..." : "Save game"}
+                    {isSaving ? "Saving..." : "Save game"}
                   </button>
                   <button
                     className="h-9 rounded-md border px-4"

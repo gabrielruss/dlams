@@ -3,7 +3,6 @@ import { zodResolver } from "@hookform/resolvers/zod"
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { loginSchema, type LoginFormValues } from "@/schemas/auth"
-import { useState } from "react"
 import { useNavigate } from "react-router-dom"
 import {
   Form,
@@ -15,13 +14,11 @@ import {
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import useAuth from "@/stores/auth"
+import { useLogin } from "@/components/auth/useAuthQueries"
 
 function Login() {
   const navigate = useNavigate()
-  const { login } = useAuth()
-
-  const [error, setError] = useState<string | null>(null)
+  const loginMutation = useLogin()
 
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
@@ -31,16 +28,8 @@ function Login() {
     },
   })
 
-  const onFormSubmit = async (data: LoginFormValues) => {
-    try {
-      setError(null)
-      await login(data.username, data.password)
-      navigate("/")
-    } catch (error) {
-      setError(
-        error instanceof Error ? error.message : "Something bad happened"
-      )
-    }
+  const onFormSubmit = (data: LoginFormValues) => {
+    loginMutation.mutate(data, { onSuccess: () => navigate("/") })
   }
 
   return (
@@ -81,13 +70,21 @@ function Login() {
                   </FormItem>
                 )}
               />
-              {error && <div className="text-sm text-destructive">{error}</div>}
+              {loginMutation.error && (
+                <div role="alert" className="text-sm text-destructive">
+                  {loginMutation.error.message}
+                </div>
+              )}
               <Button
                 type="submit"
                 className="w-full hover:bg-slate-700 hover:cursor-pointer"
-                disabled={form.formState.isSubmitting}
+                disabled={
+                  form.formState.isSubmitting || loginMutation.isPending
+                }
               >
-                {form.formState.isSubmitting ? "Logging in..." : "Login"}
+                {form.formState.isSubmitting || loginMutation.isPending
+                  ? "Logging in..."
+                  : "Login"}
               </Button>
             </form>
           </Form>

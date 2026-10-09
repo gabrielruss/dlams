@@ -1,5 +1,18 @@
 const API_URL = import.meta.env.VITE_API_URL
 
+export class ApiError extends Error {
+  readonly status: number
+
+  constructor(
+    message: string,
+    status: number
+  ) {
+    super(message)
+    this.name = "ApiError"
+    this.status = status
+  }
+}
+
 export async function apiRequest<T>(
   endpoint: string,
   options?: RequestInit
@@ -21,7 +34,7 @@ export async function apiRequest<T>(
     } catch {
       // Keep the HTTP status message if the response is not JSON.
     }
-    throw new Error(message)
+    throw new ApiError(message, response.status)
   }
 
   if (response.status === 204) {

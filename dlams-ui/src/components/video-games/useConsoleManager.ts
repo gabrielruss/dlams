@@ -1,8 +1,14 @@
 import { useState } from "react"
+import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { useForm } from "react-hook-form"
 
 import { consolesApi } from "@/lib/api/consoles"
-import type { ConsoleCreate, ConsoleRecord, VideoGameCondition } from "@/types/videoGames"
+import type {
+  ConsoleCreate,
+  ConsoleRecord,
+  VideoGameCondition,
+} from "@/types/videoGames"
+import { invalidateVideoGameCollection } from "./invalidateVideoGameCollection"
 
 interface ConsoleFormValues {
   label: string
@@ -12,48 +18,54 @@ interface ConsoleFormValues {
 
 interface UseConsoleManagerOptions {
   collectionId: number
-  onChanged: () => Promise<void>
 }
 
-function useConsoleManager({
-  collectionId,
-  onChanged,
-}: UseConsoleManagerOptions) {
+function useConsoleManager({ collectionId }: UseConsoleManagerOptions) {
+  const queryClient = useQueryClient()
   const form = useForm<ConsoleFormValues>({
     defaultValues: { label: "", edition: "", condition: "Loose" },
   })
   const [editingId, setEditingId] = useState<number | null>(null)
-  const [formError, setFormError] = useState<string | null>(null)
-  const [listError, setListError] = useState<string | null>(null)
   const [isDrawerOpen, setIsDrawerOpen] = useState(false)
+
+  const saveMutation = useMutation({
+    mutationFn: ({
+      id,
+      data,
+    }: {
+      id: number | null
+      data: ConsoleCreate
+    }) =>
+      id === null
+        ? consolesApi.create(collectionId, data)
+        : consolesApi.update(collectionId, id, data),
+    onSuccess: () =>
+      invalidateVideoGameCollection(queryClient, collectionId),
+  })
+  const deleteMutation = useMutation({
+    mutationFn: (consoleId: number) =>
+      consolesApi.delete(collectionId, consoleId),
+    onSuccess: () =>
+      invalidateVideoGameCollection(queryClient, collectionId),
+  })
 
   const resetForm = () => {
     form.reset()
     setEditingId(null)
     setIsDrawerOpen(false)
-    setFormError(null)
+    saveMutation.reset()
   }
 
-  const saveConsole = async (values: ConsoleFormValues) => {
-    setFormError(null)
-    try {
-      const data: ConsoleCreate = {
-        label: values.label.trim(),
-        edition: values.edition.trim() || null,
-        condition: values.condition,
-      }
-      if (editingId === null) {
-        await consolesApi.create(collectionId, data)
-      } else {
-        await consolesApi.update(collectionId, editingId, data)
-      }
-      resetForm()
-      await onChanged()
-    } catch (saveError) {
-      setFormError(
-        saveError instanceof Error ? saveError.message : "Could not save console"
-      )
+  const saveConsole = (values: ConsoleFormValues) => {
+    const data: ConsoleCreate = {
+      label: values.label.trim(),
+      edition: values.edition.trim() || null,
+      condition: values.condition,
     }
+    saveMutation.mutate(
+      { id: editingId, data },
+      { onSuccess: resetForm }
+    )
   }
 
   const editConsole = (consoleRecord: ConsoleRecord) => {
@@ -63,42 +75,33 @@ function useConsoleManager({
       edition: consoleRecord.edition ?? "",
       condition: consoleRecord.condition,
     })
-    setFormError(null)
+    saveMutation.reset()
     setIsDrawerOpen(true)
   }
 
   const startNewConsole = () => {
     form.reset()
     setEditingId(null)
-    setFormError(null)
+    saveMutation.reset()
     setIsDrawerOpen(true)
   }
 
-  const deleteConsole = async (consoleRecord: ConsoleRecord) => {
+  const deleteConsole = (consoleRecord: ConsoleRecord) => {
     const description = consoleRecord.edition
       ? `${consoleRecord.label} (${consoleRecord.edition})`
       : consoleRecord.label
     if (!window.confirm(`Delete ${description}?`)) return
-
-    setListError(null)
-    try {
-      await consolesApi.delete(collectionId, consoleRecord.id)
-      await onChanged()
-    } catch (deleteError) {
-      setListError(
-        deleteError instanceof Error
-          ? deleteError.message
-          : "Could not delete console"
-      )
-    }
+    deleteMutation.reset()
+    deleteMutation.mutate(consoleRecord.id)
   }
 
   return {
     form,
     editingId,
-    formError,
-    listError,
+    formError: saveMutation.error?.message ?? null,
+    listError: deleteMutation.error?.message ?? null,
     isDrawerOpen,
+    isSaving: saveMutation.isPending,
     resetForm,
     saveConsole,
     editConsole,

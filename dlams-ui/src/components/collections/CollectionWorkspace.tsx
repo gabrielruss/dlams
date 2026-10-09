@@ -1,40 +1,27 @@
-import type { Collection } from "@/types/collections"
 import { resolveCollectionWorkspace } from "./collectionWorkspaceResolver"
+import useCollections from "./useCollections"
 
-interface CollectionWorkspaceProps {
-  collection: Collection | undefined
-  isLoading: boolean
-  loadError: string | null
-  onStatsChanged: () => Promise<void>
-}
-
-function CollectionWorkspace({
-  collection,
-  isLoading,
-  loadError,
-  onStatsChanged,
-}: CollectionWorkspaceProps) {
+function CollectionWorkspace() {
+  const { selectedCollection, collectionsQuery } = useCollections()
+  const collection = selectedCollection
   const SelectedWorkspace = collection
     ? resolveCollectionWorkspace(collection.type)
     : undefined
 
   return (
     <section className="flex flex-col gap-5">
-      {loadError && (
+      {collectionsQuery.isError && (
         <p
           role="alert"
           className="rounded-md border border-destructive p-3 text-sm"
         >
-          {loadError}
+          {collectionsQuery.error.message}
         </p>
       )}
-      {isLoading ? (
+      {collectionsQuery.isPending ? (
         <p>Loading collections...</p>
       ) : collection && SelectedWorkspace ? (
-        <SelectedWorkspace
-          collection={collection}
-          onStatsChanged={onStatsChanged}
-        />
+        <SelectedWorkspace collection={collection} />
       ) : collection ? (
         <p role="status">
           This collection type is not supported in the current UI yet.

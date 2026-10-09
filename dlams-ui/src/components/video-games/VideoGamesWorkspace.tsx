@@ -6,22 +6,14 @@ import useVideoGamesCollection from "./useVideoGamesCollection"
 
 interface VideoGamesWorkspaceProps {
   collection: Collection
-  onStatsChanged: () => Promise<void>
 }
 
-function VideoGamesWorkspace({
-  collection,
-  onStatsChanged,
-}: VideoGamesWorkspaceProps) {
-  const { consoles, games, isLoading, error, loadItems } =
-    useVideoGamesCollection(collection)
+function VideoGamesWorkspace({ collection }: VideoGamesWorkspaceProps) {
+  const { consoles, games, isPending, error } =
+    useVideoGamesCollection(collection.id)
   const canWrite = canWriteCollection(collection.access)
-  const handleChanged = async () => {
-    await loadItems()
-    await onStatsChanged()
-  }
 
-  if (isLoading) return <p>Loading collection items...</p>
+  if (isPending) return <p>Loading collection items...</p>
 
   return (
     <div className="flex flex-col gap-5">
@@ -33,7 +25,7 @@ function VideoGamesWorkspace({
       )}
       {error && (
         <p role="alert" className="rounded-md border border-destructive p-3 text-sm">
-          {error}
+          {error.message}
         </p>
       )}
       <div className="grid gap-5 lg:grid-cols-2">
@@ -41,14 +33,12 @@ function VideoGamesWorkspace({
           collectionId={collection.id}
           consoles={consoles}
           canWrite={canWrite}
-          onChanged={handleChanged}
         />
         <GameManager
           collectionId={collection.id}
           consoles={consoles}
           games={games}
           canWrite={canWrite}
-          onChanged={handleChanged}
         />
       </div>
     </div>
