@@ -27,6 +27,18 @@ export function useLogin() {
   })
 }
 
+export function useRegister() {
+  return useMutation({
+    mutationFn: authApi.register,
+  })
+}
+
+export function useCreateRegistrationInvitation() {
+  return useMutation({
+    mutationFn: authApi.createRegistrationInvitation,
+  })
+}
+
 export function useLogout() {
   const queryClient = useQueryClient()
 

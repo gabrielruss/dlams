@@ -16,3 +16,15 @@ export const loginSchema = z.object({
 })
 
 export type LoginFormValues = z.infer<typeof loginSchema>
+
+export const registerSchema = loginSchema
+  .extend({
+    invitationCode: z.string().min(1, "An invitation code is required"),
+    confirmPassword: z.string().min(1, "Please confirm your password"),
+  })
+  .refine((values) => values.password === values.confirmPassword, {
+    path: ["confirmPassword"],
+    message: "Passwords do not match",
+  })
+
+export type RegisterFormValues = z.infer<typeof registerSchema>

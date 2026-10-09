@@ -1,4 +1,8 @@
-import type { User } from "@/types"
+import type {
+  RegisterRequest,
+  RegistrationInvitation,
+  User,
+} from "@/types"
 import { queryOptions } from "@tanstack/react-query"
 import { ApiError, apiRequest } from "./client"
 
@@ -17,6 +21,17 @@ async function getCurrentUser(): Promise<User | null> {
 }
 
 export const authApi = {
+  register: (data: RegisterRequest) =>
+    apiRequest<{ message: string }>("/register", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+
+  createRegistrationInvitation: () =>
+    apiRequest<RegistrationInvitation>("/invitations", {
+      method: "POST",
+    }),
+
   login: (username: string, password: string) =>
     apiRequest<{ user: User }>("/login", {
       method: "POST",

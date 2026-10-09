@@ -3,7 +3,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { loginSchema, type LoginFormValues } from "@/schemas/auth"
-import { useNavigate } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
 import {
   Form,
   FormControl,
@@ -86,6 +86,12 @@ function Login() {
                   ? "Logging in..."
                   : "Login"}
               </Button>
+              <p className="text-center text-sm">
+                Have an invitation?{" "}
+                <Link className="underline" to="/register">
+                  Create an account
+                </Link>
+              </p>
             </form>
           </Form>
         </CardContent>
