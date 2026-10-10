@@ -7,7 +7,9 @@ Applies across the DLAMS workspace. Project-local conventions take precedence wh
 - `dlams-ui/`: React + TypeScript frontend.
 - `dlams-fastapi/`: FastAPI + SQLAlchemy backend.
 - `dlams-deployment/`: Docker Compose and deployment config.
-- `DLAMS-PLAN.md`: durable record of status, decisions, and troubleshooting outcomes.
+- `DLAMS-PLAN.md`: current status, next steps, known issues, and open questions.
+- `docs/decisions.md`: dated decisions and their reasons; `docs/archive/` holds history.
+- `.private/ops-notes.md`: git-ignored operational and security notes. The repository is public: never put secrets, credentials, or infrastructure layout in tracked files.
 
 ## Current tooling (what exists today)
 
@@ -214,7 +216,7 @@ For features, refactors, or anything touching architecture:
 
 Small, isolated edits (typos, one-line fixes) can skip steps 1-3.
 
-Update `DLAMS-PLAN.md` when you: add or change an endpoint, change the schema, add a dependency, make an architectural decision, or resolve a troubleshooting issue.
+Update `DLAMS-PLAN.md` when status, next steps, or known issues change. Record architectural decisions in `docs/decisions.md` with the date and reason, marking anything they supersede. Do not log routine refactors; git history covers them.
 
 ## Git
 

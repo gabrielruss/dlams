@@ -13,8 +13,8 @@ This is a monorepo. Each folder keeps its own manifests and README:
 - `dlams-fastapi/` — FastAPI backend
 - `dlams-deployment/` — Docker Compose and Nginx
 
-Pushing to `main` runs `.github/workflows/deploy.yml` on the Raspberry Pi
-runner, which pulls `~/dlams` and rebuilds `api`, `ui`, and `nginx`. Production
-needs `dlams-deployment/.env` on the Pi with `SECRET_KEY` and the `POSTGRES_*`
-values (see `dlams-deployment/.env.example`); it is not committed.
+Pushing to `main` runs `.github/workflows/deploy.yml` on the production
+host's self-hosted runner, which pulls the repo and rebuilds `api`, `ui`, and
+`nginx`. Production needs an untracked `dlams-deployment/.env` (see
+`dlams-deployment/.env.example`); it is never committed.
 
