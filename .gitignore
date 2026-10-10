@@ -22,4 +22,4 @@ dist-ssr/
 *.log
 
 # Private operational notes (not for the public repo)
-.private/
+.private
