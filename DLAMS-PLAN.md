@@ -1,6 +1,6 @@
 # DLAMS plan
 
-Last updated: 2026-10-09
+Last updated: 2026-10-10
 
 The current state of the project. For why things are the way they are, see
 [`docs/decisions.md`](./docs/decisions.md). For the full history up to
@@ -91,16 +91,30 @@ workflow on a self-hosted runner (`.github/workflows/deploy.yml`).
 In order:
 
 1. **Retire the old per-repo checkouts and repositories.** Details are in the
-   private notes.
+   private notes. (The in-repo housekeeping, deleting the legacy
+   `docker-compose.local.yml` files and the Compose `version` key, is done.)
 2. **Harden production database credentials.** Details are in the private
    notes.
-3. **Manual browser pass** over collection and console/game CRUD for owner,
-   `edit`, `view-only`, and `demo` access.
-4. **Admin user management** and demo-account provisioning.
-5. **Grant management UI**, then **browser-local demo editing** with reset.
-6. **Tidy-ups:** the two lint errors, the obsolete Compose `version` key,
-   deleting the broken legacy `docker-compose.local.yml` files, and an
-   assessment of the dependency audit findings.
+3. **Assess the dependency audit findings** (about 25, 1 critical). The app is
+   deployed and public, so know what is exposed before adding features.
+4. **Manual browser pass** over collection and console/game CRUD for owner,
+   `edit`, `view-only`, and `demo` access. Also note anything that breaks at
+   phone width, as a baseline for step 8; do not fix layout here.
+5. **Fix the two lint errors** in `button.tsx` and `form.tsx`, so the lint
+   baseline is clean before the styling work touches shared UI components.
+6. **Admin user management** and demo-account provisioning.
+7. **Grant management UI.** Steps 6 and 7 add the last large new screens;
+   build them before the responsive pass so they are not restyled twice.
+8. **Mobile-friendly styling pass** across the whole UI (sidebar and drawers
+   in particular). This is part of the owner's styling pass, so it needs the
+   owner's go-ahead and scope before any CSS or Tailwind change. Sequence it
+   after the new screens exist and before the demo is shared widely, since
+   visitors are likely to arrive on phones. When done, mark the styling pass
+   status in `.github/copilot-instructions.md` accordingly.
+9. **Browser-local demo editing** with reset. It waits on the open questions
+   below and is mostly logic; the reset control is small and lands on the
+   already-responsive layout.
+10. **Further item types**, after the shared-fields question is settled.
 
 ## Known issues
 
@@ -116,9 +130,8 @@ In order:
   handlers lack complete type and response declarations.
 - Migration `951a8354c293` uses a PostgreSQL-only `ALTER COLUMN`, so the full
   migration chain cannot be replayed on SQLite.
-- `dlams-fastapi/docker-compose.local.yml` and `dlams-ui/docker-compose.local.yml`
-  are legacy and reference a missing Nginx config; use the development
-  Compose file in `dlams-deployment` instead.
+- `dlams-fastapi/.env.example` was only used by the deleted legacy
+  `docker-compose.local.yml` and is now orphaned; decide whether to remove it.
 - Direct cross-origin browser calls to the API fail without CORS. The
   supported development workflows avoid this with a same-origin Vite proxy.
 
