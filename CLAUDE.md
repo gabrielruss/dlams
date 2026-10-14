@@ -7,11 +7,14 @@ Start here, in order:
 
 1. [`DLAMS-PLAN.md`](./DLAMS-PLAN.md) — current status, next steps, known
    issues, open questions, and the rules for keeping it up to date.
-2. [`.github/copilot-instructions.md`](./.github/copilot-instructions.md) —
+2. [`docs/architecture.md`](./docs/architecture.md) — how the system is put
+   together now: components, auth and access model, data model, API surface,
+   stack, and deployment.
+3. [`.github/copilot-instructions.md`](./.github/copilot-instructions.md) —
    coding conventions, verified commands, and workflow.
-3. [`docs/decisions.md`](./docs/decisions.md) — why things are the way they
+4. [`docs/decisions.md`](./docs/decisions.md) — why things are the way they
    are. `docs/archive/` is history only and may be stale.
-4. [`dlams-deployment/README.md`](./dlams-deployment/README.md) — how to run
+5. [`dlams-deployment/README.md`](./dlams-deployment/README.md) — how to run
    the app locally.
 
 Rules that are easy to miss:

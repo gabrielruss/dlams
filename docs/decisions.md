@@ -7,6 +7,37 @@ replaces it is named. Proposals and open questions live in
 
 ## Repository and delivery
 
+### Portfolio-ready checkpoint before further features — 2026-10-14
+- The next goal is a state the owner can link from a portfolio site and show
+  to potential employers, reached as soon as possible. It is defined in
+  `DLAMS-PLAN.md` ("Milestone: portfolio-ready") and reorders "Next up":
+  deploy and demo provisioning, demo sign-in, a mobile-friendly styling pass,
+  CI and light tests, and a README with screenshots come first.
+- Grant management UI, browser-local demo editing, and further item types move
+  after the milestone. They are real features, but a visitor signed in as the
+  demo user cannot see the owner-only grants screen, and local editing and a
+  second item type cost more than the milestone needs.
+- Reason: the owner is actively applying for jobs. A live, working,
+  well-presented demo plus visible engineering practice (CI, tests, docs)
+  does more for that than additional features.
+- The deferred API dependency upgrades and automated backups stay deferred.
+
+### Old per-repo repositories stay, private — 2026-10-12
+- The three pre-monorepo repositories are not being deleted. They were made
+  private and their runners and local checkouts were removed; the remaining
+  step, deleting them, is won't do.
+- Reason: owner's choice. Their history still contains a committed `.env`
+  whose `SECRET_KEY` has been rotated, so it no longer signs sessions.
+
+### Defer API dependency upgrades — 2026-10-12
+- `pip-audit` reports 27 advisories in 10 API packages; none appear reachable
+  given how the app uses them (HS256-only JWTs, no forms, uploads, or static
+  serving from the API). The UI audit is clean.
+- Upgrading and replacing `python-jose` are deferred, not rejected. Closing
+  the Starlette advisories needs a FastAPI upgrade, so it is its own change.
+- Reason: no reachable exposure, and the larger upgrade should not land
+  alongside feature work.
+
 ### Monorepo, one deploy workflow — 2026-10-09
 - One `dlams` repository replaces `dlams-ui`, `dlams-fastapi`, and
   `dlams-deployment`. The three folder names are kept so Compose build
@@ -44,6 +75,49 @@ replaces it is named. Proposals and open questions live in
   (`npm run dev:hybrid`).
 
 ## Accounts and access
+
+### Admins can deactivate a user; delete is deferred — 2026-10-12
+- Admin user management deactivates and reactivates accounts. A deactivated
+  user cannot log in or use an existing session; their account, collections,
+  and grants stay intact. Deleting a user is deferred, not rejected.
+- Reason: deletion needs a policy for the user's data (see below) and
+  production has no backups, so a hard delete would be irreversible.
+- Deactivation needs a new `users` column, a forward migration, and an active
+  check at login and in `get_current_user`.
+- Facts that constrain a future delete: `collections.owner_id` and
+  `collection_grants.user_id` cascade from users, but consoles and games
+  reference console labels with `RESTRICT`, and
+  `registration_invitations.created_by_id` is `RESTRICT`, so a naive delete of
+  a user with data or issued invitations fails at the database. The API also
+  has no collection delete endpoint yet.
+- **Supersedes** "Admins can deactivate or delete a user" (same day), which
+  superseded "deactivate, not delete" (same day).
+
+### Superseded: Admins can deactivate or delete a user — 2026-10-12
+- Replaced the same day by "deactivate; delete is deferred".
+
+### Superseded: Removing a user's access means deactivating, not deleting — 2026-10-12
+- **Superseded** the same day by "Admins can deactivate a user; delete is deferred".
+- Admin user management deactivates an account instead of deleting it. A
+  deactivated user cannot log in or use an existing session, but their
+  account, collections, and grants stay intact and the action is reversible.
+- Reason: deleting a user forces decisions about what happens to their
+  collections and grants. Authentication already looks the user up on every
+  request, so a deactivation flag takes effect immediately.
+- Consequence: needs a new column on `users` and a forward migration, plus an
+  active check in `get_current_user` and at login. Not built yet.
+
+### Invites, grants, and user management are separate features — 2026-10-12
+- An invitation only creates an account (always role `user`). It never
+  carries a collection grant. Invites stay admin-only.
+- Reason: invites are an admin action, while grants are an owner action and
+  admin has no implicit access to collections it does not own. Combining them
+  would let an admin hand out access to collections it does not own.
+- UI: the invite form opens in a drawer from a link beneath the username in
+  the left sidebar. Collection grants get their own full-page, table-based
+  screen, scoped to the owner (not admin-only). Admins get a separate
+  user-management screen so a user's access can be removed from the UI rather
+  than the database.
 
 ### Invite-only registration — 2026-10-09
 - **Supersedes** "keep public registration" (2026-10-04).
@@ -129,3 +203,6 @@ replaces it is named. Proposals and open questions live in
   installing packages or running the shadcn CLI.
 - Backend tests use `unittest`. Add tests only where they protect
   authentication, authorization, or persistent-data boundaries.
+- Frontend testing, when added (2026-10-12), stays light: few tests, mostly
+  integration, asserting on user-visible behavior rather than implementation
+  details. Static checks (TypeScript, ESLint) carry the rest.

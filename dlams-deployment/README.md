@@ -91,6 +91,19 @@ The `-d` option keeps the services running in the background, so you can close
 the terminal. Open <http://localhost:5174>. API docs:
 <http://localhost:8001/docs>.
 
+### Shortcuts
+
+From the repository root, `make` wraps the Docker commands above:
+
+- `make dev` builds and starts the dev stack in the background.
+- `make watch` starts the stack and keeps the API in sync as you edit: changes
+  under `dlams-fastapi/app` and `dlams-fastapi/alembic` are copied into the
+  container and the API restarts (which also applies new migrations), and a
+  change to `requirements.txt` triggers a rebuild. UI changes already
+  hot-reload without this.
+- `make logs`, `make down`, and `make test` (backend unit tests, which need
+  `dlams-fastapi/.venv`). `make help` lists them.
+
 ### Try collections, access grants, and video-game API
 
 Rebuild/restart the stack first so the local database applies the newest

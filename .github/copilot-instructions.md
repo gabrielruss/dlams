@@ -8,6 +8,7 @@ Applies across the DLAMS workspace. Project-local conventions take precedence wh
 - `dlams-fastapi/`: FastAPI + SQLAlchemy backend.
 - `dlams-deployment/`: Docker Compose and deployment config.
 - `DLAMS-PLAN.md`: current status, next steps, known issues, and open questions.
+- `docs/architecture.md`: how the system is put together now (components, auth and access, data model, API surface, stack, deployment).
 - `docs/decisions.md`: dated decisions and their reasons; `docs/archive/` holds history.
 - `.private/ops-notes.md`: git-ignored operational and security notes. The repository is public: never put secrets, credentials, or infrastructure layout in tracked files.
 
@@ -37,6 +38,8 @@ Applies across the DLAMS workspace. Project-local conventions take precedence wh
 - Hybrid host UI (from `dlams-ui/`): `npm run dev:hybrid`
 - Frontend tests: none configured yet.
 - Backend tests (from `dlams-fastapi/`): `.venv/bin/python -m unittest discover -s tests -v`
+- Dev shortcuts (from the repo root): `make dev`, `make watch`, `make logs`,
+  `make down`, `make test`; `make help` lists them.
 - Local Docker stack (from `dlams-deployment/`):
   `docker compose -p dlams-dev -f docker-compose.dev.yml up --build -d`
 
@@ -216,7 +219,7 @@ For features, refactors, or anything touching architecture:
 
 Small, isolated edits (typos, one-line fixes) can skip steps 1-3.
 
-Update `DLAMS-PLAN.md` when status, next steps, or known issues change. Record architectural decisions in `docs/decisions.md` with the date and reason, marking anything they supersede. Do not log routine refactors; git history covers them.
+Update `DLAMS-PLAN.md` when status, next steps, or known issues change. Update `docs/architecture.md` when structure changes (components, endpoints, data model, auth or access rules, deployment, major dependencies). Record architectural decisions in `docs/decisions.md` with the date and reason, marking anything they supersede. Do not log routine refactors; git history covers them.
 
 ## Git
 

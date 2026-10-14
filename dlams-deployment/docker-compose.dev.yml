@@ -40,6 +40,16 @@ services:
       start_period: 10s
     ports:
       - "127.0.0.1:8001:8000"
+    develop:
+      watch:
+        - action: sync+restart
+          path: ../dlams-fastapi/app
+          target: /app/app
+        - action: sync+restart
+          path: ../dlams-fastapi/alembic
+          target: /app/alembic
+        - action: rebuild
+          path: ../dlams-fastapi/requirements.txt
 
   ui:
     build:
