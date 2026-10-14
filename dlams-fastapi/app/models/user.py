@@ -5,7 +5,7 @@ This file contains all models for Users until this trash gets out of hand.
 from datetime import datetime, UTC
 from enum import Enum
 
-from sqlalchemy import CheckConstraint, DateTime, ForeignKey, String
+from sqlalchemy import Boolean, CheckConstraint, DateTime, ForeignKey, String, true
 from sqlalchemy.orm import Mapped, mapped_column
 from app.db import Base
 
@@ -51,6 +51,12 @@ class User(Base):
         nullable=False,
         default=UserRole.USER.value,
         server_default=UserRole.USER.value,
+    )
+    is_active: Mapped[bool] = mapped_column(
+        Boolean,
+        nullable=False,
+        default=True,
+        server_default=true(),
     )
 
 

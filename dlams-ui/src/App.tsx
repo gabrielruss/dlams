@@ -1,6 +1,7 @@
 import { Route, Routes, Navigate } from "react-router-dom"
-import { Register, Login, Home } from "./pages"
+import { AdminUsers, Register, Login, Home } from "./pages"
 import { useCurrentUser } from "./components/auth/useAuthQueries"
+import { isAdmin } from "./lib/permissions"
 
 function App() {
   const currentUserQuery = useCurrentUser()
@@ -29,6 +30,18 @@ function App() {
       <Route
         path="/"
         element={user ? <Home /> : <Navigate to="/login" replace />}
+      />
+      <Route
+        path="/admin/users"
+        element={
+          !user ? (
+            <Navigate to="/login" replace />
+          ) : isAdmin(user) ? (
+            <AdminUsers />
+          ) : (
+            <Navigate to="/" replace />
+          )
+        }
       />
       <Route
         path="/login"

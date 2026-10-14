@@ -1,12 +1,8 @@
 import CollectionWorkspace from "@/components/collections/CollectionWorkspace"
 import AppSidebar from "@/components/AppSidebar"
 import CollectionNavigation from "@/components/collections/CollectionNavigation"
-import RegistrationInviteManager from "@/components/auth/RegistrationInviteManager"
-import { useCurrentUser } from "@/components/auth/useAuthQueries"
 
 function Home() {
-  const { data: user } = useCurrentUser()
-
   return (
     <div className="flex min-h-screen">
       <AppSidebar>
@@ -19,7 +15,6 @@ function Home() {
               Your collections
             </h1>
           </header>
-          {user?.role === "admin" && <RegistrationInviteManager />}
           <CollectionWorkspace />
         </div>
       </main>

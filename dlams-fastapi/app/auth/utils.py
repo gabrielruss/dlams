@@ -4,7 +4,7 @@ This file contains utility functions for the authentication module.
 """
 
 from typing import Optional, Any
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 from passlib.context import CryptContext
 from jose import jwt, JWTError
@@ -12,7 +12,7 @@ from sqlalchemy.orm import Session
 from fastapi import Request, Depends, HTTPException, status
 
 from app.config import SECRET_KEY
-from app.models import User
+from app.models import User, UserRole
 from app.utils import get_db
 
 # Set up bcrypt context for password hashing
@@ -61,7 +61,22 @@ def get_current_user(request: Request, db: Session = Depends(get_db)):
             detail="User not found"
         )
 
+    if not user.is_active:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Account is deactivated"
+        )
+
     return user
+
+
+def require_admin(current_user: User) -> None:
+    """Raise 403 unless the signed-in user has the global admin role."""
+    if current_user.role != UserRole.ADMIN.value:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Admin access required",
+        )
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     """
@@ -88,6 +103,6 @@ def create_access_token(data: dict[str, str], expires_delta: Optional[timedelta]
         str: The encoded JWT access token.
     """
     to_encode: dict[str, Any] = data.copy()
-    expire = datetime.now() + (expires_delta or timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES))
+    expire = datetime.now(timezone.utc) + (expires_delta or timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES))
     to_encode.update({"exp": expire})
     return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)

@@ -46,3 +46,23 @@ class AuthResponse(BaseModel):
     """Schema for auth responses"""
     message: str
     user: UserResponse
+
+
+class AdminUserResponse(BaseModel):
+    """A user as shown on the admin user-management screen."""
+
+    id: int
+    username: str
+    role: UserRole
+    is_active: bool
+    created_at: datetime
+
+    class Config:
+        """ Allows Pydantic to work with SQLAlchemy models """
+        from_attributes = True
+
+
+class AdminUserListResponse(BaseModel):
+    """All users, for admin user management."""
+
+    users: list[AdminUserResponse]

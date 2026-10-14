@@ -38,7 +38,7 @@ Versions are the declared ranges from `dlams-ui/package.json` and
 | Routing | `react-router-dom` 7 |
 | Server state | `@tanstack/react-query` 5 |
 | Forms and validation | `react-hook-form`, `@hookform/resolvers`, `zod` 4 |
-| Styling | Tailwind CSS 4 (`@tailwindcss/vite`), `tw-animate-css`, `tailwind-merge`, `clsx`, `class-variance-authority` |
+| Styling | Tailwind CSS 4 (`@tailwindcss/vite`), `tw-animate-css`, `tailwind-merge`, `clsx`, `class-variance-authority`, `cn` |
 | Components | shadcn/ui pattern over Radix (`@radix-ui/react-label`, `@radix-ui/react-slot`), `vaul` (drawers), `lucide-react` (icons) |
 | Lint | ESLint 9 with `typescript-eslint`, `react-hooks`, `react-refresh` |
 
@@ -119,7 +119,9 @@ Two independent layers:
    Two FastAPI dependencies implement this: `get_readable_collection` and
    `get_writable_collection`. A user with no access gets 404, not 403, so
    collection ids are not discoverable. The UI mirrors write access through
-   `lib/permissions.ts` (`canWriteCollection`).
+   `lib/permissions.ts` (`canWriteCollection`, `isAdmin`); admin checks go
+   through `isAdmin` in the UI and `require_admin` in the API, never a raw
+   role string.
 
 ## Data model
 

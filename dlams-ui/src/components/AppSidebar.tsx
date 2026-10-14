@@ -1,12 +1,14 @@
 import type { ReactNode } from "react"
-import { LogOut } from "lucide-react"
-import { Link } from "react-router-dom"
+import { LogOut, Users } from "lucide-react"
+import { Link, NavLink } from "react-router-dom"
 
 import { Button } from "@/components/ui/button"
+import RegistrationInviteManager from "@/components/auth/RegistrationInviteManager"
 import { useCurrentUser, useLogout } from "@/components/auth/useAuthQueries"
+import { isAdmin } from "@/lib/permissions"
 
 interface AppSidebarProps {
-  children: ReactNode
+  children?: ReactNode
 }
 
 function AppSidebar({ children }: AppSidebarProps) {
@@ -35,6 +37,21 @@ function AppSidebar({ children }: AppSidebarProps) {
         <p className="truncate px-2 pb-3 text-sm font-medium">
           {user?.username}
         </p>
+        {isAdmin(user) && (
+          <>
+            <RegistrationInviteManager />
+            <Button
+              asChild
+              className="w-full justify-start aria-[current=page]:bg-accent"
+              variant="ghost"
+            >
+              <NavLink to="/admin/users">
+                <Users aria-hidden="true" />
+                Manage users
+              </NavLink>
+            </Button>
+          </>
+        )}
         {logoutMutation.error && (
           <p role="alert" className="px-2 pb-3 text-sm text-destructive">
             {logoutMutation.error.message}

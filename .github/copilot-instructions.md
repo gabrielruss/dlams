@@ -15,12 +15,15 @@ Applies across the DLAMS workspace. Project-local conventions take precedence wh
 ## Current tooling (what exists today)
 
 - Frontend architecture: Vite, Tailwind CSS, shadcn/ui components, React
-  Router, TanStack Query v5 for server state, and Zustand only for shared
-  client/UI state when several distant components genuinely need it.
+  Router, and TanStack Query v5 for server state. There is no client-state
+  store library (Zustand was removed 2026-10-14 because nothing used it).
 - The UI already has local shadcn-style components under
   `dlams-ui/src/components/ui/`; shadcn/ui is component source, not a runtime
   dependency in `package.json`. Reuse these components and follow shadcn
   conventions rather than introducing a competing component system.
+- The shadcn CLI emits `import { cn } from "cn"` and installs the `cn`
+  package (a clsx + tailwind-merge replacement). Leave generated imports
+  alone; `@/lib/utils` also works and both coexist (decided 2026-10-14).
 - Do not install packages or run the shadcn CLI to add components without
   asking the owner first. When a component requires a dependency, explain
   which package is needed and wait for the owner to install/approve it before
@@ -70,14 +73,14 @@ Decide by asking whether the data lives on the backend and the UI only holds a
 cached copy.
 
 - **Server state** (collections, items, grants, user profile, anything
-  returned by the API): TanStack Query only. Do not mirror it into `useState`,
-  Zustand, or another persistent store as a second source of truth. Temporary
+  returned by the API): TanStack Query only. Do not mirror it into `useState`
+  or another store as a second source of truth. Temporary
   form drafts and explicitly requested optimistic updates may differ from
   server data while being edited or submitted.
 - **Client state** (drawer open, form drafts, theme, view preferences): local
-  `useState` by default. Use Zustand only when several distant components
-  genuinely need to share client/UI state. Zustand holds only client/UI state,
-  never data returned by the API.
+  `useState` by default. If several distant components genuinely need to share
+  client/UI state, ask the owner before adding a store library; it must hold
+  only client/UI state, never data returned by the API.
 - **Selections and filters**: store the ID, not the object, and look the data
   up via a query. Prefer URL params (route or search params) for state that
   should survive refresh or be shareable. The selected collection ID is in
@@ -90,8 +93,7 @@ cached copy.
 ## Frontend (React + TypeScript)
 
 - Follow the UI stack: Vite, Tailwind CSS, shadcn/ui, React Router,
-  TanStack Query v5 for server state, and Zustand for genuinely shared
-  client/UI state only.
+  and TanStack Query v5 for server state.
 - Prefer the existing shadcn-style components in `src/components/ui/`.
   shadcn/ui components are maintained in the project source; do not expect a
   `shadcn` runtime package. Add or adapt components using the project's
@@ -155,8 +157,7 @@ cached copy.
   have refreshed. Changes to sharing or grants must invalidate both the
   collection and collection-list keys. Optimistic updates only when requested.
 - Every query-backed view handles pending, error, and empty states.
-- Do not mirror query data in Zustand or component state. Use Zustand for
-  client/UI state only when genuinely shared across distant components.
+- Do not mirror query data in component state or any other store.
 - `@tanstack/eslint-plugin-query` is not installed. The owner controls
   dependency installation; do not add it or change package files without
   approval. When available, fix its warnings rather than disabling rules.

@@ -184,6 +184,17 @@ replaces it is named. Proposals and open questions live in
 
 ## Code and UI conventions
 
+### Leave the shadcn CLI's `cn` import alone — 2026-10-14
+- The shadcn CLI generates `import { cn } from "cn"` and adds the `cn` npm
+  package (a drop-in for clsx plus tailwind-merge). Removing the package the
+  same day broke the production UI build: the pushed commit dropped the
+  package while `drawer.tsx` still imported it, because the fix to
+  `drawer.tsx` was not in that commit.
+- Decision: keep the `cn` package and do not rewrite generated imports. Older
+  components keep using `@/lib/utils`; the two helpers do the same job.
+- Reason: the CLI re-adds it on every component install, so fighting it costs
+  more than the small duplication.
+
 - Prefer feature/domain-focused files; keep route pages structural.
   Separate API modules by resource.
 - Nontrivial component workflows (loading, state, mutations) live in focused
@@ -194,7 +205,9 @@ replaces it is named. Proposals and open questions live in
 - Use React Hook Form for submitted data-entry forms.
 - Server state lives in TanStack Query; destructure the fields a component
   uses and derive views with `select` or a feature hook. Do not mirror query
-  data in React state. Zustand only for genuinely shared client state.
+  data in React state. Zustand only for genuinely shared client state
+  (superseded 2026-10-14: Zustand was unused and removed; see the plan's
+  open questions for the demo overlay).
 - Keep authorization rules in shared helpers (for example
   `canWriteCollection`); the API remains authoritative.
 - Avoid `void` on promises unless a lint rule or fire-and-forget boundary

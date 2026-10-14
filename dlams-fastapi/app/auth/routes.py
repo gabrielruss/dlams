@@ -19,21 +19,18 @@ from app.auth.schemas import (
     RegistrationInvitationResponse,
     UserResponse,
 )
-from app.auth.utils import create_access_token, get_current_user, get_user_by_username
+from app.auth.utils import (
+    create_access_token,
+    get_current_user,
+    get_user_by_username,
+    require_admin,
+)
 from app.config import COOKIE_SECURE
 from app.auth.utils import pwd_context
 from app.models import RegistrationInvitation, User, UserRole
 from app.utils import get_db
 
 router = APIRouter()
-
-
-def _require_admin(current_user: User) -> None:
-    if current_user.role != UserRole.ADMIN.value:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Admin access required",
-        )
 
 
 @router.post("/register")
@@ -96,7 +93,7 @@ def create_registration_invitation(
     current_user: User = Depends(get_current_user),
 ) -> RegistrationInvitationResponse:
     """Create a seven-day, single-use registration invitation for an admin."""
-    _require_admin(current_user)
+    require_admin(current_user)
 
     now = datetime.now(timezone.utc)
     expires_at = now + timedelta(days=7)
@@ -145,6 +142,12 @@ def login(
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect username or password"
+        )
+
+    if not db_user.is_active:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Account is deactivated",
         )
 
     access_token = create_access_token(
