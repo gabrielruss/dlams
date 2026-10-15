@@ -76,6 +76,37 @@ replaces it is named. Proposals and open questions live in
 
 ## Accounts and access
 
+### Demo accounts: an admin-assigned role, GET-only at the API — 2026-10-14
+- A demo account is a user whose role is `demo` (alongside `user` and
+  `admin`). Only an admin can set it, from admin user management, by changing
+  an existing account's role between `user` and `demo`. No invitation
+  produces one, nothing creates one directly, and the API never sets or
+  clears `admin` this way. Other users never see the option.
+- Demo content is entered by hand: register the account as an ordinary user
+  from an invitation, add the collection and items through the normal UI,
+  then switch the role to `demo`. Switching back to `user` allows editing the
+  content later. A seed script was considered and deferred as too much for
+  now.
+- In the sharing area a demo account can only grant read-only access, so the
+  access-mode control is not shown to it at all (no greyed-out option and no
+  helper text).
+- A demo account is read-only at the API: any request from it other than
+  `GET`, `HEAD`, or `OPTIONS` returns 403, including creating collections.
+  The check lives once, in `get_current_user`. Login, logout, and register do
+  not use it, so there are no named exceptions.
+- A demo account owns its demo collection, so the owner-scoped sharing screen
+  can show real grants. Visitors will eventually use the app as if it were a
+  full account, but their edits are saved only in their browser and never
+  reach the API. That is the difference from a `view-only` grant.
+- Reason: demo credentials are public, so the API must give them no write
+  path at all, not just no write path into one collection.
+- **Supersedes** parts of "Collection ownership and grants" (2026-10-04): the
+  global `demo` role dropped then returns with a different meaning
+  (admin-created, GET-only), and the demo collection is owned by the demo
+  account instead of being a main-account collection with a `demo` grant. The
+  `demo` grant mode is now redundant; whether to remove it is an open
+  question in the plan. Not built yet.
+
 ### Admins can deactivate a user; delete is deferred — 2026-10-12
 - Admin user management deactivates and reactivates accounts. A deactivated
   user cannot log in or use an existing session; their account, collections,
@@ -143,6 +174,9 @@ replaces it is named. Proposals and open questions live in
 - **Supersedes** a global `demo` role (2026-10-04) and the earlier
   owner-only-write roadmap. `demo` is a property of a grant, not of an
   account.
+- **Partly superseded 2026-10-14** by "Demo accounts: an admin-assigned role,
+  GET-only at the API": a `demo` role returns, and the demo account owns the
+  demo collection.
 
 ### Demo behavior — 2026-10-02
 - Demo credentials are public and carry no authority; server-side

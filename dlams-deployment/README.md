@@ -223,6 +223,153 @@ create a registration link. Each invitation works once and expires after
 seven days. Share it privately; anyone holding an unused link can create one
 regular account.
 
+### Database backups
+
+`dlams-deployment/scripts/backup-db.sh` dumps the production database with
+`pg_dump` inside the `db` container, writes a compressed dump named
+`dlams-<UTC timestamp>.dump` to `~/dlams-backups`, checks that the archive is
+readable, deletes dumps older than 14 days, and can copy the new dump to
+another machine. It needs only Docker and, for the off-device copy, `rsync`.
+No credentials are in the script: the container supplies the database user
+and name.
+
+A backup that lives only on the host does not survive losing the host, so set
+an off-device destination. Dumps contain password hashes and personal data;
+keep them private, and keep the destination out of tracked files (record it
+in `.private/ops-notes.md`).
+
+Settings, all optional environment variables:
+
+| Variable | Default | Meaning |
+| --- | --- | --- |
+| `DLAMS_DB_CONTAINER` | `dlams-db` | Name of the db container |
+| `DLAMS_BACKUP_DIR` | `~/dlams-backups` | Where dumps are kept |
+| `DLAMS_BACKUP_KEEP_DAYS` | `14` | Delete dumps older than this |
+| `DLAMS_BACKUP_REMOTE` | unset | `rsync` destination, for example `user@host:/path/` |
+
+**Run it by hand** before any deploy that includes a migration:
+
+```bash
+~/dlams/dlams-deployment/scripts/backup-db.sh
+```
+
+**Schedule it nightly** on the host with `crontab -e`:
+
+```cron
+15 3 * * * DLAMS_BACKUP_REMOTE=user@host:/path/ ~/dlams/dlams-deployment/scripts/backup-db.sh >> ~/dlams-backups/backup.log 2>&1
+```
+
+Cron runs with a minimal environment, so confirm the line works by running the
+same command once in a shell. Then check that
+`~/dlams-backups/backup.log` has a "wrote" line the next morning and that the
+off-device copy arrived.
+
+**Test a restore once** so you know a dump works before you need it. This
+restores into a scratch database and does not touch production data:
+
+```bash
+cd ~/dlams/dlams-deployment
+f=~/dlams-backups/<a dump file>.dump
+docker exec dlams-db sh -c 'createdb -U "$POSTGRES_USER" restore_test'
+docker exec -i dlams-db sh -c 'pg_restore -U "$POSTGRES_USER" -d restore_test --no-owner' < "$f"
+docker exec dlams-db sh -c 'psql -U "$POSTGRES_USER" -d restore_test -c "select count(*) from users;"'
+docker exec dlams-db sh -c 'dropdb -U "$POSTGRES_USER" restore_test'
+```
+
+The count should match the number of users on the site.
+
+**Restore for real** (this replaces the production database with the dump):
+
+```bash
+cd ~/dlams/dlams-deployment
+docker compose stop api
+docker exec dlams-db sh -c 'dropdb -U "$POSTGRES_USER" "$POSTGRES_DB" && createdb -U "$POSTGRES_USER" "$POSTGRES_DB"'
+docker exec -i dlams-db sh -c 'pg_restore -U "$POSTGRES_USER" -d "$POSTGRES_DB" --no-owner' < ~/dlams-backups/<dump file>.dump
+docker compose start api
+```
+
+The dump includes Alembic's version table, so the API's start-up migration
+resumes from the schema the dump was taken at.
+
+Not covered: point-in-time recovery, and the dump is only as recent as the
+last run. Re-enter anything added since the last backup.
+
+### Demo account
+
+> **Outdated.** These steps describe the earlier design (an ordinary
+> `demo-user` with a `demo` grant from your main account). Demo accounts are
+> becoming an admin-assigned `demo` role that owns its own collection and can
+> only make `GET` requests; see `DLAMS-PLAN.md` ("Next up", items 1 and 2) and
+> `docs/decisions.md`. Do not provision with these steps or share the demo
+> link until that lands, and this section is rewritten.
+
+The public demo is a `demo-user` account holding a `demo` grant on one curated
+collection that your main account owns. Its credentials are public by design,
+so give it a password you use nowhere else.
+
+A demo account is meant to be read-only at the API: the only requests that
+should succeed for it are `GET`s (plus signing in and out). A visitor will
+eventually be able to use the app as if it were a full account, but their
+edits are applied only in their own browser and never reach the API. That
+browser-local editing is not built yet. Today the API enforces this only
+inside the demo collection (writes there return HTTP 403); see "Known gap"
+below for what is not enforced.
+
+Provision it once on production, signed in as the account that will own the
+demo collection (your main account, which is also the admin if you have only
+one):
+
+1. **Create the invitation.** Use "Invite someone" in the sidebar and copy the
+   link. Open it in a private browser window and register `demo-user` with the
+   public demo password.
+2. **Create the collection.** Back in your own session, create a collection
+   (for example "Retro game shelf", type video game) and add content that
+   looks like a real collection: roughly 10 to 15 games across 3 or 4
+   consoles, a mix of conditions, some completed, some with a last-played
+   date, and at least one console with two editions.
+3. **Note the collection ID.** It is the `collection` value in the page URL
+   when that collection is selected (`/?collection=<id>`).
+4. **Grant `demo` access.** The grant screen is not built yet, so call the
+   API. Replace `SITE` with the site's address; the password is read without
+   echoing and the session cookie is kept in a temporary file:
+
+   ```bash
+   SITE=https://your-site.example
+   read -rs PW   # type your own password, press Enter
+   printf '{"username":"YOUR_USERNAME","password":"%s"}' "$PW" \
+     | curl -sS -c /tmp/dlams-jar -H 'Content-Type: application/json' \
+         -d @- "$SITE/api/login"
+   unset PW
+   curl -sS -b /tmp/dlams-jar -H 'Content-Type: application/json' \
+     -d '{"username":"demo-user","mode":"demo"}' \
+     "$SITE/api/collections/COLLECTION_ID/grants"
+   rm /tmp/dlams-jar
+   ```
+
+   A successful grant returns `{"user_id":...,"username":"demo-user","mode":"demo"}`.
+5. **Verify as the visitor.** In a private window, sign in as `demo-user`.
+   You should see exactly one collection, with the read-only notice and no
+   add, edit, or delete controls, and your private collections should not
+   appear.
+
+Things to know:
+
+- **Taking it down.** An admin can deactivate `demo-user` from "Manage users"
+  at any time and reactivate it later. Deleting the grant
+  (`DELETE /collections/<id>/grants/<user_id>`) removes access without
+  touching the account.
+- **Changing the demo password.** There is no password-change screen. Rotating
+  it today means a database update on the host; record the procedure in
+  `.private/ops-notes.md` if you do it.
+- **Known gap, do not share the demo link until closed.** `demo-user` is an
+  ordinary account, so with the public password a visitor can still create
+  collections and items of their own through the API, which breaks the
+  rule above. Enforcing "GET only for demo accounts" is tracked in
+  `DLAMS-PLAN.md`.
+- **No backups.** The curated demo content lives only in the production
+  database, so keep a list of the games and consoles you entered somewhere
+  you can re-enter them from.
+
 The production Nginx `/api/` proxy is configured to strip the prefix before
 forwarding to FastAPI, and the production auth cookie is configured as
 Secure. These source changes still need deployment and a live end-to-end check;
