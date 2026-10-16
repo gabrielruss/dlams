@@ -1,10 +1,35 @@
 # DLAMS plan
 
-Last updated: 2026-10-14
+Last updated: 2026-10-15
 
 The current state of the project. For why things are the way they are, see
 [`docs/decisions.md`](./docs/decisions.md). For the full history up to
 2026-10-09, see [`docs/archive/`](./docs/archive/).
+
+## Where we left off (2026-10-15)
+
+Start here in a new session. This block is rewritten at the end of a session,
+never appended to.
+
+- **State.** The demo role is built and tested but not deployed (Next up,
+  item 1). The owner commits and pushes everything themselves, so run
+  `git status` before assuming what is committed.
+- **Before the owner pushes:** run `dlams-deployment/scripts/backup-db.sh` on
+  the Pi. The push applies migration `c91e5f7a2b64` to production.
+- **After the deploy:** on a throwaway account, use "Make demo" in "Manage
+  users", then confirm a write is refused (steps in
+  `dlams-deployment/README.md`, "Demo account"). Only then provision
+  `demo-user` (item 2). Do not share the demo link before that.
+- **Next code work, in order:** demo sign-in on the login page (item 3), the
+  mobile styling pass (item 4, needs the owner's go-ahead and scope), CI plus
+  light frontend tests (item 5, needs approval to install packages), README
+  and screenshots (item 6).
+- **Waiting on the owner:** which URL the demo lives at, styling scope, and
+  package approval for the test tooling.
+- **How the owner likes to work:** one decision per message; confirm when a
+  reply is ambiguous or has two parts. For commands on the Pi, give one
+  command per code block and wait for the output (multi-line pastes have
+  garbled in the owner's terminal). Do not offer to commit.
 
 ## How to use this document
 
@@ -26,7 +51,8 @@ the code. Before finishing: update this file only when one of these changed.
   what result to expect.
 
 Do not log routine refactors; git history covers them. End planning replies
-with one concrete next step.
+with one concrete next step. At the end of a session, rewrite "Where we left
+off".
 
 **This repository is public.** Never put secrets, credentials, hostnames of
 real infrastructure, or server layout in tracked files. Operational and
@@ -59,9 +85,12 @@ workflow on a self-hosted runner (`.github/workflows/deploy.yml`).
 **Implemented and deployed**
 
 - **Accounts:** invite-only registration (admin-issued, single-use, 7-day
-  invitations), login/logout with an HTTP-only cookie, global roles `user` and
-  `admin`, and a CLI to bootstrap the first admin
-  (`python -m app.auth.bootstrap_admin`).
+  invitations, created from a sidebar drawer), login/logout with an HTTP-only
+  cookie, global roles `user` and `admin`, admin user management
+  (`/admin/users`: deactivate and reactivate), and a CLI to bootstrap the
+  first admin (`python -m app.auth.bootstrap_admin`).
+- **Operations:** nightly database backup on the host with a tested restore
+  (see Known issues for its limits).
 - **Collections and access:** users own multiple typed collections (type
   `video_game` only). Owners grant `edit`, `view-only`, or `demo` access.
   Persistent writes are owner or `edit` grantee only; global admin has no
@@ -72,22 +101,33 @@ workflow on a self-hosted runner (`.github/workflows/deploy.yml`).
   for forms, URL-backed collection selection, TanStack Query for all server
   state.
 
+**Built and tested, not deployed**
+
+- **Demo role:** a `demo` global role, "Make demo" and "Make regular" in
+  "Manage users", and a check in `get_current_user` that rejects every
+  non-`GET`/`HEAD`/`OPTIONS` request from a demo account. The UI hides write
+  controls from demo accounts. Migration `c91e5f7a2b64` widens the role
+  constraint.
+
 **Not implemented**
 
 - Collection grant management UI.
-- Browser-local editing for `demo` access (demo collections are read-only in
-  the UI today).
-- A provisioned demo account on production (the procedure is documented in
-  `dlams-deployment/README.md`; it has not been run).
-- Demo login prefill on the login page.
+- Browser-local editing for demo accounts (a demo account sees a read-only UI
+  today).
+- A provisioned demo account on production (the `demo` role is built but not
+  deployed; the procedure is in `dlams-deployment/README.md` and has not been
+  run).
+- Demo sign-in on the login page.
 - Item types other than video games.
 
 **Verification baseline**
 
-- API (2026-10-12): 31 unit tests pass (run on Python 3.13 in a scratch venv,
-  not the project's 3.12); PostgreSQL SQL generates for the `is_active`
-  migration. The migration has not been applied to a database yet.
-- UI (2026-10-12): `npm run build` and full `npm run lint` pass.
+- API (2026-10-15): 41 unit tests pass (run on Python 3.13, the project's version, in a
+  scratch venv outside the repo), including a check that every write route requires
+  a signed-in user; PostgreSQL SQL generates for migration `c91e5f7a2b64`,
+  which has not been applied to a database yet.
+- UI (2026-10-15): `npm run build`, `tsc -b`, and full `npm run lint` pass.
+  The demo role switch and demo read-only UI have not been tried in a browser.
 - Production routing and the automated deploy pipeline were exercised
   end to end by the owner (2026-10-09).
 - Manual browser pass (2026-10-12, owner-reported): collection and
@@ -98,7 +138,8 @@ workflow on a self-hosted runner (`.github/workflows/deploy.yml`).
 
 The next goal, set 2026-10-14: a state good enough to link from the owner's
 portfolio site and show to potential employers, reached as soon as possible.
-Items 1 to 5 under "Next up" are the path; the rest waits. See `docs/decisions.md` for why.
+Items 1 to 6 under "Next up" are the path; the rest waits. See
+`docs/decisions.md` for why.
 
 Done when all of these are true:
 
@@ -120,36 +161,29 @@ Done when all of these are true:
   with its credentials is rejected, checked by hand).
 
 Explicitly not required for this milestone: grant management UI,
-browser-local demo editing, the demo sharing walkthrough, further item types, user deletion, automated
-backups, and the deferred API dependency upgrades.
+browser-local demo editing, the demo sharing walkthrough, further item types,
+user deletion, off-device backups, and the deferred API dependency upgrades.
 
 ## Next up
 
 In order. Items 1 to 6 are the path to the portfolio milestone.
 
-0. **Install and test database backups (side task, before the next migration
-   deploys).** Run the script once by hand on the host, schedule it with
-   cron, set an off-device destination (record it in
-   `.private/ops-notes.md`), and do the scratch-database restore test
-   described in the README. Not required for the portfolio milestone, but it
-   makes every later migration deploy low-risk.
-1. **Demo accounts: role, admin role switch, API read-only.** Add the `demo`
-   role (a migration widening the role check constraint), an admin-only
-   action in "Manage users" that switches an existing account between
-   `user` and `demo` (never to or from `admin`, and not your own account),
-   and one check in `get_current_user` that returns 403 for any request other
-   than `GET`, `HEAD`, or `OPTIONS` from a demo account. Tests cover it, and
-   a write attempt with a demo account's credentials is rejected, checked by
-   hand. This must be in place before the demo link is shared. See
-   `docs/decisions.md`.
+1. **Deploy the demo role.** Built 2026-10-15 and tested (see Current
+   status), not deployed: the `demo` role (migration `c91e5f7a2b64`, which
+   widens the role check constraint), "Make demo" and "Make regular" on each
+   row in "Manage users", and the GET-only check in `get_current_user`. Take a
+   backup with `dlams-deployment/scripts/backup-db.sh` first, push, then try
+   the switch on a throwaway account and confirm a write is refused (steps in
+   `dlams-deployment/README.md`, "Demo account"). This must be in place
+   before the demo link is shared. See `docs/decisions.md`.
 2. **Provision the demo account and its content.** Admin user management is
    deployed (2026-10-14, owner-reported working, including migration
-   `b7d4a1c93e52`). Once item 1 exists: create an invitation, register
+   `b7d4a1c93e52`). Once item 1 is deployed: create an invitation, register
    `demo-user` as an ordinary user, sign in as it and enter a real-looking
    collection through the normal UI, then switch it to `demo` in "Manage
-   users". Switch it back to `user` to edit later. The "Demo account" steps
-   in `dlams-deployment/README.md` predate this design and are outdated; they
-   get rewritten once item 1 lands. Deleting a user is deferred.
+   users". Switch it back to `user` to edit later. The steps are in
+   `dlams-deployment/README.md` ("Demo account"). Redo the backup restore test
+   once the content exists. Deleting a user is deferred.
 3. **Demo sign-in on the login page.** A "Try the demo" control that signs in
    as the demo user without typing credentials. Demo credentials are public
    by design and carry no authority (see `docs/decisions.md`).
@@ -194,17 +228,16 @@ After the milestone:
 
 ## Known issues
 
-- Production has no backups until the script is installed (found
-  2026-10-14): `dlams-deployment/scripts/backup-db.sh` and a "Database
-  backups" section in `dlams-deployment/README.md` exist, but the script has
-  not been run against a real database, scheduled on the host, or restore
-  tested, and no off-device destination is set. See "Next up".
-- Demo accounts are not API read-only yet (found 2026-10-14): the rule is
-  that a demo account can make only `GET` requests. Today there is no `demo`
-  role, so `demo-user` would be an ordinary user and anyone with the public
-  password could create collections and items of their own and persist them.
-  Other users' data stays safe. Fixed by the first item in "Next up". An
-  admin can deactivate the account at any time.
+- Backups stay on the Pi (decided 2026-10-15): a nightly dump runs at 03:15
+  and keeps 14 days in `~/dlams-backups` on the host, but there is no
+  off-device copy, so losing the Pi's storage loses the backups with the
+  database. Accepted for now. The restore test passed on 2026-10-15 against a
+  database with 2 users and no collections or games; redo it once the demo
+  content exists.
+- Demo accounts are not read-only on production yet (found 2026-10-14): the
+  role, the API check, and the admin switch are built and tested but not
+  deployed. Until they are, an account with a public password is an ordinary
+  user. Do not share the demo link before deploying item 1.
 - Dependency audit (2026-10-12): `npm audit` on `dlams-ui` reports 0
   vulnerabilities. `pip-audit` on `dlams-fastapi/requirements.txt` reports 27
   advisories in 10 packages (starlette, cryptography, pyasn1, ecdsa, anyio,
@@ -214,6 +247,12 @@ After the milestone:
   from the API). Several have no fixed version (`ecdsa`, `python-jose`).
   Upgrading is deferred (decided 2026-10-12) and is a separate, explicitly
   requested change because FastAPI 0.115.12 requires `starlette<0.47`.
+- `make test` needs `dlams-fastapi/.venv`, which does not exist on the
+  owner's machine. Backend tests have been run in a scratch virtual
+  environment outside the repo: `python3 -m venv <dir>`, then
+  `<dir>/bin/pip install -r dlams-fastapi/requirements.txt`, then from
+  `dlams-fastapi/`: `SECRET_KEY=test <dir>/bin/python -m unittest discover -s
+  tests`. Creating the venv installs packages, so ask first.
 - There is no frontend test framework. Backend tests use `unittest`; Ruff and
   pytest are not configured.
 - Backend debt: `video_games_routes.py` combines console and game routes and
@@ -239,7 +278,7 @@ After the milestone:
   decide whether the demo lives at the main domain or a dedicated subdomain.
 - Deferred: what should deleting a user do to the collections, consoles, and
   games they own, and to invitations they issued? Decide before building
-  delete; production has no backups yet, so a hard delete cannot be undone.
+  delete; backups exist only on the Pi, so a hard delete is hard to undo.
 - Should collection owners, not only admins, be able to invite someone with a
   grant on their own collection attached?
 - Is browser local storage enough for the first demo version? If the overlay

@@ -1,6 +1,7 @@
 import { queryOptions } from "@tanstack/react-query"
 
 import type { AdminUser } from "@/types/adminUsers"
+import type { AssignableRole } from "@/types/user"
 import { apiRequest } from "./client"
 
 export const adminUserKeys = {
@@ -13,6 +14,11 @@ export const adminUsersApi = {
   deactivate: (userId: number) =>
     apiRequest<AdminUser>(`/admin/users/${userId}/deactivate`, {
       method: "POST",
+    }),
+  setRole: (userId: number, role: AssignableRole) =>
+    apiRequest<AdminUser>(`/admin/users/${userId}/role`, {
+      method: "PUT",
+      body: JSON.stringify({ role }),
     }),
   activate: (userId: number) =>
     apiRequest<AdminUser>(`/admin/users/${userId}/activate`, {

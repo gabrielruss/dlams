@@ -1,4 +1,5 @@
 import type { Collection } from "@/types/collections"
+import { useCurrentUser } from "@/components/auth/useAuthQueries"
 import { canWriteCollection } from "@/lib/permissions"
 import ConsoleManager from "./ConsoleManager"
 import GameManager from "./GameManager"
@@ -11,7 +12,8 @@ interface VideoGamesWorkspaceProps {
 function VideoGamesWorkspace({ collection }: VideoGamesWorkspaceProps) {
   const { consoles, games, isPending, error } =
     useVideoGamesCollection(collection.id)
-  const canWrite = canWriteCollection(collection.access)
+  const { data: user } = useCurrentUser()
+  const canWrite = canWriteCollection(collection.access, user)
 
   if (isPending) return <p>Loading collection items...</p>
 

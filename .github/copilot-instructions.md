@@ -24,15 +24,18 @@ Applies across the DLAMS workspace. Project-local conventions take precedence wh
 - The shadcn CLI emits `import { cn } from "cn"` and installs the `cn`
   package (a clsx + tailwind-merge replacement). Leave generated imports
   alone; `@/lib/utils` also works and both coexist (decided 2026-10-14).
-- Do not install packages or run the shadcn CLI to add components without
-  asking the owner first. When a component requires a dependency, explain
-  which package is needed and wait for the owner to install/approve it before
-  adding that component or validating a build that depends on it.
+- Do not install packages or run the shadcn CLI. When a shadcn component is
+  needed, tell the owner which one and give the command
+  (`npx shadcn@latest add <component>`, from `dlams-ui/`); the owner runs it.
+  Do not write the component file by hand as a substitute. When a component
+  requires a dependency, explain which package is needed and wait for the
+  owner to install it before wiring the component or validating a build that
+  depends on it.
 - TanStack Query v5 is installed and is the standard for server state.
 - Backend tests use `unittest`. Write new tests with `unittest` until pytest is adopted. Do not add pytest-only features.
 - Ruff and pytest are not configured. Never claim they were run. Adopting them is a separate, focused tooling change, not part of a feature.
 - Redux is not used. Do not add it.
-- Backend runs on Python 3.12. Check project config before using newer language features.
+- Backend runs on Python 3.13 (see `dlams-fastapi/Dockerfile`). Check project config before using newer language features.
 
 ## Commands
 
@@ -97,10 +100,9 @@ cached copy.
 - Prefer the existing shadcn-style components in `src/components/ui/`.
   shadcn/ui components are maintained in the project source; do not expect a
   `shadcn` runtime package. Add or adapt components using the project's
-  established shadcn conventions. When adding a shadcn component, use the
-  shadcn CLI (`npx shadcn@latest add <component>`) and adapt its generated
-  source to the existing project utilities and conventions rather than
-  hand-rolling a parallel primitive.
+  established shadcn conventions. When a shadcn component is needed, the owner
+  adds it with the shadcn CLI (see above); review its generated source and
+  wire it up rather than hand-rolling a parallel primitive.
 - Functional components and hooks. Strict TypeScript: no `any` or unsafe casts; type API data and props explicitly.
 - Prefer derived values over duplicated state. Use effects only to sync with external systems.
 - Do not add `void` solely to discard a promise unless it provides a concrete
@@ -224,5 +226,8 @@ Update `DLAMS-PLAN.md` when status, next steps, or known issues change. Update `
 
 ## Git
 
-- Do not commit unless the owner explicitly asks for a commit.
-- Leave changes uncommitted for review by default.
+- The owner commits and pushes everything themselves. Do not commit or push,
+  and do not offer to.
+- Leave changes uncommitted for review. A push to `main` deploys to
+  production, so say what the owner should do before pushing (for example a
+  database backup before a migration).

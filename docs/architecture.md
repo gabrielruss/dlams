@@ -1,6 +1,6 @@
 # DLAMS architecture
 
-Last updated: 2026-10-14
+Last updated: 2026-10-15
 
 How the system is put together right now. For status and next steps see
 [`DLAMS-PLAN.md`](../DLAMS-PLAN.md); for why things are this way see
@@ -104,9 +104,15 @@ and served by `nginx:alpine`, database `postgres:15` (development uses 14).
 
 Two independent layers:
 
-1. **Global role** on the user: `user` or `admin`. `admin` can issue
-   invitations and activate or deactivate users (`require_admin`). Admin
-   confers **no** access to other users' collections.
+1. **Global role** on the user: `user`, `admin`, or `demo`. `admin` can
+   issue invitations, activate or deactivate users, and switch an account
+   between `user` and `demo` (`require_admin`). Admin confers **no** access
+   to other users' collections. `demo` accounts are read-only at the API:
+   `get_current_user` rejects any request that is not `GET`, `HEAD`, or
+   `OPTIONS` with 403, so every authenticated write route is covered in one
+   place. A test fails if a write route does not depend on it (only
+   `/register`, `/login`, and `/logout` are exempt). The UI also hides write
+   controls from demo accounts.
 2. **Per-collection access**, resolved in `app/collections/permissions.py`:
 
    | Access | How it arises | Reads | Persistent writes |
@@ -133,7 +139,7 @@ users ─┬─< collections ─┬─< collection_grants >── users
 
 | Table | Notes |
 | --- | --- |
-| `users` | `username` (unique), bcrypt `hashed_password`, optional unique `email`, `role` (`user`/`admin`, check constraint), `is_active`, `created_at`. |
+| `users` | `username` (unique), bcrypt `hashed_password`, optional unique `email`, `role` (`user`/`admin`/`demo`, check constraint), `is_active`, `created_at`. |
 | `registration_invitations` | `token_hash` (unique), `created_by_id` (RESTRICT), `expires_at`, `redeemed_at`. |
 | `collections` | `owner_id` (CASCADE), `name`, `type` (check constraint; only `video_game`). |
 | `collection_grants` | One row per (collection, user), unique; `mode` is `edit`, `view-only`, or `demo`. Cascades from both collection and user. |
@@ -157,7 +163,7 @@ the edge).
 | --- | --- | --- |
 | Auth | `POST /register`, `POST /login`, `POST /logout`, `GET /verify` | public / signed-in |
 | Invitations | `POST /invitations` | admin |
-| Admin users | `GET /admin/users`, `POST /admin/users/{id}/deactivate`, `POST /admin/users/{id}/activate` | admin; no self-deactivation |
+| Admin users | `GET /admin/users`, `POST /admin/users/{id}/deactivate`, `POST /admin/users/{id}/activate`, `PUT /admin/users/{id}/role` (`user` or `demo`) | admin; not on yourself, and never on or to `admin` |
 | Collections | `POST /collections`, `GET /collections`, `GET /collections/{id}` | signed-in; list includes owned and granted |
 | Grants | `GET`, `POST`, `PUT`, `DELETE` under `/collections/{id}/grants` | collection owner |
 | Video games | `/collections/{id}/consoles`, `/console-labels`, `/games` (list, create, update, delete) | read: any access; write: owner or `edit` |

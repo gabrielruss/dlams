@@ -85,7 +85,7 @@ class RegistrationRoleTests(unittest.TestCase):
             User(
                 username="visitor",
                 hashed_password="hashed-password",
-                role="demo",
+                role="superuser",
             )
         )
 

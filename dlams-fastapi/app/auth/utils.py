@@ -21,6 +21,9 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
+# Requests that only read. Demo accounts may make nothing else.
+SAFE_METHODS = frozenset({"GET", "HEAD", "OPTIONS"})
+
 def get_user_by_username(username: str, db: Session) -> Optional[User]:
     """ Get user from db by username """
     return db.query(User).filter(User.username == username).first()
@@ -65,6 +68,12 @@ def get_current_user(request: Request, db: Session = Depends(get_db)):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Account is deactivated"
+        )
+
+    if user.role == UserRole.DEMO.value and request.method not in SAFE_METHODS:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Demo accounts are read-only"
         )
 
     return user

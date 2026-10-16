@@ -7,6 +7,16 @@ replaces it is named. Proposals and open questions live in
 
 ## Repository and delivery
 
+### Database backups stay on the host — 2026-10-15
+- A nightly `pg_dump` (`dlams-deployment/scripts/backup-db.sh`, 03:15, 14 days
+  kept) protects against a bad migration or an accidental delete. It is not
+  copied off the Pi.
+- Decision: accept the Pi as a single point of failure for now. An off-device
+  copy (pulling from the owner's Mac, pushing from the Pi, or cloud storage)
+  is deferred, not rejected; the script already supports a push destination.
+- Reason: the data is a small, single-owner collection that can be re-entered,
+  and the extra moving part was not worth it yet.
+
 ### Portfolio-ready checkpoint before further features — 2026-10-14
 - The next goal is a state the owner can link from a portfolio site and show
   to potential employers, reached as soon as possible. It is defined in
@@ -105,7 +115,8 @@ replaces it is named. Proposals and open questions live in
   (admin-created, GET-only), and the demo collection is owned by the demo
   account instead of being a main-account collection with a `demo` grant. The
   `demo` grant mode is now redundant; whether to remove it is an open
-  question in the plan. Not built yet.
+  question in the plan. Built 2026-10-15 (role, admin switch, and the API
+  check); deployment pending.
 
 ### Admins can deactivate a user; delete is deferred — 2026-10-12
 - Admin user management deactivates and reactivates accounts. A deactivated

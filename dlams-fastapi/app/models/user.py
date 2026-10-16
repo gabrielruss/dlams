@@ -15,6 +15,7 @@ class UserRole(str, Enum):
 
     USER = "user"
     ADMIN = "admin"
+    DEMO = "demo"
 
 
 class User(Base):
@@ -22,7 +23,7 @@ class User(Base):
     __tablename__ = "users"
     __table_args__ = (
         CheckConstraint(
-            "role IN ('user', 'admin')",
+            "role IN ('user', 'demo', 'admin')",
             name="ck_users_role",
         ),
     )

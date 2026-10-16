@@ -4,7 +4,7 @@ This file contains the Pydantic models for the authentication module.
 """
 
 from datetime import datetime
-from typing import Optional
+from typing import Literal, Optional
 from pydantic import BaseModel, Field
 from app.models import UserRole
 
@@ -60,6 +60,15 @@ class AdminUserResponse(BaseModel):
     class Config:
         """ Allows Pydantic to work with SQLAlchemy models """
         from_attributes = True
+
+
+class AdminUserRoleUpdate(BaseModel):
+    """Roles an admin can assign here. `admin` is never assignable."""
+
+    role: Literal["user", "demo"]
+
+    class Config:
+        extra = "forbid"
 
 
 class AdminUserListResponse(BaseModel):

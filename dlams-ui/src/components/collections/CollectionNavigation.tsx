@@ -2,6 +2,7 @@ import { useState } from "react"
 import { useForm } from "react-hook-form"
 import { Plus } from "lucide-react"
 
+import { Button } from "@/components/ui/button"
 import {
   Drawer,
   DrawerClose,
@@ -9,6 +10,8 @@ import {
   DrawerHeader,
   DrawerTitle,
 } from "@/components/ui/drawer"
+import { useCurrentUser } from "@/components/auth/useAuthQueries"
+import { isDemo } from "@/lib/permissions"
 import CollectionStats from "./CollectionStats"
 import useCollections from "./useCollections"
 
@@ -20,6 +23,7 @@ function CollectionNavigation() {
     collectionsQuery,
     createCollectionMutation,
   } = useCollections()
+  const { data: user } = useCurrentUser()
   const [isCreateDrawerOpen, setIsCreateDrawerOpen] = useState(false)
   const form = useForm<{ name: string }>({ defaultValues: { name: "" } })
   const newCollectionName = form.watch("name")
@@ -47,19 +51,24 @@ function CollectionNavigation() {
       aria-label="Collections"
       className="flex min-h-0 flex-1 flex-col overflow-hidden"
     >
-      <div className="flex shrink-0 items-center justify-between gap-2 p-3 pb-2">
-        <h2 className="text-sm font-semibold">Collections</h2>
-        <button
-          className="inline-flex h-9 items-center gap-2 rounded-md bg-primary px-3 text-sm font-medium text-primary-foreground hover:bg-primary/90"
-          type="button"
-          onClick={() => {
-            createCollectionMutation.reset()
-            setIsCreateDrawerOpen(true)
-          }}
-        >
-          <Plus aria-hidden="true" className="size-4" />
-          New collection
-        </button>
+      <div className="flex shrink-0 flex-col gap-1 p-3 pb-2">
+        <h2 className="px-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+          Collections
+        </h2>
+        {!isDemo(user) && (
+          <Button
+            className="w-full justify-start"
+            variant="ghost"
+            type="button"
+            onClick={() => {
+              createCollectionMutation.reset()
+              setIsCreateDrawerOpen(true)
+            }}
+          >
+            <Plus aria-hidden="true" />
+            New collection
+          </Button>
+        )}
       </div>
 
       {collectionsQuery.isError && (

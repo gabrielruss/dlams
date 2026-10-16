@@ -44,7 +44,7 @@ class UserDeactivationTests(unittest.TestCase):
         token = jwt.encode(
             {"sub": username, "exp": expires}, SECRET_KEY, algorithm=ALGORITHM
         )
-        return SimpleNamespace(cookies={"access_token": token})
+        return SimpleNamespace(cookies={"access_token": token}, method="GET")
 
     def test_new_users_are_active_by_default(self) -> None:
         self.assertTrue(self.member.is_active)
