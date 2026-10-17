@@ -86,6 +86,24 @@ replaces it is named. Proposals and open questions live in
 
 ## Accounts and access
 
+### All sharing is read-only — 2026-10-16
+- Sharing a collection gives another user read access and nothing else. There
+  is no `edit` or `demo` grant: the collection owner is the only user who ever
+  writes to it. A grant is just "this user can read this collection".
+- Demo behavior now comes only from the `demo` account role (see "Demo
+  accounts: an admin-assigned role, GET-only at the API"), so the `demo` grant
+  mode was redundant and is removed with `edit`.
+- Reason: collaborative editing was costing more complexity than it earned (a
+  second write path, mode management, more test cases, a grants screen with a
+  mode control), and it blocked simpler ownership of related data such as
+  console labels.
+- Consequences: the "update a grant" endpoint and the `mode` column go away.
+  The grants screen becomes a "Shared with" list: add a username, remove a
+  user. A demo account's sharing form needs no special case.
+- **Supersedes** the grant modes in "Collection ownership and grants"
+  (2026-10-04) and resolves the open question about the `demo` grant mode.
+  Admins still have no implicit access to collections they do not own.
+
 ### Demo accounts: an admin-assigned role, GET-only at the API — 2026-10-14
 - A demo account is a user whose role is `demo` (alongside `user` and
   `admin`). Only an admin can set it, from admin user management, by changing
@@ -188,6 +206,8 @@ replaces it is named. Proposals and open questions live in
 - **Partly superseded 2026-10-14** by "Demo accounts: an admin-assigned role,
   GET-only at the API": a `demo` role returns, and the demo account owns the
   demo collection.
+- **Superseded 2026-10-16** by "All sharing is read-only": the `edit`,
+  `view-only`, and `demo` grant modes no longer exist.
 
 ### Demo behavior — 2026-10-02
 - Demo credentials are public and carry no authority; server-side
@@ -197,6 +217,41 @@ replaces it is named. Proposals and open questions live in
   become database writes.
 
 ## Domain model
+
+### Console labels belong to the owner; items belong to collections — 2026-10-16
+- A console label (a platform name such as `Xbox 360`) belongs to a user, the
+  owner of the collections that use it, and is reused across that user's
+  collections. Names are unique per user ignoring case, enforced by a database
+  index, and matched ignoring case and surrounding spaces.
+- Consoles and games each have their own `collection_id`, and both require a
+  console label. Owner-scoped labels are safe because only owners write (see
+  "All sharing is read-only"), so no other user can attach to or change a
+  label.
+- Console and game forms share one searchable dropdown of the signed-in
+  user's labels (the shadcn Combobox, installed by the owner on 2026-10-16;
+  it added `@base-ui/react` and `radix-ui`). It is labeled "Console label" on
+  console forms and "Console" on game forms. It only selects from a list, so
+  whenever what you type matches no label exactly it also offers an
+  `Add "name"` row, the "creatable" pattern in Base UI's docs. A collection
+  with no consoles, such as "Games to sell", can still hold games for any
+  platform.
+- A label is deleted only when no console and no game, in any of the owner's
+  collections, uses it. Deleting or relabelling the last console no longer
+  fails while games use its label.
+- The label list is per user (`GET /console-labels`), not per collection. A
+  console's game count counts only games in its own collection.
+- Deferred, not rejected: a rename-label action (the link from items to
+  labels is a real foreign key, so a rename would update every item), and a
+  small screen to manage labels.
+- Migration `b8e1d6a42c07` drops and recreates the grants, labels, consoles,
+  and games tables, deleting any rows in them. The owner confirmed there was
+  no data worth keeping, and a database backup is the safety net.
+- **Supersedes** from "Video-game rules" (2026-10-05): labels are scoped per
+  collection, a console must exist before a game, and the last console cannot
+  be deleted or relabelled while games use its label. It also replaces three
+  same-day versions (console optional; console required but per-collection
+  labels; labels per collection with inline create) that were tried in the dev
+  stack and dropped.
 
 ### Categories, collections, and item types — 2026-10-05
 - A **collection** is a user-owned container, separate from the category
@@ -216,8 +271,8 @@ replaces it is named. Proposals and open questions live in
 - **Game records** store one console label (not a device), a `name`, a
   `condition`, an optional `last_played` date, and a `completed` boolean
   defaulting to false. Photos are deferred.
-- Console must exist before a game for its label. The game dropdown shows
-  each distinct label once.
+- ~~Console must exist before a game for its label.~~ Superseded 2026-10-16
+  (see above). The game dropdown shows each distinct label once.
 - Condition is a fixed list: `Loose`, `CIB`, `New`, `Item & Box`.
 - Deleting a console edition is allowed while another edition of the same
   label remains; deleting the last edition is blocked while games use the

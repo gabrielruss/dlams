@@ -31,5 +31,8 @@ Rules that are easy to miss:
   production.
 - Ask before installing packages or changing styling. When a shadcn component
   is needed, give the owner the install command and wait; do not run the CLI
-  or write the component file yourself.
+  or write the component file yourself. Never edit a file the shadcn CLI
+  generated in `dlams-ui/src/components/ui/`; adapt it from the consuming
+  component instead (the one existing local edit is the `container` prop in
+  `combobox.tsx`).
 - Do not claim a check passed unless it was run.

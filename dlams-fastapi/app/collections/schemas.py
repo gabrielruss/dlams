@@ -1,8 +1,8 @@
-"""Request and response schemas for collections and access grants."""
+"""Request and response schemas for collections and read-only sharing."""
 
 from pydantic import BaseModel, Field
 
-from app.models.collection import CollectionAccess, CollectionType, GrantMode
+from app.models.collection import CollectionAccess, CollectionType
 
 
 class CollectionCreate(BaseModel):
@@ -20,17 +20,11 @@ class CollectionResponse(BaseModel):
 
 class GrantCreate(BaseModel):
     username: str = Field(min_length=1)
-    mode: GrantMode
-
-
-class GrantUpdate(BaseModel):
-    mode: GrantMode
 
 
 class GrantResponse(BaseModel):
     user_id: int
     username: str
-    mode: GrantMode
 
 
 class GrantListResponse(BaseModel):

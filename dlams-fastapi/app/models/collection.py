@@ -1,4 +1,4 @@
-"""Collection models and collection-level access modes."""
+"""Collection models and the access levels a user can have to one."""
 
 from enum import Enum
 
@@ -14,26 +14,16 @@ from app.db import Base
 
 
 class CollectionAccess(str, Enum):
-    """Access granted to a user for a collection."""
+    """A user's access to a collection: the owner writes, anyone shared reads."""
 
     OWNER = "owner"
-    EDIT = "edit"
     VIEW_ONLY = "view-only"
-    DEMO = "demo"
 
 
 class CollectionType(str, Enum):
     """Content type supported by a collection."""
 
     VIDEO_GAME = "video_game"
-
-
-class GrantMode(str, Enum):
-    """Modes that can be assigned on a collection grant."""
-
-    EDIT = "edit"
-    VIEW_ONLY = "view-only"
-    DEMO = "demo"
 
 
 class Collection(Base):
@@ -63,14 +53,10 @@ class Collection(Base):
 
 
 class CollectionGrant(Base):
-    """A user's access mode for a collection they do not own."""
+    """Read-only access to a collection for a user who does not own it."""
 
     __tablename__ = "collection_grants"
     __table_args__ = (
-        CheckConstraint(
-            "mode IN ('edit', 'view-only', 'demo')",
-            name="ck_collection_grants_mode",
-        ),
         UniqueConstraint(
             "collection_id",
             "user_id",
@@ -89,4 +75,3 @@ class CollectionGrant(Base):
         nullable=False,
         index=True,
     )
-    mode: Mapped[str] = mapped_column(String(20), nullable=False)

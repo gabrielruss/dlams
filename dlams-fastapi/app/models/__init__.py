@@ -5,7 +5,6 @@ from app.models.collection import (
     CollectionAccess,
     CollectionGrant,
     CollectionType,
-    GrantMode,
 )
 from app.models.video_games import (
     Console,
@@ -22,7 +21,6 @@ __all__ = [
     "CollectionType",
     "ConsoleLabel",
     "Game",
-    "GrantMode",
     "RegistrationInvitation",
     "VideoGameCondition",
     "User",

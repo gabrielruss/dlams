@@ -1,3 +1,6 @@
+import { useRef } from "react"
+import { Controller } from "react-hook-form"
+
 import {
   Drawer,
   DrawerClose,
@@ -10,6 +13,8 @@ import type {
 } from "@/types/videoGames"
 import { videoGameConditions } from "@/types/videoGames"
 import { isVideoGameCondition } from "./videoGameOptions"
+import ConsoleLabelCombobox from "./ConsoleLabelCombobox"
+import useConsoleLabels from "./useConsoleLabels"
 import useConsoleManager from "./useConsoleManager"
 
 interface ConsoleManagerProps {
@@ -36,6 +41,8 @@ function ConsoleManager({
     startNewConsole,
     deleteConsole,
   } = useConsoleManager({ collectionId })
+  const consoleLabelOptions = useConsoleLabels(canWrite)
+  const drawerRef = useRef<HTMLDivElement>(null)
   const label = form.watch("label")
 
   return (
@@ -60,7 +67,7 @@ function ConsoleManager({
             if (!open) resetForm()
           }}
         >
-          <DrawerContent>
+          <DrawerContent ref={drawerRef}>
             <DrawerHeader className="flex-row items-center justify-between border-b">
               <DrawerTitle className="text-xl">
                 {editingId === null ? "Add console" : "Edit console"}
@@ -80,20 +87,30 @@ function ConsoleManager({
                 onSubmit={form.handleSubmit(saveConsole)}
                 className="flex flex-col gap-4"
               >
-            <label className="flex flex-col gap-1 text-sm">
-              Console label
-              <input
-                className="h-9 rounded-md border bg-background px-3"
-                {...form.register("label", {
+            <div className="flex flex-col gap-1 text-sm">
+              <label htmlFor="console-label">Console label</label>
+              <Controller
+                control={form.control}
+                name="label"
+                rules={{
                   required: "Console label is required",
                   maxLength: {
                     value: 100,
                     message: "Console label must be 100 characters or fewer",
                   },
-                })}
-                autoFocus
+                }}
+                render={({ field }) => (
+                  <ConsoleLabelCombobox
+                    id="console-label"
+                    options={consoleLabelOptions}
+                    container={drawerRef}
+                    value={field.value}
+                    onChange={field.onChange}
+                    invalid={!!form.formState.errors.label}
+                  />
+                )}
               />
-            </label>
+            </div>
             {form.formState.errors.label && (
               <p role="alert" className="text-sm text-destructive">
                 {form.formState.errors.label.message}

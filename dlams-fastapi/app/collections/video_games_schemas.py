@@ -35,7 +35,6 @@ class ConsoleListResponse(BaseModel):
 class ConsoleLabelResponse(BaseModel):
     id: int
     name: str
-    game_count: int
 
 
 class ConsoleLabelListResponse(BaseModel):
@@ -45,7 +44,7 @@ class ConsoleLabelListResponse(BaseModel):
 class GameCreate(BaseModel):
     name: str = Field(min_length=1, max_length=200)
     condition: VideoGameCondition
-    console_label_id: int
+    console_label: str = Field(min_length=1, max_length=100)
     last_played: date | None = None
     completed: bool = False
 
@@ -53,7 +52,7 @@ class GameCreate(BaseModel):
 class GameUpdate(BaseModel):
     name: str = Field(min_length=1, max_length=200)
     condition: VideoGameCondition
-    console_label_id: int
+    console_label: str = Field(min_length=1, max_length=100)
     last_played: date | None = None
     completed: bool
 

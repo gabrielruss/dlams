@@ -16,6 +16,11 @@ export interface ConsoleRecord {
   game_count: number
 }
 
+export interface ConsoleLabel {
+  id: number
+  name: string
+}
+
 export interface ConsoleCreate {
   label: string
   edition: string | null
@@ -41,7 +46,7 @@ export interface VideoGameCollectionStats {
 export interface GameCreate {
   name: string
   condition: VideoGameCondition
-  console_label_id: number
+  console_label: string
   last_played: string | null
   completed: boolean
 }

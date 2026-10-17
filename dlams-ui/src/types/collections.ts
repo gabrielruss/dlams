@@ -1,4 +1,4 @@
-export type CollectionAccess = "owner" | "edit" | "view-only" | "demo"
+export type CollectionAccess = "owner" | "view-only"
 export const collectionTypes = ["video_game"] as const
 export type CollectionType = (typeof collectionTypes)[number]
 export const defaultCollectionType = collectionTypes[0]

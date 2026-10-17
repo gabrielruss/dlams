@@ -20,7 +20,6 @@ from app.models import (
     Collection,
     CollectionAccess,
     CollectionGrant,
-    GrantMode,
     User,
     UserRole,
 )
@@ -53,13 +52,9 @@ class CollectionPermissionTests(unittest.TestCase):
         self.db.close()
         self.engine.dispose()
 
-    def add_grant(self, user: User, mode: GrantMode) -> None:
+    def add_grant(self, user: User) -> None:
         self.db.add(
-            CollectionGrant(
-                collection_id=self.collection.id,
-                user_id=user.id,
-                mode=mode.value,
-            )
+            CollectionGrant(collection_id=self.collection.id, user_id=user.id)
         )
         self.db.commit()
 
@@ -85,43 +80,34 @@ class CollectionPermissionTests(unittest.TestCase):
             self.collection,
         )
 
-    def test_edit_grant_can_read_and_write(self) -> None:
-        self.add_grant(self.reader, GrantMode.EDIT)
+    def test_shared_user_can_read_but_never_write(self) -> None:
+        self.add_grant(self.reader)
 
         self.assertEqual(
             get_collection_access(self.db, self.collection, self.reader),
-            CollectionAccess.EDIT,
+            CollectionAccess.VIEW_ONLY,
         )
         self.assertIs(
-            get_writable_collection(
+            get_readable_collection(
                 self.collection.id,
                 self.db,
                 self.reader,
             ),
             self.collection,
         )
+        with self.assertRaises(HTTPException) as raised:
+            get_writable_collection(
+                self.collection.id,
+                self.db,
+                self.reader,
+            )
+        self.assertEqual(raised.exception.status_code, 403)
 
-    def test_view_only_and_demo_grants_are_read_only(self) -> None:
-        for mode in (GrantMode.VIEW_ONLY, GrantMode.DEMO):
-            with self.subTest(mode=mode):
-                self.add_grant(self.reader, mode)
-                self.assertIs(
-                    get_readable_collection(
-                        self.collection.id,
-                        self.db,
-                        self.reader,
-                    ),
-                    self.collection,
-                )
-                with self.assertRaises(HTTPException) as raised:
-                    get_writable_collection(
-                        self.collection.id,
-                        self.db,
-                        self.reader,
-                    )
-                self.assertEqual(raised.exception.status_code, 403)
-                self.db.query(CollectionGrant).delete()
-                self.db.commit()
+    def test_user_without_a_grant_cannot_see_the_collection(self) -> None:
+        for dependency in (get_readable_collection, get_writable_collection):
+            with self.assertRaises(HTTPException) as raised:
+                dependency(self.collection.id, self.db, self.reader)
+            self.assertEqual(raised.exception.status_code, 404)
 
     def test_global_admin_has_no_implicit_collection_access(self) -> None:
         with self.assertRaises(HTTPException) as raised:
@@ -136,7 +122,7 @@ class CollectionPermissionTests(unittest.TestCase):
         target = User(username="target", hashed_password="hash")
         self.db.add(target)
         self.db.commit()
-        request = GrantCreate(username="target", mode=GrantMode.DEMO)
+        request = GrantCreate(username="target")
 
         result = create_grant(
             request,
@@ -145,7 +131,6 @@ class CollectionPermissionTests(unittest.TestCase):
             self.owner,
         )
         self.assertEqual(result.user_id, target.id)
-        self.assertEqual(result.mode, GrantMode.DEMO)
 
         with self.assertRaises(HTTPException) as raised:
             create_grant(

@@ -7,9 +7,10 @@ from sqlalchemy import (
     CheckConstraint,
     Date,
     ForeignKey,
+    Index,
     String,
-    UniqueConstraint,
     false,
+    text,
 )
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -26,20 +27,25 @@ class VideoGameCondition(str, Enum):
 
 
 class ConsoleLabel(Base):
-    """A collection-scoped platform label used by games and consoles."""
+    """A platform name (for example Xbox 360) owned by a user.
+
+    Labels belong to the collection owner and are reused across that owner's
+    collections. Only owners write, so no other user can attach to a label.
+    """
 
     __tablename__ = "console_labels"
     __table_args__ = (
-        UniqueConstraint(
-            "collection_id",
-            "name",
-            name="uq_console_labels_collection_name",
+        Index(
+            "uq_console_labels_user_name_lower",
+            "user_id",
+            text("lower(name)"),
+            unique=True,
         ),
     )
 
     id: Mapped[int] = mapped_column(primary_key=True, index=True)
-    collection_id: Mapped[int] = mapped_column(
-        ForeignKey("collections.id", ondelete="CASCADE"),
+    user_id: Mapped[int] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"),
         nullable=False,
         index=True,
     )
@@ -58,6 +64,11 @@ class Console(Base):
     )
 
     id: Mapped[int] = mapped_column(primary_key=True, index=True)
+    collection_id: Mapped[int] = mapped_column(
+        ForeignKey("collections.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
     console_label_id: Mapped[int] = mapped_column(
         ForeignKey("console_labels.id", ondelete="RESTRICT"),
         nullable=False,
@@ -68,7 +79,7 @@ class Console(Base):
 
 
 class Game(Base):
-    """One owned game record associated with a console label."""
+    """One owned game in a collection, with the console label it is for."""
 
     __tablename__ = "games"
     __table_args__ = (
@@ -79,6 +90,11 @@ class Game(Base):
     )
 
     id: Mapped[int] = mapped_column(primary_key=True, index=True)
+    collection_id: Mapped[int] = mapped_column(
+        ForeignKey("collections.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
     console_label_id: Mapped[int] = mapped_column(
         ForeignKey("console_labels.id", ondelete="RESTRICT"),
         nullable=False,

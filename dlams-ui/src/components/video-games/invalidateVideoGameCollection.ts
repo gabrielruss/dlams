@@ -1,12 +1,13 @@
 import type { QueryClient } from "@tanstack/react-query"
 
 import { consoleKeys } from "@/lib/api/consoles"
+import { consoleLabelKeys } from "@/lib/api/consoleLabels"
 import { gameKeys } from "@/lib/api/games"
 import { videoGameStatsKeys } from "@/lib/api/videoGameStats"
 
 export async function invalidateVideoGameCollection(
   queryClient: QueryClient,
-  collectionId: number
+  collectionId: number,
 ) {
   await Promise.all([
     queryClient.invalidateQueries({
@@ -17,6 +18,9 @@ export async function invalidateVideoGameCollection(
     }),
     queryClient.invalidateQueries({
       queryKey: videoGameStatsKeys.all,
+    }),
+    queryClient.invalidateQueries({
+      queryKey: consoleLabelKeys.all,
     }),
   ])
 }

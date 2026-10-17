@@ -126,32 +126,34 @@ the API docs at <http://localhost:8001/docs>, then:
 1. Call `POST /collections` with
    `{"name":"Demo collection","type":"video_game"}` and note its ID.
 2. Call `POST /collections/{collection_id}/grants` with that ID and
-   `{"username":"demo-user","mode":"demo"}`.
+   `{"username":"demo-user"}`. Sharing is read-only, so a grant has no mode.
 3. Log in as `demo-user` with `POST /login`.
-4. Call `GET /collections` and confirm the demo collection appears with
-   `"access":"demo"`.
+4. Call `GET /collections` and confirm the collection appears with
+   `"access":"view-only"`.
 5. Call `GET /collections/video-game-stats` to retrieve game and console
    counts for every collection the signed-in user can access.
 
-For a writable collection, log in as its owner (or a user with an `edit`
-grant), then use these endpoints in the API docs:
+To write to a collection, log in as its owner (shared users cannot write),
+then use these endpoints in the API docs:
 
 1. Create a physical console with `POST /collections/{collection_id}/consoles`:
    `{"label":"Xbox 360","edition":"Original white","condition":"CIB"}`.
    Save the returned `console_label_id`.
 2. Add a second console with the same `label` and a different `edition`.
-   `GET /collections/{collection_id}/console-labels` should still return one
-   Xbox 360 label.
-3. Create a game with `POST /collections/{collection_id}/games`, using the
-   saved ID:
-   `{"name":"Example game","condition":"Loose","console_label_id":1,"last_played":null,"completed":false}`.
-   Replace `1` with the ID from step 1.
+   `GET /console-labels` (your labels, across all your collections) should
+   still return one Xbox 360 label.
+3. Create a game with `POST /collections/{collection_id}/games`:
+   `{"name":"Example game","condition":"Loose","console_label":"Xbox 360","last_played":null,"completed":false}`.
+   The console is required but is a name, not an ID. A name that does not
+   exist yet (for example `"PS2"`) creates a label with no console record, so
+   a collection with no consoles can still hold games. Names match ignoring
+   case.
 4. Confirm `GET /collections/{collection_id}/games` returns the game and that
-   the Xbox 360 label and each console response report `game_count: 1`.
+   each console response reports `game_count: 1` (games in that collection).
 5. Delete one console edition. It should succeed while the other edition
-   remains. Deleting the final edition while a game uses its label should
-   return HTTP 409. Delete the game first; then deleting the final console
-   should succeed and remove the now-unused label.
+   remains. Deleting the final edition while a game uses its label also
+   succeeds, and the label stays because the game uses it. A label is removed
+   only once no console and no game uses it.
 6. Log in as `demo-user`, then try creating a console or game in the demo
    collection. The API should deny the write with HTTP 403 while allowing
    reads. Browser-local demo editing is not implemented yet.

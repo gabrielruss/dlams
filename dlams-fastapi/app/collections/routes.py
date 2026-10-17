@@ -1,13 +1,10 @@
-"""Collection ownership and access-grant endpoints."""
+"""Collection ownership and read-only sharing endpoints."""
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.auth.utils import get_current_user
-from app.collections.permissions import (
-    get_collection_access,
-    get_readable_collection,
-)
+from app.collections.permissions import get_collection_with_access
 from app.collections.schemas import (
     CollectionCreate,
     CollectionListResponse,
@@ -15,14 +12,12 @@ from app.collections.schemas import (
     GrantCreate,
     GrantListResponse,
     GrantResponse,
-    GrantUpdate,
 )
 from app.models import (
     Collection,
     CollectionAccess,
     CollectionGrant,
     CollectionType,
-    GrantMode,
     User,
 )
 from app.utils import get_db
@@ -96,9 +91,9 @@ def list_collections(
         .order_by(Collection.id)
         .all()
     )
-    grants = (
-        db.query(CollectionGrant, Collection)
-        .join(Collection, Collection.id == CollectionGrant.collection_id)
+    shared = (
+        db.query(Collection)
+        .join(CollectionGrant, CollectionGrant.collection_id == Collection.id)
         .filter(CollectionGrant.user_id == current_user.id)
         .order_by(Collection.id)
         .all()
@@ -108,24 +103,17 @@ def list_collections(
         for collection in owned
     ]
     collections.extend(
-        _collection_response(collection, CollectionAccess(grant.mode))
-        for grant, collection in grants
+        _collection_response(collection, CollectionAccess.VIEW_ONLY)
+        for collection in shared
     )
     return CollectionListResponse(collections=collections)
 
 
 @router.get("/{collection_id}", response_model=CollectionResponse)
 def read_collection(
-    collection: Collection = Depends(get_readable_collection),
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    found: tuple[Collection, CollectionAccess] = Depends(get_collection_with_access),
 ) -> CollectionResponse:
-    access = get_collection_access(db, collection, current_user)
-    if access is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Collection not found",
-        )
+    collection, access = found
     return _collection_response(collection, access)
 
 
@@ -170,18 +158,10 @@ def create_grant(
             detail="User already has access to this collection",
         )
 
-    grant = CollectionGrant(
-        collection_id=collection_id,
-        user_id=target.id,
-        mode=request.mode.value,
-    )
+    grant = CollectionGrant(collection_id=collection_id, user_id=target.id)
     db.add(grant)
     db.commit()
-    return GrantResponse(
-        user_id=target.id,
-        username=target.username,
-        mode=GrantMode(grant.mode),
-    )
+    return GrantResponse(user_id=target.id, username=target.username)
 
 
 @router.get("/{collection_id}/grants", response_model=GrantListResponse)
@@ -191,57 +171,18 @@ def list_grants(
     current_user: User = Depends(get_current_user),
 ) -> GrantListResponse:
     _get_owned_collection(collection_id, db, current_user)
-    rows = (
-        db.query(CollectionGrant, User)
-        .join(User, User.id == CollectionGrant.user_id)
+    users = (
+        db.query(User)
+        .join(CollectionGrant, CollectionGrant.user_id == User.id)
         .filter(CollectionGrant.collection_id == collection_id)
         .order_by(User.username)
         .all()
     )
     return GrantListResponse(
         grants=[
-            GrantResponse(
-                user_id=user.id,
-                username=user.username,
-                mode=GrantMode(grant.mode),
-            )
-            for grant, user in rows
+            GrantResponse(user_id=user.id, username=user.username)
+            for user in users
         ]
-    )
-
-
-@router.put(
-    "/{collection_id}/grants/{user_id}",
-    response_model=GrantResponse,
-)
-def update_grant(
-    collection_id: int,
-    user_id: int,
-    request: GrantUpdate,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
-) -> GrantResponse:
-    _get_owned_collection(collection_id, db, current_user)
-    grant = (
-        db.query(CollectionGrant)
-        .filter(
-            CollectionGrant.collection_id == collection_id,
-            CollectionGrant.user_id == user_id,
-        )
-        .first()
-    )
-    if grant is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Access grant not found",
-        )
-    grant.mode = request.mode.value
-    db.commit()
-    target = db.query(User).filter(User.id == user_id).one()
-    return GrantResponse(
-        user_id=target.id,
-        username=target.username,
-        mode=GrantMode(grant.mode),
     )
 
 

@@ -1,7 +1,7 @@
 """CRUD endpoints for video-game console inventory and games."""
 
 from fastapi import APIRouter, Depends, HTTPException, Response, status
-from sqlalchemy import func
+from sqlalchemy import func, or_
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
@@ -38,6 +38,7 @@ from app.utils import get_db
 
 router = APIRouter(prefix="/collections/{collection_id}", tags=["video games"])
 stats_router = APIRouter(prefix="/collections", tags=["video games"])
+labels_router = APIRouter(prefix="/console-labels", tags=["video games"])
 
 
 @stats_router.get(
@@ -48,49 +49,38 @@ def list_video_game_collection_stats(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ) -> VideoGameCollectionStatsListResponse:
-    owned_ids = [
+    shared_ids = db.query(CollectionGrant.collection_id).filter(
+        CollectionGrant.user_id == current_user.id
+    )
+    collection_ids = [
         collection_id
         for (collection_id,) in (
             db.query(Collection.id)
             .filter(
-                Collection.owner_id == current_user.id,
                 Collection.type == CollectionType.VIDEO_GAME.value,
+                or_(
+                    Collection.owner_id == current_user.id,
+                    Collection.id.in_(shared_ids),
+                ),
             )
+            .order_by(Collection.id)
             .all()
         )
     ]
-    granted_ids = [
-        collection_id
-        for (collection_id,) in (
-            db.query(Collection.id)
-            .join(
-                CollectionGrant,
-                CollectionGrant.collection_id == Collection.id,
-            )
-            .filter(
-                CollectionGrant.user_id == current_user.id,
-                Collection.type == CollectionType.VIDEO_GAME.value,
-            )
-            .all()
-        )
-    ]
-    collection_ids = sorted(set(owned_ids + granted_ids))
     counts = {collection_id: [0, 0] for collection_id in collection_ids}
     if collection_ids:
         for collection_id, count in (
-            db.query(ConsoleLabel.collection_id, func.count(Console.id))
-            .join(Console, Console.console_label_id == ConsoleLabel.id)
-            .filter(ConsoleLabel.collection_id.in_(collection_ids))
-            .group_by(ConsoleLabel.collection_id)
+            db.query(Console.collection_id, func.count(Console.id))
+            .filter(Console.collection_id.in_(collection_ids))
+            .group_by(Console.collection_id)
             .all()
         ):
             counts[collection_id][1] = count
 
         for collection_id, count in (
-            db.query(ConsoleLabel.collection_id, func.count(Game.id))
-            .join(Game, Game.console_label_id == ConsoleLabel.id)
-            .filter(ConsoleLabel.collection_id.in_(collection_ids))
-            .group_by(ConsoleLabel.collection_id)
+            db.query(Game.collection_id, func.count(Game.id))
+            .filter(Game.collection_id.in_(collection_ids))
+            .group_by(Game.collection_id)
             .all()
         ):
             counts[collection_id][0] = count
@@ -107,30 +97,29 @@ def list_video_game_collection_stats(
     )
 
 
-def _get_console_label(
-    db: Session,
-    collection_id: int,
-    label_id: int,
-) -> ConsoleLabel:
-    label = (
-        db.query(ConsoleLabel)
-        .filter(
-            ConsoleLabel.id == label_id,
-            ConsoleLabel.collection_id == collection_id,
-        )
-        .first()
-    )
+def _get_label(db: Session, label_id: int) -> ConsoleLabel:
+    label = db.get(ConsoleLabel, label_id)
     if label is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="Console label not found in this collection",
+            detail="Console label not found",
         )
     return label
 
 
+def _delete_label_if_unused(db: Session, label: ConsoleLabel) -> None:
+    """Drop a label once no console and no game uses it."""
+    in_use = (
+        db.query(Console.id).filter(Console.console_label_id == label.id).first()
+        or db.query(Game.id).filter(Game.console_label_id == label.id).first()
+    )
+    if in_use is None:
+        db.delete(label)
+
+
 def _get_or_create_label(
     db: Session,
-    collection_id: int,
+    owner_id: int,
     name: str,
 ) -> ConsoleLabel:
     normalized_name = name.strip()
@@ -143,15 +132,15 @@ def _get_or_create_label(
     label = (
         db.query(ConsoleLabel)
         .filter(
-            ConsoleLabel.collection_id == collection_id,
-            ConsoleLabel.name == normalized_name,
+            ConsoleLabel.user_id == owner_id,
+            func.lower(ConsoleLabel.name) == normalized_name.lower(),
         )
         .first()
     )
     if label is not None:
         return label
 
-    label = ConsoleLabel(collection_id=collection_id, name=normalized_name)
+    label = ConsoleLabel(user_id=owner_id, name=normalized_name)
     db.add(label)
     try:
         db.flush()
@@ -160,8 +149,8 @@ def _get_or_create_label(
         label = (
             db.query(ConsoleLabel)
             .filter(
-                ConsoleLabel.collection_id == collection_id,
-                ConsoleLabel.name == normalized_name,
+                ConsoleLabel.user_id == owner_id,
+                func.lower(ConsoleLabel.name) == normalized_name.lower(),
             )
             .first()
         )
@@ -174,7 +163,10 @@ def _console_response(db: Session, console: Console) -> ConsoleResponse:
     label = db.query(ConsoleLabel).filter(ConsoleLabel.id == console.console_label_id).one()
     game_count = (
         db.query(func.count(func.distinct(Game.id)))
-        .filter(Game.console_label_id == label.id)
+        .filter(
+            Game.console_label_id == label.id,
+            Game.collection_id == console.collection_id,
+        )
         .scalar()
     )
     return ConsoleResponse(
@@ -210,9 +202,10 @@ def create_console(
     collection: Collection = Depends(get_writable_collection),
     db: Session = Depends(get_db),
 ) -> ConsoleResponse:
-    label = _get_or_create_label(db, collection.id, request.label)
+    label = _get_or_create_label(db, collection.owner_id, request.label)
     edition = request.edition.strip() if request.edition else None
     console = Console(
+        collection_id=collection.id,
         console_label_id=label.id,
         edition=edition or None,
         condition=request.condition.value,
@@ -231,7 +224,7 @@ def list_consoles(
     rows = (
         db.query(Console)
         .join(ConsoleLabel, ConsoleLabel.id == Console.console_label_id)
-        .filter(ConsoleLabel.collection_id == collection.id)
+        .filter(Console.collection_id == collection.id)
         .order_by(ConsoleLabel.name, Console.id)
         .all()
     )
@@ -249,8 +242,7 @@ def update_console(
 ) -> ConsoleResponse:
     console = (
         db.query(Console)
-        .join(ConsoleLabel, ConsoleLabel.id == Console.console_label_id)
-        .filter(Console.id == console_id, ConsoleLabel.collection_id == collection.id)
+        .filter(Console.id == console_id, Console.collection_id == collection.id)
         .first()
     )
     if console is None:
@@ -259,7 +251,7 @@ def update_console(
             detail="Console not found",
         )
 
-    old_label = _get_console_label(db, collection.id, console.console_label_id)
+    old_label = _get_label(db, console.console_label_id)
     new_name = request.label.strip()
     if not new_name:
         raise HTTPException(
@@ -267,29 +259,13 @@ def update_console(
             detail="Console label cannot be blank",
         )
     if new_name != old_label.name:
-        remaining_count = (
-            db.query(func.count(Console.id))
-            .filter(
-                Console.console_label_id == old_label.id,
-                Console.id != console.id,
-            )
-            .scalar()
-        )
-        linked_games = (
-            db.query(func.count(Game.id))
-            .filter(Game.console_label_id == old_label.id)
-            .scalar()
-        )
-        if not remaining_count and linked_games:
-            raise HTTPException(
-                status_code=status.HTTP_409_CONFLICT,
-                detail="Cannot change the last console label used by games",
-            )
-        new_label = _get_or_create_label(db, collection.id, new_name)
-        console.console_label_id = new_label.id
-        if not remaining_count and not linked_games:
+        new_label = _get_or_create_label(db, collection.owner_id, new_name)
+        if new_label.id == old_label.id:
+            old_label.name = new_name
+        else:
+            console.console_label_id = new_label.id
             db.flush()
-            db.delete(old_label)
+            _delete_label_if_unused(db, old_label)
 
     edition = request.edition.strip() if request.edition else None
     console.edition = edition or None
@@ -307,8 +283,7 @@ def delete_console(
 ) -> Response:
     console = (
         db.query(Console)
-        .join(ConsoleLabel, ConsoleLabel.id == Console.console_label_id)
-        .filter(Console.id == console_id, ConsoleLabel.collection_id == collection.id)
+        .filter(Console.id == console_id, Console.collection_id == collection.id)
         .first()
     )
     if console is None:
@@ -317,57 +292,28 @@ def delete_console(
             detail="Console not found",
         )
 
-    label = _get_console_label(db, collection.id, console.console_label_id)
-    remaining_count = (
-        db.query(func.count(Console.id))
-        .filter(
-            Console.console_label_id == label.id,
-            Console.id != console.id,
-        )
-        .scalar()
-    )
-    game_count = (
-        db.query(func.count(Game.id))
-        .filter(Game.console_label_id == label.id)
-        .scalar()
-    )
-    if not remaining_count and game_count:
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail="Cannot delete the last console record while games use its label",
-        )
-
+    label = _get_label(db, console.console_label_id)
     db.delete(console)
-    if not remaining_count:
-        db.flush()
-        db.delete(label)
+    db.flush()
+    _delete_label_if_unused(db, label)
     db.commit()
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
-@router.get("/console-labels", response_model=ConsoleLabelListResponse)
+@labels_router.get("", response_model=ConsoleLabelListResponse)
 def list_console_labels(
-    collection: Collection = Depends(get_readable_collection),
     db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
 ) -> ConsoleLabelListResponse:
+    """The signed-in user's console labels, for the console and game forms."""
     rows = (
-        db.query(ConsoleLabel, func.count(func.distinct(Game.id)))
-        .join(Console, Console.console_label_id == ConsoleLabel.id)
-        .outerjoin(Game, Game.console_label_id == ConsoleLabel.id)
-        .filter(ConsoleLabel.collection_id == collection.id)
-        .group_by(ConsoleLabel.id)
-        .order_by(ConsoleLabel.name)
+        db.query(ConsoleLabel)
+        .filter(ConsoleLabel.user_id == current_user.id)
+        .order_by(func.lower(ConsoleLabel.name))
         .all()
     )
     return ConsoleLabelListResponse(
-        labels=[
-            ConsoleLabelResponse(
-                id=label.id,
-                name=label.name,
-                game_count=count,
-            )
-            for label, count in rows
-        ]
+        labels=[ConsoleLabelResponse(id=label.id, name=label.name) for label in rows]
     )
 
 
@@ -381,30 +327,22 @@ def create_game(
     collection: Collection = Depends(get_writable_collection),
     db: Session = Depends(get_db),
 ) -> GameResponse:
-    label = _get_console_label(db, collection.id, request.console_label_id)
-    has_console = (
-        db.query(Console.id)
-        .filter(Console.console_label_id == label.id)
-        .first()
-    )
-    if has_console is None:
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail="Add a physical console record before adding games for this label",
-        )
-
-    game = Game(
-        console_label_id=label.id,
-        name=request.name.strip(),
-        condition=request.condition.value,
-        last_played=request.last_played,
-        completed=request.completed,
-    )
-    if not game.name:
+    name = request.name.strip()
+    if not name:
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
             detail="Game name cannot be blank",
         )
+    label = _get_or_create_label(db, collection.owner_id, request.console_label)
+
+    game = Game(
+        collection_id=collection.id,
+        console_label_id=label.id,
+        name=name,
+        condition=request.condition.value,
+        last_played=request.last_played,
+        completed=request.completed,
+    )
     db.add(game)
     db.commit()
     db.refresh(game)
@@ -418,8 +356,7 @@ def list_games(
 ) -> GameListResponse:
     rows = (
         db.query(Game)
-        .join(ConsoleLabel, ConsoleLabel.id == Game.console_label_id)
-        .filter(ConsoleLabel.collection_id == collection.id)
+        .filter(Game.collection_id == collection.id)
         .order_by(Game.id)
         .all()
     )
@@ -435,8 +372,7 @@ def update_game(
 ) -> GameResponse:
     game = (
         db.query(Game)
-        .join(ConsoleLabel, ConsoleLabel.id == Game.console_label_id)
-        .filter(Game.id == game_id, ConsoleLabel.collection_id == collection.id)
+        .filter(Game.id == game_id, Game.collection_id == collection.id)
         .first()
     )
     if game is None:
@@ -445,27 +381,22 @@ def update_game(
             detail="Game not found",
         )
 
-    label = _get_console_label(db, collection.id, request.console_label_id)
-    has_console = (
-        db.query(Console.id)
-        .filter(Console.console_label_id == label.id)
-        .first()
-    )
-    if has_console is None:
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail="Add a physical console record before using this label",
-        )
-    game.name = request.name.strip()
-    if not game.name:
+    name = request.name.strip()
+    if not name:
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
             detail="Game name cannot be blank",
         )
+    old_label_id = game.console_label_id
+    label = _get_or_create_label(db, collection.owner_id, request.console_label)
+    game.name = name
     game.condition = request.condition.value
     game.console_label_id = label.id
     game.last_played = request.last_played
     game.completed = request.completed
+    if label.id != old_label_id:
+        db.flush()
+        _delete_label_if_unused(db, _get_label(db, old_label_id))
     db.commit()
     db.refresh(game)
     return _game_response(db, game)
@@ -479,8 +410,7 @@ def delete_game(
 ) -> Response:
     game = (
         db.query(Game)
-        .join(ConsoleLabel, ConsoleLabel.id == Game.console_label_id)
-        .filter(Game.id == game_id, ConsoleLabel.collection_id == collection.id)
+        .filter(Game.id == game_id, Game.collection_id == collection.id)
         .first()
     )
     if game is None:
@@ -488,6 +418,9 @@ def delete_game(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Game not found",
         )
+    label = _get_label(db, game.console_label_id)
     db.delete(game)
+    db.flush()
+    _delete_label_if_unused(db, label)
     db.commit()
     return Response(status_code=status.HTTP_204_NO_CONTENT)

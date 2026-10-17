@@ -1,3 +1,6 @@
+import { useRef } from "react"
+import { Controller } from "react-hook-form"
+
 import {
   Drawer,
   DrawerClose,
@@ -5,25 +8,24 @@ import {
   DrawerHeader,
   DrawerTitle,
 } from "@/components/ui/drawer"
-import type { ConsoleRecord, GameRecord } from "@/types/videoGames"
+import type { GameRecord } from "@/types/videoGames"
 import { videoGameConditions } from "@/types/videoGames"
+import ConsoleLabelCombobox from "./ConsoleLabelCombobox"
+import useConsoleLabels from "./useConsoleLabels"
 import useGameManager from "./useGameManager"
 
 interface GameManagerProps {
   collectionId: number
-  consoles: ConsoleRecord[]
   games: GameRecord[]
   canWrite: boolean
 }
 
 function GameManager({
   collectionId,
-  consoles,
   games,
   canWrite,
 }: GameManagerProps) {
   const {
-    consoleLabels,
     form,
     editingId,
     formError,
@@ -36,8 +38,11 @@ function GameManager({
     startNewGame,
     deleteGame,
     isVideoGameCondition,
-  } = useGameManager({ collectionId, consoles })
+  } = useGameManager({ collectionId })
+  const consoleLabelOptions = useConsoleLabels(canWrite)
+  const drawerRef = useRef<HTMLDivElement>(null)
   const name = form.watch("name")
+  const consoleLabel = form.watch("consoleLabel")
 
   return (
     <section className="flex flex-col gap-4 rounded-lg border p-4">
@@ -45,10 +50,9 @@ function GameManager({
         <h2 className="text-xl font-semibold">Games</h2>
         {canWrite && (
           <button
-            className="h-9 rounded-md bg-primary px-4 text-primary-foreground disabled:opacity-50"
+            className="h-9 rounded-md bg-primary px-4 text-primary-foreground"
             type="button"
             onClick={startNewGame}
-            disabled={consoleLabels.length === 0}
           >
             Add game
           </button>
@@ -62,7 +66,7 @@ function GameManager({
             if (!open) resetForm()
           }}
         >
-          <DrawerContent>
+          <DrawerContent ref={drawerRef}>
             <DrawerHeader className="flex-row items-center justify-between border-b">
               <DrawerTitle className="text-xl">
                 {editingId === null ? "Add game" : "Edit game"}
@@ -101,22 +105,35 @@ function GameManager({
                     {form.formState.errors.name.message}
                   </p>
                 )}
-                <label className="flex flex-col gap-1 text-sm">
-                  Console
-                  <select
-                    className="h-9 rounded-md border bg-background px-3"
-                    {...form.register("consoleLabelId", {
-                      required: "Select a console",
-                    })}
-                  >
-                    <option value="">Select a console</option>
-                    {consoleLabels.map((consoleLabel) => (
-                      <option key={consoleLabel.id} value={consoleLabel.id}>
-                        {consoleLabel.name}
-                      </option>
-                    ))}
-                  </select>
-                </label>
+                <div className="flex flex-col gap-1 text-sm">
+                  <label htmlFor="game-console">Console</label>
+                  <Controller
+                    control={form.control}
+                    name="consoleLabel"
+                    rules={{
+                      required: "Console is required",
+                      maxLength: {
+                        value: 100,
+                        message: "Console must be 100 characters or fewer",
+                      },
+                    }}
+                    render={({ field }) => (
+                      <ConsoleLabelCombobox
+                        id="game-console"
+                        options={consoleLabelOptions}
+                        container={drawerRef}
+                        value={field.value}
+                        onChange={field.onChange}
+                        invalid={!!form.formState.errors.consoleLabel}
+                      />
+                    )}
+                  />
+                </div>
+                {form.formState.errors.consoleLabel && (
+                  <p role="alert" className="text-sm text-destructive">
+                    {form.formState.errors.consoleLabel.message}
+                  </p>
+                )}
                 <label className="flex flex-col gap-1 text-sm">
                   Condition
                   <select
@@ -152,11 +169,7 @@ function GameManager({
                 <div className="flex gap-2">
                   <button
                     className="h-9 rounded-md bg-primary px-4 text-primary-foreground disabled:opacity-50"
-                    disabled={
-                      isSaving ||
-                      !name?.trim() ||
-                      consoleLabels.length === 0
-                    }
+                    disabled={isSaving || !name?.trim() || !consoleLabel?.trim()}
                   >
                     {isSaving ? "Saving..." : "Save game"}
                   </button>

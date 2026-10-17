@@ -1,6 +1,6 @@
 # DLAMS architecture
 
-Last updated: 2026-10-15
+Last updated: 2026-10-16
 
 How the system is put together right now. For status and next steps see
 [`DLAMS-PLAN.md`](../DLAMS-PLAN.md); for why things are this way see
@@ -39,8 +39,8 @@ Versions are the declared ranges from `dlams-ui/package.json` and
 | Server state | `@tanstack/react-query` 5 |
 | Forms and validation | `react-hook-form`, `@hookform/resolvers`, `zod` 4 |
 | Styling | Tailwind CSS 4 (`@tailwindcss/vite`), `tw-animate-css`, `tailwind-merge`, `clsx`, `class-variance-authority`, `cn` |
-| Components | shadcn/ui pattern over Radix (`@radix-ui/react-label`, `@radix-ui/react-slot`), `vaul` (drawers), `lucide-react` (icons) |
-| Lint | ESLint 9 with `typescript-eslint`, `react-hooks`, `react-refresh` |
+| Components | shadcn/ui pattern over Radix (`@radix-ui/react-label`, `@radix-ui/react-slot`, and the `radix-ui` umbrella package that newer generated components import) and Base UI (`@base-ui/react`, used by the Combobox), `vaul` (drawers), `lucide-react` (icons) |
+| Lint | ESLint 9 with `typescript-eslint`, `react-hooks`, `react-refresh` (its export rule is off under `src/components/ui/`, where the shadcn CLI writes files) |
 
 There is no client-side store library: server state is TanStack Query, and
 the selected collection is in the URL. A store is a candidate for the
@@ -118,12 +118,13 @@ Two independent layers:
    | Access | How it arises | Reads | Persistent writes |
    | --- | --- | --- | --- |
    | `owner` | `collections.owner_id` is the user | yes | yes |
-   | `edit` | grant with mode `edit` | yes | yes |
-   | `view-only` | grant with mode `view-only` | yes | no (403) |
-   | `demo` | grant with mode `demo` | yes | no (403); browser-local edits planned |
+   | `view-only` | a row in `collection_grants` for the user | yes | no (403) |
+
+   All sharing is read-only: only the owner ever writes. Browser-local edits
+   for demo accounts are planned and never reach the API.
 
    Two FastAPI dependencies implement this: `get_readable_collection` and
-   `get_writable_collection`. A user with no access gets 404, not 403, so
+   `get_writable_collection` (owner only). A user with no access gets 404, not 403, so
    collection ids are not discoverable. The UI mirrors write access through
    `lib/permissions.ts` (`canWriteCollection`, `isAdmin`); admin checks go
    through `isAdmin` in the UI and `require_admin` in the API, never a raw
@@ -133,8 +134,10 @@ Two independent layers:
 
 ```
 users ─┬─< collections ─┬─< collection_grants >── users
-       │                └─< console_labels ─┬─< consoles
-       └─< registration_invitations         └─< games
+       │                ├─< games ──────┐
+       │                └─< consoles ───┤
+       ├─< console_labels >─────────────┘
+       └─< registration_invitations
 ```
 
 | Table | Notes |
@@ -142,10 +145,10 @@ users ─┬─< collections ─┬─< collection_grants >── users
 | `users` | `username` (unique), bcrypt `hashed_password`, optional unique `email`, `role` (`user`/`admin`/`demo`, check constraint), `is_active`, `created_at`. |
 | `registration_invitations` | `token_hash` (unique), `created_by_id` (RESTRICT), `expires_at`, `redeemed_at`. |
 | `collections` | `owner_id` (CASCADE), `name`, `type` (check constraint; only `video_game`). |
-| `collection_grants` | One row per (collection, user), unique; `mode` is `edit`, `view-only`, or `demo`. Cascades from both collection and user. |
-| `console_labels` | Collection-scoped platform names, unique per collection. Shared by consoles and games. |
-| `consoles` | One physical console: label, `edition`, `condition`. |
-| `games` | One owned game: `name`, label, `condition`, `last_played`, `completed`. |
+| `collection_grants` | One row per (collection, user), unique: that user can read the collection. Cascades from both collection and user. |
+| `console_labels` | Platform names owned by a user (`user_id`, CASCADE), reused across that user's collections; unique per user ignoring case. Created from the console or game form; deleted when no console and no game uses them. |
+| `consoles` | One physical console: `collection_id` (CASCADE), required `console_label_id`, `edition`, `condition`. |
+| `games` | One owned game: `collection_id` (CASCADE), required `console_label_id`, `name`, `condition`, `last_played`, `completed`. |
 
 - `condition` is one of `Loose`, `CIB`, `New`, `Item & Box`.
 - Consoles and games reference a label with `RESTRICT`, which is why deleting
@@ -165,8 +168,9 @@ the edge).
 | Invitations | `POST /invitations` | admin |
 | Admin users | `GET /admin/users`, `POST /admin/users/{id}/deactivate`, `POST /admin/users/{id}/activate`, `PUT /admin/users/{id}/role` (`user` or `demo`) | admin; not on yourself, and never on or to `admin` |
 | Collections | `POST /collections`, `GET /collections`, `GET /collections/{id}` | signed-in; list includes owned and granted |
-| Grants | `GET`, `POST`, `PUT`, `DELETE` under `/collections/{id}/grants` | collection owner |
-| Video games | `/collections/{id}/consoles`, `/console-labels`, `/games` (list, create, update, delete) | read: any access; write: owner or `edit` |
+| Sharing | `GET`, `POST` (by username), `DELETE` under `/collections/{id}/grants` | collection owner |
+| Video games | `/collections/{id}/consoles` and `/games` (list, create, update, delete) | read: owner or shared; write: owner |
+| Console labels | `GET /console-labels` (the signed-in user's labels) | signed-in |
 | Stats | `GET /collections/video-game-stats` | signed-in; owned and granted collections |
 
 Handlers are grouped by module: `app/auth/` (`routes.py`, `admin_routes.py`,

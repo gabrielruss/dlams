@@ -21,9 +21,24 @@ Applies across the DLAMS workspace. Project-local conventions take precedence wh
   `dlams-ui/src/components/ui/`; shadcn/ui is component source, not a runtime
   dependency in `package.json`. Reuse these components and follow shadcn
   conventions rather than introducing a competing component system.
+- `components/ui/combobox.tsx` has one local edit: `ComboboxContent` accepts a
+  `container` prop forwarded to the portal, so a combobox inside a drawer can
+  render its popup within the drawer (otherwise clicking an option counts as
+  an outside click and closes the drawer). The drawer managers pass a ref on
+  their `DrawerContent` through `ConsoleLabelCombobox`. Re-apply the edit after
+  reinstalling; if it is lost, `tsc` fails on the `container` prop.
+- Re-running the CLI overwrites the generated file (for example it restored
+  `buttonVariants` in `button.tsx` and moved it to the `radix-ui` package). The
+  `react-refresh/only-export-components` lint rule is off under
+  `src/components/ui/` for that reason; review the diff after each install.
 - The shadcn CLI emits `import { cn } from "cn"` and installs the `cn`
   package (a clsx + tailwind-merge replacement). Leave generated imports
   alone; `@/lib/utils` also works and both coexist (decided 2026-10-14).
+- Never edit files the shadcn CLI generated in `src/components/ui/`, including
+  small fixes, lint cleanups, and unused classes. Change the consuming
+  component instead, or ask the owner to reinstall or customize the file.
+  The only local edit is the `container` prop in `combobox.tsx` (above); do not
+  add others.
 - Do not install packages or run the shadcn CLI. When a shadcn component is
   needed, tell the owner which one and give the command
   (`npx shadcn@latest add <component>`, from `dlams-ui/`); the owner runs it.
@@ -181,15 +196,15 @@ Styling pass status: **not started** (change to **complete** once the owner fini
   only a hash of the bearer token; never add an unguarded public signup path.
   Only admins may issue invites. Bootstrap the first admin through the
   operator-run API command, not a public endpoint.
-- A collection owner can read, write, and manage grants. An `edit` grantee can
-  read and persist content changes but cannot manage grants.
-- `view-only` and `demo` grants can read but cannot write through the API.
-  Browser-local editing for demo users is planned but not implemented.
+- A collection owner can read, write, and manage who the collection is shared
+  with. All sharing is read-only: a shared user can read but never write
+  through the API. Demo accounts (role `demo`) can only make `GET` requests;
+  browser-local editing for them is planned but not implemented.
 - Global `admin` does not grant implicit access to collections the admin does
-  not own or have an explicit grant for.
+  not own or have been shared.
 - Enforce ownership/grants on every protected endpoint. Never trust a client-supplied owner, role, or cross-collection resource ID.
 - Tests for protected API behavior must collectively cover unauthenticated
-  access, no grant, read-only write rejection, edit access, owner access, and
+  access, no grant, shared-user write rejection, owner access, and
   cross-collection resource IDs. Use representative endpoint tests rather
   than duplicating every case for every route.
 

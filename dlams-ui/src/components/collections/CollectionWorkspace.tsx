@@ -10,6 +10,9 @@ function CollectionWorkspace() {
 
   return (
     <section className="flex flex-col gap-5">
+      <h1 className="text-3xl font-semibold">
+        {collection?.name ?? "Your collections"}
+      </h1>
       {collectionsQuery.isError && (
         <p
           role="alert"

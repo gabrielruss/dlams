@@ -4,7 +4,6 @@ import { useForm } from "react-hook-form"
 
 import { gamesApi } from "@/lib/api/games"
 import type {
-  ConsoleRecord,
   GameCreate,
   GameRecord,
   VideoGameCondition,
@@ -15,34 +14,22 @@ import { invalidateVideoGameCollection } from "./invalidateVideoGameCollection"
 interface GameFormValues {
   name: string
   condition: VideoGameCondition
-  consoleLabelId: string
+  consoleLabel: string
   lastPlayed: string
   completed: boolean
 }
 
 interface UseGameManagerOptions {
   collectionId: number
-  consoles: ConsoleRecord[]
 }
 
-function useGameManager({
-  collectionId,
-  consoles,
-}: UseGameManagerOptions) {
+function useGameManager({ collectionId }: UseGameManagerOptions) {
   const queryClient = useQueryClient()
-  const consoleLabels = Array.from(
-    new Map(
-      consoles.map((consoleRecord) => [
-        consoleRecord.console_label_id,
-        { id: consoleRecord.console_label_id, name: consoleRecord.label },
-      ])
-    ).values()
-  )
   const form = useForm<GameFormValues>({
     defaultValues: {
       name: "",
       condition: "Loose",
-      consoleLabelId: "",
+      consoleLabel: "",
       lastPlayed: "",
       completed: false,
     },
@@ -81,7 +68,7 @@ function useGameManager({
     const data: GameCreate = {
       name: values.name.trim(),
       condition: values.condition,
-      console_label_id: Number(values.consoleLabelId),
+      console_label: values.consoleLabel.trim(),
       last_played: values.lastPlayed || null,
       completed: values.completed,
     }
@@ -96,7 +83,7 @@ function useGameManager({
     form.reset({
       name: game.name,
       condition: game.condition,
-      consoleLabelId: String(game.console_label_id),
+      consoleLabel: game.console_label,
       lastPlayed: game.last_played ?? "",
       completed: game.completed,
     })
@@ -116,7 +103,6 @@ function useGameManager({
   }
 
   return {
-    consoleLabels,
     form,
     editingId,
     formError: saveMutation.error?.message ?? null,

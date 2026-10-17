@@ -38,7 +38,6 @@ function VideoGamesWorkspace({ collection }: VideoGamesWorkspaceProps) {
         />
         <GameManager
           collectionId={collection.id}
-          consoles={consoles}
           games={games}
           canWrite={canWrite}
         />

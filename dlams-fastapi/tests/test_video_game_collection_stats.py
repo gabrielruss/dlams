@@ -55,27 +55,26 @@ class VideoGameCollectionStatsTests(unittest.TestCase):
             CollectionGrant(
                 collection_id=self.granted_collection.id,
                 user_id=self.reader.id,
-                mode="demo",
             )
         )
 
-        label = ConsoleLabel(
-            collection_id=self.owned_collection.id,
-            name="Xbox 360",
-        )
+        label = ConsoleLabel(user_id=self.reader.id, name="Xbox 360")
         self.db.add(label)
         self.db.flush()
         self.db.add_all(
             [
                 Console(
+                    collection_id=self.owned_collection.id,
                     console_label_id=label.id,
                     condition="CIB",
                 ),
                 Console(
+                    collection_id=self.owned_collection.id,
                     console_label_id=label.id,
                     condition="Loose",
                 ),
                 Game(
+                    collection_id=self.owned_collection.id,
                     console_label_id=label.id,
                     name="Example game",
                     condition="Loose",

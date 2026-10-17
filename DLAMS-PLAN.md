@@ -1,21 +1,52 @@
 # DLAMS plan
 
-Last updated: 2026-10-15
+Last updated: 2026-10-16
 
 The current state of the project. For why things are the way they are, see
 [`docs/decisions.md`](./docs/decisions.md). For the full history up to
 2026-10-09, see [`docs/archive/`](./docs/archive/).
 
-## Where we left off (2026-10-15)
+## Where we left off (2026-10-16)
 
 Start here in a new session. This block is rewritten at the end of a session,
 never appended to.
 
-- **State.** The demo role is built and tested but not deployed (Next up,
-  item 1). The owner commits and pushes everything themselves, so run
-  `git status` before assuming what is committed.
+- **State.** The demo role, read-only sharing, owner-scoped console labels
+  with comboboxes, and the collection-name page heading are built, tested
+  (51 backend unit tests, UI lint/`tsc`/build), and in the working tree, not
+  deployed (Next up, item 1). The owner commits and pushes everything
+  themselves, so run `git status` before assuming what is committed. The
+  dev database was reset on 2026-10-16 and the admin re-bootstrapped. The
+  owner confirmed the console combobox's `Add "name"` row works in the dev
+  stack (a drawer-dismissal bug was fixed that day).
+- **Commit hygiene.** Two migration files were deleted from disk but may still
+  be staged (`d3a7e92b5f18_games_belong_to_collections.py` and
+  `a4f6c8d1e973_games_require_console_label.py`). They must not be
+  committed: the chain is `b7d4a1c93e52 -> c91e5f7a2b64 -> b8e1d6a42c07`, and
+  `alembic heads` must show only `b8e1d6a42c07`.
+- **Owner's manual UI pass, still to do (in the dev stack):**
+  1. Add console: type a new label, choose `Add "..."`, save; the label then
+     appears for the next console and for games.
+  2. Add game: pick an existing console label and add a new one (for example a
+     platform with no console record); editing a game starts with its label;
+     saving with the field blank is blocked.
+  3. A second collection offers the same labels (labels belong to the owner).
+  4. Share a collection (no sharing screen yet; use the API docs at
+     `http://localhost:8001/docs`, `POST /collections/{id}/grants` with
+     `{"username": "..."}`); the shared user sees it with a `view-only` badge
+     and no add, edit, or delete controls.
+  5. "Make demo" on a user in "Manage users"; that user's write requests return
+     403 `Demo accounts are read-only` (browser-console fetch in
+     `dlams-deployment/README.md`, "Demo account"); "Make regular" restores
+     them.
+  6. The page heading shows the selected collection's name ("Your collections"
+     only when none is selected). Try a long name.
+  7. Buttons show a pointer cursor on hover.
 - **Before the owner pushes:** run `dlams-deployment/scripts/backup-db.sh` on
-  the Pi. The push applies migration `c91e5f7a2b64` to production.
+  the Pi. The push applies two migrations to production: `c91e5f7a2b64`
+  (demo role) and `b8e1d6a42c07`, which drops and recreates the grants,
+  console labels, consoles, and games tables, deleting any rows in them. The
+  owner confirmed on 2026-10-16 that nothing there is worth keeping.
 - **After the deploy:** on a throwaway account, use "Make demo" in "Manage
   users", then confirm a write is refused (steps in
   `dlams-deployment/README.md`, "Demo account"). Only then provision
@@ -26,10 +57,17 @@ never appended to.
   and screenshots (item 6).
 - **Waiting on the owner:** which URL the demo lives at, styling scope, and
   package approval for the test tooling.
+- **Things to remember about the code.** Generated shadcn files are reviewed
+  after each install and not edited by hand, except that `combobox.tsx` has a
+  local `container` prop on `ComboboxContent` so a combobox popup renders
+  inside its drawer (see `.github/copilot-instructions.md`); the CLI writes
+  `import { cn } from "cn"` and that is accepted. A raw `<button>` cleanup
+  (about 15 places) and the create-collection drawer's form buttons are left
+  for the styling pass.
 - **How the owner likes to work:** one decision per message; confirm when a
   reply is ambiguous or has two parts. For commands on the Pi, give one
   command per code block and wait for the output (multi-line pastes have
-  garbled in the owner's terminal). Do not offer to commit.
+  garbled in the owner's terminal). Do not offer to commit or push.
 
 ## How to use this document
 
@@ -92,11 +130,13 @@ workflow on a self-hosted runner (`.github/workflows/deploy.yml`).
 - **Operations:** nightly database backup on the host with a tested restore
   (see Known issues for its limits).
 - **Collections and access:** users own multiple typed collections (type
-  `video_game` only). Owners grant `edit`, `view-only`, or `demo` access.
-  Persistent writes are owner or `edit` grantee only; global admin has no
-  implicit collection access.
-- **Video games:** collection-scoped console labels, physical console
-  records, and game records, with full CRUD in the API and UI.
+  `video_game` only). Owners share a collection read-only with other users
+  (built and tested, not deployed: previously there were also `edit` and
+  `demo` grant modes). Only the owner writes; global admin has no implicit
+  collection access.
+- **Video games:** console labels, physical console records, and game
+  records, with full CRUD in the API and UI. (Owner-scoped labels and the
+  combobox forms are built, not deployed; see below.)
 - **UI:** left sidebar with collection rows and counts, right-side drawers
   for forms, URL-backed collection selection, TanStack Query for all server
   state.
@@ -108,10 +148,21 @@ workflow on a self-hosted runner (`.github/workflows/deploy.yml`).
   non-`GET`/`HEAD`/`OPTIONS` request from a demo account. The UI hides write
   controls from demo accounts. Migration `c91e5f7a2b64` widens the role
   constraint.
+- **Read-only sharing:** a grant means "this user can read this
+  collection"; the `edit` and `demo` grant modes and the update-grant
+  endpoint are gone. Only owners write.
+- **Owner-scoped console labels:** labels belong to the collection's owner and
+  are shared across their collections; consoles and games each have a
+  `collection_id`. The console and game forms use a searchable combobox
+  ("Console label" / "Console") with an `Add "name"` row when nothing matches
+  exactly. `GET /console-labels` lists the user's labels. Migration
+  `b8e1d6a42c07` recreates the affected tables (see "Where we left off").
+  The comboboxes have not been tried in a browser. Decision in
+  `docs/decisions.md`.
 
 **Not implemented**
 
-- Collection grant management UI.
+- Sharing UI (add and remove who a collection is shared with).
 - Browser-local editing for demo accounts (a demo account sees a read-only UI
   today).
 - A provisioned demo account on production (the `demo` role is built but not
@@ -122,17 +173,20 @@ workflow on a self-hosted runner (`.github/workflows/deploy.yml`).
 
 **Verification baseline**
 
-- API (2026-10-15): 41 unit tests pass (run on Python 3.13, the project's version, in a
-  scratch venv outside the repo), including a check that every write route requires
-  a signed-in user; PostgreSQL SQL generates for migration `c91e5f7a2b64`,
-  which has not been applied to a database yet.
-- UI (2026-10-15): `npm run build`, `tsc -b`, and full `npm run lint` pass.
+- API (2026-10-16): 51 unit tests pass (run on Python 3.13, the project's
+  version, in a scratch venv outside the repo), including a check that every
+  write route requires a signed-in user. PostgreSQL SQL generates for
+  migrations `c91e5f7a2b64` and `b8e1d6a42c07` (upgrade and downgrade); neither
+  has been applied to a real database yet.
+- UI (2026-10-16): `npm run build`, `tsc -b`, and full `npm run lint` pass
+  (the lint rule `react-refresh/only-export-components` is now off under
+  `src/components/ui/`).
   The demo role switch and demo read-only UI have not been tried in a browser.
 - Production routing and the automated deploy pipeline were exercised
   end to end by the owner (2026-10-09).
 - Manual browser pass (2026-10-12, owner-reported): collection and
   console/game flows across owner, `edit`, `view-only`, and `demo` access
-  worked as expected. Phone-width observations were not reported.
+  worked as expected (before the sharing and label changes of 2026-10-16). Phone-width observations were not reported.
 
 ## Milestone: portfolio-ready
 
@@ -160,7 +214,7 @@ Done when all of these are true:
   clean, and the demo account can make only `GET` requests (a write attempt
   with its credentials is rejected, checked by hand).
 
-Explicitly not required for this milestone: grant management UI,
+Explicitly not required for this milestone: the sharing UI,
 browser-local demo editing, the demo sharing walkthrough, further item types,
 user deletion, off-device backups, and the deferred API dependency upgrades.
 
@@ -168,14 +222,18 @@ user deletion, off-device backups, and the deferred API dependency upgrades.
 
 In order. Items 1 to 6 are the path to the portfolio milestone.
 
-1. **Deploy the demo role.** Built 2026-10-15 and tested (see Current
-   status), not deployed: the `demo` role (migration `c91e5f7a2b64`, which
-   widens the role check constraint), "Make demo" and "Make regular" on each
-   row in "Manage users", and the GET-only check in `get_current_user`. Take a
-   backup with `dlams-deployment/scripts/backup-db.sh` first, push, then try
+1. **Deploy the demo role, read-only sharing, and owner-scoped labels.**
+   Built 2026-10-15 and 2026-10-16 and tested (see Current status), not
+   deployed. Migrations: `c91e5f7a2b64` (the `demo` role, "Make demo" and
+   "Make regular" in "Manage users", and the GET-only check in
+   `get_current_user`) and `b8e1d6a42c07` (drops and recreates the item and
+   sharing tables). Reset the dev database, try the dev-stack checks listed in
+   "Where we left off", take a backup with
+   `dlams-deployment/scripts/backup-db.sh`, then push. After the deploy, try
    the switch on a throwaway account and confirm a write is refused (steps in
-   `dlams-deployment/README.md`, "Demo account"). This must be in place
-   before the demo link is shared. See `docs/decisions.md`.
+   `dlams-deployment/README.md`, "Demo account"), and add a game for a console
+   you don't own. The demo role must be in place before the demo link is
+   shared. See `docs/decisions.md`.
 2. **Provision the demo account and its content.** Admin user management is
    deployed (2026-10-14, owner-reported working, including migration
    `b7d4a1c93e52`). Once item 1 is deployed: create an invitation, register
@@ -198,7 +256,7 @@ In order. Items 1 to 6 are the path to the portfolio milestone.
    the spirit of "write tests, not too many, mostly integration": a few tests
    that render real flows and assert on what a user sees. Vitest with React
    Testing Library and MSW for integration tests, plus a handful of
-   Playwright end-to-end checks across owner, `edit`, `view-only`, and `demo`
+   Playwright end-to-end checks across owner, shared (read-only), and demo
    access. Skip per-component and per-hook unit tests. Needs the owner's
    approval to install packages. Backend tests stay on `unittest`.
 6. **README, screenshots, and a final check.** Rewrite the root `README.md`
@@ -208,8 +266,9 @@ In order. Items 1 to 6 are the path to the portfolio milestone.
 
 After the milestone:
 
-7. **Grant management UI.** A full-page, table-based screen where a collection
-   owner views and edits the access they have granted.
+7. **Sharing UI.** A full-page "Shared with" screen where a collection owner
+   adds a user by username and removes users. Sharing is read-only, so there
+   is no access-mode control.
 8. **Browser-local demo editing** with reset. It waits on the open questions
    below.
 9. **Demo sharing walkthrough.** After signing in as `demo-user`, a visitor
@@ -219,15 +278,18 @@ After the milestone:
    endpoint and no special cases; its credentials are public like
    `demo-user`'s). `demo-shared` holds a real, fixed view-only grant on the
    demo collection, and the visitor's browser-local edits are applied to what
-   it shows. A demo account can only grant read-only access, so its sharing
-   form simply has no access-mode control. The share action is simulated in
+   it shows. All sharing is read-only, so no sharing form has an access-mode control. The share action is simulated in
    the browser, because all visitors share one server state. Depends on the
-   grant management UI (7) and browser-local demo editing (8). Proposed
+   sharing UI (7) and browser-local demo editing (8). Proposed
    2026-10-14.
 10. **Further item types**, after the shared-fields question is settled.
 
 ## Known issues
 
+- The UI build emits a Vite large-chunk warning again (about 509 kB, over the
+  500 kB limit) since the Combobox added `@base-ui/react` (2026-10-16). It was
+  clear after the earlier dependency cleanup. Code-splitting would fix it; not
+  urgent.
 - Backups stay on the Pi (decided 2026-10-15): a nightly dump runs at 03:15
   and keeps 14 days in `~/dlams-backups` on the host, but there is no
   off-device copy, so losing the Pi's storage loses the backups with the
@@ -268,12 +330,10 @@ After the milestone:
 ## Open questions
 
 - How should a visitor's browser-local demo overlay behave if the owner
-  changes the source demo collection or revokes the demo grant?
+  changes the source demo collection or stops sharing it?
 - What fields are shared by every item type, and how should type-specific
   metadata be modeled? Compare schema options before choosing an inheritance
   strategy, and choose stable names for categories and item types.
-- Is the `demo` grant mode still needed once demo accounts own their
-  collections and are read-only by role, or should it be removed?
 - Which URL do visitors get? The portfolio link is the first impression, so
   decide whether the demo lives at the main domain or a dedicated subdomain.
 - Deferred: what should deleting a user do to the collections, consoles, and
