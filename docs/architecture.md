@@ -123,9 +123,10 @@ Two independent layers:
    All sharing is read-only: only the owner ever writes. Browser-local edits
    for demo accounts are planned and never reach the API.
 
-   Two FastAPI dependencies implement this: `get_readable_collection` and
-   `get_writable_collection` (owner only). A user with no access gets 404, not 403, so
-   collection ids are not discoverable. The UI mirrors write access through
+   Three FastAPI dependencies implement this. `get_collection_with_access`
+   loads the collection and the user's access; `get_readable_collection` and
+   `get_writable_collection` (owner only) build on it. A user with no access
+   gets 404, not 403, so collection ids are not discoverable. The UI mirrors write access through
    `lib/permissions.ts` (`canWriteCollection`, `isAdmin`); admin checks go
    through `isAdmin` in the UI and `require_admin` in the API, never a raw
    role string.
@@ -225,8 +226,8 @@ Styling is Tailwind with shadcn/ui; the owner's styling pass has not started
   `alembic upgrade head && uvicorn app.main:app`. Deploying a new migration
   therefore changes the production schema on the next API start.
 - **Where production runs.** A single Raspberry Pi, with every service in
-  Docker Compose. There is no staging environment and no automated database
-  backup.
+  Docker Compose. There is no staging environment. A nightly database backup runs
+  on the host (see the deployment README).
 - **Deploy.** A GitHub Actions runner is installed on the Pi itself
   (self-hosted, so the Pi polls GitHub for jobs and nothing connects in to
   it). A push to `main` triggers `.github/workflows/deploy.yml`, which runs

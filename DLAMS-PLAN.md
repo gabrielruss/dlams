@@ -1,62 +1,48 @@
 # DLAMS plan
 
-Last updated: 2026-10-16
+Last updated: 2026-10-17
 
 The current state of the project. For why things are the way they are, see
 [`docs/decisions.md`](./docs/decisions.md). For the full history up to
 2026-10-09, see [`docs/archive/`](./docs/archive/).
 
-## Where we left off (2026-10-16)
+## Where we left off (2026-10-17)
 
 Start here in a new session. This block is rewritten at the end of a session,
 never appended to.
 
 - **State.** The demo role, read-only sharing, owner-scoped console labels
-  with comboboxes, and the collection-name page heading are built, tested
-  (51 backend unit tests, UI lint/`tsc`/build), and in the working tree, not
-  deployed (Next up, item 1). The owner commits and pushes everything
-  themselves, so run `git status` before assuming what is committed. The
-  dev database was reset on 2026-10-16 and the admin re-bootstrapped. The
-  owner confirmed the console combobox's `Add "name"` row works in the dev
-  stack (a drawer-dismissal bug was fixed that day).
-- **Commit hygiene.** Two migration files were deleted from disk but may still
-  be staged (`d3a7e92b5f18_games_belong_to_collections.py` and
-  `a4f6c8d1e973_games_require_console_label.py`). They must not be
-  committed: the chain is `b7d4a1c93e52 -> c91e5f7a2b64 -> b8e1d6a42c07`, and
-  `alembic heads` must show only `b8e1d6a42c07`.
-- **Owner's manual UI pass, still to do (in the dev stack):**
-  1. Add console: type a new label, choose `Add "..."`, save; the label then
-     appears for the next console and for games.
-  2. Add game: pick an existing console label and add a new one (for example a
-     platform with no console record); editing a game starts with its label;
-     saving with the field blank is blocked.
-  3. A second collection offers the same labels (labels belong to the owner).
-  4. Share a collection (no sharing screen yet; use the API docs at
-     `http://localhost:8001/docs`, `POST /collections/{id}/grants` with
-     `{"username": "..."}`); the shared user sees it with a `view-only` badge
-     and no add, edit, or delete controls.
-  5. "Make demo" on a user in "Manage users"; that user's write requests return
-     403 `Demo accounts are read-only` (browser-console fetch in
-     `dlams-deployment/README.md`, "Demo account"); "Make regular" restores
-     them.
-  6. The page heading shows the selected collection's name ("Your collections"
-     only when none is selected). Try a long name.
-  7. Buttons show a pointer cursor on hover.
-- **Before the owner pushes:** run `dlams-deployment/scripts/backup-db.sh` on
-  the Pi. The push applies two migrations to production: `c91e5f7a2b64`
-  (demo role) and `b8e1d6a42c07`, which drops and recreates the grants,
-  console labels, consoles, and games tables, deleting any rows in them. The
-  owner confirmed on 2026-10-16 that nothing there is worth keeping.
-- **After the deploy:** on a throwaway account, use "Make demo" in "Manage
-  users", then confirm a write is refused (steps in
-  `dlams-deployment/README.md`, "Demo account"). Only then provision
-  `demo-user` (item 2). Do not share the demo link before that.
-- **Next code work, in order:** demo sign-in on the login page (item 3), the
-  mobile styling pass (item 4, needs the owner's go-ahead and scope), CI plus
-  light frontend tests (item 5, needs approval to install packages), README
-  and screenshots (item 6).
-- **Waiting on the owner:** which URL the demo lives at, styling scope, and
-  package approval for the test tooling.
+  with comboboxes, and the collection-name page heading were pushed and
+  deployed on 2026-10-17. On the Pi, `alembic current` reports
+  `b8e1d6a42c07 (head)` (owner-reported), and the owner confirmed on a
+  throwaway account that "Make demo" works and a demo account's write is
+  refused with 403. Checked locally the same day: 52 backend unit tests pass,
+  and the UI `tsc -b` and build pass. `npm run lint` fails with one error in
+  the generated `combobox.tsx` (see Known issues). The owner commits and
+  pushes everything themselves, so run `git status` before assuming what is
+  committed. The dev database was reset on 2026-10-16 and the admin
+  re-bootstrapped.
+- **Done 2026-10-17.** Removed the dead `grant` unpacking and the double access
+  lookup in the collection routes (new `get_collection_with_access`
+  dependency); simplified the video-game stats query to one query; validate a
+  game's name before creating its label; a case-only change to a console label
+  now renames the label (with a test); a console's game count now covers its
+  label across all the owner's collections (with a test); the combobox popup renders inside its
+  drawer through a `container` ref (after trying a handler, a wrapper, and an
+  inline list, see `docs/decisions.md`).
+- **Manual check done on production (owner-reported, 2026-10-17).** The owner
+  confirmed the deployed functionality there, in place of a dev-stack pass.
+- **Next, in order:** deactivate the throwaway account used for the demo check
+  (there is no delete yet), then provision `demo-user` (item 2; steps in
+  `dlams-deployment/README.md`, "Demo account"). Do not share the demo link
+  before `demo-user` is switched to the `demo` role. Then code work: demo
+  sign-in on the login page (item 3), the mobile styling pass (item 4, needs
+  the owner's go-ahead and scope), CI plus light frontend tests (item 5, needs
+  approval to install packages), README and screenshots (item 6).
+- **Waiting on the owner:** which URL the demo lives at, styling scope,
+  package approval for the test tooling, and how to clear the lint error in
+  the generated `combobox.tsx` (turn the rule off for `src/components/ui/` in
+  `eslint.config.js`, or another way).
 - **Things to remember about the code.** Generated shadcn files are reviewed
   after each install and not edited by hand, except that `combobox.tsx` has a
   local `container` prop on `ComboboxContent` so a combobox popup renders
@@ -131,17 +117,16 @@ workflow on a self-hosted runner (`.github/workflows/deploy.yml`).
   (see Known issues for its limits).
 - **Collections and access:** users own multiple typed collections (type
   `video_game` only). Owners share a collection read-only with other users
-  (built and tested, not deployed: previously there were also `edit` and
+  (deployed 2026-10-17: previously there were also `edit` and
   `demo` grant modes). Only the owner writes; global admin has no implicit
   collection access.
 - **Video games:** console labels, physical console records, and game
-  records, with full CRUD in the API and UI. (Owner-scoped labels and the
-  combobox forms are built, not deployed; see below.)
+  records, with full CRUD in the API and UI.
 - **UI:** left sidebar with collection rows and counts, right-side drawers
   for forms, URL-backed collection selection, TanStack Query for all server
   state.
 
-**Built and tested, not deployed**
+**Deployed 2026-10-17**
 
 - **Demo role:** a `demo` global role, "Make demo" and "Make regular" in
   "Manage users", and a check in `get_current_user` that rejects every
@@ -156,32 +141,35 @@ workflow on a self-hosted runner (`.github/workflows/deploy.yml`).
   `collection_id`. The console and game forms use a searchable combobox
   ("Console label" / "Console") with an `Add "name"` row when nothing matches
   exactly. `GET /console-labels` lists the user's labels. Migration
-  `b8e1d6a42c07` recreates the affected tables (see "Where we left off").
-  The comboboxes have not been tried in a browser. Decision in
-  `docs/decisions.md`.
+  `b8e1d6a42c07` recreated the affected tables, deleting their rows (the
+  owner had nothing to keep). Decision in `docs/decisions.md`.
 
 **Not implemented**
 
 - Sharing UI (add and remove who a collection is shared with).
 - Browser-local editing for demo accounts (a demo account sees a read-only UI
   today).
-- A provisioned demo account on production (the `demo` role is built but not
-  deployed; the procedure is in `dlams-deployment/README.md` and has not been
-  run).
+- A provisioned demo account on production (the `demo` role is deployed; the
+  procedure is in `dlams-deployment/README.md` and has not been run for
+  `demo-user`).
 - Demo sign-in on the login page.
 - Item types other than video games.
 
 **Verification baseline**
 
-- API (2026-10-16): 51 unit tests pass (run on Python 3.13, the project's
+- API (2026-10-17): 52 unit tests pass (run on Python 3.13, the project's
   version, in a scratch venv outside the repo), including a check that every
-  write route requires a signed-in user. PostgreSQL SQL generates for
-  migrations `c91e5f7a2b64` and `b8e1d6a42c07` (upgrade and downgrade); neither
-  has been applied to a real database yet.
-- UI (2026-10-16): `npm run build`, `tsc -b`, and full `npm run lint` pass
-  (the lint rule `react-refresh/only-export-components` is now off under
-  `src/components/ui/`).
-  The demo role switch and demo read-only UI have not been tried in a browser.
+  write route requires a signed-in user. Migrations `c91e5f7a2b64` and
+  `b8e1d6a42c07` were applied to production on 2026-10-17 (`alembic current`
+  showed `b8e1d6a42c07 (head)`, owner-reported). The downgrades have not been
+  run against a real database.
+- UI (2026-10-17): `npm run build` and `tsc -b` pass. `npm run lint` reports 1
+  error, `@typescript-eslint/no-unused-vars` for `children` in
+  `ComboboxChipsInput` in the generated `combobox.tsx` (the rule
+  `react-refresh/only-export-components` is off under `src/components/ui/`).
+  Owner-reported on production, 2026-10-17: "Make demo" on a throwaway
+  account, a write from that account refused with 403, the collection list
+  unchanged, and no write controls in its UI.
 - Production routing and the automated deploy pipeline were exercised
   end to end by the owner (2026-10-09).
 - Manual browser pass (2026-10-12, owner-reported): collection and
@@ -223,20 +211,12 @@ user deletion, off-device backups, and the deferred API dependency upgrades.
 In order. Items 1 to 6 are the path to the portfolio milestone.
 
 1. **Deploy the demo role, read-only sharing, and owner-scoped labels.**
-   Built 2026-10-15 and 2026-10-16 and tested (see Current status), not
-   deployed. Migrations: `c91e5f7a2b64` (the `demo` role, "Make demo" and
-   "Make regular" in "Manage users", and the GET-only check in
-   `get_current_user`) and `b8e1d6a42c07` (drops and recreates the item and
-   sharing tables). Reset the dev database, try the dev-stack checks listed in
-   "Where we left off", take a backup with
-   `dlams-deployment/scripts/backup-db.sh`, then push. After the deploy, try
-   the switch on a throwaway account and confirm a write is refused (steps in
-   `dlams-deployment/README.md`, "Demo account"), and add a game for a console
-   you don't own. The demo role must be in place before the demo link is
-   shared. See `docs/decisions.md`.
+   Done 2026-10-17: migrations `c91e5f7a2b64` and `b8e1d6a42c07` are applied
+   on production and a demo account's write was refused. See
+   `docs/decisions.md`.
 2. **Provision the demo account and its content.** Admin user management is
    deployed (2026-10-14, owner-reported working, including migration
-   `b7d4a1c93e52`). Once item 1 is deployed: create an invitation, register
+   `b7d4a1c93e52`). Item 1 is done, so: create an invitation, register
    `demo-user` as an ordinary user, sign in as it and enter a real-looking
    collection through the normal UI, then switch it to `demo` in "Manage
    users". Switch it back to `user` to edit later. The steps are in
@@ -252,7 +232,8 @@ In order. Items 1 to 6 are the path to the portfolio milestone.
    mark the styling pass status in `.github/copilot-instructions.md`.
 5. **Automated checks: CI plus light frontend testing.** Add a CI workflow on
    a GitHub-hosted runner (separate from the deploy workflow) that runs lint,
-   type check, build, and the backend tests. Add light frontend testing in
+   type check, build, and the backend tests. Lint must pass first (see Known
+   issues). Add light frontend testing in
    the spirit of "write tests, not too many, mostly integration": a few tests
    that render real flows and assert on what a user sees. Vitest with React
    Testing Library and MSW for integration tests, plus a handful of
@@ -286,20 +267,20 @@ After the milestone:
 
 ## Known issues
 
-- The UI build emits a Vite large-chunk warning again (about 509 kB, over the
-  500 kB limit) since the Combobox added `@base-ui/react` (2026-10-16). It was
-  clear after the earlier dependency cleanup. Code-splitting would fix it; not
-  urgent.
+- `npm run lint` fails on one error in the generated `combobox.tsx` (unused
+  `children` in `ComboboxChipsInput`, found 2026-10-17). Generated files are
+  not edited by hand, so the fix is a lint-config change or a reinstall.
+  Resolve it before CI (Next up, item 5), which runs lint.
+- The UI build emits a Vite large-chunk warning (about 647 kB on 2026-10-17,
+  over the 500 kB limit) since the Combobox added `@base-ui/react` (2026-10-16).
+  It was clear after the earlier dependency cleanup. Code-splitting would fix
+  it; not urgent.
 - Backups stay on the Pi (decided 2026-10-15): a nightly dump runs at 03:15
   and keeps 14 days in `~/dlams-backups` on the host, but there is no
   off-device copy, so losing the Pi's storage loses the backups with the
   database. Accepted for now. The restore test passed on 2026-10-15 against a
   database with 2 users and no collections or games; redo it once the demo
   content exists.
-- Demo accounts are not read-only on production yet (found 2026-10-14): the
-  role, the API check, and the admin switch are built and tested but not
-  deployed. Until they are, an account with a public password is an ordinary
-  user. Do not share the demo link before deploying item 1.
 - Dependency audit (2026-10-12): `npm audit` on `dlams-ui` reports 0
   vulnerabilities. `pip-audit` on `dlams-fastapi/requirements.txt` reports 27
   advisories in 10 packages (starlette, cryptography, pyasn1, ecdsa, anyio,

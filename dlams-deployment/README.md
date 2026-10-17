@@ -149,7 +149,7 @@ then use these endpoints in the API docs:
    a collection with no consoles can still hold games. Names match ignoring
    case.
 4. Confirm `GET /collections/{collection_id}/games` returns the game and that
-   each console response reports `game_count: 1` (games in that collection).
+   each console response reports `game_count: 1` (games with that label across your collections).
 5. Delete one console edition. It should succeed while the other edition
    remains. Deleting the final edition while a game uses its label also
    succeeds, and the label stays because the game uses it. A label is removed

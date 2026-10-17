@@ -134,7 +134,7 @@ replaces it is named. Proposals and open questions live in
   account instead of being a main-account collection with a `demo` grant. The
   `demo` grant mode is now redundant; whether to remove it is an open
   question in the plan. Built 2026-10-15 (role, admin switch, and the API
-  check); deployment pending.
+  check); deployed 2026-10-17.
 
 ### Admins can deactivate a user; delete is deferred — 2026-10-12
 - Admin user management deactivates and reactivates accounts. A deactivated
@@ -235,11 +235,16 @@ replaces it is named. Proposals and open questions live in
   `Add "name"` row, the "creatable" pattern in Base UI's docs. A collection
   with no consoles, such as "Games to sell", can still hold games for any
   platform.
+- Changing only the capitalization of a console's label renames the label
+  (2026-10-17); before, the matching label was found and the change ignored.
+  The rename applies to every console and game that uses the label.
 - A label is deleted only when no console and no game, in any of the owner's
   collections, uses it. Deleting or relabelling the last console no longer
   fails while games use its label.
 - The label list is per user (`GET /console-labels`), not per collection. A
-  console's game count counts only games in its own collection.
+  console's game count is the number of games with its label across all of the
+  owner's collections (changed 2026-10-17; it counted only its own collection),
+  so every console with that label shows the same number.
 - Deferred, not rejected: a rename-label action (the link from items to
   labels is a real foreign key, so a rename would update every item), and a
   small screen to manage labels.
@@ -283,6 +288,23 @@ replaces it is named. Proposals and open questions live in
   shared reference catalog.
 
 ## Code and UI conventions
+
+### Combobox popups render inside their drawer through a `container` prop — 2026-10-17
+- A combobox popup renders in a portal outside the drawer, so a click on an
+  option can count as an outside click and close the drawer. `ComboboxContent`
+  in the generated `combobox.tsx` accepts a `container` prop for the portal,
+  and the console and game drawers pass a ref on their `DrawerContent`
+  through `ConsoleLabelCombobox`.
+- This is the one local edit to a generated shadcn file. A reinstall removes
+  it, and `tsc` then fails on the `container` prop, which points at what to
+  re-apply.
+- Tried and dropped: an `onInteractOutside` handler that matches the popup
+  with a selector (fragile), a drawer wrapper component with the same handler,
+  and Base UI's `inline` list (always open, so it does not scale to many
+  consoles). A combobox popup shell composed in our own file would avoid the
+  edit but duplicates the generated popup markup.
+- The drawer-dismissal cause was never confirmed in a browser or from the
+  library docs.
 
 ### Leave the shadcn CLI's `cn` import alone — 2026-10-14
 - The shadcn CLI generates `import { cn } from "cn"` and adds the `cn` npm

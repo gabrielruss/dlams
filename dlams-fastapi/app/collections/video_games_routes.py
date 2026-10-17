@@ -162,11 +162,8 @@ def _get_or_create_label(
 def _console_response(db: Session, console: Console) -> ConsoleResponse:
     label = db.query(ConsoleLabel).filter(ConsoleLabel.id == console.console_label_id).one()
     game_count = (
-        db.query(func.count(func.distinct(Game.id)))
-        .filter(
-            Game.console_label_id == label.id,
-            Game.collection_id == console.collection_id,
-        )
+        db.query(func.count(Game.id))
+        .filter(Game.console_label_id == label.id)
         .scalar()
     )
     return ConsoleResponse(
