@@ -9,6 +9,9 @@ jobs:
     runs-on: [self-hosted, deploy-pi]
     steps:
       - name: Pull and rebuild
+        env:
+          VITE_DEMO_USERNAME: demo-user
+          VITE_DEMO_PASSWORD: ${{ secrets.DEMO_PASSWORD }}
         run: |
           cd ~/dlams
           git pull origin main

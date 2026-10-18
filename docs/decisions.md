@@ -7,6 +7,13 @@ replaces it is named. Proposals and open questions live in
 
 ## Repository and delivery
 
+### The demo lives in the production app, on the main domain — 2026-10-17
+- Visitors use the real app at its main domain, not a separate demo site or
+  subdomain. They sign in as `demo-user`, which holds the `demo` role and is
+  GET-only at the API, so it cannot change anything. This answers the earlier
+  open question about the demo URL.
+- The domain is not written in tracked files (public repository).
+
 ### Database backups stay on the host — 2026-10-15
 - A nightly `pg_dump` (`dlams-deployment/scripts/backup-db.sh`, 03:15, 14 days
   kept) protects against a bad migration or an accidental delete. It is not

@@ -32,6 +32,18 @@ function Login() {
     loginMutation.mutate(data, { onSuccess: () => navigate("/") })
   }
 
+  const demoUsername = import.meta.env.VITE_DEMO_USERNAME
+  const demoPassword = import.meta.env.VITE_DEMO_PASSWORD
+  const isBusy = form.formState.isSubmitting || loginMutation.isPending
+
+  const onDemoClick = () => {
+    if (!demoUsername || !demoPassword) return
+    loginMutation.mutate(
+      { username: demoUsername, password: demoPassword },
+      { onSuccess: () => navigate("/") },
+    )
+  }
+
   return (
     <div className="min-h-screen flex items-center justify-center">
       <Card className="w-full max-w-md">
@@ -78,14 +90,21 @@ function Login() {
               <Button
                 type="submit"
                 className="w-full hover:bg-slate-700 hover:cursor-pointer"
-                disabled={
-                  form.formState.isSubmitting || loginMutation.isPending
-                }
+                disabled={isBusy}
               >
-                {form.formState.isSubmitting || loginMutation.isPending
-                  ? "Logging in..."
-                  : "Login"}
+                {isBusy ? "Logging in..." : "Login"}
               </Button>
+              {demoUsername && demoPassword && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="w-full hover:cursor-pointer"
+                  disabled={isBusy}
+                  onClick={onDemoClick}
+                >
+                  Try the demo
+                </Button>
+              )}
               <p className="text-center text-sm">
                 Have an invitation?{" "}
                 <Link className="underline" to="/register">

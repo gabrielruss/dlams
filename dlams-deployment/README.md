@@ -332,6 +332,14 @@ Provision it once on production, signed in as an admin:
 
 Things to know:
 
+- **"Try the demo" button.** The login page shows it only when the UI is
+  built with `VITE_DEMO_USERNAME` and `VITE_DEMO_PASSWORD`. The deploy
+  workflow sets them from the `DEMO_PASSWORD` GitHub Actions secret and the
+  username `demo-user`. The values end up in the public JavaScript bundle, by
+  design. A manual `docker compose up --build` without those variables drops
+  the button, so check the login page after one. To try it locally, put the
+  two variables in a git-ignored `dlams-ui/.env.local` and run
+  `npm run dev:hybrid`.
 - **Editing the content later.** Use "Make regular" on the row, sign in as the
   account, make the changes, then "Make demo" again. Do not leave it as a
   regular account while its password is public.

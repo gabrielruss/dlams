@@ -15,7 +15,7 @@ never appended to.
   with comboboxes, and the collection-name page heading were pushed and
   deployed on 2026-10-17. On the Pi, `alembic current` reports
   `b8e1d6a42c07 (head)` (owner-reported), and the owner confirmed on a
-  throwaway account that "Make demo" works and a demo account's write is
+  test account that "Make demo" works and a demo account's write is
   refused with 403. Checked locally the same day: 52 backend unit tests pass,
   and the UI `tsc -b` and build pass. `npm run lint` fails with one error in
   the generated `combobox.tsx` (see Known issues). The owner commits and
@@ -32,14 +32,22 @@ never appended to.
   inline list, see `docs/decisions.md`).
 - **Manual check done on production (owner-reported, 2026-10-17).** The owner
   confirmed the deployed functionality there, in place of a dev-stack pass.
-- **Next, in order:** deactivate the throwaway account used for the demo check
-  (there is no delete yet), then provision `demo-user` (item 2; steps in
-  `dlams-deployment/README.md`, "Demo account"). Do not share the demo link
-  before `demo-user` is switched to the `demo` role. Then code work: demo
-  sign-in on the login page (item 3), the mobile styling pass (item 4, needs
+- **Demo account (owner-reported, 2026-10-17).** `demo-user` exists in
+  production as a regular user with initial data entered. The owner will
+  switch it to the `demo` role right before go live. Do not share the demo
+  link before that switch.
+- **Demo sign-in (2026-10-17).** The login page shows a "Try the demo" button
+  when `VITE_DEMO_USERNAME` and `VITE_DEMO_PASSWORD` are set at build time.
+  The deploy workflow sets them from the `DEMO_PASSWORD` GitHub secret (added
+  by the owner) and a fixed `demo-user` username. The owner confirmed the
+  button works locally. It has not been tried on production yet, since it
+  needs a push. The selected collection in the sidebar now has a teal accent
+  bar on its right edge (`teal` is a theme color in `index.css`).
+- **Next, in order:** push and try the demo button on production, then code
+  work: the mobile styling pass (item 4, needs
   the owner's go-ahead and scope), CI plus light frontend tests (item 5, needs
   approval to install packages), README and screenshots (item 6).
-- **Waiting on the owner:** which URL the demo lives at, styling scope,
+- **Waiting on the owner:** styling scope,
   package approval for the test tooling, and how to clear the lint error in
   the generated `combobox.tsx` (turn the rule off for `src/components/ui/` in
   `eslint.config.js`, or another way).
@@ -149,10 +157,9 @@ workflow on a self-hosted runner (`.github/workflows/deploy.yml`).
 - Sharing UI (add and remove who a collection is shared with).
 - Browser-local editing for demo accounts (a demo account sees a read-only UI
   today).
-- A provisioned demo account on production (the `demo` role is deployed; the
-  procedure is in `dlams-deployment/README.md` and has not been run for
-  `demo-user`).
-- Demo sign-in on the login page.
+- The `demo` role on `demo-user` in production (the account and its data
+  exist as a regular user; the switch is the go-live step, see
+  `dlams-deployment/README.md`, "Demo account").
 - Item types other than video games.
 
 **Verification baseline**
@@ -167,7 +174,7 @@ workflow on a self-hosted runner (`.github/workflows/deploy.yml`).
   error, `@typescript-eslint/no-unused-vars` for `children` in
   `ComboboxChipsInput` in the generated `combobox.tsx` (the rule
   `react-refresh/only-export-components` is off under `src/components/ui/`).
-  Owner-reported on production, 2026-10-17: "Make demo" on a throwaway
+  Owner-reported on production, 2026-10-17: "Make demo" on a test
   account, a write from that account refused with 403, the collection list
   unchanged, and no write controls in its UI.
 - Production routing and the automated deploy pipeline were exercised
@@ -214,17 +221,18 @@ In order. Items 1 to 6 are the path to the portfolio milestone.
    Done 2026-10-17: migrations `c91e5f7a2b64` and `b8e1d6a42c07` are applied
    on production and a demo account's write was refused. See
    `docs/decisions.md`.
-2. **Provision the demo account and its content.** Admin user management is
-   deployed (2026-10-14, owner-reported working, including migration
-   `b7d4a1c93e52`). Item 1 is done, so: create an invitation, register
-   `demo-user` as an ordinary user, sign in as it and enter a real-looking
-   collection through the normal UI, then switch it to `demo` in "Manage
-   users". Switch it back to `user` to edit later. The steps are in
-   `dlams-deployment/README.md` ("Demo account"). Redo the backup restore test
-   once the content exists. Deleting a user is deferred.
-3. **Demo sign-in on the login page.** A "Try the demo" control that signs in
-   as the demo user without typing credentials. Demo credentials are public
-   by design and carry no authority (see `docs/decisions.md`).
+2. **Provision the demo account and its content.** Mostly done 2026-10-17
+   (owner-reported): `demo-user` is registered in production with initial
+   data. Remaining: switch it to `demo` in "Manage users" right before go
+   live (switch it back to `user` to edit later; steps in
+   `dlams-deployment/README.md`, "Demo account"), and redo the backup restore
+   test now that content exists. Deleting a user is deferred.
+3. **Demo sign-in on the login page.** Built 2026-10-17 and working locally
+   (owner-confirmed); it needs a push and a check on production. A "Try the
+   demo" button signs in as the demo user through the normal login, using
+   build-time variables fed from the `DEMO_PASSWORD` GitHub secret. Demo
+   credentials are public by design and carry no authority (see
+   `docs/decisions.md`).
 4. **Mobile-friendly styling pass** across the whole UI (sidebar and drawers
    in particular). This is the owner's styling pass, so it needs the owner's
    go-ahead and scope before any CSS or Tailwind change. For the milestone,
@@ -242,7 +250,8 @@ In order. Items 1 to 6 are the path to the portfolio milestone.
    approval to install packages. Backend tests stay on `unittest`.
 6. **README, screenshots, and a final check.** Rewrite the root `README.md`
    as the front door (see the milestone), take screenshots after the styling
-   pass, run a secrets scan, and click through the live demo on a phone and a
+   pass, run a secrets scan, switch `demo-user` to the `demo` role and confirm
+   a write is refused, and click through the live demo on a phone and a
    desktop. Then share it.
 
 After the milestone:
@@ -315,8 +324,6 @@ After the milestone:
 - What fields are shared by every item type, and how should type-specific
   metadata be modeled? Compare schema options before choosing an inheritance
   strategy, and choose stable names for categories and item types.
-- Which URL do visitors get? The portfolio link is the first impression, so
-  decide whether the demo lives at the main domain or a dedicated subdomain.
 - Deferred: what should deleting a user do to the collections, consoles, and
   games they own, and to invitations they issued? Decide before building
   delete; backups exist only on the Pi, so a hard delete is hard to undo.

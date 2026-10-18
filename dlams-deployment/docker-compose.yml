@@ -33,6 +33,9 @@ services:
     build:
       context: ../dlams-ui
       dockerfile: Dockerfile
+      args:
+        VITE_DEMO_USERNAME: ${VITE_DEMO_USERNAME:-}
+        VITE_DEMO_PASSWORD: ${VITE_DEMO_PASSWORD:-}
     container_name: dlams-ui
     networks:
       - dlams-network

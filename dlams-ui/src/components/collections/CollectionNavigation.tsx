@@ -86,7 +86,7 @@ function CollectionNavigation() {
           No collections yet.
         </p>
       ) : (
-        <ul className="min-h-0 flex-1 overflow-y-auto px-3">
+        <ul className="min-h-0 flex-1 overflow-y-auto pl-3">
           {collections.map((collection) => {
             const selected = collection.id === selectedCollectionId
             return (
@@ -94,11 +94,12 @@ function CollectionNavigation() {
                 <button
                   type="button"
                   aria-pressed={selected}
+                  aria-current={selected ? "true" : undefined}
                   onClick={() => setSelectedCollectionId(collection.id)}
-                  className={`flex w-full flex-col gap-2 py-3 text-left transition-colors ${
+                  className={`flex w-full flex-col gap-2 border-r-4 py-3 pr-3 text-left transition-colors ${
                     selected
-                      ? "text-sidebar-primary"
-                      : "text-sidebar-foreground hover:text-sidebar-primary"
+                      ? "border-teal text-sidebar-primary"
+                      : "border-transparent text-sidebar-foreground hover:text-sidebar-primary"
                   }`}
                 >
                   <span className="flex min-w-0 items-center justify-between gap-2">
