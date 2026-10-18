@@ -2,6 +2,7 @@ import type { ReactNode } from "react"
 import { LogOut, Users } from "lucide-react"
 import { Link, NavLink } from "react-router-dom"
 
+import Wordmark from "@/components/Wordmark"
 import { Button } from "@/components/ui/button"
 import RegistrationInviteManager from "@/components/auth/RegistrationInviteManager"
 import { useCurrentUser, useLogout } from "@/components/auth/useAuthQueries"
@@ -21,14 +22,11 @@ function AppSidebar({ children }: AppSidebarProps) {
       className="sticky top-0 flex h-screen w-56 shrink-0 flex-col overflow-hidden border-r bg-sidebar text-sidebar-foreground sm:w-64"
     >
       <Link
-        className="flex items-center gap-3 border-b p-4 font-semibold sm:p-5"
+        className="relative block h-[4.75rem] shrink-0 border-b"
         to="/"
         aria-label="DLAMS home"
       >
-        <span className="flex size-9 items-center justify-center rounded-md bg-sidebar-primary text-sidebar-primary-foreground">
-          D
-        </span>
-        <span className="text-lg">DLAMS</span>
+        <Wordmark className="absolute inset-x-4 inset-y-0" />
       </Link>
 
       {children}

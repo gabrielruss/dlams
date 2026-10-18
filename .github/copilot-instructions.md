@@ -26,7 +26,9 @@ Applies across the DLAMS workspace. Project-local conventions take precedence wh
   render its popup within the drawer (otherwise clicking an option counts as
   an outside click and closes the drawer). The drawer managers pass a ref on
   their `DrawerContent` through `ConsoleLabelCombobox`. Re-apply the edit after
-  reinstalling; if it is lost, `tsc` fails on the `container` prop.
+  reinstalling; if it is lost, `tsc` fails on the `container` prop. The owner
+  also allowed one removal of the unused `children` in `ComboboxChipsInput`
+  (2026-10-18) so lint passes; a reinstall brings that lint error back.
 - Re-running the CLI overwrites the generated file (for example it restored
   `buttonVariants` in `button.tsx` and moved it to the `radix-ui` package). The
   `react-refresh/only-export-components` lint rule is off under

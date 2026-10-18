@@ -1,12 +1,12 @@
 # DLAMS plan
 
-Last updated: 2026-10-17
+Last updated: 2026-10-18
 
 The current state of the project. For why things are the way they are, see
 [`docs/decisions.md`](./docs/decisions.md). For the full history up to
 2026-10-09, see [`docs/archive/`](./docs/archive/).
 
-## Where we left off (2026-10-17)
+## Where we left off (2026-10-18)
 
 Start here in a new session. This block is rewritten at the end of a session,
 never appended to.
@@ -29,6 +29,15 @@ never appended to.
   label across all the owner's collections (with a test); the combobox popup renders inside its
   drawer through a `container` ref (after trying a handler, a wrapper, and an
   inline list, see `docs/decisions.md`).
+- **Done 2026-10-18.** Login branding: the faint "DON'T LOOK AT MY STUFF"
+  text fills the login background (DON'T turned sideways on the left, in
+  `red` at 15%; LOOK / AT MY / STUFF stacked beside it, centered as one
+  group, in Półtawski Nowy), and the login card is 80%
+  opaque. The sidebar header is now a `D.L.A.M.S.` wordmark (Półtawski Nowy,
+  the first D and its period in `red`, the rest in the text color) fitted to
+  the old header height. Fira Code is now the app font. `teal` and `red` are
+  theme colors in `index.css`. The unused `children` in `ComboboxChipsInput` was removed so
+  lint passes. See `docs/decisions.md`.
 - **Manual check done on production (owner-reported, 2026-10-17).** The owner
   confirmed the deployed functionality there, in place of a dev-stack pass.
 - **Demo account (owner-reported, 2026-10-17).** `demo-user` exists in
@@ -39,13 +48,14 @@ never appended to.
   when `VITE_DEMO_USERNAME` and `VITE_DEMO_PASSWORD` are set at build time.
   The deploy workflow sets them from the `DEMO_PASSWORD` GitHub secret (added
   by the owner) and a fixed `demo-user` username. The owner confirmed the
-  button works locally. It has not been tried on production yet, since it
-  needs a push. The selected collection in the sidebar now has a teal accent
-  bar on its right edge (`teal` is a theme color in `index.css`).
-- **Next, in order:** push and try the demo button on production, then code
-  work: the mobile styling pass (item 4, needs
-  the owner's go-ahead and scope), CI plus light frontend tests (item 5, needs
-  approval to install packages), README and screenshots (item 6).
+  button works locally, then pushed and reported everything working
+  (2026-10-18). The selected collection in the sidebar has a teal accent bar
+  on its right edge (`teal` is a theme color in `index.css`).
+- **Next, in order:** push the login branding, then code work: the mobile
+  styling pass (item 4; the owner approved the plan in principle, see item 4),
+  CI plus light frontend tests (item 5, needs
+  approval to install packages), the accessibility audit (item 6), README
+  and screenshots (item 7).
 - **Waiting on the owner:** styling scope, and package approval for the test
   tooling.
 - **Things to remember about the code.** Generated shadcn files are reviewed
@@ -185,7 +195,7 @@ workflow on a self-hosted runner (`.github/workflows/deploy.yml`).
 
 The next goal, set 2026-10-14: a state good enough to link from the owner's
 portfolio site and show to potential employers, reached as soon as possible.
-Items 1 to 6 under "Next up" are the path; the rest waits. See
+Items 1 to 7 under "Next up" are the path; the rest waits. See
 `docs/decisions.md` for why.
 
 Done when all of these are true:
@@ -200,6 +210,8 @@ Done when all of these are true:
 - **Shows engineering practice.** A CI workflow runs lint, type check, build,
   and the backend tests on every push, with a passing status visible, plus a
   few meaningful frontend integration tests.
+- **Accessible.** An accessibility audit of the screens a visitor sees has
+  been done and its findings fixed or recorded (Next up, item 6).
 - **Has a front door.** The root `README.md` says what DLAMS is and why, links
   the live demo, shows screenshots, summarizes the stack and architecture
   (linking `docs/architecture.md`), and explains how to run it.
@@ -213,7 +225,7 @@ user deletion, off-device backups, and the deferred API dependency upgrades.
 
 ## Next up
 
-In order. Items 1 to 6 are the path to the portfolio milestone.
+In order. Items 1 to 7 are the path to the portfolio milestone.
 
 1. **Deploy the demo role, read-only sharing, and owner-scoped labels.**
    Done 2026-10-17: migrations `c91e5f7a2b64` and `b8e1d6a42c07` are applied
@@ -225,8 +237,8 @@ In order. Items 1 to 6 are the path to the portfolio milestone.
    live (switch it back to `user` to edit later; steps in
    `dlams-deployment/README.md`, "Demo account"), and redo the backup restore
    test now that content exists. Deleting a user is deferred.
-3. **Demo sign-in on the login page.** Built 2026-10-17 and working locally
-   (owner-confirmed); it needs a push and a check on production. A "Try the
+3. **Demo sign-in on the login page.** Done 2026-10-18 (owner-reported
+   working on production after the push). A "Try the
    demo" button signs in as the demo user through the normal login, using
    build-time variables fed from the `DEMO_PASSWORD` GitHub secret. Demo
    credentials are public by design and carry no authority (see
@@ -235,10 +247,19 @@ In order. Items 1 to 6 are the path to the portfolio milestone.
    in particular). This is the owner's styling pass, so it needs the owner's
    go-ahead and scope before any CSS or Tailwind change. For the milestone,
    scope it to the screens a visitor sees; the rest can follow. When done,
-   mark the styling pass status in `.github/copilot-instructions.md`.
+   mark the styling pass status in `.github/copilot-instructions.md`. Plan
+   (proposed 2026-10-18): below `md` the sidebar becomes a top bar with a
+   menu button that opens the sidebar contents in a left drawer (picking a
+   collection closes it); smaller padding and heading on phones; larger tap
+   targets on the row buttons; login card side padding. The idea of reusing
+   the login backdrop behind the whole app was dropped on 2026-10-18 in favor
+   of the sidebar wordmark. Needs a browser check of the left and right
+   drawers nesting on a phone; the 76px wordmark header will also need a
+   phone-width look.
 5. **Automated checks: CI plus light frontend testing.** The CI workflow
    (`.github/workflows/ci.yml`, GitHub-hosted runner, separate from the deploy
-   workflow) is written 2026-10-17 and has not run on GitHub yet. It runs lint
+   workflow) is written 2026-10-17 and was pushed 2026-10-18; check the Actions tab for
+   its status. It runs lint
    and build (the build includes the type check) for the UI, and the backend
    tests. Check its first run after the push. It does not gate the deploy.
    Still to do: add light frontend testing in
@@ -248,7 +269,18 @@ In order. Items 1 to 6 are the path to the portfolio milestone.
    Playwright end-to-end checks across owner, shared (read-only), and demo
    access. Skip per-component and per-hook unit tests. Needs the owner's
    approval to install packages. Backend tests stay on `unittest`.
-6. **README, screenshots, and a final check.** Rewrite the root `README.md`
+6. **Accessibility audit.** Do it after the styling pass and before
+   publishing, on the screens a visitor sees (login, sidebar, collection
+   workspace, drawers). Run an automated check (axe or Lighthouse), then
+   check by hand: keyboard-only use with visible focus, a screen reader pass,
+   color contrast at both phone and desktop widths, and zoom to 200%. Known
+   finding from 2026-10-17: the default input border is about 1.2:1 against
+   the card, below the 3:1 that WCAG 1.4.11 asks of form-field boundaries;
+   this is the shadcn default and affects the whole app. The login backdrop
+   is decorative and hidden from screen readers; its card text measured
+   about 19:1 at 80% opacity (computed, not tested in a browser). Record the
+   findings and fixes here.
+7. **README, screenshots, and a final check.** Rewrite the root `README.md`
    as the front door (see the milestone), take screenshots after the styling
    pass, run a secrets scan, switch `demo-user` to the `demo` role and confirm
    a write is refused, and click through the live demo on a phone and a
@@ -256,12 +288,12 @@ In order. Items 1 to 6 are the path to the portfolio milestone.
 
 After the milestone:
 
-7. **Sharing UI.** A full-page "Shared with" screen where a collection owner
+8. **Sharing UI.** A full-page "Shared with" screen where a collection owner
    adds a user by username and removes users. Sharing is read-only, so there
    is no access-mode control.
-8. **Browser-local demo editing** with reset. It waits on the open questions
+9. **Browser-local demo editing** with reset. It waits on the open questions
    below.
-9. **Demo sharing walkthrough.** After signing in as `demo-user`, a visitor
+10. **Demo sharing walkthrough.** After signing in as `demo-user`, a visitor
    opens the sharing area and clicks "Share my collection"; a "View the app
    as the shared user" button then appears. It signs in as a second demo
    account, `demo-shared`, through the normal login (no session-swap
@@ -270,9 +302,9 @@ After the milestone:
    demo collection, and the visitor's browser-local edits are applied to what
    it shows. All sharing is read-only, so no sharing form has an access-mode control. The share action is simulated in
    the browser, because all visitors share one server state. Depends on the
-   sharing UI (7) and browser-local demo editing (8). Proposed
+   sharing UI (8) and browser-local demo editing (9). Proposed
    2026-10-14.
-10. **Further item types**, after the shared-fields question is settled.
+11. **Further item types**, after the shared-fields question is settled.
 
 ## Known issues
 

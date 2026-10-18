@@ -296,6 +296,48 @@ replaces it is named. Proposals and open questions live in
 
 ## Code and UI conventions
 
+### Login branding: backdrop text, two fonts, two brand colors — 2026-10-18
+- The login page shows "DON'T LOOK AT MY STUFF" as a faint full-screen
+  background. DON'T is turned sideways on the left, at the screen's full height
+  (its width capped at a quarter of the screen); LOOK / AT MY / STUFF is
+  stacked beside it, each line stretched to the width left over. The whole
+  group is centered. On a wide screen the height limit makes the lines narrower
+  than the space, so the group is centered rather than stretched. Tried and
+  dropped: choosing one, two, or three lines to fit the screen shape, and a
+  single block sized to the largest fit; the owner preferred the plain
+  centered stack.
+- The text is measured in the browser (font-independent) and re-fitted on
+  resize and font load. It is decorative and hidden from assistive tech. The
+  login card is 80% opaque so the text shows through faintly; computed
+  contrast stays about 19:1 for body text, but muted text drops to the AA
+  line at lower opacity, so do not go below 80% without checking.
+- Fonts: Fira Code is the app font (`--font-sans`); Półtawski Nowy is for the
+  logo text only (`--font-logo`). Both come from `@fontsource-variable`
+  packages, so they are self-hosted and visitors' browsers make no request to
+  a font service.
+- Brand colors, taken from the owner's portfolio site palette: `--teal`
+  (`#17b890`, the selected-collection accent bar) and `--red` (`#ba3f2c`, a
+  dark red from flamingo's hue, 5.25:1 on `#fafafa`; used for DON'T and
+  intended for errors). Dark-mode variants and the `aa`/`aaa` variants are not
+  defined; `--destructive` has not been repointed.
+- The sidebar header shows a `D.L.A.M.S.` wordmark instead of the "D" square
+  and "DLAMS" text, in the same two fonts and colors: the logo font, the first
+  D and its period in `red`, the rest in the sidebar text color at full
+  strength, fitted to the old header height (76px). The periods mark it as an
+  acronym of the login text and cost about a quarter of the size. The home
+  link's accessible name stays "DLAMS home", and the app name stays plain
+  DLAMS everywhere else.
+- The favicon is the wordmark's red D alone, as a static
+  `dlams-ui/public/favicon.svg` on a transparent background. The letter is the
+  bold Półtawski Nowy D converted to a path (a favicon cannot load web fonts),
+  made with a throwaway `fonttools` install outside the repo. SVG only; older
+  Safari may show no icon until a PNG fallback is added.
+- Considered and dropped: reusing the login backdrop behind the whole app
+  (it would need translucent panels so muted text stays above the AA line),
+  and a smaller copy of the login logo in the sidebar header. The owner
+  chose the wordmark.
+
+
 ### Combobox popups render inside their drawer through a `container` prop — 2026-10-17
 - A combobox popup renders in a portal outside the drawer, so a click on an
   option can count as an outside click and close the drawer. `ComboboxContent`

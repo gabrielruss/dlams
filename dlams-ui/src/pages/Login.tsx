@@ -15,6 +15,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { useLogin } from "@/components/auth/useAuthQueries"
+import BrandLogo from "@/components/BrandLogo"
 
 function Login() {
   const navigate = useNavigate()
@@ -45,8 +46,12 @@ function Login() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center">
-      <Card className="w-full max-w-md">
+    <div className="relative flex min-h-screen items-center justify-center overflow-hidden px-4">
+      <BrandLogo
+        className="pointer-events-none absolute inset-0 text-foreground/10"
+        sideClassName="text-red/15"
+      />
+      <Card className="relative w-full max-w-md bg-card/80">
         <CardHeader>
           <CardTitle>Login</CardTitle>
         </CardHeader>

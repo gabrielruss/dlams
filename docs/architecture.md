@@ -209,8 +209,12 @@ dlams-ui/src/
   schemas/, types/           zod schemas and shared TypeScript types
 ```
 
-Forms open in right-side drawers; the sidebar lists collections with counts.
-Styling is Tailwind with shadcn/ui; the owner's styling pass has not started
+Forms open in right-side drawers; the sidebar lists collections with counts
+and marks the selected one with a teal bar. Its header is a fitted
+`D.L.A.M.S.` wordmark (`components/Wordmark.tsx`). The login page draws a
+decorative "DON'T LOOK AT MY STUFF" backdrop (`components/BrandLogo.tsx`); the
+app font is Fira Code and brand colors `teal` and `red` are theme tokens in
+`index.css`. Styling is Tailwind with shadcn/ui; the owner's styling pass has not started
 (see the conventions file for the rule).
 
 ## Environments and deployment

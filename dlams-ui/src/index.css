@@ -3,6 +3,11 @@
 
 @custom-variant dark (&:is(.dark *));
 
+@theme {
+  --font-sans: "Fira Code Variable", "Fira Code", ui-monospace, monospace;
+  --font-logo: "Poltawski Nowy Variable", "Poltawski Nowy", Georgia, serif;
+}
+
 @theme inline {
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
@@ -40,6 +45,7 @@
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-teal: var(--teal);
+  --color-red: var(--red);
 }
 
 :root {
@@ -76,6 +82,7 @@
   --sidebar-border: oklch(0.929 0.013 255.508);
   --sidebar-ring: oklch(0.704 0.04 256.788);
   --teal: #17b890;
+  --red: #ba3f2c;
 }
 
 .dark {
