@@ -17,8 +17,7 @@ never appended to.
   `b8e1d6a42c07 (head)` (owner-reported), and the owner confirmed on a
   test account that "Make demo" works and a demo account's write is
   refused with 403. Checked locally the same day: 52 backend unit tests pass,
-  and the UI `tsc -b` and build pass. `npm run lint` fails with one error in
-  the generated `combobox.tsx` (see Known issues). The owner commits and
+  and the UI `tsc -b`, lint, and build pass. The owner commits and
   pushes everything themselves, so run `git status` before assuming what is
   committed. The dev database was reset on 2026-10-16 and the admin
   re-bootstrapped.
@@ -47,10 +46,8 @@ never appended to.
   work: the mobile styling pass (item 4, needs
   the owner's go-ahead and scope), CI plus light frontend tests (item 5, needs
   approval to install packages), README and screenshots (item 6).
-- **Waiting on the owner:** styling scope,
-  package approval for the test tooling, and how to clear the lint error in
-  the generated `combobox.tsx` (turn the rule off for `src/components/ui/` in
-  `eslint.config.js`, or another way).
+- **Waiting on the owner:** styling scope, and package approval for the test
+  tooling.
 - **Things to remember about the code.** Generated shadcn files are reviewed
   after each install and not edited by hand, except that `combobox.tsx` has a
   local `container` prop on `ComboboxContent` so a combobox popup renders
@@ -170,11 +167,12 @@ workflow on a self-hosted runner (`.github/workflows/deploy.yml`).
   `b8e1d6a42c07` were applied to production on 2026-10-17 (`alembic current`
   showed `b8e1d6a42c07 (head)`, owner-reported). The downgrades have not been
   run against a real database.
-- UI (2026-10-17): `npm run build` and `tsc -b` pass. `npm run lint` reports 1
-  error, `@typescript-eslint/no-unused-vars` for `children` in
-  `ComboboxChipsInput` in the generated `combobox.tsx` (the rule
-  `react-refresh/only-export-components` is off under `src/components/ui/`).
-  Owner-reported on production, 2026-10-17: "Make demo" on a test
+- UI (2026-10-17): `npm run build`, `tsc -b`, and `npm run lint` pass
+  (`react-refresh/only-export-components` is off under `src/components/ui/`
+  because that folder is generated; the unused `children` in
+  `ComboboxChipsInput` in `combobox.tsx` was removed by hand with the
+  owner's one-off permission, so a reinstall of the combobox brings the lint
+  error back). Owner-reported on production, 2026-10-17: "Make demo" on a test
   account, a write from that account refused with 403, the collection list
   unchanged, and no write controls in its UI.
 - Production routing and the automated deploy pipeline were exercised
@@ -238,10 +236,12 @@ In order. Items 1 to 6 are the path to the portfolio milestone.
    go-ahead and scope before any CSS or Tailwind change. For the milestone,
    scope it to the screens a visitor sees; the rest can follow. When done,
    mark the styling pass status in `.github/copilot-instructions.md`.
-5. **Automated checks: CI plus light frontend testing.** Add a CI workflow on
-   a GitHub-hosted runner (separate from the deploy workflow) that runs lint,
-   type check, build, and the backend tests. Lint must pass first (see Known
-   issues). Add light frontend testing in
+5. **Automated checks: CI plus light frontend testing.** The CI workflow
+   (`.github/workflows/ci.yml`, GitHub-hosted runner, separate from the deploy
+   workflow) is written 2026-10-17 and has not run on GitHub yet. It runs lint
+   and build (the build includes the type check) for the UI, and the backend
+   tests. Check its first run after the push. It does not gate the deploy.
+   Still to do: add light frontend testing in
    the spirit of "write tests, not too many, mostly integration": a few tests
    that render real flows and assert on what a user sees. Vitest with React
    Testing Library and MSW for integration tests, plus a handful of
@@ -276,10 +276,8 @@ After the milestone:
 
 ## Known issues
 
-- `npm run lint` fails on one error in the generated `combobox.tsx` (unused
-  `children` in `ComboboxChipsInput`, found 2026-10-17). Generated files are
-  not edited by hand, so the fix is a lint-config change or a reinstall.
-  Resolve it before CI (Next up, item 5), which runs lint.
+- A push to `main` deploys even if CI fails, because the deploy workflow does
+  not wait for CI. Decide whether to gate the deploy on it later.
 - The UI build emits a Vite large-chunk warning (about 647 kB on 2026-10-17,
   over the 500 kB limit) since the Combobox added `@base-ui/react` (2026-10-16).
   It was clear after the earlier dependency cleanup. Code-splitting would fix
