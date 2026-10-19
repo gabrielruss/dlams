@@ -4,7 +4,7 @@ import CollectionNavigation from "@/components/collections/CollectionNavigation"
 
 function Home() {
   return (
-    <div className="flex min-h-screen">
+    <div className="flex min-h-screen flex-col md:flex-row">
       <AppSidebar>
         <CollectionNavigation />
       </AppSidebar>

@@ -6,7 +6,7 @@ import UserManagement from "@/components/admin/UserManagement"
 
 function AdminUsers() {
   return (
-    <div className="flex min-h-screen">
+    <div className="flex min-h-screen flex-col md:flex-row">
       <AppSidebar />
       <main className="min-w-0 flex-1">
         <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 p-6">

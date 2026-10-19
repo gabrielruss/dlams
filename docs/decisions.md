@@ -332,6 +332,17 @@ replaces it is named. Proposals and open questions live in
   bold Półtawski Nowy D converted to a path (a favicon cannot load web fonts),
   made with a throwaway `fonttools` install outside the repo. SVG only; older
   Safari may show no icon until a PNG fallback is added.
+- On phones (below `md`) the login page shows the logo above the form instead
+  of behind it, at full strength, because a card centered over the logo hides
+  most of it. The page is a three-row grid (logo row, card, empty row of equal
+  size), so the card is exactly centered and the logo is fitted to the space
+  above it. Tried and dropped: splitting the text above and below the card
+  (DON'T LOOK on top, AT MY STUFF below, in two lines or four) and a fixed
+  288px logo block above the card. From 768px up, the logo stays faint behind
+  the card.
+- Below `md` the sidebar is replaced by a top bar with a menu button and a
+  small wordmark; the button opens the same sidebar contents in a left drawer,
+  which closes when the page location changes (picking a collection).
 - Considered and dropped: reusing the login backdrop behind the whole app
   (it would need translucent panels so muted text stays above the AA line),
   and a smaller copy of the login logo in the sidebar header. The owner

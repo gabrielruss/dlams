@@ -211,8 +211,13 @@ dlams-ui/src/
 
 Forms open in right-side drawers; the sidebar lists collections with counts
 and marks the selected one with a teal bar. Its header is a fitted
-`D.L.A.M.S.` wordmark (`components/Wordmark.tsx`). The login page draws a
-decorative "DON'T LOOK AT MY STUFF" backdrop (`components/BrandLogo.tsx`); the
+`D.L.A.M.S.` wordmark (`components/Wordmark.tsx`, built on
+`components/FitText.tsx`). Below the `md` breakpoint the sidebar becomes a top
+bar with a menu button that opens the same contents in a left drawer
+(`components/AppSidebar.tsx`). The login page draws a decorative "DON'T LOOK
+AT MY STUFF" logo (`components/BrandLogo.tsx`): behind the card on wide screens
+and above it on phones. Both fitted components share the
+`components/useFitOnResize.ts` hook; the
 app font is Fira Code and brand colors `teal` and `red` are theme tokens in
 `index.css`. Styling is Tailwind with shadcn/ui; the owner's styling pass has not started
 (see the conventions file for the rule).

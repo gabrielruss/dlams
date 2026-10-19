@@ -34,6 +34,11 @@ function CollectionNavigation() {
     createCollectionMutation.reset()
   }
 
+  const openCreateDrawer = () => {
+    createCollectionMutation.reset()
+    setIsCreateDrawerOpen(true)
+  }
+
   const handleCreateCollection = ({ name }: { name: string }) => {
     const trimmedName = name.trim()
     if (!trimmedName) return
@@ -51,22 +56,18 @@ function CollectionNavigation() {
       aria-label="Collections"
       className="flex min-h-0 flex-1 flex-col overflow-hidden"
     >
-      <div className="flex shrink-0 flex-col gap-1 p-3 pb-2">
-        <h2 className="px-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-          Collections
-        </h2>
+      <div className="flex shrink-0 items-center justify-between py-2 pl-3 pr-3">
+        <h2 className="text-sm font-semibold">Collections</h2>
         {!isDemo(user) && (
           <Button
-            className="w-full justify-start"
-            variant="ghost"
+            variant="outline"
+            size="icon"
             type="button"
-            onClick={() => {
-              createCollectionMutation.reset()
-              setIsCreateDrawerOpen(true)
-            }}
+            aria-label="New collection"
+            title="New collection"
+            onClick={openCreateDrawer}
           >
             <Plus aria-hidden="true" />
-            New collection
           </Button>
         )}
       </div>
@@ -82,9 +83,14 @@ function CollectionNavigation() {
           Loading collections...
         </p>
       ) : collections.length === 0 ? (
-        <p className="px-3 py-2 text-sm text-muted-foreground">
-          No collections yet.
-        </p>
+        <div className="flex flex-col gap-3 px-3 py-2">
+          <p className="text-sm text-muted-foreground">No collections yet.</p>
+          {!isDemo(user) && (
+            <Button variant="outline" type="button" onClick={openCreateDrawer}>
+              Create your first collection
+            </Button>
+          )}
+        </div>
       ) : (
         <ul className="min-h-0 flex-1 overflow-y-auto pl-3">
           {collections.map((collection) => {

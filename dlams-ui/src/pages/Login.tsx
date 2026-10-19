@@ -46,10 +46,10 @@ function Login() {
   }
 
   return (
-    <div className="relative flex min-h-screen items-center justify-center overflow-hidden px-4">
+    <div className="relative grid min-h-dvh grid-cols-[minmax(0,1fr)] grid-rows-[minmax(6rem,1fr)_auto_minmax(6rem,1fr)] justify-items-center overflow-hidden px-4 md:flex md:min-h-screen md:items-center md:justify-center">
       <BrandLogo
-        className="pointer-events-none absolute inset-0 text-foreground/10"
-        sideClassName="text-red/15"
+        className="pointer-events-none relative mb-6 mt-4 min-h-0 w-full text-foreground md:absolute md:inset-0 md:m-0 md:text-foreground/10"
+        sideClassName="text-red md:text-red/15"
       />
       <Card className="relative w-full max-w-md bg-card/80">
         <CardHeader>

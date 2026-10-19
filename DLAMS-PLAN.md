@@ -37,7 +37,14 @@ never appended to.
   the first D and its period in `red`, the rest in the text color) fitted to
   the old header height. Fira Code is now the app font. `teal` and `red` are
   theme colors in `index.css`. The unused `children` in `ComboboxChipsInput` was removed so
-  lint passes. See `docs/decisions.md`.
+  lint passes. The favicon is the red D. See `docs/decisions.md`.
+- **Mobile pass, started 2026-10-18.** Done, and looked at by the owner in a
+  browser's device mode (owner-reported "looking pretty good"): below `md` the
+  sidebar is a top bar with a menu button that opens a left drawer, and the
+  login page puts the logo above a vertically centered card, shrunk to fit.
+  Not done yet: smaller page padding and headings, larger tap targets on the
+  row buttons, the admin users table check, and a phone-width look at the
+  nested right drawers inside the menu drawer.
 - **Manual check done on production (owner-reported, 2026-10-17).** The owner
   confirmed the deployed functionality there, in place of a dev-stack pass.
 - **Demo account (owner-reported, 2026-10-17).** `demo-user` exists in
@@ -250,8 +257,9 @@ In order. Items 1 to 7 are the path to the portfolio milestone.
    mark the styling pass status in `.github/copilot-instructions.md`. Plan
    (proposed 2026-10-18): below `md` the sidebar becomes a top bar with a
    menu button that opens the sidebar contents in a left drawer (picking a
-   collection closes it); smaller padding and heading on phones; larger tap
-   targets on the row buttons; login card side padding. The idea of reusing
+   collection closes it; done); smaller padding and heading on phones;
+   larger tap targets on the row buttons; login card side padding (done as
+   part of the login layout). The idea of reusing
    the login backdrop behind the whole app was dropped on 2026-10-18 in favor
    of the sidebar wordmark. Needs a browser check of the left and right
    drawers nesting on a phone; the 76px wordmark header will also need a
