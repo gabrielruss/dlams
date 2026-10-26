@@ -401,3 +401,9 @@ replaces it is named. Proposals and open questions live in
 - Frontend testing, when added (2026-10-12), stays light: few tests, mostly
   integration, asserting on user-visible behavior rather than implementation
   details. Static checks (TypeScript, ESLint) carry the rest.
+- Testing reference point (2026-10-26): Kent C. Dodds, "Write tests. Not too
+  many. Mostly integration." (https://kentcdodds.com/blog/write-tests) is the
+  guide for when to write a test and which kind: the testing trophy, no
+  coverage target, no implementation-detail tests, minimal mocking. The rules
+  are in `.github/copilot-instructions.md` ("Testing"). This sharpens the
+  entry above; it does not supersede it.

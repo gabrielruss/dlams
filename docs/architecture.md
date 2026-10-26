@@ -219,8 +219,8 @@ AT MY STUFF" logo (`components/BrandLogo.tsx`): behind the card on wide screens
 and above it on phones. Both fitted components share the
 `components/useFitOnResize.ts` hook; the
 app font is Fira Code and brand colors `teal` and `red` are theme tokens in
-`index.css`. Styling is Tailwind with shadcn/ui; the owner's styling pass has not started
-(see the conventions file for the rule).
+`index.css`. Styling is Tailwind with shadcn/ui; the owner's styling pass is complete, so
+styling changes need approval (see the conventions file for the rule).
 
 ## Environments and deployment
 
@@ -263,8 +263,13 @@ app font is Fira Code and brand colors `teal` and `red` are theme tokens in
 - **API:** `unittest` under `dlams-fastapi/tests/`, covering auth,
   invitations, deactivation, collection permissions and types, and video-game
   routes. Run with `make test` (needs a local `dlams-fastapi/.venv`).
-- **UI:** no test framework yet; light integration testing is planned.
-  `npm run lint` and `npm run build` are the current checks.
+- **UI:** Vitest with jsdom, React Testing Library, `user-event`, and MSW
+  (`npm test`). The config is the `test` block in `vite.config.ts`; shared
+  setup is in `dlams-ui/src/test/` (`setup.ts`, `server.ts`, `renderApp.tsx`).
+  Tests render the real app and fake only the network. `npm run lint` and
+  `npm run build` (which type-checks) are the other checks. Playwright
+  end-to-end checks are planned. See the reference in the conventions file
+  ("Testing").
 
 ## Where to look first
 

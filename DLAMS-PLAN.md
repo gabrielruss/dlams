@@ -1,32 +1,24 @@
 # DLAMS plan
 
-Last updated: 2026-10-23
+Last updated: 2026-10-26
 
 The current state of the project. For why things are the way they are, see
 [`docs/decisions.md`](./docs/decisions.md). For the full history up to
 2026-10-09, see [`docs/archive/`](./docs/archive/).
 
-## Where we left off (2026-10-23)
+## Where we left off (2026-10-26)
 
 Start here in a new session. This block is rewritten at the end of a session,
 never appended to.
 
-- **Start here (2026-10-23).** Eight files have uncommitted mobile changes in
-  the working tree (run `git status`): `Home.tsx`, `AdminUsers.tsx`,
-  `CollectionWorkspace.tsx` (padding and headings) and
-  `RegistrationInviteManager.tsx`, `CollectionNavigation.tsx`,
-  `ConsoleManager.tsx`, `GameManager.tsx` (taller small buttons), plus this
-  file. `tsc -b`, lint, and build passed on them; nobody has looked at them in
-  a browser yet. The owner is checking them first. Wait for the owner's report
-  before more mobile edits. When the owner checks, in a browser's device mode at
-  about 375px wide, these are the things to look for: page padding of 16px
-  and `text-2xl` headings; a long collection name wrapping without crowding
-  the edge; the Edit and Delete pairs wrapping cleanly in the console and game
-  rows; the Close buttons in each drawer being easy to tap; and, at 768px and
-  wider, nothing different from before. Also still untested: whether tapping
-  the already-selected collection in the phone menu closes the menu. Then the
-  owner pushes (a push to `main` deploys), checks the CI status in the
-  Actions tab (CI was pushed 2026-10-18; its result is not recorded here), and looks at the live login page and favicon.
+- **Start here (2026-10-26).** The mobile pass is done: the owner checked the
+  mobile changes in a browser and pushed them (owner-reported, 2026-10-26: "looks
+  good"). The styling pass status in `.github/copilot-instructions.md` is now
+  **complete**, so ask before any styling change. Not recorded yet: the CI
+  result in the Actions tab (CI was pushed 2026-10-18), the live login page
+  and favicon, and whether tapping the already-selected collection in the
+  phone menu closes the menu. Next is item 5 (frontend tests), which needs
+  package approval.
 - **State.** The demo role, read-only sharing, owner-scoped console labels
   with comboboxes, and the collection-name page heading were pushed and
   deployed on 2026-10-17. On the Pi, `alembic current` reports
@@ -77,15 +69,21 @@ never appended to.
   button works locally, then pushed and reported everything working
   (2026-10-18). The selected collection in the sidebar has a teal accent bar
   on its right edge (`teal` is a theme color in `index.css`).
-- **Next, in order:** the owner's phone-width check of the uncommitted mobile
-  changes and a push (see "Start here"); then mark the styling pass status in
-  `.github/copilot-instructions.md` once the owner says the mobile pass is
-  done; CI plus light frontend tests (item 5, needs approval to install
-  packages; suggest Vitest, Testing Library, and MSW first and Playwright
-  later); the accessibility audit (item 6); README and screenshots (item 7),
-  whose final check includes switching `demo-user` to the `demo` role.
-- **Waiting on the owner:** the result of the phone-width check, and package
-  approval for the test tooling.
+- **Next, in order:** CI plus light frontend tests (item 5, needs approval to
+  install packages; suggest Vitest, Testing Library, and MSW first and
+  Playwright later); the accessibility audit (item 6); README and screenshots
+  (item 7), whose final check includes switching `demo-user` to the `demo`
+  role.
+- **Test tooling (2026-10-26).** Vitest, jsdom, React Testing Library,
+  `user-event`, `jest-dom`, and MSW are installed and wired (`npm test` in
+  `dlams-ui`). Two tests exist in `src/pages/Login.test.tsx` (wrong password
+  shows the API's message; "Try the demo" lands on the collection with no
+  "New collection" button). `npm test`, lint, and build pass (run
+  2026-10-26). `ci.yml` now runs `npm test` between lint and build; that is
+  unverified until it runs on GitHub. Uncommitted. Next: owner vs shared
+  access tests.
+- **Waiting on the owner:** the CI result from the Actions tab, and whether
+  to take the `zod` fix (`npm audit fix`).
 - **Things to remember about the code.** Generated shadcn files are reviewed
   after each install and not edited by hand, except that `combobox.tsx` has a
   local `container` prop on `ComboboxContent` so a combobox popup renders
@@ -290,16 +288,18 @@ In order. Items 1 to 7 are the path to the portfolio milestone.
    headings; taller small buttons. The admin users table scrolls sideways
    inside its box and was left as is. The idea of reusing the login backdrop
    behind the whole app was dropped on 2026-10-18 in favor of the sidebar
-   wordmark. What is left is the owner's pass on a real phone, then marking
-   the styling pass status in `.github/copilot-instructions.md`.
+   wordmark. Done 2026-10-26: the owner checked it in a browser and
+   pushed it, and the styling pass status is marked complete.
 5. **Automated checks: CI plus light frontend testing.** The CI workflow
    (`.github/workflows/ci.yml`, GitHub-hosted runner, separate from the deploy
    workflow) is written 2026-10-17 and was pushed 2026-10-18; check the Actions tab for
    its status. It runs lint
    and build (the build includes the type check) for the UI, and the backend
    tests. Check its first run after the push. It does not gate the deploy.
-   Still to do: add light frontend testing in
-   the spirit of "write tests, not too many, mostly integration": a few tests
+   Still to do: add light frontend testing following Kent C. Dodds'
+   "Write tests. Not too many. Mostly integration."
+   (https://kentcdodds.com/blog/write-tests; rules in
+   `.github/copilot-instructions.md`, "Testing"): a few tests
    that render real flows and assert on what a user sees. Vitest with React
    Testing Library and MSW for integration tests, plus a handful of
    Playwright end-to-end checks across owner, shared (read-only), and demo
@@ -377,7 +377,10 @@ After the milestone:
   `<dir>/bin/pip install -r dlams-fastapi/requirements.txt`, then from
   `dlams-fastapi/`: `SECRET_KEY=test <dir>/bin/python -m unittest discover -s
   tests`. Creating the venv installs packages, so ask first.
-- There is no frontend test framework. Backend tests use `unittest`; Ruff and
+- Frontend test tooling was installed 2026-10-26 and has two tests. `npm audit` reports 4
+  vulnerabilities after the install: `vitest`/`@vitest/mocker` and `tinypool`
+  (dev-only; the fix is a downgrade to Vitest 2.0.5) and `zod` (runtime; `npm
+  audit fix` resolves it). Upgrades are deferred. Backend tests use `unittest`; Ruff and
   pytest are not configured.
 - Backend debt: `video_games_routes.py` combines console and game routes and
   uses `Session.query()`; `app/db.py` uses `declarative_base()`; older auth

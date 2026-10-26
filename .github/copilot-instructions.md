@@ -59,7 +59,12 @@ Applies across the DLAMS workspace. Project-local conventions take precedence wh
 - Frontend build (from `dlams-ui/`): `npm run build`
 - Frontend lint (from `dlams-ui/`): `npm run lint`
 - Hybrid host UI (from `dlams-ui/`): `npm run dev:hybrid`
-- Frontend tests: none configured yet.
+- Frontend tests (from `dlams-ui/`): `npm test` (Vitest, one run) or
+  `npm run test:watch`. Tests sit beside the code as `*.test.tsx`. Use
+  `renderApp(route)` from `src/test/renderApp.tsx` (fresh `QueryClient`,
+  `MemoryRouter`, and a `userEvent` instance) and register MSW handlers per
+  test with `server.use(...)` from `src/test/server.ts`. The API base in tests
+  is `http://localhost/api`, and a request with no handler fails the test.
 - Backend tests (from `dlams-fastapi/`): `.venv/bin/python -m unittest discover -s tests -v`
 - Dev shortcuts (from the repo root): `make dev`, `make watch`, `make logs`,
   `make down`, `make test`; `make help` lists them.
@@ -186,10 +191,28 @@ cached copy.
 
 ## Styling
 
-Styling pass status: **not started** (change to **complete** once the owner finishes customizing styles).
+Styling pass status: **complete** (the owner finished the mobile pass on 2026-10-26).
 
 - Not started: add only minimal styles needed to make a feature usable, scoped to the new component. Do not change global styles, design tokens, or shared component styles.
 - Complete: ask before any CSS or styling change (global styles, tokens, component styles, Tailwind classes), even small ones. After approval, limit edits to the approved scope.
+
+## Testing
+
+Reference: Kent C. Dodds, "Write tests. Not too many. Mostly integration."
+(https://kentcdodds.com/blog/write-tests). Use it to decide when to write a
+test and which kind.
+
+- Write tests to gain confidence the app works, not to reach a coverage
+  number. Do not chase 100% coverage or test trivial code.
+- Testing trophy: static checks (TypeScript, ESLint) are the base, most tests
+  are integration tests, and a few end-to-end tests sit on top. Unit tests are
+  for pure logic that is hard to exercise through a flow.
+- Test what a user sees and does. Do not test implementation details; you
+  should rarely have to change a test when you refactor. No shallow rendering.
+- Mock as little as possible. Mock at the network boundary (MSW) or for things
+  that cannot run in a test, not the app's own modules or hooks.
+- Backend: add tests where they protect authentication, authorization, or
+  persistent-data boundaries (see "Permissions model").
 
 ## Permissions model
 
