@@ -74,7 +74,7 @@ function ConsoleManager({
               </DrawerTitle>
               <DrawerClose asChild>
                 <button
-                  className="rounded-md border px-3 py-1 text-sm"
+                  className="rounded-md border px-3 py-2 text-sm md:py-1"
                   type="button"
                   aria-label="Close drawer"
                 >
@@ -203,14 +203,14 @@ function ConsoleManager({
               {canWrite && (
                 <div className="flex gap-2">
                   <button
-                    className="rounded-md border px-3 py-1 text-sm"
+                    className="rounded-md border px-3 py-2 text-sm md:py-1"
                     type="button"
                     onClick={() => editConsole(consoleRecord)}
                   >
                     Edit
                   </button>
                   <button
-                    className="rounded-md border px-3 py-1 text-sm"
+                    className="rounded-md border px-3 py-2 text-sm md:py-1"
                     type="button"
                     onClick={() => deleteConsole(consoleRecord)}
                   >

@@ -73,7 +73,7 @@ function GameManager({
               </DrawerTitle>
               <DrawerClose asChild>
                 <button
-                  className="rounded-md border px-3 py-1 text-sm"
+                  className="rounded-md border px-3 py-2 text-sm md:py-1"
                   type="button"
                   aria-label="Close drawer"
                 >
@@ -213,14 +213,14 @@ function GameManager({
               {canWrite && (
                 <div className="flex gap-2">
                   <button
-                    className="rounded-md border px-3 py-1 text-sm"
+                    className="rounded-md border px-3 py-2 text-sm md:py-1"
                     type="button"
                     onClick={() => editGame(game)}
                   >
                     Edit
                   </button>
                   <button
-                    className="rounded-md border px-3 py-1 text-sm"
+                    className="rounded-md border px-3 py-2 text-sm md:py-1"
                     type="button"
                     onClick={() => deleteGame(game)}
                   >

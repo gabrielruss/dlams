@@ -9,7 +9,7 @@ function AdminUsers() {
     <div className="flex min-h-screen flex-col md:flex-row">
       <AppSidebar />
       <main className="min-w-0 flex-1">
-        <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 p-6">
+        <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 p-4 md:p-6">
           <Link
             className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"
             to="/"
@@ -18,7 +18,7 @@ function AdminUsers() {
             Back to collections
           </Link>
           <header>
-            <h1 className="text-3xl font-semibold">Users</h1>
+            <h1 className="text-2xl font-semibold md:text-3xl">Users</h1>
           </header>
           <UserManagement />
         </div>

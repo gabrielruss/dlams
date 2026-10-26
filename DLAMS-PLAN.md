@@ -1,16 +1,32 @@
 # DLAMS plan
 
-Last updated: 2026-10-18
+Last updated: 2026-10-23
 
 The current state of the project. For why things are the way they are, see
 [`docs/decisions.md`](./docs/decisions.md). For the full history up to
 2026-10-09, see [`docs/archive/`](./docs/archive/).
 
-## Where we left off (2026-10-18)
+## Where we left off (2026-10-23)
 
 Start here in a new session. This block is rewritten at the end of a session,
 never appended to.
 
+- **Start here (2026-10-23).** Eight files have uncommitted mobile changes in
+  the working tree (run `git status`): `Home.tsx`, `AdminUsers.tsx`,
+  `CollectionWorkspace.tsx` (padding and headings) and
+  `RegistrationInviteManager.tsx`, `CollectionNavigation.tsx`,
+  `ConsoleManager.tsx`, `GameManager.tsx` (taller small buttons), plus this
+  file. `tsc -b`, lint, and build passed on them; nobody has looked at them in
+  a browser yet. The owner is checking them first. Wait for the owner's report
+  before more mobile edits. When the owner checks, in a browser's device mode at
+  about 375px wide, these are the things to look for: page padding of 16px
+  and `text-2xl` headings; a long collection name wrapping without crowding
+  the edge; the Edit and Delete pairs wrapping cleanly in the console and game
+  rows; the Close buttons in each drawer being easy to tap; and, at 768px and
+  wider, nothing different from before. Also still untested: whether tapping
+  the already-selected collection in the phone menu closes the menu. Then the
+  owner pushes (a push to `main` deploys), checks the CI status in the
+  Actions tab (CI was pushed 2026-10-18; its result is not recorded here), and looks at the live login page and favicon.
 - **State.** The demo role, read-only sharing, owner-scoped console labels
   with comboboxes, and the collection-name page heading were pushed and
   deployed on 2026-10-17. On the Pi, `alembic current` reports
@@ -38,13 +54,16 @@ never appended to.
   the old header height. Fira Code is now the app font. `teal` and `red` are
   theme colors in `index.css`. The unused `children` in `ComboboxChipsInput` was removed so
   lint passes. The favicon is the red D. See `docs/decisions.md`.
-- **Mobile pass, started 2026-10-18.** Done, and looked at by the owner in a
-  browser's device mode (owner-reported "looking pretty good"): below `md` the
-  sidebar is a top bar with a menu button that opens a left drawer, and the
-  login page puts the logo above a vertically centered card, shrunk to fit.
-  Not done yet: smaller page padding and headings, larger tap targets on the
-  row buttons, the admin users table check, and a phone-width look at the
-  nested right drawers inside the menu drawer.
+- **Mobile pass, code done 2026-10-23.** Pushed 2026-10-18 and checked by the
+  owner in a browser's device mode (owner-reported): below `md` the sidebar is
+  a top bar with a menu button that opens a left drawer (creating a collection
+  from inside it closes both drawers), and the login page puts the logo above
+  a vertically centered card, shrunk to fit. Done 2026-10-23, local only
+  (`tsc -b`, lint, and build pass; not yet looked at in a browser): page
+  padding is 16px below `md`, headings are `text-2xl` below `md`, and the small
+  bordered Edit, Delete, and Close buttons are taller below `md`. The admin
+  users table was checked by reading the code and left as is (see Known
+  issues). Remaining: the owner's own pass through the screens on a phone.
 - **Manual check done on production (owner-reported, 2026-10-17).** The owner
   confirmed the deployed functionality there, in place of a dev-stack pass.
 - **Demo account (owner-reported, 2026-10-17).** `demo-user` exists in
@@ -58,24 +77,34 @@ never appended to.
   button works locally, then pushed and reported everything working
   (2026-10-18). The selected collection in the sidebar has a teal accent bar
   on its right edge (`teal` is a theme color in `index.css`).
-- **Next, in order:** push the login branding, then code work: the mobile
-  styling pass (item 4; the owner approved the plan in principle, see item 4),
-  CI plus light frontend tests (item 5, needs
-  approval to install packages), the accessibility audit (item 6), README
-  and screenshots (item 7).
-- **Waiting on the owner:** styling scope, and package approval for the test
-  tooling.
+- **Next, in order:** the owner's phone-width check of the uncommitted mobile
+  changes and a push (see "Start here"); then mark the styling pass status in
+  `.github/copilot-instructions.md` once the owner says the mobile pass is
+  done; CI plus light frontend tests (item 5, needs approval to install
+  packages; suggest Vitest, Testing Library, and MSW first and Playwright
+  later); the accessibility audit (item 6); README and screenshots (item 7),
+  whose final check includes switching `demo-user` to the `demo` role.
+- **Waiting on the owner:** the result of the phone-width check, and package
+  approval for the test tooling.
 - **Things to remember about the code.** Generated shadcn files are reviewed
   after each install and not edited by hand, except that `combobox.tsx` has a
   local `container` prop on `ComboboxContent` so a combobox popup renders
   inside its drawer (see `.github/copilot-instructions.md`); the CLI writes
   `import { cn } from "cn"` and that is accepted. A raw `<button>` cleanup
   (about 15 places) and the create-collection drawer's form buttons are left
-  for the styling pass.
+  for the styling pass. In our own components never use the `cn` helper (it is
+  for shadcn files only) and do not add code comments. The one-off edit that
+  removed the unused `children` in `ComboboxChipsInput` means a reinstall of
+  the combobox brings the lint error back. Fonts come from
+  `@fontsource-variable` packages (Fira Code for the app, Półtawski Nowy for
+  the logo only); `teal` and `red` are theme colors in `index.css`.
 - **How the owner likes to work:** one decision per message; confirm when a
   reply is ambiguous or has two parts. For commands on the Pi, give one
   command per code block and wait for the output (multi-line pastes have
-  garbled in the owner's terminal). Do not offer to commit or push.
+  garbled in the owner's terminal). Do not offer to commit or push. Ask
+  before any styling change, but the owner's direct request counts as the
+  go-ahead for that change; when a design choice is open, give a
+  recommendation and one question rather than several.
 
 ## How to use this document
 
@@ -255,15 +284,14 @@ In order. Items 1 to 7 are the path to the portfolio milestone.
    go-ahead and scope before any CSS or Tailwind change. For the milestone,
    scope it to the screens a visitor sees; the rest can follow. When done,
    mark the styling pass status in `.github/copilot-instructions.md`. Plan
-   (proposed 2026-10-18): below `md` the sidebar becomes a top bar with a
-   menu button that opens the sidebar contents in a left drawer (picking a
-   collection closes it; done); smaller padding and heading on phones;
-   larger tap targets on the row buttons; login card side padding (done as
-   part of the login layout). The idea of reusing
-   the login backdrop behind the whole app was dropped on 2026-10-18 in favor
-   of the sidebar wordmark. Needs a browser check of the left and right
-   drawers nesting on a phone; the 76px wordmark header will also need a
-   phone-width look.
+   Code is done: below `md` the sidebar is a top bar with a menu button that
+   opens the sidebar contents in a left drawer (picking a collection closes
+   it); the login logo sits above a centered card; smaller padding and
+   headings; taller small buttons. The admin users table scrolls sideways
+   inside its box and was left as is. The idea of reusing the login backdrop
+   behind the whole app was dropped on 2026-10-18 in favor of the sidebar
+   wordmark. What is left is the owner's pass on a real phone, then marking
+   the styling pass status in `.github/copilot-instructions.md`.
 5. **Automated checks: CI plus light frontend testing.** The CI workflow
    (`.github/workflows/ci.yml`, GitHub-hosted runner, separate from the deploy
    workflow) is written 2026-10-17 and was pushed 2026-10-18; check the Actions tab for
@@ -316,6 +344,12 @@ After the milestone:
 
 ## Known issues
 
+- On a phone, the admin users table scrolls sideways inside its bordered box,
+  and the Make demo and Deactivate buttons are in the last column, so an admin
+  swipes right to reach them. Checked by reading the code on 2026-10-23, not
+  in a browser. Left as is (admin-only, not on the visitor path). The cheap
+  fixes are hiding the Created column below `md` or stacking each user as a
+  card.
 - A push to `main` deploys even if CI fails, because the deploy workflow does
   not wait for CI. Decide whether to gate the deploy on it later.
 - The UI build emits a Vite large-chunk warning (about 647 kB on 2026-10-17,

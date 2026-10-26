@@ -60,7 +60,7 @@ function RegistrationInviteManager() {
             <DrawerTitle className="text-xl">Invite someone</DrawerTitle>
             <DrawerClose asChild>
               <button
-                className="rounded-md border px-3 py-1 text-sm"
+                className="rounded-md border px-3 py-2 text-sm md:py-1"
                 type="button"
                 aria-label="Close drawer"
               >
