@@ -211,6 +211,10 @@ test and which kind.
   should rarely have to change a test when you refactor. No shallow rendering.
 - Mock as little as possible. Mock at the network boundary (MSW) or for things
   that cannot run in a test, not the app's own modules or hooks.
+- Put a test beside the feature it covers, named for it (for example
+  `components/video-games/VideoGamesWorkspace.test.tsx`), so each collection
+  type keeps its own tests. Cross-cutting flows such as sign-in live with their
+  page (`pages/Login.test.tsx`).
 - Backend: add tests where they protect authentication, authorization, or
   persistent-data boundaries (see "Permissions model").
 

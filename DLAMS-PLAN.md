@@ -76,12 +76,14 @@ never appended to.
   role.
 - **Test tooling (2026-10-26).** Vitest, jsdom, React Testing Library,
   `user-event`, `jest-dom`, and MSW are installed and wired (`npm test` in
-  `dlams-ui`). Two tests exist in `src/pages/Login.test.tsx` (wrong password
+  `dlams-ui`). Four tests exist: `src/pages/Login.test.tsx` (wrong password
   shows the API's message; "Try the demo" lands on the collection with no
-  "New collection" button). `npm test`, lint, and build pass (run
+  "New collection" button) and `src/components/video-games/VideoGamesWorkspace.test.tsx` (an owner sees the
+  add, edit, and delete controls; a shared user sees the games and none of
+  them). `npm test`, lint, and build pass (run
   2026-10-26). `ci.yml` now runs `npm test` between lint and build; that is
-  unverified until it runs on GitHub. Uncommitted. Next: owner vs shared
-  access tests.
+  unverified until it runs on GitHub. Uncommitted. The planned frontend tests are
+  in place; Playwright end-to-end checks are still to do.
 - **Waiting on the owner:** the CI result from the Actions tab, and whether
   to take the `zod` fix (`npm audit fix`).
 - **Things to remember about the code.** Generated shadcn files are reviewed
@@ -377,7 +379,7 @@ After the milestone:
   `<dir>/bin/pip install -r dlams-fastapi/requirements.txt`, then from
   `dlams-fastapi/`: `SECRET_KEY=test <dir>/bin/python -m unittest discover -s
   tests`. Creating the venv installs packages, so ask first.
-- Frontend test tooling was installed 2026-10-26 and has two tests. `npm audit` reports 4
+- Frontend test tooling was installed 2026-10-26 and has four tests. `npm audit` reports 4
   vulnerabilities after the install: `vitest`/`@vitest/mocker` and `tinypool`
   (dev-only; the fix is a downgrade to Vitest 2.0.5) and `zod` (runtime; `npm
   audit fix` resolves it). Upgrades are deferred. Backend tests use `unittest`; Ruff and
