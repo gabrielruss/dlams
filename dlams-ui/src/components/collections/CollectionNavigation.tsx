@@ -104,7 +104,7 @@ function CollectionNavigation() {
                   onClick={() => setSelectedCollectionId(collection.id)}
                   className={`flex w-full flex-col gap-2 border-r-4 py-3 pr-3 text-left transition-colors ${
                     selected
-                      ? "border-teal text-sidebar-primary"
+                      ? "border-red text-sidebar-primary"
                       : "border-transparent text-sidebar-foreground hover:text-sidebar-primary"
                   }`}
                 >
@@ -112,7 +112,7 @@ function CollectionNavigation() {
                     <span className="truncate font-medium">
                       {collection.name}
                     </span>
-                    <span className="shrink-0 rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground">
+                    <span className="shrink-0 rounded-full bg-foreground px-2 py-0.5 text-xs text-background">
                       {collection.access}
                     </span>
                   </span>

@@ -55,10 +55,12 @@ function Register() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center p-4">
+    <main className="flex min-h-screen items-center justify-center p-4">
       <Card className="w-full max-w-md">
         <CardHeader>
-          <CardTitle>Create account</CardTitle>
+          <CardTitle role="heading" aria-level={1}>
+            Create account
+          </CardTitle>
         </CardHeader>
         <CardContent>
           {registerMutation.isSuccess ? (
@@ -159,7 +161,7 @@ function Register() {
           )}
         </CardContent>
       </Card>
-    </div>
+    </main>
   )
 }
 

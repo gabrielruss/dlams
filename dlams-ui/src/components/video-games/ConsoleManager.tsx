@@ -186,40 +186,45 @@ function ConsoleManager({
         </p>
       ) : (
         <ul className="divide-y">
-          {consoles.map((consoleRecord) => (
-            <li
-              key={consoleRecord.id}
-              className="flex flex-wrap items-center justify-between gap-2 py-3"
-            >
-              <div>
-                <p className="font-medium">
-                  {consoleRecord.label}
-                  {consoleRecord.edition ? ` — ${consoleRecord.edition}` : ""}
-                </p>
-                <p className="text-sm text-muted-foreground">
-                  {consoleRecord.condition} · {consoleRecord.game_count} games
-                </p>
-              </div>
-              {canWrite && (
-                <div className="flex gap-2">
-                  <button
-                    className="rounded-md border px-3 py-2 text-sm md:py-1"
-                    type="button"
-                    onClick={() => editConsole(consoleRecord)}
-                  >
-                    Edit
-                  </button>
-                  <button
-                    className="rounded-md border px-3 py-2 text-sm md:py-1"
-                    type="button"
-                    onClick={() => deleteConsole(consoleRecord)}
-                  >
-                    Delete
-                  </button>
+          {consoles.map((consoleRecord) => {
+            const name = consoleRecord.edition
+              ? `${consoleRecord.label} — ${consoleRecord.edition}`
+              : consoleRecord.label
+            return (
+              <li
+                key={consoleRecord.id}
+                className="flex flex-wrap items-center justify-between gap-2 py-3"
+              >
+                <div>
+                  <p className="font-medium">{name}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {consoleRecord.condition} · {consoleRecord.game_count}{" "}
+                    {consoleRecord.game_count === 1 ? "game" : "games"}
+                  </p>
                 </div>
-              )}
-            </li>
-          ))}
+                {canWrite && (
+                  <div className="flex gap-2">
+                    <button
+                      className="rounded-md border px-3 py-2 text-sm md:py-1"
+                      type="button"
+                      aria-label={`Edit ${name}`}
+                      onClick={() => editConsole(consoleRecord)}
+                    >
+                      Edit
+                    </button>
+                    <button
+                      className="rounded-md border px-3 py-2 text-sm md:py-1"
+                      type="button"
+                      aria-label={`Delete ${name}`}
+                      onClick={() => deleteConsole(consoleRecord)}
+                    >
+                      Delete
+                    </button>
+                  </div>
+                )}
+              </li>
+            )
+          })}
         </ul>
       )}
     </section>

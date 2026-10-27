@@ -46,14 +46,16 @@ function Login() {
   }
 
   return (
-    <div className="relative grid min-h-dvh grid-cols-[minmax(0,1fr)] grid-rows-[minmax(6rem,1fr)_auto_minmax(6rem,1fr)] justify-items-center overflow-hidden px-4 md:flex md:min-h-screen md:items-center md:justify-center">
+    <main className="relative grid min-h-dvh grid-cols-[minmax(0,1fr)] grid-rows-[minmax(6rem,1fr)_auto_minmax(6rem,1fr)] justify-items-center overflow-hidden px-4 md:flex md:min-h-screen md:items-center md:justify-center">
       <BrandLogo
         className="pointer-events-none relative mb-6 mt-4 min-h-0 w-full text-foreground md:absolute md:inset-0 md:m-0 md:text-foreground/10"
         sideClassName="text-red md:text-red/15"
       />
       <Card className="relative w-full max-w-md bg-card/80">
         <CardHeader>
-          <CardTitle>Login</CardTitle>
+          <CardTitle role="heading" aria-level={1}>
+            Login
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <Form {...form}>
@@ -68,7 +70,7 @@ function Login() {
                   <FormItem>
                     <FormLabel>Username</FormLabel>
                     <FormControl>
-                      <Input type="text" {...field} />
+                      <Input type="text" autoComplete="username" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -81,7 +83,11 @@ function Login() {
                   <FormItem>
                     <FormLabel>Password</FormLabel>
                     <FormControl>
-                      <Input type="password" {...field} />
+                      <Input
+                        type="password"
+                        autoComplete="current-password"
+                        {...field}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -120,7 +126,7 @@ function Login() {
           </Form>
         </CardContent>
       </Card>
-    </div>
+    </main>
   )
 }
 

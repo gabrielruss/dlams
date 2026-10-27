@@ -12,7 +12,11 @@ replaces it is named. Proposals and open questions live in
   subdomain. They sign in as `demo-user`, which holds the `demo` role and is
   GET-only at the API, so it cannot change anything. This answers the earlier
   open question about the demo URL.
-- The domain is not written in tracked files (public repository).
+- The domain is not written in tracked files (public repository). **Revised
+  2026-10-27:** the production domain is named in `dlams-deployment/nginx.conf`
+  and will be linked from the README as the live demo link, so it is public by
+  design. What stays out of tracked files is anything else about the host: IP
+  addresses, paths, the network layout, and credentials.
 
 ### Database backups stay on the host — 2026-10-15
 - A nightly `pg_dump` (`dlams-deployment/scripts/backup-db.sh`, 03:15, 14 days
@@ -349,14 +353,52 @@ replaces it is named. Proposals and open questions live in
   chose the wordmark.
 
 
+### Generated shadcn files may be edited, with the owner's approval — 2026-10-26
+- Editing a file the shadcn CLI generated is allowed when the owner approves
+  it. Shadcn's docs call it open code ("The top layer of your component code
+  is open for modification"). Before, the rule was never to edit them.
+- Reason: axe found the combobox's dropdown-arrow button had no accessible
+  name. A one-line `aria-label` on the generated `ComboboxTrigger` was simpler
+  than copying its markup into our own component, which would have
+  duplicated generated code.
+- Cost: a reinstall can overwrite an edit. The local edits are listed in
+  `.github/copilot-instructions.md` with how each is noticed if lost; check
+  `npx shadcn@latest add <component> --diff` before reinstalling.
+- **Supersedes** "never edit generated files" (2026-10-14 conventions). The
+  rule that the owner, not Claude, runs the CLI is unchanged.
+
+### Muted text and input borders darkened to meet contrast — 2026-10-27
+- Two light-theme tokens in `index.css` changed: `--muted-foreground` (L 0.554
+  to 0.52) so small muted text, such as the "owner" badge, reaches the 4.5:1 AA
+  line (badge 4.35 to 5.02:1), and `--input` (L 0.929 to 0.65) so input borders
+  reach the 3:1 that WCAG 1.4.11 asks of form-field boundaries (1.23 to
+  3.23:1). Found by axe-style review of the theme and confirmed by Firefox's
+  contrast check on the badge. Ratios are calculated from the tokens.
+- The sidebar access badge is a black pill with white text, the same for
+  `owner` and `view-only` (owner's choice, 2026-10-27): `bg-foreground` with
+  `text-background`, 20.17:1. It was tried grey (4.35:1, failing), then
+  solid blue and yellow, then those at 50%, and dropped each as too loud or too
+  soft. The `blue` and `yellow` theme colors added for those attempts were
+  removed. The word on the badge, not its color, says which access it is.
+- The selected-collection bar in the sidebar is `red` instead of `teal`
+  (owner's choice, 2026-10-27), the same red as the D in the logo. Teal was
+  2.42:1 against the sidebar, under the 3:1 WCAG 1.4.11 asks of a graphical
+  cue, and the bar is the only visible cue for the selection (the selected and
+  unselected text colors are near-identical). Red is 5.23:1. The `teal` theme
+  color stays in `index.css` but nothing uses it now.
+- Not changed: `--ring`, and the dark theme tokens, which the app never turns
+  on.
+- **Supersedes** the "default input border is about 1.2:1" finding in the
+  plan's accessibility item.
+
 ### Combobox popups render inside their drawer through a `container` prop — 2026-10-17
 - A combobox popup renders in a portal outside the drawer, so a click on an
   option can count as an outside click and close the drawer. `ComboboxContent`
   in the generated `combobox.tsx` accepts a `container` prop for the portal,
   and the console and game drawers pass a ref on their `DrawerContent`
   through `ConsoleLabelCombobox`.
-- This is the one local edit to a generated shadcn file. A reinstall removes
-  it, and `tsc` then fails on the `container` prop, which points at what to
+- This is a local edit to a generated shadcn file (see the 2026-10-26 entry
+  below for the rule). A reinstall removes it, and `tsc` then fails on the `container` prop, which points at what to
   re-apply.
 - Tried and dropped: an `onInteractOutside` handler that matches the popup
   with a selector (fragile), a drawer wrapper component with the same handler,

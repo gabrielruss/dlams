@@ -210,7 +210,7 @@ dlams-ui/src/
 ```
 
 Forms open in right-side drawers; the sidebar lists collections with counts
-and marks the selected one with a teal bar. Its header is a fitted
+and marks the selected one with a red bar. Its header is a fitted
 `D.L.A.M.S.` wordmark (`components/Wordmark.tsx`, built on
 `components/FitText.tsx`). Below the `md` breakpoint the sidebar becomes a top
 bar with a menu button that opens the same contents in a left drawer

@@ -10,7 +10,7 @@ export function renderApp(route = "/") {
   })
   const user = userEvent.setup()
 
-  render(
+  const { container } = render(
     <QueryClientProvider client={queryClient}>
       <MemoryRouter initialEntries={[route]}>
         <App />
@@ -18,5 +18,5 @@ export function renderApp(route = "/") {
     </QueryClientProvider>
   )
 
-  return { user }
+  return { user, container }
 }

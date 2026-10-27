@@ -1,6 +1,7 @@
 import { screen } from "@testing-library/react"
 import { http, HttpResponse } from "msw"
 import { afterEach, describe, expect, it, vi } from "vitest"
+import { expectNoViolations } from "@/test/axe"
 import { server } from "@/test/server"
 import { renderApp } from "@/test/renderApp"
 
@@ -69,7 +70,7 @@ describe("signing in", () => {
         HttpResponse.json({ games: [] }),
       ),
       http.get(`${api}/console-labels`, () =>
-        HttpResponse.json({ console_labels: [] }),
+        HttpResponse.json({ labels: [] }),
       ),
     )
 
@@ -85,5 +86,33 @@ describe("signing in", () => {
     expect(
       screen.queryByRole("button", { name: "New collection" }),
     ).not.toBeInTheDocument()
+  })
+
+  it("is a page with a main landmark and a level 1 heading", async () => {
+    server.use(
+      http.get(`${api}/verify`, () =>
+        HttpResponse.json({ detail: "Not authenticated" }, { status: 401 })
+      )
+    )
+
+    renderApp("/")
+
+    expect(await screen.findByRole("main")).toBeInTheDocument()
+    expect(
+      screen.getByRole("heading", { level: 1, name: "Login" })
+    ).toBeInTheDocument()
+  })
+
+  it("has no accessibility violations on the login page", async () => {
+    server.use(
+      http.get(`${api}/verify`, () =>
+        HttpResponse.json({ detail: "Not authenticated" }, { status: 401 })
+      )
+    )
+
+    const { container } = renderApp("/")
+    await screen.findByLabelText("Username")
+
+    await expectNoViolations(container)
   })
 })

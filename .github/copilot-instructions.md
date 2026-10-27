@@ -21,14 +21,19 @@ Applies across the DLAMS workspace. Project-local conventions take precedence wh
   `dlams-ui/src/components/ui/`; shadcn/ui is component source, not a runtime
   dependency in `package.json`. Reuse these components and follow shadcn
   conventions rather than introducing a competing component system.
-- `components/ui/combobox.tsx` has one local edit: `ComboboxContent` accepts a
-  `container` prop forwarded to the portal, so a combobox inside a drawer can
-  render its popup within the drawer (otherwise clicking an option counts as
-  an outside click and closes the drawer). The drawer managers pass a ref on
-  their `DrawerContent` through `ConsoleLabelCombobox`. Re-apply the edit after
-  reinstalling; if it is lost, `tsc` fails on the `container` prop. The owner
-  also allowed one removal of the unused `children` in `ComboboxChipsInput`
-  (2026-10-18) so lint passes; a reinstall brings that lint error back.
+- Local edits to generated files. Re-apply these after reinstalling a
+  component (run `npx shadcn@latest add <component> --diff` first to see what
+  would change). All are in `components/ui/combobox.tsx`:
+  - `ComboboxContent` accepts a `container` prop forwarded to the portal, so a
+    combobox inside a drawer can render its popup within the drawer (otherwise
+    clicking an option counts as an outside click and closes the drawer). The
+    drawer managers pass a ref on their `DrawerContent` through
+    `ConsoleLabelCombobox`. If it is lost, `tsc` fails on the `container` prop.
+  - The unused `children` in `ComboboxChipsInput` was removed (2026-10-18) so
+    lint passes; a reinstall brings that lint error back.
+  - `ComboboxTrigger` has `aria-label="Show options"` (2026-10-26), so the
+    dropdown-arrow button has an accessible name. If it is lost, the axe tests
+    for the Add console and Add game drawers fail.
 - Re-running the CLI overwrites the generated file (for example it restored
   `buttonVariants` in `button.tsx` and moved it to the `radix-ui` package). The
   `react-refresh/only-export-components` lint rule is off under
@@ -36,11 +41,11 @@ Applies across the DLAMS workspace. Project-local conventions take precedence wh
 - The shadcn CLI emits `import { cn } from "cn"` and installs the `cn`
   package (a clsx + tailwind-merge replacement). Leave generated imports
   alone; `@/lib/utils` also works and both coexist (decided 2026-10-14).
-- Never edit files the shadcn CLI generated in `src/components/ui/`, including
-  small fixes, lint cleanups, and unused classes. Change the consuming
-  component instead, or ask the owner to reinstall or customize the file.
-  The only local edit is the `container` prop in `combobox.tsx` (above); do not
-  add others.
+- Ask before editing a file the shadcn CLI generated in
+  `src/components/ui/`. Editing is fine in principle (shadcn is open code,
+  meant to be modified), but a reinstall can overwrite an edit. Prefer
+  changing the consuming component when that is as simple. If the owner
+  approves an edit, keep it small and add it to the list of local edits above.
 - Do not install packages or run the shadcn CLI. When a shadcn component is
   needed, tell the owner which one and give the command
   (`npx shadcn@latest add <component>`, from `dlams-ui/`); the owner runs it.
@@ -215,6 +220,10 @@ test and which kind.
   `components/video-games/VideoGamesWorkspace.test.tsx`), so each collection
   type keeps its own tests. Cross-cutting flows such as sign-in live with their
   page (`pages/Login.test.tsx`).
+- Accessibility: `expectNoViolations(container)` from `src/test/axe.ts` runs
+  axe on rendered markup. Add it to the test for a screen rather than writing
+  separate accessibility tests. jsdom cannot check color contrast, so that rule
+  is off and contrast is checked in a real browser.
 - Backend: add tests where they protect authentication, authorization, or
   persistent-data boundaries (see "Permissions model").
 

@@ -215,6 +215,7 @@ function GameManager({
                   <button
                     className="rounded-md border px-3 py-2 text-sm md:py-1"
                     type="button"
+                    aria-label={`Edit ${game.name}`}
                     onClick={() => editGame(game)}
                   >
                     Edit
@@ -222,6 +223,7 @@ function GameManager({
                   <button
                     className="rounded-md border px-3 py-2 text-sm md:py-1"
                     type="button"
+                    aria-label={`Delete ${game.name}`}
                     onClick={() => deleteGame(game)}
                   >
                     Delete

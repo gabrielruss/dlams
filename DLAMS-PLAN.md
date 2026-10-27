@@ -15,7 +15,7 @@ never appended to.
   mobile changes in a browser and pushed them (owner-reported, 2026-10-26: "looks
   good"). The styling pass status in `.github/copilot-instructions.md` is now
   **complete**, so ask before any styling change. Not recorded yet: the CI
-  result in the Actions tab (CI was pushed 2026-10-18), the live login page
+  the live login page
   and favicon, and whether tapping the already-selected collection in the
   phone menu closes the menu. Next is item 5 (frontend tests), which needs
   package approval.
@@ -67,35 +67,35 @@ never appended to.
   The deploy workflow sets them from the `DEMO_PASSWORD` GitHub secret (added
   by the owner) and a fixed `demo-user` username. The owner confirmed the
   button works locally, then pushed and reported everything working
-  (2026-10-18). The selected collection in the sidebar has a teal accent bar
-  on its right edge (`teal` is a theme color in `index.css`).
-- **Next, in order:** CI plus light frontend tests (item 5, needs approval to
-  install packages; suggest Vitest, Testing Library, and MSW first and
-  Playwright later); the accessibility audit (item 6); README and screenshots
-  (item 7), whose final check includes switching `demo-user` to the `demo`
-  role.
+  (2026-10-18). The selected collection in the sidebar had a teal accent bar
+  on its right edge; since 2026-10-27 it is a `red` bar (see
+  `docs/decisions.md`).
+- **Next, in order:** finish the accessibility audit (item 6: contrast,
+  keyboard, drawers, 200% zoom, phone menu); the shadcn-everywhere cleanup
+  (item 6a, needs the owner's styling go-ahead and possibly `select` and
+  `checkbox` installs); Playwright end-to-end checks if wanted (needs package
+  approval); README and screenshots (item 7), whose final check includes
+  switching `demo-user` to the `demo` role.
 - **Test tooling (2026-10-26).** Vitest, jsdom, React Testing Library,
   `user-event`, `jest-dom`, and MSW are installed and wired (`npm test` in
-  `dlams-ui`). Four tests exist: `src/pages/Login.test.tsx` (wrong password
+  `dlams-ui`). Six tests exist: `src/pages/Login.test.tsx` (wrong password
   shows the API's message; "Try the demo" lands on the collection with no
   "New collection" button) and `src/components/video-games/VideoGamesWorkspace.test.tsx` (an owner sees the
   add, edit, and delete controls; a shared user sees the games and none of
-  them). `npm test`, lint, and build pass (run
-  2026-10-26). `ci.yml` now runs `npm test` between lint and build; that is
-  unverified until it runs on GitHub. Uncommitted. The planned frontend tests are
+  them), plus an axe check on the login page and on the collection view. `npm test`, lint, and build pass (run
+  2026-10-26). `ci.yml` runs `npm test` between lint and build; the owner reported
+  CI ran and passed (2026-10-26). Uncommitted. The planned frontend tests are
   in place; Playwright end-to-end checks are still to do.
-- **Waiting on the owner:** the CI result from the Actions tab, and whether
-  to take the `zod` fix (`npm audit fix`).
+- **Waiting on the owner:** whether to take the `zod` fix (`npm audit fix`).
 - **Things to remember about the code.** Generated shadcn files are reviewed
-  after each install and not edited by hand, except that `combobox.tsx` has a
-  local `container` prop on `ComboboxContent` so a combobox popup renders
-  inside its drawer (see `.github/copilot-instructions.md`); the CLI writes
+  after each install, and edits to them need the owner's approval; the local
+  edits to `combobox.tsx` (a `container` prop, the removed unused `children`,
+  and an `aria-label` on the trigger) are listed in
+  `.github/copilot-instructions.md` and must be re-applied after a reinstall; the CLI writes
   `import { cn } from "cn"` and that is accepted. A raw `<button>` cleanup
   (about 15 places) and the create-collection drawer's form buttons are left
   for the styling pass. In our own components never use the `cn` helper (it is
-  for shadcn files only) and do not add code comments. The one-off edit that
-  removed the unused `children` in `ComboboxChipsInput` means a reinstall of
-  the combobox brings the lint error back. Fonts come from
+  for shadcn files only) and do not add code comments. Fonts come from
   `@fontsource-variable` packages (Fira Code for the app, Półtawski Nowy for
   the logo only); `teal` and `red` are theme colors in `index.css`.
 - **How the owner likes to work:** one decision per message; confirm when a
@@ -311,18 +311,155 @@ In order. Items 1 to 7 are the path to the portfolio milestone.
    publishing, on the screens a visitor sees (login, sidebar, collection
    workspace, drawers). Run an automated check (axe or Lighthouse), then
    check by hand: keyboard-only use with visible focus, a screen reader pass,
-   color contrast at both phone and desktop widths, and zoom to 200%. Known
-   finding from 2026-10-17: the default input border is about 1.2:1 against
-   the card, below the 3:1 that WCAG 1.4.11 asks of form-field boundaries;
-   this is the shadcn default and affects the whole app. The login backdrop
+   color contrast at both phone and desktop widths, and zoom to 200%. Finding
+   from 2026-10-17: the default input border was about 1.2:1 against the card,
+   below the 3:1 that WCAG 1.4.11 asks of form-field boundaries; fixed
+   2026-10-27 (see below). The login backdrop
    is decorative and hidden from screen readers; its card text measured
-   about 19:1 at 80% opacity (computed, not tested in a browser). Record the
-   findings and fixes here.
+   about 19:1 at 80% opacity (computed, not tested in a browser). Started
+   2026-10-26: `vitest-axe` runs in the test suite (`expectNoViolations` in
+   `dlams-ui/src/test/axe.ts`) on the login page and the owner's collection
+   view, and both report no violations. Later the same day axe was added to the
+   New collection, Add console, Add game, and phone-menu drawers and to the admin
+   users page and invite drawer; those report no violations except one finding
+   (below). jsdom has no layout, so the
+   color-contrast rule is switched off there and contrast must be checked in a
+   real browser; the drawers, the admin page, and the phone-menu drawer are not
+   covered yet. Record the findings and fixes here.
+
+   **Fixed finding (2026-10-26):** the dropdown-arrow button inside the console
+   combobox (Add console and Add game drawers) had no accessible name (axe
+   `button-name`). Fixed with an `aria-label` on `ComboboxTrigger` in the
+   generated `components/ui/combobox.tsx`, with the owner's approval.
+
+   **Firefox accessibility tree, desktop width (owner-pasted, 2026-10-26;
+   structure only, so no contrast, focus, or drawers).** Good: the sidebar is a
+   named `complementary` with a `navigation` and `main`; headings run h1 then
+   h2; lists are real lists; the selected collection exposes pressed and
+   current; the login backdrop logo is not in the tree; every input has a label
+   name. Findings, all fixed 2026-10-26 (owner-approved; `npm test`, lint, and
+   build pass; re-checked in Firefox by the owner the same day, see below):
+   1. The login page had no `main` landmark and no heading ("Login" is a
+      `div`); Register the same. Fixed: both pages use `<main>`, and the card
+      title has `role="heading" aria-level={1}` (`CardTitle` is a generated
+      `div`). Tests assert both, because axe on a container skips page-level
+      rules.
+   2. The Login inputs had no `autocomplete`. Fixed: `username` and
+      `current-password`.
+   3. Every console and game row had buttons named just "Edit" and "Delete".
+      Fixed with `aria-label` ("Edit Halo 3"); the visible text is unchanged.
+   4. Not accessibility: console rows said "1 games". Fixed.
+
+   **Contrast, computed from the light-theme tokens in `index.css` (2026-10-27;
+   a calculation, not a browser test, so confirm in Lighthouse or Firefox).**
+   The pasted accessibility trees contain no color data and cannot show
+   contrast.
+   - Fails: the sidebar "owner" badge (`text-muted-foreground` on `bg-muted`,
+     `text-xs`) is about 4.35:1 against the 4.5:1 AA needs. Default input
+     border on white is about 1.23:1 against 3:1 (the known finding). The teal
+     selected-collection bar on the sidebar was about 2.42:1 against 3:1, and
+     the owner confirmed (2026-10-27) it is the only visible cue for the
+     selected collection (the text colors are near-identical). Fixed the same
+     day by making the bar `red` (5.23:1 on the sidebar).
+   - Passes: muted text on the sidebar (about 4.55:1) and on white (about
+     4.77:1), though both are close to the line; `red` on white (about 5.48:1).
+   - Dark theme tokens exist but nothing in the app code turns dark mode on,
+     so they were checked only for reference (all pass).
+   Owner-reported 2026-10-27: Firefox's contrast check flags 3 text leaves,
+   all the "owner" badge text (one per collection), which matches the badge
+   result above. The owner also reported one badge appearing grey with no text
+   in it; it went away on its own and was put down to a browser glitch (the
+   badge renders `collection.access` in `CollectionNavigation.tsx`, so it
+   cannot be empty unless the API sends an empty value).
+   **Fixed 2026-10-27 (owner-approved; calculated ratios, not yet re-checked
+   in a browser):** in `index.css` (light theme only) `--muted-foreground`
+   went from L 0.554 to 0.52 and `--input` from L 0.929 to 0.65. The badge is
+   now 5.02:1, other muted text 5.26:1 on the sidebar and 5.50:1 on white, and
+   the input border 3.23:1. The sidebar access badge is now a black pill with
+   white text (20.17:1; see `docs/decisions.md`), which replaces its grey-badge
+   ratio. The selected-collection bar is now red. Side
+   effect to look at: `--ring` is unchanged at 2.63:1, so an input's focused
+   border (`border-ring`) is now lighter than its resting border; the 3px focus
+   glow still shows. Darkening `--ring` would fix it and would also darken
+   every focus ring, so it was left for the owner to decide after seeing it.
+   Re-run Lighthouse or Firefox's contrast check to confirm.
+
+   Firefox re-check (owner-pasted trees, 2026-10-27): confirmed items 1, 3, and
+   4. The login page now has a `main` and a level 1 "Login" heading, and the row
+   buttons read "Edit Playstation 2 — Original Grey", "Delete NHL 11", and so on,
+   with "1 game" singular. Item 2 (`autocomplete`) cannot be seen in that tree;
+   it is in the source only. Nothing new was found. The raw `<button>`s ("Add
+   console", "Add game", and the row Edit and Delete) have no custom focus
+   style, so check their focus outline in the keyboard pass.
+   Still to check by hand: contrast, keyboard, drawers, 200% zoom, phone menu.
+6a. **Use the shadcn components everywhere (before go-live).** Scanned
+   2026-10-27, nothing changed yet. This is a styling change, so it needs the
+   owner's go-ahead and scope first. Installed in `components/ui/`: `button`,
+   `card`, `combobox`, `drawer`, `form`, `input-group`, `input`, `label`,
+   `table`, `textarea`. Raw HTML found in app code (outside `components/ui/`):
+   - **17 raw `<button>`s** where `Button` should be used: the session Retry
+     (`App.tsx`); the invite drawer's Close (`RegistrationInviteManager.tsx`);
+     in `ConsoleManager.tsx` and `GameManager.tsx` each, the Add button, the
+     drawer Close, two form buttons (submit and cancel), and the row Edit and
+     Delete (6 each); in `CollectionNavigation.tsx` the collection row button,
+     the drawer Close, and the create submit. The collection row button is a
+     list-style toggle and may want `Button variant="ghost"` or to stay custom.
+   - **5 raw `<input>`s** (4 text, 1 checkbox) in `ConsoleManager`,
+     `GameManager`, and `CollectionNavigation`, where `Input` is used elsewhere
+     (login, register, invite link).
+   - **2 raw `<select>`s** (the condition fields in `ConsoleManager` and
+     `GameManager`). No shadcn `select` is installed; the owner would run
+     `npx shadcn@latest add select`. The checkbox has no shadcn component
+     installed either (`checkbox`).
+   - **8 raw `<label>`s** across the three drawer forms, where `Label` or
+     `FormLabel` should be used. `Form`/`FormField` are used on login and
+     register but the drawer forms use `react-hook-form` `register` directly.
+   - `textarea` is installed but unused. `input-group` and `label` are only
+     used inside the generated `combobox` and `form` files.
+   Doing this also gives these controls the shadcn focus ring, which the
+   keyboard check in item 6 flags as missing on the raw buttons. Re-run the
+   tests afterward; the axe checks and the `Edit`/`Delete` name tests cover
+   these screens.
 7. **README, screenshots, and a final check.** Rewrite the root `README.md`
    as the front door (see the milestone), take screenshots after the styling
    pass, run a secrets scan, switch `demo-user` to the `demo` role and confirm
    a write is refused, and click through the live demo on a phone and a
    desktop. Then share it.
+
+   **Secrets scan, run 2026-10-27 (read-only; no dedicated scanner was
+   installed, so this was `git grep` and `git log -p` regex passes, not
+   gitleaks or trufflehog).** Covered the working tree and all 82 commits on
+   every branch, including the four `origin/emdash/*` branches (all contained
+   in `main`).
+   - Clean: no private keys, cloud or GitHub tokens, JWTs, or long hex or
+     base64 secrets in any added line, ever. No `.env` with real values was
+     committed (an old `dlams-ui/.env` held only an API URL, later `/api`). No
+     public or LAN IP address appears in any commit. `.private/` and the
+     `.env` files are git-ignored and untracked.
+   - The only credentials in the repo are public defaults or placeholders:
+     `dlams_password` and `dlams_user` (compose defaults; the production
+     database password was changed, per the private notes), `dlams_dev` (dev
+     stack), `local-development-only-secret`, and `change-me-...`. Two bcrypt
+     hashes of throwaway test passwords sit in early `auth/routes.py`
+     commits (a fake user and `testpass123`); not in the current tree.
+   - Known and accepted (private notes, item 6): early commits describe the
+     Pi layout and the old leaked `.env` (no secret value is quoted), and
+     history was not rewritten.
+   - Fixed 2026-10-27: the `.env.example` missing newline (item 4 below), and
+     `docs/decisions.md` now says the domain is public by design (item 3).
+   - Not clean, owner to decide: (1) the owner's local OS username appears in
+     a `DATABASE_URL` in `app/db.py` in two September 2025 commits (no
+     password); (2) commit metadata carries two personal email addresses
+     (76 and 6 commits); (3) `nginx.conf` names the production domain, though
+     `docs/decisions.md` says the domain is not written in tracked files. The
+     README will link the live demo anyway, so that decision likely needs
+     updating rather than the file; (4) a real bug: in
+     `dlams-deployment/.env.example`, `POSTGRES_DB=dlams_db` and
+     `SECRET_KEY=...` are on one line (a missing newline), so copying the file
+     gives no `SECRET_KEY`.
+   - Not done: a second opinion from a real scanner (gitleaks or trufflehog;
+     needs an install the owner approves), and the demo-account check (a write
+     with its credentials gets a 403), which waits for the role switch.
 
 After the milestone:
 
@@ -379,7 +516,7 @@ After the milestone:
   `<dir>/bin/pip install -r dlams-fastapi/requirements.txt`, then from
   `dlams-fastapi/`: `SECRET_KEY=test <dir>/bin/python -m unittest discover -s
   tests`. Creating the venv installs packages, so ask first.
-- Frontend test tooling was installed 2026-10-26 and has four tests. `npm audit` reports 4
+- Frontend test tooling was installed 2026-10-26 and has six tests, including `vitest-axe` accessibility checks (added 2026-10-26). `npm audit` reports 4
   vulnerabilities after the install: `vitest`/`@vitest/mocker` and `tinypool`
   (dev-only; the fix is a downgrade to Vitest 2.0.5) and `zod` (runtime; `npm
   audit fix` resolves it). Upgrades are deferred. Backend tests use `unittest`; Ruff and
