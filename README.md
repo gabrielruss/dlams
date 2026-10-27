@@ -1,20 +1,39 @@
 # DLAMS
 
-DLAMS has a React frontend, a FastAPI backend, and PostgreSQL.
+A collection tracker I built for fun. Accounts are invite-only, and a read-only demo account is open to visitors. Live demo: <https://dontlookatmystuff.com>
 
-- To run the app, follow [`dlams-deployment/README.md`](./dlams-deployment/README.md).
-- For project plans and decisions, see [`DLAMS-PLAN.md`](./DLAMS-PLAN.md).
+## Architecture
 
-## Repository layout
+```
+Browser ──► Nginx ──► ui   (React, served as static files)
+               │
+               └────► api  (FastAPI) ──► db (PostgreSQL)
+```
 
-This is a monorepo. Each folder keeps its own manifests and README:
+| Folder             | Stack                                                                                                   |
+| ------------------ | ------------------------------------------------------------------------------------------------------- |
+| `dlams-ui`         | React 19, TypeScript, Vite, Tailwind CSS, shadcn/ui, TanStack Query, React Router, React Hook Form, Zod |
+| `dlams-fastapi`    | FastAPI, SQLAlchemy 2, Alembic, PostgreSQL                                                              |
+| `dlams-deployment` | Docker Compose, Nginx, GitHub Actions                                                                   |
 
-- `dlams-ui/` — React frontend
-- `dlams-fastapi/` — FastAPI backend
-- `dlams-deployment/` — Docker Compose and Nginx
+- The API is the security boundary; the UI hides controls but every rule is enforced server-side.
+- Auth: HTTP-only cookie holding an HS256 JWT. Registration requires a single-use, expiring invitation.
+- Roles: `user`, `admin`, `demo`. A demo account is limited to `GET`, `HEAD`, and `OPTIONS` at the API.
+- Access: owner (read and write) or shared (read-only). Admins have no implicit access to collections.
+- Migrations run on API start. A push to `main` deploys through GitHub Actions.
+- CI runs lint, frontend tests (Vitest, Testing Library, MSW, axe), the build, and backend tests (`unittest`).
 
-Pushing to `main` runs `.github/workflows/deploy.yml` on the production
-host's self-hosted runner, which pulls the repo and rebuilds `api`, `ui`, and
-`nginx`. Production needs an untracked `dlams-deployment/.env` (see
-`dlams-deployment/.env.example`); it is never committed.
+Details: [`docs/architecture.md`](./docs/architecture.md) · decisions: [`docs/decisions.md`](./docs/decisions.md) · status: [`DLAMS-PLAN.md`](./DLAMS-PLAN.md)
 
+## Run locally
+
+```bash
+make dev
+```
+
+UI at <http://localhost:5174>, API docs at <http://localhost:8001/docs>. First-admin setup and other run modes: [`dlams-deployment/README.md`](./dlams-deployment/README.md).
+
+```bash
+cd dlams-ui && npm test
+cd dlams-fastapi && SECRET_KEY=test python -m unittest discover -s tests
+```

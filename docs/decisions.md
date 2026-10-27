@@ -18,6 +18,13 @@ replaces it is named. Proposals and open questions live in
   design. What stays out of tracked files is anything else about the host: IP
   addresses, paths, the network layout, and credentials.
 
+### No screenshots in the README — 2026-10-27
+- The README links the live demo instead of showing screenshots. The owner does
+  not want to maintain images that drift from the app, and a visitor can open
+  the real thing in one click.
+- **Supersedes** the "README with screenshots" in the 2026-10-14 portfolio
+  checkpoint below.
+
 ### Database backups stay on the host — 2026-10-15
 - A nightly `pg_dump` (`dlams-deployment/scripts/backup-db.sh`, 03:15, 14 days
   kept) protects against a bad migration or an accidental delete. It is not

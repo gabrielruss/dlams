@@ -74,7 +74,7 @@ never appended to.
   keyboard, drawers, 200% zoom, phone menu); the shadcn-everywhere cleanup
   (item 6a, needs the owner's styling go-ahead and possibly `select` and
   `checkbox` installs); Playwright end-to-end checks if wanted (needs package
-  approval); README and screenshots (item 7), whose final check includes
+  approval); the README (item 7), whose final check includes
   switching `demo-user` to the `demo` role.
 - **Test tooling (2026-10-26).** Vitest, jsdom, React Testing Library,
   `user-event`, `jest-dom`, and MSW are installed and wired (`npm test` in
@@ -249,7 +249,7 @@ Done when all of these are true:
 - **Accessible.** An accessibility audit of the screens a visitor sees has
   been done and its findings fixed or recorded (Next up, item 6).
 - **Has a front door.** The root `README.md` says what DLAMS is and why, links
-  the live demo, shows screenshots, summarizes the stack and architecture
+  the live demo, summarizes the stack and architecture
   (linking `docs/architecture.md`), and explains how to run it.
 - **Safe to publish.** A secrets scan of the repository and its history is
   clean, and the demo account can make only `GET` requests (a write attempt
@@ -420,11 +420,14 @@ In order. Items 1 to 7 are the path to the portfolio milestone.
    keyboard check in item 6 flags as missing on the raw buttons. Re-run the
    tests afterward; the axe checks and the `Edit`/`Delete` name tests cover
    these screens.
-7. **README, screenshots, and a final check.** Rewrite the root `README.md`
-   as the front door (see the milestone), take screenshots after the styling
-   pass, run a secrets scan, switch `demo-user` to the `demo` role and confirm
-   a write is refused, and click through the live demo on a phone and a
-   desktop. Then share it.
+7. **README and a final check.** The root `README.md` was rewritten as the
+   front door on 2026-10-27 (uncommitted; no screenshots, since the live demo
+   shows the app and there is nothing to keep current). It links the live demo,
+   so push it only after `demo-user` is switched to the `demo` role. Still to
+   do: switch `demo-user` to the `demo` role and confirm a write is refused,
+   redo the backup restore test now that demo content exists, and click through
+   the live demo on a phone and a desktop. Then share it. The secrets scan is
+   done (below).
 
    **Secrets scan, run 2026-10-27 (read-only; no dedicated scanner was
    installed, so this was `git grep` and `git log -p` regex passes, not
