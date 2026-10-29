@@ -236,9 +236,10 @@ test and which kind.
   operator-run API command, not a public endpoint.
 - A collection owner can read, write, and manage who the collection is shared
   with. All sharing is read-only: a shared user can read but never write
-  through the API. The demo template account (role `demo`) can only make
-  `GET` requests. Demo-session accounts (role `sandbox`, `app/auth/sandbox.py`)
-  write only to their own copy, within limits, and can never share.
+  through the API. The demo template account (role `template`) is the source
+  demo sessions copy. Demo-session accounts (role `sandbox`,
+  `app/auth/sandbox.py`) write only to their own copy, within limits, and can
+  never share.
 - Global `admin` does not grant implicit access to collections the admin does
   not own or have been shared.
 - Enforce ownership/grants on every protected endpoint. Never trust a client-supplied owner, role, or cross-collection resource ID.

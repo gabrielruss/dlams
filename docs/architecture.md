@@ -98,7 +98,7 @@ and served by `nginx:alpine`, database `postgres:15` (development uses 14).
   the URL fragment (`/register#invite=...`).
 - The first admin is created by an operator command run inside the API
   environment (`python -m app.auth.bootstrap_admin`).
-- **Demo sessions.** `POST /demo-sessions` (no sign-in) copies the `demo`
+- **Demo sessions.** `POST /demo-sessions` (no sign-in) copies the `template`
   template account into a new `sandbox` account and sets its session cookie.
   At most 10 sandboxes exist; each is deleted on sign-out or, once its
   30-minute session is over, by the next demo request
@@ -108,16 +108,14 @@ and served by `nginx:alpine`, database `postgres:15` (development uses 14).
 
 Two independent layers:
 
-1. **Global role** on the user: `user`, `admin`, `demo`, or `sandbox`. `admin` can
+1. **Global role** on the user: `user`, `admin`, `template`, or `sandbox`. `admin` can
    issue invitations, activate or deactivate users, and switch an account
-   between `user` and `demo` (`require_admin`). Admin confers **no** access
-   to other users' collections. `demo` accounts are read-only at the API:
-   `get_current_user` rejects any request that is not `GET`, `HEAD`, or
-   `OPTIONS` with 403, so every authenticated write route is covered in one
-   place. A test fails if a write route does not depend on it (only
-   `/register`, `/login`, `/logout`, and `/demo-sessions` are exempt). The UI
-   also hides write controls from demo accounts. The `demo` account is the
-   template for demo sessions. `sandbox` accounts write normally to what they
+   between `user` and `template` (`require_admin`). Admin confers **no** access
+   to other users' collections. A `template` account is an ordinary account
+   that demo sessions copy; only its owner signs into it. A test fails if a
+   write route does not depend on `get_current_user` (only `/register`,
+   `/login`, `/logout`, and `/demo-sessions` are exempt). `sandbox` accounts
+   write normally to what they
    own, within 3 collections and 30 consoles and games, and are refused on
    every sharing route.
 2. **Per-collection access**, resolved in `app/collections/permissions.py`:
@@ -149,7 +147,7 @@ users ─┬─< collections ─┬─< collection_grants >── users
 
 | Table | Notes |
 | --- | --- |
-| `users` | `username` (unique), bcrypt `hashed_password`, optional unique `email`, `role` (`user`/`admin`/`demo`/`sandbox`, check constraint), `is_active`, `created_at`. |
+| `users` | `username` (unique), bcrypt `hashed_password`, optional unique `email`, `role` (`user`/`admin`/`template`/`sandbox`, check constraint), `is_active`, `created_at`. |
 | `registration_invitations` | `token_hash` (unique), `created_by_id` (RESTRICT), `expires_at`, `redeemed_at`. |
 | `collections` | `owner_id` (CASCADE), `name`, `type` (check constraint; only `video_game`). |
 | `collection_grants` | One row per (collection, user), unique: that user can read the collection. Cascades from both collection and user. |
@@ -173,7 +171,7 @@ the edge).
 | --- | --- | --- |
 | Auth | `POST /register`, `POST /login`, `POST /logout`, `POST /demo-sessions`, `GET /verify` | public / signed-in |
 | Invitations | `POST /invitations` | admin |
-| Admin users | `GET /admin/users`, `POST /admin/users/{id}/deactivate`, `POST /admin/users/{id}/activate`, `PUT /admin/users/{id}/role` (`user` or `demo`) | admin; not on yourself, and never on or to `admin` |
+| Admin users | `GET /admin/users`, `POST /admin/users/{id}/deactivate`, `POST /admin/users/{id}/activate`, `PUT /admin/users/{id}/role` (`user` or `template`) | admin; not on yourself, and never on or to `admin` |
 | Collections | `POST /collections`, `GET /collections`, `GET /collections/{id}` | signed-in; list includes owned and granted |
 | Sharing | `GET`, `POST` (by username), `DELETE` under `/collections/{id}/grants` | collection owner; never a sandbox |
 | Video games | `/collections/{id}/consoles` and `/games` (list, create, update, delete) | read: owner or shared; write: owner |

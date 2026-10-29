@@ -152,9 +152,6 @@ then use these endpoints in the API docs:
    remains. Deleting the final edition while a game uses its label also
    succeeds, and the label stays because the game uses it. A label is removed
    only once no console and no game uses it.
-6. Log in as `demo-user`, then try creating a console or game in the demo
-   collection. The API should deny the write with HTTP 403 while allowing
-   reads.
 
 Console and game conditions are `Loose`, `CIB`, `New`, and `Item & Box`.
 Optional `last_played` uses `YYYY-MM-DD`. In the UI, collection and item
@@ -296,8 +293,9 @@ last run. Re-enter anything added since the last backup.
 
 ### Demo account
 
-The demo runs from a template: a `demo-user` account with the `demo` role,
-which can only read. Only an admin can set that role, from "Manage users".
+The demo runs from a template: a `demo-user` account with the `template` role.
+Only an admin can set that role, from "Manage users". Its password must be
+private: whoever signs into the template changes what every visitor gets.
 Nobody signs into the template during a demo.
 
 "Try the demo" on the login page calls `POST /demo-sessions`. The API copies
@@ -319,7 +317,7 @@ Provision the template once on production, signed in as an admin:
    last-played date, and at least one console with two editions. Keep it well
    under 30 consoles and games so visitors have room to add their own.
 3. **Switch the role.** In your own admin session, open "Manage users" and
-   choose "Make demo" on the `demo-user` row.
+   choose "Make template" on the `demo-user` row.
 4. **Verify as a visitor.** In a private window, click "Try the demo". You
    should land in a copy of the collection with add, edit, and delete
    controls and a note that the session ends after 30 minutes. Sign out, and
@@ -327,9 +325,8 @@ Provision the template once on production, signed in as an admin:
 
 Things to know:
 
-- **Editing the template.** Use "Make regular" on the `demo-user` row, sign
-  in as it, make the changes, then "Make demo" again. New demo sessions copy
-  the template as it is when they start.
+- **Editing the template.** Sign in as `demo-user` and make the changes. New
+  demo sessions copy the template as it is when they start.
 - **Taking the demo down.** Deactivate `demo-user` from "Manage users"; "Try
   the demo" then reports that the demo is not available.
 - **Changing the template password.** There is no password-change screen.

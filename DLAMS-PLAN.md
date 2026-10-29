@@ -27,10 +27,14 @@ never appended to. History lives in git and `docs/decisions.md`.
   click-through of the live demo.
 - **Next, in order:**
   1. **Sandbox demo sessions** (item 9). Built and tested 2026-10-29, not
-     deployed. Before pushing: back up the database (new migration
-     `e7a3c5d91f20`). After deploying: click "Try the demo" on the live site,
-     change `demo-user`'s password (it was public in the JavaScript bundle),
-     and delete the `DEMO_PASSWORD` GitHub secret.
+     deployed. In this order: (1) **change `demo-user`'s password on
+     production first.** It was public in the JavaScript bundle, and the
+     template is no longer read-only, so the old password must not work once
+     this deploys. The live "Try the demo" button fails until the push. (2)
+     Back up the database (new migrations `e7a3c5d91f20`, the `sandbox` role,
+     and `f4c2e8a7b913`, which renames `demo` to `template`). (3) Push. (4)
+     Click "Try the demo" on the live site. (5) Delete the `DEMO_PASSWORD`
+     GitHub secret.
      Then, as its own change (owner, 2026-10-29): set up Ruff for the backend.
      That means Ruff in a new `requirements-dev.txt` (the owner approved the
      install), `[tool.ruff]` in `dlams-fastapi/pyproject.toml`, a one-time
@@ -75,7 +79,8 @@ never appended to. History lives in git and `docs/decisions.md`.
     (see `docs/decisions.md`). A raw `<button>`/`<input>`/`<select>`/`<label>`
     cleanup is item 6a.
   - The demo: "Try the demo" calls `POST /demo-sessions`, which copies the
-    read-only `demo-user` template into a temporary `sandbox` account for one
+    `demo-user` account (role `template`) into a temporary `sandbox`
+    account for one
     30-minute session (`app/auth/sandbox.py`). No credentials are in the
     bundle.
 - **How the owner likes to work:** one decision per message; confirm when a
@@ -518,7 +523,7 @@ is next, then the sharing UI, then search.
 ## Known issues
 
 - On a phone, the admin users table scrolls sideways inside its bordered box,
-  and the Make demo and Deactivate buttons are in the last column, so an admin
+  and the Make template and Deactivate buttons are in the last column, so an admin
   swipes right to reach them. Checked by reading the code on 2026-10-23, not
   in a browser. Left as is (admin-only, not on the visitor path). The cheap
   fixes are hiding the Created column below `md` or stacking each user as a

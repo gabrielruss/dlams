@@ -32,7 +32,7 @@ def depends_on_current_user(dependant) -> bool:
     return False
 
 
-class DemoAccountTests(unittest.TestCase):
+class TemplateAccountTests(unittest.TestCase):
     def setUp(self) -> None:
         self.engine = create_engine("sqlite:///:memory:")
         Base.metadata.create_all(self.engine)
@@ -43,12 +43,12 @@ class DemoAccountTests(unittest.TestCase):
             role=UserRole.ADMIN.value,
         )
         self.member = User(username="member", hashed_password="hashed-password")
-        self.demo = User(
+        self.template = User(
             username="demo-user",
             hashed_password="hashed-password",
-            role=UserRole.DEMO.value,
+            role=UserRole.TEMPLATE.value,
         )
-        self.db.add_all([self.admin, self.member, self.demo])
+        self.db.add_all([self.admin, self.member, self.template])
         self.db.commit()
 
     def tearDown(self) -> None:
@@ -62,26 +62,12 @@ class DemoAccountTests(unittest.TestCase):
         )
         return SimpleNamespace(cookies={"access_token": token}, method=method)
 
-    def test_demo_account_can_make_read_requests(self) -> None:
-        for method in ("GET", "HEAD", "OPTIONS"):
-            user = get_current_user(self.request_for("demo-user", method), self.db)
-            self.assertEqual(user.username, "demo-user")
-
-    def test_demo_account_cannot_make_any_other_request(self) -> None:
-        for method in ("POST", "PUT", "PATCH", "DELETE"):
-            with self.assertRaises(HTTPException) as raised:
-                get_current_user(self.request_for("demo-user", method), self.db)
-            self.assertEqual(raised.exception.status_code, 403)
-            self.assertEqual(raised.exception.detail, "Demo accounts are read-only")
-
-    def test_regular_user_can_still_write(self) -> None:
-        user = get_current_user(self.request_for("member", "POST"), self.db)
-        self.assertEqual(user.username, "member")
+    def test_template_account_can_write(self) -> None:
+        user = get_current_user(self.request_for("demo-user", "POST"), self.db)
+        self.assertEqual(user.username, "demo-user")
 
     def test_every_write_route_requires_a_signed_in_user(self) -> None:
-        # Demo accounts are blocked inside get_current_user, so a write route
-        # that skips it would be open to them. Only the auth routes that run
-        # before or while ending a session may skip it.
+        # Only the auth routes that start or end a session may skip sign-in.
         unauthenticated = {"/register", "/login", "/logout", "/demo-sessions"}
         unsafe = {"POST", "PUT", "PATCH", "DELETE"}
         unprotected = []
@@ -96,37 +82,25 @@ class DemoAccountTests(unittest.TestCase):
                 unprotected.append((sorted(route.methods), route.path))
         self.assertEqual(unprotected, [])
 
-    def test_admin_can_switch_a_user_to_demo_and_back(self) -> None:
+    def test_admin_can_switch_a_user_to_template_and_back(self) -> None:
         changed = set_user_role(
-            self.member.id, AdminUserRoleUpdate(role="demo"), self.db, self.admin
+            self.member.id, AdminUserRoleUpdate(role="template"), self.db, self.admin
         )
-        self.assertEqual(changed.role, UserRole.DEMO)
+        self.assertEqual(changed.role, UserRole.TEMPLATE)
         self.db.refresh(self.member)
-        self.assertEqual(self.member.role, UserRole.DEMO.value)
+        self.assertEqual(self.member.role, UserRole.TEMPLATE.value)
 
         changed = set_user_role(
             self.member.id, AdminUserRoleUpdate(role="user"), self.db, self.admin
         )
         self.assertEqual(changed.role, UserRole.USER)
 
-    def test_switching_to_demo_blocks_existing_sessions_from_writing(self) -> None:
-        request = self.request_for("member", "POST")
-        self.assertEqual(get_current_user(request, self.db).username, "member")
-
-        set_user_role(
-            self.member.id, AdminUserRoleUpdate(role="demo"), self.db, self.admin
-        )
-
-        with self.assertRaises(HTTPException) as raised:
-            get_current_user(request, self.db)
-        self.assertEqual(raised.exception.status_code, 403)
-
     def test_only_admins_can_switch_roles(self) -> None:
-        for actor in (self.member, self.demo):
+        for actor in (self.member, self.template):
             with self.assertRaises(HTTPException) as raised:
                 set_user_role(
                     self.member.id,
-                    AdminUserRoleUpdate(role="demo"),
+                    AdminUserRoleUpdate(role="template"),
                     self.db,
                     actor,
                 )
@@ -144,7 +118,7 @@ class DemoAccountTests(unittest.TestCase):
         for target in (self.admin, other_admin):
             with self.assertRaises(HTTPException) as raised:
                 set_user_role(
-                    target.id, AdminUserRoleUpdate(role="demo"), self.db, self.admin
+                    target.id, AdminUserRoleUpdate(role="template"), self.db, self.admin
                 )
             self.assertEqual(raised.exception.status_code, 400)
             self.db.refresh(target)
@@ -153,7 +127,7 @@ class DemoAccountTests(unittest.TestCase):
     def test_unknown_user_returns_404(self) -> None:
         with self.assertRaises(HTTPException) as raised:
             set_user_role(
-                9999, AdminUserRoleUpdate(role="demo"), self.db, self.admin
+                9999, AdminUserRoleUpdate(role="template"), self.db, self.admin
             )
         self.assertEqual(raised.exception.status_code, 404)
 

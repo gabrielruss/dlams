@@ -14,7 +14,7 @@ function VideoGamesWorkspace({ collection }: VideoGamesWorkspaceProps) {
     collection.id,
   )
   const { data: user } = useCurrentUser()
-  const canWrite = canWriteCollection(collection.access, user)
+  const canWrite = canWriteCollection(collection.access)
 
   if (isPending) return <p>Loading collection items...</p>
 

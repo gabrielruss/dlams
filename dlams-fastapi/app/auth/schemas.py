@@ -65,7 +65,7 @@ class AdminUserResponse(BaseModel):
 class AdminUserRoleUpdate(BaseModel):
     """Roles an admin can assign here. `admin` is never assignable."""
 
-    role: Literal["user", "demo"]
+    role: Literal["user", "template"]
 
     class Config:
         extra = "forbid"

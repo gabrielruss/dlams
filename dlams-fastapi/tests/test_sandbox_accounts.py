@@ -53,7 +53,7 @@ class SandboxAccountTests(unittest.TestCase):
         self.template = User(
             username="demo-user",
             hashed_password="hash",
-            role=UserRole.DEMO.value,
+            role=UserRole.TEMPLATE.value,
         )
         self.db.add_all([self.admin, self.member, self.template])
         self.db.flush()

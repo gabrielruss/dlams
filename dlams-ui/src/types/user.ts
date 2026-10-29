@@ -1,6 +1,6 @@
-export type UserRole = "user" | "admin" | "demo" | "sandbox"
+export type UserRole = "user" | "admin" | "template" | "sandbox"
 
-export type AssignableRole = Extract<UserRole, "user" | "demo">
+export type AssignableRole = Extract<UserRole, "user" | "template">
 
 export interface User {
   id: string

@@ -131,7 +131,7 @@ def create_sandbox(db: Session) -> User:
 
     template = db.scalars(
         select(User)
-        .where(User.role == UserRole.DEMO.value, User.is_active.is_(True))
+        .where(User.role == UserRole.TEMPLATE.value, User.is_active.is_(True))
         .order_by(User.id)
     ).first()
     if template is None:

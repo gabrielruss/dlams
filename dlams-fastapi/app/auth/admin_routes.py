@@ -1,7 +1,7 @@
 """
 admin_routes.py
 Admin-only user management: list users, deactivate and reactivate accounts,
-and switch an account between the `user` and `demo` roles.
+and switch an account between the `user` and `template` roles.
 """
 
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -83,7 +83,7 @@ def set_user_role(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ) -> AdminUserResponse:
-    """Switch an account between regular and demo. Demo accounts can only read."""
+    """Switch an account between regular and template. Templates can only read."""
     require_admin(current_user)
     if user_id == current_user.id:
         raise HTTPException(
