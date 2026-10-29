@@ -38,6 +38,11 @@ export const authApi = {
       body: JSON.stringify({ username, password }),
     }),
 
+  startDemoSession: () =>
+    apiRequest<{ user: User }>("/demo-sessions", {
+      method: "POST",
+    }),
+
   verify: () => apiRequest<{ user: User }>("/verify"),
 
   logout: () =>

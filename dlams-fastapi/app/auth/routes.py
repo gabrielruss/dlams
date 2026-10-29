@@ -7,7 +7,7 @@ import hashlib
 import secrets
 from datetime import datetime, timedelta, timezone
 
-from fastapi import APIRouter, Depends, HTTPException, Response, status
+from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
@@ -19,7 +19,9 @@ from app.auth.schemas import (
     RegistrationInvitationResponse,
     UserResponse,
 )
+from app.auth.sandbox import create_sandbox, delete_sandbox, is_sandbox
 from app.auth.utils import (
+    ACCESS_TOKEN_EXPIRE_MINUTES,
     create_access_token,
     get_current_user,
     get_user_by_username,
@@ -31,6 +33,22 @@ from app.models import RegistrationInvitation, User, UserRole
 from app.utils import get_db
 
 router = APIRouter()
+
+
+def _set_session_cookie(response: Response, username: str) -> None:
+    access_token = create_access_token(
+        data={"sub": username},
+        expires_delta=timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES),
+    )
+    response.set_cookie(
+        key="access_token",
+        value=access_token,
+        httponly=True,
+        secure=COOKIE_SECURE,
+        samesite="lax",
+        max_age=ACCESS_TOKEN_EXPIRE_MINUTES * 60,
+        path="/",
+    )
 
 
 @router.post("/register")
@@ -150,20 +168,7 @@ def login(
             detail="Account is deactivated",
         )
 
-    access_token = create_access_token(
-        data={"sub": login_data.username},
-        expires_delta=timedelta(minutes=30))
-
-
-    response.set_cookie(
-        key="access_token",
-        value=access_token,
-        httponly=True,
-        secure=COOKIE_SECURE,
-        samesite="lax",
-        max_age=1800,  # 30 minutes
-        path="/",
-    )
+    _set_session_cookie(response, login_data.username)
 
     return AuthResponse(
         message="Login successful",
@@ -171,9 +176,39 @@ def login(
     )
 
 
+@router.post(
+    "/demo-sessions",
+    response_model=AuthResponse,
+    status_code=status.HTTP_201_CREATED,
+)
+def create_demo_session(
+    response: Response,
+    db: Session = Depends(get_db),
+) -> AuthResponse:
+    """Sign the visitor into a fresh copy of the demo account for one session."""
+    sandbox = create_sandbox(db)
+    _set_session_cookie(response, sandbox.username)
+    return AuthResponse(
+        message="Demo session started",
+        user=UserResponse.model_validate(sandbox),
+    )
+
+
 @router.post("/logout", status_code=status.HTTP_204_NO_CONTENT)
-def logout(response: Response) -> Response:
-    """Clear the authentication cookie for this browser session."""
+def logout(
+    request: Request,
+    response: Response,
+    db: Session = Depends(get_db),
+) -> Response:
+    """Clear the authentication cookie, deleting a demo session's account."""
+    try:
+        current_user = get_current_user(request, db)
+    except HTTPException:
+        current_user = None
+    if current_user is not None and is_sandbox(current_user):
+        delete_sandbox(db, current_user)
+        db.commit()
+
     response.delete_cookie(
         key="access_token",
         httponly=True,

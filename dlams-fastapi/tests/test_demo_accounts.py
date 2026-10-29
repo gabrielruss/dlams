@@ -82,7 +82,7 @@ class DemoAccountTests(unittest.TestCase):
         # Demo accounts are blocked inside get_current_user, so a write route
         # that skips it would be open to them. Only the auth routes that run
         # before or while ending a session may skip it.
-        unauthenticated = {"/register", "/login", "/logout"}
+        unauthenticated = {"/register", "/login", "/logout", "/demo-sessions"}
         unsafe = {"POST", "PUT", "PATCH", "DELETE"}
         unprotected = []
         for route in app.routes:

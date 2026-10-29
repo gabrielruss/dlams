@@ -109,8 +109,6 @@ From the repository root, `make` wraps the Docker commands above:
 Rebuild/restart the stack first so the local database applies the newest
 migration. The collection-type migration assigns existing collections the
 `video_game` type.
-If an account previously had the global `demo` role, the migration changes
-that role to `user`; grant it `demo` access to a collection instead.
 Registration requires a one-time invitation. On an empty development database,
 create its first admin from the API container:
 
@@ -156,7 +154,7 @@ then use these endpoints in the API docs:
    only once no console and no game uses it.
 6. Log in as `demo-user`, then try creating a console or game in the demo
    collection. The API should deny the write with HTTP 403 while allowing
-   reads. Browser-local demo editing is not implemented yet.
+   reads.
 
 Console and game conditions are `Loose`, `CIB`, `New`, and `Item & Box`.
 Optional `last_played` uses `YYYY-MM-DD`. In the UI, collection and item
@@ -298,59 +296,47 @@ last run. Re-enter anything added since the last backup.
 
 ### Demo account
 
-The public demo is a `demo-user` account with the `demo` role. Only an admin
-can set that role, from "Manage users". A demo account can sign in and read
-everything it can see, but the API rejects any other request it makes with
-HTTP 403, including creating collections. Its credentials are public by
-design, so give it a password you use nowhere else.
+The demo runs from a template: a `demo-user` account with the `demo` role,
+which can only read. Only an admin can set that role, from "Manage users".
+Nobody signs into the template during a demo.
 
-A visitor will eventually be able to use the app as if it were a full
-account, with edits applied only in their own browser. That browser-local
-editing is not built yet; until it is, demo accounts see a read-only UI with
-no add, edit, or delete controls.
+"Try the demo" on the login page calls `POST /demo-sessions`. The API copies
+the template's collections, labels, consoles, and games into a temporary
+`sandbox` account and signs the visitor in as it. The visitor can add, edit,
+and delete in that copy (up to 3 collections and 30 consoles and games,
+copied ones included) but cannot share. A sandbox is deleted when the visitor
+signs out, or by the next "Try the demo" click once its 30-minute session has
+ended. At most 10 exist at once; the 11th visitor is told the demo is busy.
 
-Provision it once on production, signed in as an admin:
+Provision the template once on production, signed in as an admin:
 
 1. **Create the invitation.** Use "Invite someone" in the sidebar and copy the
-   link. Open it in a private browser window and register `demo-user` with the
-   public demo password. It starts as an ordinary account.
+   link. Open it in a private browser window and register `demo-user` with a
+   password you use nowhere else. It starts as an ordinary account.
 2. **Enter the content as that account.** Still in the private window, create
    a collection (for example "Retro game shelf", type video game) and add
-   content that looks real: roughly 10 to 15 games across 3 or 4 consoles, a
-   mix of conditions, some completed, some with a last-played date, and at
-   least one console with two editions. The account owns the collection.
+   content that looks real: a mix of conditions, some completed, some with a
+   last-played date, and at least one console with two editions. Keep it well
+   under 30 consoles and games so visitors have room to add their own.
 3. **Switch the role.** In your own admin session, open "Manage users" and
-   choose "Make demo" on the `demo-user` row. It takes effect on the
-   account's next request, even in an open session.
-4. **Verify as the visitor.** Sign in as `demo-user` in a private window. You
-   should see its collection with no add, edit, or delete controls and no
-   "New collection" button.
-5. **Prove the API refuses writes.** In that same demo session, from the
-   browser console, run
-   `fetch("/api/collections", {method: "POST", credentials: "include", headers: {"Content-Type": "application/json"}, body: JSON.stringify({name: "x"})}).then(r => r.status)`.
-   It should print `403`, and the collection list should be unchanged.
+   choose "Make demo" on the `demo-user` row.
+4. **Verify as a visitor.** In a private window, click "Try the demo". You
+   should land in a copy of the collection with add, edit, and delete
+   controls and a note that the session ends after 30 minutes. Sign out, and
+   the sandbox account should disappear from "Manage users".
 
 Things to know:
 
-- **"Try the demo" button.** The login page shows it only when the UI is
-  built with `VITE_DEMO_USERNAME` and `VITE_DEMO_PASSWORD`. The deploy
-  workflow sets them from the `DEMO_PASSWORD` GitHub Actions secret and the
-  username `demo-user`. The values end up in the public JavaScript bundle, by
-  design. A manual `docker compose up --build` without those variables drops
-  the button, so check the login page after one. To try it locally, put the
-  two variables in a git-ignored `dlams-ui/.env.local` and run
-  `npm run dev:hybrid`.
-- **Editing the content later.** Use "Make regular" on the row, sign in as the
-  account, make the changes, then "Make demo" again. Do not leave it as a
-  regular account while its password is public.
-- **Taking it down.** An admin can deactivate the account from "Manage users"
-  at any time and reactivate it later.
-- **Changing the demo password.** There is no password-change screen. Rotating
-  it today means a database update on the host; record the procedure in
+- **Editing the template.** Use "Make regular" on the `demo-user` row, sign
+  in as it, make the changes, then "Make demo" again. New demo sessions copy
+  the template as it is when they start.
+- **Taking the demo down.** Deactivate `demo-user` from "Manage users"; "Try
+  the demo" then reports that the demo is not available.
+- **Changing the template password.** There is no password-change screen.
+  Rotating it means a database update on the host; record the procedure in
   `.private/ops-notes.md` if you do it.
-- **Backups.** The curated content lives only in the production database,
-  which the nightly backup covers (see "Database backups"). Keep a list of the
-  games and consoles you entered in case you need to re-enter them.
+- **Backups.** The template content lives only in the production database,
+  which the nightly backup covers (see "Database backups").
 
 The production Nginx `/api/` proxy is configured to strip the prefix before
 forwarding to FastAPI, and the production auth cookie is configured as

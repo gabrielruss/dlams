@@ -96,6 +96,11 @@ def set_user_role(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Admin accounts cannot be changed here",
         )
+    if user.role == UserRole.SANDBOX.value:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Demo session accounts cannot be changed here",
+        )
     user.role = request.role
     db.commit()
     return AdminUserResponse.model_validate(user)

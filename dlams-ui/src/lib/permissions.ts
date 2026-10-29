@@ -9,6 +9,10 @@ export function isDemo(user: Pick<User, "role"> | null | undefined): boolean {
   return user?.role === "demo"
 }
 
+export function isSandbox(user: Pick<User, "role"> | null | undefined): boolean {
+  return user?.role === "sandbox"
+}
+
 export function canWriteCollection(
   access: CollectionAccess,
   user: Pick<User, "role"> | null | undefined,

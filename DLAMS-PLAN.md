@@ -1,110 +1,90 @@
 # DLAMS plan
 
-Last updated: 2026-10-26
+Last updated: 2026-10-29
 
 The current state of the project. For why things are the way they are, see
 [`docs/decisions.md`](./docs/decisions.md). For the full history up to
 2026-10-09, see [`docs/archive/`](./docs/archive/).
 
-## Where we left off (2026-10-26)
+## Where we left off (2026-10-29)
 
 Start here in a new session. This block is rewritten at the end of a session,
-never appended to.
+never appended to. History lives in git and `docs/decisions.md`.
 
-- **Start here (2026-10-26).** The mobile pass is done: the owner checked the
-  mobile changes in a browser and pushed them (owner-reported, 2026-10-26: "looks
-  good"). The styling pass status in `.github/copilot-instructions.md` is now
-  **complete**, so ask before any styling change. Not recorded yet: the CI
-  the live login page
-  and favicon, and whether tapping the already-selected collection in the
-  phone menu closes the menu. Next is item 5 (frontend tests), which needs
-  package approval.
-- **State.** The demo role, read-only sharing, owner-scoped console labels
-  with comboboxes, and the collection-name page heading were pushed and
-  deployed on 2026-10-17. On the Pi, `alembic current` reports
-  `b8e1d6a42c07 (head)` (owner-reported), and the owner confirmed on a
-  test account that "Make demo" works and a demo account's write is
-  refused with 403. Checked locally the same day: 52 backend unit tests pass,
-  and the UI `tsc -b`, lint, and build pass. The owner commits and
-  pushes everything themselves, so run `git status` before assuming what is
-  committed. The dev database was reset on 2026-10-16 and the admin
-  re-bootstrapped.
-- **Done 2026-10-17.** Removed the dead `grant` unpacking and the double access
-  lookup in the collection routes (new `get_collection_with_access`
-  dependency); simplified the video-game stats query to one query; validate a
-  game's name before creating its label; a case-only change to a console label
-  now renames the label (with a test); a console's game count now covers its
-  label across all the owner's collections (with a test); the combobox popup renders inside its
-  drawer through a `container` ref (after trying a handler, a wrapper, and an
-  inline list, see `docs/decisions.md`).
-- **Done 2026-10-18.** Login branding: the faint "DON'T LOOK AT MY STUFF"
-  text fills the login background (DON'T turned sideways on the left, in
-  `red` at 15%; LOOK / AT MY / STUFF stacked beside it, centered as one
-  group, in Półtawski Nowy), and the login card is 80%
-  opaque. The sidebar header is now a `D.L.A.M.S.` wordmark (Półtawski Nowy,
-  the first D and its period in `red`, the rest in the text color) fitted to
-  the old header height. Fira Code is now the app font. `teal` and `red` are
-  theme colors in `index.css`. The unused `children` in `ComboboxChipsInput` was removed so
-  lint passes. The favicon is the red D. See `docs/decisions.md`.
-- **Mobile pass, code done 2026-10-23.** Pushed 2026-10-18 and checked by the
-  owner in a browser's device mode (owner-reported): below `md` the sidebar is
-  a top bar with a menu button that opens a left drawer (creating a collection
-  from inside it closes both drawers), and the login page puts the logo above
-  a vertically centered card, shrunk to fit. Done 2026-10-23, local only
-  (`tsc -b`, lint, and build pass; not yet looked at in a browser): page
-  padding is 16px below `md`, headings are `text-2xl` below `md`, and the small
-  bordered Edit, Delete, and Close buttons are taller below `md`. The admin
-  users table was checked by reading the code and left as is (see Known
-  issues). Remaining: the owner's own pass through the screens on a phone.
-- **Manual check done on production (owner-reported, 2026-10-17).** The owner
-  confirmed the deployed functionality there, in place of a dev-stack pass.
-- **Demo account (owner-reported, 2026-10-17).** `demo-user` exists in
-  production as a regular user with initial data entered. The owner will
-  switch it to the `demo` role right before go live. Do not share the demo
-  link before that switch.
-- **Demo sign-in (2026-10-17).** The login page shows a "Try the demo" button
-  when `VITE_DEMO_USERNAME` and `VITE_DEMO_PASSWORD` are set at build time.
-  The deploy workflow sets them from the `DEMO_PASSWORD` GitHub secret (added
-  by the owner) and a fixed `demo-user` username. The owner confirmed the
-  button works locally, then pushed and reported everything working
-  (2026-10-18). The selected collection in the sidebar had a teal accent bar
-  on its right edge; since 2026-10-27 it is a `red` bar (see
-  `docs/decisions.md`).
-- **Next, in order:** finish the accessibility audit (item 6: contrast,
-  keyboard, drawers, 200% zoom, phone menu); the shadcn-everywhere cleanup
-  (item 6a, needs the owner's styling go-ahead and possibly `select` and
-  `checkbox` installs); Playwright end-to-end checks if wanted (needs package
-  approval); the README (item 7), whose final check includes
-  switching `demo-user` to the `demo` role.
-- **Test tooling (2026-10-26).** Vitest, jsdom, React Testing Library,
-  `user-event`, `jest-dom`, and MSW are installed and wired (`npm test` in
-  `dlams-ui`). Six tests exist: `src/pages/Login.test.tsx` (wrong password
-  shows the API's message; "Try the demo" lands on the collection with no
-  "New collection" button) and `src/components/video-games/VideoGamesWorkspace.test.tsx` (an owner sees the
-  add, edit, and delete controls; a shared user sees the games and none of
-  them), plus an axe check on the login page and on the collection view. `npm test`, lint, and build pass (run
-  2026-10-26). `ci.yml` runs `npm test` between lint and build; the owner reported
-  CI ran and passed (2026-10-26). Uncommitted. The planned frontend tests are
-  in place; Playwright end-to-end checks are still to do.
-- **Waiting on the owner:** whether to take the `zod` fix (`npm audit fix`).
-- **Things to remember about the code.** Generated shadcn files are reviewed
-  after each install, and edits to them need the owner's approval; the local
-  edits to `combobox.tsx` (a `container` prop, the removed unused `children`,
-  and an `aria-label` on the trigger) are listed in
-  `.github/copilot-instructions.md` and must be re-applied after a reinstall; the CLI writes
-  `import { cn } from "cn"` and that is accepted. A raw `<button>` cleanup
-  (about 15 places) and the create-collection drawer's form buttons are left
-  for the styling pass. In our own components never use the `cn` helper (it is
-  for shadcn files only) and do not add code comments. Fonts come from
-  `@fontsource-variable` packages (Fira Code for the app, Półtawski Nowy for
-  the logo only); `teal` and `red` are theme colors in `index.css`.
+- **Status.** The portfolio-ready milestone is **complete** (the owner's call,
+  2026-10-27). `main` is pushed through commit `400178a` ("readme"); at the end
+  of this session the sandbox demo work (API, UI, deploy config, docs) was
+  uncommitted, but run `git status` yourself: the owner commits and pushes
+  everything. Whether the last deploy run succeeded was not reported.
+- **What is verified.** Owner-reported: the mobile pass, CI passing
+  (2026-10-26), `demo-user` on the `demo` role, and a `POST /collections` from
+  its live session returning `403` (2026-10-27). Owner-run on 2026-10-29, output
+  pasted: the backup restore test passed (see Known issues). Run by Claude on
+  2026-10-29, after the sandbox demo work: `npm test` (15 tests in 4 files),
+  `npm run lint`, and `npm run build` pass in `dlams-ui`, and the 65 backend
+  tests pass in `dlams-fastapi/.venv`. Not run: migration `e7a3c5d91f20`
+  against PostgreSQL, and a demo session in a browser. Not reported: a phone and desktop
+  click-through of the live demo.
+- **Next, in order:**
+  1. **Sandbox demo sessions** (item 9). Built and tested 2026-10-29, not
+     deployed. Before pushing: back up the database (new migration
+     `e7a3c5d91f20`). After deploying: click "Try the demo" on the live site,
+     change `demo-user`'s password (it was public in the JavaScript bundle),
+     and delete the `DEMO_PASSWORD` GitHub secret.
+     Then, as its own change (owner, 2026-10-29): set up Ruff for the backend.
+     That means Ruff in a new `requirements-dev.txt` (the owner approved the
+     install), `[tool.ruff]` in `dlams-fastapi/pyproject.toml`, a one-time
+     reformat with nothing else in it, `ruff check` and `ruff format --check`
+     in `ci.yml`, both commands in `.github/copilot-instructions.md`, Ruff as
+     the format-on-save formatter and Pylance on `basic` in
+     `dlams.code-workspace`, and a Claude Code hook that formats edited `.py`
+     files. Type checking stays with Pylance (Pyright); no mypy.
+  2. **Sharing UI** (item 8). The API already works; there is no screen.
+     **Open question for the owner, to be settled before building** (see Open
+     questions): where is the "Shared with" screen reached from.
+  3. **Search** (item 8a, scope still to settle).
+  4. The manual half of the accessibility audit (item 6: keyboard pass,
+     including the raw buttons' focus outline, 200% zoom, the phone menu); the
+     shadcn-everywhere cleanup (item 6a, needs the owner's styling go-ahead and
+     possibly `select` and `checkbox` installs); Playwright end-to-end checks
+     if wanted (needs package approval); then items 10 and 11.
+- **Waiting on the owner:** the sharing-screen entry-point question; whether to
+  take the `zod` fix (`npm audit fix`); the search scope questions when search
+  starts.
+- **Things to remember about the code.**
+  - Tests sit beside the feature they cover. `renderApp(route)` in
+    `dlams-ui/src/test/renderApp.tsx` renders the real app with a fresh
+    `QueryClient` (production's 30 s stale time) and a `userEvent`; register
+    MSW handlers per test with `server.use(...)`; add an axe check with
+    `expectNoViolations(container)` from `src/test/axe.ts`. An unhandled
+    request fails the test. The approach is in `.github/copilot-instructions.md`
+    ("Testing").
+  - Generated shadcn files need the owner's approval to edit. The local edits to
+    `components/ui/combobox.tsx` (a `container` prop, the removed unused
+    `children`, an `aria-label` on the trigger) are listed in
+    `.github/copilot-instructions.md` and must be re-applied after a reinstall.
+    The owner runs the shadcn CLI; never hand-write a missing component.
+  - In our own components never use the `cn` helper (shadcn files only), do not
+    add code comments, and never use the owner's name in tests or fixtures
+    (use `test-user`, `demo-user`).
+  - Styling: the styling pass is complete, so ask before any styling change.
+    The app font is Fira Code; the logo font is Półtawski Nowy. `red` is the
+    brand color used for the logo D and the selected-collection bar; `teal` is
+    still a theme color but nothing uses it. The sidebar access badge is a black
+    pill with white text. Light-theme contrast tokens were changed 2026-10-27
+    (see `docs/decisions.md`). A raw `<button>`/`<input>`/`<select>`/`<label>`
+    cleanup is item 6a.
+  - The demo: "Try the demo" calls `POST /demo-sessions`, which copies the
+    read-only `demo-user` template into a temporary `sandbox` account for one
+    30-minute session (`app/auth/sandbox.py`). No credentials are in the
+    bundle.
 - **How the owner likes to work:** one decision per message; confirm when a
-  reply is ambiguous or has two parts. For commands on the Pi, give one
-  command per code block and wait for the output (multi-line pastes have
-  garbled in the owner's terminal). Do not offer to commit or push. Ask
-  before any styling change, but the owner's direct request counts as the
-  go-ahead for that change; when a design choice is open, give a
-  recommendation and one question rather than several.
+  reply is ambiguous or has two parts; give a recommendation and one question
+  rather than several; keep docs and the README trim with no fluff. For
+  commands on the Pi, give one command per code block and wait for the output
+  (multi-line pastes have garbled in the owner's terminal). Do not offer to
+  commit or push. Ask before any styling change, but the owner's direct request
+  counts as the go-ahead for that change.
 
 ## How to use this document
 
@@ -198,14 +178,27 @@ workflow on a self-hosted runner (`.github/workflows/deploy.yml`).
 **Not implemented**
 
 - Sharing UI (add and remove who a collection is shared with).
-- Browser-local editing for demo accounts (a demo account sees a read-only UI
-  today).
-- The `demo` role on `demo-user` in production (the account and its data
-  exist as a regular user; the switch is the go-live step, see
-  `dlams-deployment/README.md`, "Demo account").
+- Search (no search or filter exists in the UI or API).
+- An admin button to wipe all sandbox accounts.
 - Item types other than video games.
 
 **Verification baseline**
+
+- UI (2026-10-29, run by Claude): `npm test` passes (15 tests: login, the demo
+  session button, the owner and shared access views, the admin page, and axe
+  checks on the login, register, collection,
+  admin, and drawer screens), and `npm run lint` and `npm run build` pass. CI (lint, `npm test`, build, backend tests) passed on
+  push (owner-reported, 2026-10-26).
+
+- API (2026-10-29, run by Claude in `dlams-fastapi/.venv`): 65 unit tests
+  pass, including 13 for sandbox demo sessions (the copy, the 10-sandbox cap,
+  expiry cleanup, the collection and item limits, blocked sharing, the
+  template staying untouched, and deletion on sign-out).
+
+- Backup restore (2026-10-29, owner-run, output pasted): the 2026-10-29 03:15
+  dump restored into a scratch database with 3 users, 3 collections, 6
+  consoles, and 6 games at migration `b8e1d6a42c07`, the same counts as
+  production. The scratch database was dropped.
 
 - API (2026-10-17): 52 unit tests pass (run on Python 3.13, the project's
   version, in a scratch venv outside the repo), including a check that every
@@ -213,14 +206,10 @@ workflow on a self-hosted runner (`.github/workflows/deploy.yml`).
   `b8e1d6a42c07` were applied to production on 2026-10-17 (`alembic current`
   showed `b8e1d6a42c07 (head)`, owner-reported). The downgrades have not been
   run against a real database.
-- UI (2026-10-17): `npm run build`, `tsc -b`, and `npm run lint` pass
-  (`react-refresh/only-export-components` is off under `src/components/ui/`
-  because that folder is generated; the unused `children` in
-  `ComboboxChipsInput` in `combobox.tsx` was removed by hand with the
-  owner's one-off permission, so a reinstall of the combobox brings the lint
-  error back). Owner-reported on production, 2026-10-17: "Make demo" on a test
+- UI (2026-10-17): owner-reported on production: "Make demo" on a test
   account, a write from that account refused with 403, the collection list
-  unchanged, and no write controls in its UI.
+  unchanged, and no write controls in its UI. (`react-refresh/only-export-components`
+  is off under `src/components/ui/` because that folder is generated.)
 - Production routing and the automated deploy pipeline were exercised
   end to end by the owner (2026-10-09).
 - Manual browser pass (2026-10-12, owner-reported): collection and
@@ -233,6 +222,10 @@ The next goal, set 2026-10-14: a state good enough to link from the owner's
 portfolio site and show to potential employers, reached as soon as possible.
 Items 1 to 7 under "Next up" are the path; the rest waits. See
 `docs/decisions.md` for why.
+
+**Status: complete, 2026-10-27 (owner's call).** The phone and desktop
+click-through was not separately reported. The restore test was redone
+2026-10-29 and passed.
 
 Done when all of these are true:
 
@@ -269,16 +262,19 @@ In order. Items 1 to 7 are the path to the portfolio milestone.
    `docs/decisions.md`.
 2. **Provision the demo account and its content.** Mostly done 2026-10-17
    (owner-reported): `demo-user` is registered in production with initial
-   data. Remaining: switch it to `demo` in "Manage users" right before go
-   live (switch it back to `user` to edit later; steps in
-   `dlams-deployment/README.md`, "Demo account"), and redo the backup restore
-   test now that content exists. Deleting a user is deferred.
+   data. Switched to the `demo` role by 2026-10-27 (owner-reported; switch it
+   back to `user` to edit its content later, steps in
+   `dlams-deployment/README.md`, "Demo account"). The backup restore
+   test was redone with the content on 2026-10-29 and passed. Deleting a user
+   is deferred.
 3. **Demo sign-in on the login page.** Done 2026-10-18 (owner-reported
    working on production after the push). A "Try the
    demo" button signs in as the demo user through the normal login, using
    build-time variables fed from the `DEMO_PASSWORD` GitHub secret. Demo
    credentials are public by design and carry no authority (see
-   `docs/decisions.md`).
+   `docs/decisions.md`). **Replaced 2026-10-29** by sandbox demo sessions
+   (item 9): the button calls `POST /demo-sessions` and no credentials are in
+   the bundle.
 4. **Mobile-friendly styling pass** across the whole UI (sidebar and drawers
    in particular). This is the owner's styling pass, so it needs the owner's
    go-ahead and scope before any CSS or Tailwind change. For the milestone,
@@ -294,19 +290,16 @@ In order. Items 1 to 7 are the path to the portfolio milestone.
    pushed it, and the styling pass status is marked complete.
 5. **Automated checks: CI plus light frontend testing.** The CI workflow
    (`.github/workflows/ci.yml`, GitHub-hosted runner, separate from the deploy
-   workflow) is written 2026-10-17 and was pushed 2026-10-18; check the Actions tab for
-   its status. It runs lint
-   and build (the build includes the type check) for the UI, and the backend
-   tests. Check its first run after the push. It does not gate the deploy.
-   Still to do: add light frontend testing following Kent C. Dodds'
-   "Write tests. Not too many. Mostly integration."
-   (https://kentcdodds.com/blog/write-tests; rules in
-   `.github/copilot-instructions.md`, "Testing"): a few tests
-   that render real flows and assert on what a user sees. Vitest with React
-   Testing Library and MSW for integration tests, plus a handful of
-   Playwright end-to-end checks across owner, shared (read-only), and demo
-   access. Skip per-component and per-hook unit tests. Needs the owner's
-   approval to install packages. Backend tests stay on `unittest`.
+   workflow) runs lint, `npm test`, and build (which type-checks) for the UI,
+   and the backend tests; it passed (owner-reported, 2026-10-26). It does not
+   gate the deploy. Frontend testing follows Kent C. Dodds' "Write tests. Not
+   too many. Mostly integration." (https://kentcdodds.com/blog/write-tests;
+   rules in `.github/copilot-instructions.md`, "Testing"): Vitest, React
+   Testing Library, and MSW, with tests beside the features they cover. Done
+   2026-10-26: 14 tests across login, owner and shared access, the admin page,
+   and axe checks. Still optional: a handful of Playwright end-to-end checks
+   across owner, shared (read-only), and demo access (needs the owner's
+   approval to install packages). Backend tests stay on `unittest`.
 6. **Accessibility audit.** Do it after the styling pass and before
    publishing, on the screens a visitor sees (login, sidebar, collection
    workspace, drawers). Run an automated check (axe or Lighthouse), then
@@ -321,11 +314,11 @@ In order. Items 1 to 7 are the path to the portfolio milestone.
    `dlams-ui/src/test/axe.ts`) on the login page and the owner's collection
    view, and both report no violations. Later the same day axe was added to the
    New collection, Add console, Add game, and phone-menu drawers and to the admin
-   users page and invite drawer; those report no violations except one finding
-   (below). jsdom has no layout, so the
-   color-contrast rule is switched off there and contrast must be checked in a
-   real browser; the drawers, the admin page, and the phone-menu drawer are not
-   covered yet. Record the findings and fixes here.
+   users page and invite drawer, and the Register page; all report no
+   violations after the fixes below. jsdom has no layout, so the
+   color-contrast rule is switched off there and contrast is calculated from the
+   theme tokens or checked in a real browser. Still open: the hands-on keyboard
+   pass, 200% zoom, and the phone menu. Record the findings and fixes here.
 
    **Fixed finding (2026-10-26):** the dropdown-arrow button inside the console
    combobox (Add console and Add game drawers) had no accessible name (axe
@@ -420,14 +413,14 @@ In order. Items 1 to 7 are the path to the portfolio milestone.
    keyboard check in item 6 flags as missing on the raw buttons. Re-run the
    tests afterward; the axe checks and the `Edit`/`Delete` name tests cover
    these screens.
-7. **README and a final check.** The root `README.md` was rewritten as the
-   front door on 2026-10-27 (uncommitted; no screenshots, since the live demo
-   shows the app and there is nothing to keep current). It links the live demo,
-   so push it only after `demo-user` is switched to the `demo` role. Still to
-   do: switch `demo-user` to the `demo` role and confirm a write is refused,
-   redo the backup restore test now that demo content exists, and click through
-   the live demo on a phone and a desktop. Then share it. The secrets scan is
-   done (below).
+7. **README and a final check.** Done 2026-10-27 (owner's call). The root
+   `README.md` was rewritten as the front door (no screenshots: the live demo
+   shows the app and there is nothing to keep current; see
+   `docs/decisions.md`). `demo-user` is on the `demo` role and a write from it
+   was refused with a 403 on the live site (owner-reported). The secrets scan
+   is done (below). The backup restore test was redone 2026-10-29 and passed.
+   Not separately reported: the phone and desktop
+   click-through.
 
    **Secrets scan, run 2026-10-27 (read-only; no dedicated scanner was
    installed, so this was `git grep` and `git log -p` regex passes, not
@@ -461,17 +454,49 @@ In order. Items 1 to 7 are the path to the portfolio milestone.
      `SECRET_KEY=...` are on one line (a missing newline), so copying the file
      gives no `SECRET_KEY`.
    - Not done: a second opinion from a real scanner (gitleaks or trufflehog;
-     needs an install the owner approves), and the demo-account check (a write
-     with its credentials gets a 403), which waits for the role switch.
+     needs an install the owner approves). The demo-account check (a write
+     gets a 403) passed on the live site (owner-reported, 2026-10-27).
 
-After the milestone:
+After the milestone. Items 9, 8, and 8a are the first follow-ups (owner
+priority, 2026-10-27 to 2026-10-29), in that order: browser-local demo editing
+is next, then the sharing UI, then search.
 
-8. **Sharing UI.** A full-page "Shared with" screen where a collection owner
-   adds a user by username and removes users. Sharing is read-only, so there
-   is no access-mode control.
-9. **Browser-local demo editing** with reset. It waits on the open questions
-   below.
-10. **Demo sharing walkthrough.** After signing in as `demo-user`, a visitor
+8. **Sharing UI. After demo editing** (owner, 2026-10-29; it was next on
+   2026-10-28). The API can share a collection (`GET`,
+   `POST` by username, and `DELETE` under `/collections/{id}/grants`), but
+   there is no screen, so an owner cannot share one today. Build a full-page
+   "Shared with" screen where a collection owner adds a user by username and
+   removes users. Sharing is read-only, so there is no access-mode control.
+   A demo account is read-only at the API, so it cannot add a grant; its UI
+   should not offer the form. Mutations invalidate both the collection and
+   collection-list keys.
+8a. **Search** (owner wants it "pretty quickly", 2026-10-28; not designed
+   yet). Today there is no search anywhere: the console and game lists show
+   everything in the selected collection, and the API has no search or filter
+   parameter. Questions to settle before building:
+   - Scope: only the selected collection's games and consoles, or across all
+     the user's collections (and shared ones)?
+   - Fields: game name, console label, edition, condition, completed?
+   - Where it runs: a client-side filter over the lists the page already loads
+     (instant, no API change), or a server-side query. Proposal, not yet
+     confirmed with the owner: start with a client-side filter inside the
+     current collection, since the lists are already loaded in full and
+     collections are small; add a server query and cross-collection search
+     only if that stops being enough.
+   - Whether it reads from the URL (a `q` search param), as the selected
+     collection does, so a search survives refresh.
+   Follow the testing approach in `.github/copilot-instructions.md`: integration
+   tests that type a query and assert on what is listed, plus an axe check; the
+   field needs a visible label.
+9. **Sandbox demo sessions. Next to do** (owner, 2026-10-29). Built
+   2026-10-29, not deployed (see `docs/decisions.md`, "Demo sessions"). "Try
+   the demo" copies the `demo-user` template into a temporary `sandbox`
+   account: at most 10 at once, 3 collections and 30 consoles and games each,
+   no sharing, deleted on sign-out or after its 30-minute session. Replaces
+   the browser-local editing plan.
+9a. **Admin button to wipe all sandbox accounts** (owner, 2026-10-29; later).
+10. **Demo sharing walkthrough.** **On hold (2026-10-29):** sandbox accounts
+   cannot share, so this needs rethinking before it is built. After signing in as `demo-user`, a visitor
    opens the sharing area and clicks "Share my collection"; a "View the app
    as the shared user" button then appears. It signs in as a second demo
    account, `demo-shared`, through the normal login (no session-swap
@@ -482,7 +507,13 @@ After the milestone:
    the browser, because all visitors share one server state. Depends on the
    sharing UI (8) and browser-local demo editing (9). Proposed
    2026-10-14.
-11. **Further item types**, after the shared-fields question is settled.
+11. **Further item types**, after the shared-fields question is settled. As
+    the first step, split the sandbox template copy (`_copy_template` in
+    `dlams-fastapi/app/auth/sandbox.py`) into one copier per collection type,
+    registered by type like `collectionWorkspaceResolver.ts` in the UI. Move
+    the video-game copying (labels, consoles, games) beside the video-game
+    code. Settle the copier's interface with the new type; labels are copied
+    per owner, not per collection (owner, 2026-10-29).
 
 ## Known issues
 
@@ -501,9 +532,9 @@ After the milestone:
 - Backups stay on the Pi (decided 2026-10-15): a nightly dump runs at 03:15
   and keeps 14 days in `~/dlams-backups` on the host, but there is no
   off-device copy, so losing the Pi's storage loses the backups with the
-  database. Accepted for now. The restore test passed on 2026-10-15 against a
-  database with 2 users and no collections or games; redo it once the demo
-  content exists.
+  database. Accepted for now. The restore test passed on 2026-10-15 (2 users, no
+  collections or games) and again on 2026-10-29 with the demo content (3 users,
+  3 collections, 6 consoles, 6 games, matching production).
 - Dependency audit (2026-10-12): `npm audit` on `dlams-ui` reports 0
   vulnerabilities. `pip-audit` on `dlams-fastapi/requirements.txt` reports 27
   advisories in 10 packages (starlette, cryptography, pyasn1, ecdsa, anyio,
@@ -513,13 +544,7 @@ After the milestone:
   from the API). Several have no fixed version (`ecdsa`, `python-jose`).
   Upgrading is deferred (decided 2026-10-12) and is a separate, explicitly
   requested change because FastAPI 0.115.12 requires `starlette<0.47`.
-- `make test` needs `dlams-fastapi/.venv`, which does not exist on the
-  owner's machine. Backend tests have been run in a scratch virtual
-  environment outside the repo: `python3 -m venv <dir>`, then
-  `<dir>/bin/pip install -r dlams-fastapi/requirements.txt`, then from
-  `dlams-fastapi/`: `SECRET_KEY=test <dir>/bin/python -m unittest discover -s
-  tests`. Creating the venv installs packages, so ask first.
-- Frontend test tooling was installed 2026-10-26 and has six tests, including `vitest-axe` accessibility checks (added 2026-10-26). `npm audit` reports 4
+- Frontend test tooling was installed 2026-10-26 and has 15 tests, including `vitest-axe` accessibility checks. `npm audit` reports 4
   vulnerabilities after the install: `vitest`/`@vitest/mocker` and `tinypool`
   (dev-only; the fix is a downgrade to Vitest 2.0.5) and `zod` (runtime; `npm
   audit fix` resolves it). Upgrades are deferred. Backend tests use `unittest`; Ruff and
@@ -536,8 +561,6 @@ After the milestone:
 
 ## Open questions
 
-- How should a visitor's browser-local demo overlay behave if the owner
-  changes the source demo collection or stops sharing it?
 - What fields are shared by every item type, and how should type-specific
   metadata be modeled? Compare schema options before choosing an inheritance
   strategy, and choose stable names for categories and item types.
@@ -546,10 +569,15 @@ After the milestone:
   delete; backups exist only on the Pi, so a hard delete is hard to undo.
 - Should collection owners, not only admins, be able to invite someone with a
   grant on their own collection attached?
-- Is browser local storage enough for the first demo version? If the overlay
-  needs a client store, `zustand` with its `persist` middleware is a candidate
-  (it was removed on 2026-10-14 because nothing used it); a small
-  `useSyncExternalStore` hook is the dependency-free alternative. Decide with
-  the overlay design, not before.
+- Where is the sharing screen reached from? Asked 2026-10-28, for the owner
+  to answer next. Options: (a) a link on each collection row in the sidebar,
+  or (b) a "Share" control on the selected collection's page heading in the
+  workspace, opening a full-page route such as `/collections/:id/sharing` (the
+  plan calls for a full-page screen; today the routes are `/`, `/login`,
+  `/register`, `/admin/users`, with the selected collection in the `?collection=`
+  search param). Claude's recommendation is (b): the sidebar rows are already
+  dense, especially on a phone, and sharing acts on the collection you are
+  looking at. Shared collections need no control at all, because only owners
+  can share, and demo accounts must not see it.
 - What features beyond the first game-list workflow are in scope for the
   private app and for the demo?

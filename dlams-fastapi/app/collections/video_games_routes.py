@@ -5,6 +5,7 @@ from sqlalchemy import func, or_
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
+from app.auth.sandbox import check_item_limit
 from app.collections.video_games_schemas import (
     ConsoleCreate,
     ConsoleLabelListResponse,
@@ -199,6 +200,7 @@ def create_console(
     collection: Collection = Depends(get_writable_collection),
     db: Session = Depends(get_db),
 ) -> ConsoleResponse:
+    check_item_limit(db, collection)
     label = _get_or_create_label(db, collection.owner_id, request.label)
     edition = request.edition.strip() if request.edition else None
     console = Console(
@@ -324,6 +326,7 @@ def create_game(
     collection: Collection = Depends(get_writable_collection),
     db: Session = Depends(get_db),
 ) -> GameResponse:
+    check_item_limit(db, collection)
     name = request.name.strip()
     if not name:
         raise HTTPException(

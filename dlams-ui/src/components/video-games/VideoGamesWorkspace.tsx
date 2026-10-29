@@ -1,6 +1,6 @@
 import type { Collection } from "@/types/collections"
 import { useCurrentUser } from "@/components/auth/useAuthQueries"
-import { canWriteCollection } from "@/lib/permissions"
+import { canWriteCollection, isSandbox } from "@/lib/permissions"
 import ConsoleManager from "./ConsoleManager"
 import GameManager from "./GameManager"
 import useVideoGamesCollection from "./useVideoGamesCollection"
@@ -10,8 +10,9 @@ interface VideoGamesWorkspaceProps {
 }
 
 function VideoGamesWorkspace({ collection }: VideoGamesWorkspaceProps) {
-  const { consoles, games, isPending, error } =
-    useVideoGamesCollection(collection.id)
+  const { consoles, games, isPending, error } = useVideoGamesCollection(
+    collection.id,
+  )
   const { data: user } = useCurrentUser()
   const canWrite = canWriteCollection(collection.access, user)
 
@@ -19,14 +20,22 @@ function VideoGamesWorkspace({ collection }: VideoGamesWorkspaceProps) {
 
   return (
     <div className="flex flex-col gap-5">
+      {isSandbox(user) && (
+        <p className="rounded-md border p-3 text-sm">
+          You are currently in a demo session. All data you add will be reset in
+          30 minutes. Enjoy :)
+        </p>
+      )}
       {!canWrite && (
         <p className="rounded-md border p-3 text-sm">
-          This collection is read-only in the current UI. Browser-only demo
-          editing is not implemented yet.
+          This collection is read-only.
         </p>
       )}
       {error && (
-        <p role="alert" className="rounded-md border border-destructive p-3 text-sm">
+        <p
+          role="alert"
+          className="rounded-md border border-destructive p-3 text-sm"
+        >
           {error.message}
         </p>
       )}

@@ -1,6 +1,6 @@
 # DLAMS architecture
 
-Last updated: 2026-10-16
+Last updated: 2026-10-29
 
 How the system is put together right now. For status and next steps see
 [`DLAMS-PLAN.md`](../DLAMS-PLAN.md); for why things are this way see
@@ -43,8 +43,7 @@ Versions are the declared ranges from `dlams-ui/package.json` and
 | Lint | ESLint 9 with `typescript-eslint`, `react-hooks`, `react-refresh` (its export rule is off under `src/components/ui/`, where the shadcn CLI writes files) |
 
 There is no client-side store library: server state is TanStack Query, and
-the selected collection is in the URL. A store is a candidate for the
-browser-local demo overlay (see the plan's open questions).
+the selected collection is in the URL.
 
 **Backend (`dlams-fastapi`)**
 
@@ -99,20 +98,28 @@ and served by `nginx:alpine`, database `postgres:15` (development uses 14).
   the URL fragment (`/register#invite=...`).
 - The first admin is created by an operator command run inside the API
   environment (`python -m app.auth.bootstrap_admin`).
+- **Demo sessions.** `POST /demo-sessions` (no sign-in) copies the `demo`
+  template account into a new `sandbox` account and sets its session cookie.
+  At most 10 sandboxes exist; each is deleted on sign-out or, once its
+  30-minute session is over, by the next demo request
+  (`app/auth/sandbox.py`).
 
 ## Authorization model
 
 Two independent layers:
 
-1. **Global role** on the user: `user`, `admin`, or `demo`. `admin` can
+1. **Global role** on the user: `user`, `admin`, `demo`, or `sandbox`. `admin` can
    issue invitations, activate or deactivate users, and switch an account
    between `user` and `demo` (`require_admin`). Admin confers **no** access
    to other users' collections. `demo` accounts are read-only at the API:
    `get_current_user` rejects any request that is not `GET`, `HEAD`, or
    `OPTIONS` with 403, so every authenticated write route is covered in one
    place. A test fails if a write route does not depend on it (only
-   `/register`, `/login`, and `/logout` are exempt). The UI also hides write
-   controls from demo accounts.
+   `/register`, `/login`, `/logout`, and `/demo-sessions` are exempt). The UI
+   also hides write controls from demo accounts. The `demo` account is the
+   template for demo sessions. `sandbox` accounts write normally to what they
+   own, within 3 collections and 30 consoles and games, and are refused on
+   every sharing route.
 2. **Per-collection access**, resolved in `app/collections/permissions.py`:
 
    | Access | How it arises | Reads | Persistent writes |
@@ -120,8 +127,7 @@ Two independent layers:
    | `owner` | `collections.owner_id` is the user | yes | yes |
    | `view-only` | a row in `collection_grants` for the user | yes | no (403) |
 
-   All sharing is read-only: only the owner ever writes. Browser-local edits
-   for demo accounts are planned and never reach the API.
+   All sharing is read-only: only the owner ever writes.
 
    Three FastAPI dependencies implement this. `get_collection_with_access`
    loads the collection and the user's access; `get_readable_collection` and
@@ -143,7 +149,7 @@ users ─┬─< collections ─┬─< collection_grants >── users
 
 | Table | Notes |
 | --- | --- |
-| `users` | `username` (unique), bcrypt `hashed_password`, optional unique `email`, `role` (`user`/`admin`/`demo`, check constraint), `is_active`, `created_at`. |
+| `users` | `username` (unique), bcrypt `hashed_password`, optional unique `email`, `role` (`user`/`admin`/`demo`/`sandbox`, check constraint), `is_active`, `created_at`. |
 | `registration_invitations` | `token_hash` (unique), `created_by_id` (RESTRICT), `expires_at`, `redeemed_at`. |
 | `collections` | `owner_id` (CASCADE), `name`, `type` (check constraint; only `video_game`). |
 | `collection_grants` | One row per (collection, user), unique: that user can read the collection. Cascades from both collection and user. |
@@ -165,11 +171,11 @@ the edge).
 
 | Area | Routes | Access |
 | --- | --- | --- |
-| Auth | `POST /register`, `POST /login`, `POST /logout`, `GET /verify` | public / signed-in |
+| Auth | `POST /register`, `POST /login`, `POST /logout`, `POST /demo-sessions`, `GET /verify` | public / signed-in |
 | Invitations | `POST /invitations` | admin |
 | Admin users | `GET /admin/users`, `POST /admin/users/{id}/deactivate`, `POST /admin/users/{id}/activate`, `PUT /admin/users/{id}/role` (`user` or `demo`) | admin; not on yourself, and never on or to `admin` |
 | Collections | `POST /collections`, `GET /collections`, `GET /collections/{id}` | signed-in; list includes owned and granted |
-| Sharing | `GET`, `POST` (by username), `DELETE` under `/collections/{id}/grants` | collection owner |
+| Sharing | `GET`, `POST` (by username), `DELETE` under `/collections/{id}/grants` | collection owner; never a sandbox |
 | Video games | `/collections/{id}/consoles` and `/games` (list, create, update, delete) | read: owner or shared; write: owner |
 | Console labels | `GET /console-labels` (the signed-in user's labels) | signed-in |
 | Stats | `GET /collections/video-game-stats` | signed-in; owned and granted collections |
@@ -207,7 +213,10 @@ dlams-ui/src/
   lib/api/                   fetch client and one module per resource
   lib/                       queryClient, permissions, utils
   schemas/, types/           zod schemas and shared TypeScript types
+  test/                      test setup, MSW server, renderApp, axe helper
 ```
+
+Tests (`*.test.tsx`) sit beside the feature they cover.
 
 Forms open in right-side drawers; the sidebar lists collections with counts
 and marks the selected one with a red bar. Its header is a fitted
@@ -219,7 +228,9 @@ AT MY STUFF" logo (`components/BrandLogo.tsx`): behind the card on wide screens
 and above it on phones. Both fitted components share the
 `components/useFitOnResize.ts` hook; the
 app font is Fira Code and brand colors `teal` and `red` are theme tokens in
-`index.css`. Styling is Tailwind with shadcn/ui; the owner's styling pass is complete, so
+`index.css` (`red` marks the selected collection and the logo D; `teal` is
+unused). The access badge on each sidebar row is a black pill with white text.
+Styling is Tailwind with shadcn/ui; the owner's styling pass is complete, so
 styling changes need approval (see the conventions file for the rule).
 
 ## Environments and deployment
