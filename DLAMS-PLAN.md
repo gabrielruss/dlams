@@ -27,14 +27,16 @@ never appended to. History lives in git and `docs/decisions.md`.
   click-through of the live demo.
 - **Next, in order:**
   1. **Sandbox demo sessions** (item 9). Built and tested 2026-10-29, not
-     deployed. In this order: (1) **change `demo-user`'s password on
-     production first.** It was public in the JavaScript bundle, and the
-     template is no longer read-only, so the old password must not work once
-     this deploys. The live "Try the demo" button fails until the push. (2)
-     Back up the database (new migrations `e7a3c5d91f20`, the `sandbox` role,
-     and `f4c2e8a7b913`, which renames `demo` to `template`). (3) Push. (4)
-     Click "Try the demo" on the live site. (5) Delete the `DEMO_PASSWORD`
-     GitHub secret.
+     deployed. In this order, because `demo-user`'s current password was
+     public in the JavaScript bundle and the template is no longer read-only:
+     (1) **deactivate `demo-user`** in "Manage users" on the live site, so the
+     old password stops working; (2) back up the database (new migrations
+     `e7a3c5d91f20`, the `sandbox` role, and `f4c2e8a7b913`, which renames
+     `demo` to `template`); (3) push; (4) set a new password for `demo-user`
+     with `PUT /admin/users/{id}/password` (steps in
+     `dlams-deployment/README.md`, "Changing a password"); (5) reactivate
+     `demo-user`; (6) click "Try the demo" on the live site; (7) delete the
+     `DEMO_PASSWORD` GitHub secret.
      Then, as its own change (owner, 2026-10-29): set up Ruff for the backend.
      That means Ruff in a new `requirements-dev.txt` (the owner approved the
      install), `[tool.ruff]` in `dlams-fastapi/pyproject.toml`, a one-time

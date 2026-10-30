@@ -145,6 +145,20 @@ replaces it is named. Proposals and open questions live in
   an invitation, and a visitor never chooses the name or role.
 - Later: an admin button to wipe all sandbox accounts.
 
+### Admins reset passwords through the API; no screen yet — 2026-10-29
+- `PUT /admin/users/{id}/password` sets a new password (6 to 30 characters,
+  like registration). An admin may reset a regular or template account and
+  their own, never another admin's and never a sandbox's. There is no UI;
+  the admin calls it from the browser console.
+- Reason: the template's password was public and the template is no longer
+  read-only, so it had to be changed, and there was no way to change any
+  password. A command run on the Pi was considered; the owner chose an API
+  endpoint.
+- A reset does not end existing sessions (they expire within 30 minutes).
+  Deactivating the account first ends them.
+- Not done: deleting a user. That still waits on the open question in the
+  plan about what happens to the user's data.
+
 ### The `demo` role is renamed `template` — 2026-10-29
 - With demo sessions, nobody signs into the read-only account any more; it is
   the template each sandbox is copied from, so its role is now `template`.

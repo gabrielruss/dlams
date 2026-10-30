@@ -71,6 +71,15 @@ class AdminUserRoleUpdate(BaseModel):
         extra = "forbid"
 
 
+class AdminPasswordReset(BaseModel):
+    """A new password set by an admin, with the same rules as registration."""
+
+    password: str = Field(min_length=6, max_length=30)
+
+    class Config:
+        extra = "forbid"
+
+
 class AdminUserListResponse(BaseModel):
     """All users, for admin user management."""
 

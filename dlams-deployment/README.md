@@ -329,9 +329,14 @@ Things to know:
   demo sessions copy the template as it is when they start.
 - **Taking the demo down.** Deactivate `demo-user` from "Manage users"; "Try
   the demo" then reports that the demo is not available.
-- **Changing the template password.** There is no password-change screen.
-  Rotating it means a database update on the host; record the procedure in
-  `.private/ops-notes.md` if you do it.
+- **Changing a password.** There is no screen for it. Signed in as admin on
+  the site, find the account's `id` with
+  `fetch("/api/admin/users", {credentials: "include"}).then(r => r.json())`
+  in the browser console, then run
+  `fetch("/api/admin/users/<id>/password", {method: "PUT", credentials: "include", headers: {"Content-Type": "application/json"}, body: JSON.stringify({password: "<new password>"})}).then(r => r.status)`.
+  It should print `200`. The password must be 6 to 30 characters. Existing
+  sessions for that account stay signed in until they expire (30 minutes);
+  deactivate the account first if that matters. Clear the console afterward.
 - **Backups.** The template content lives only in the production database,
   which the nightly backup covers (see "Database backups").
 

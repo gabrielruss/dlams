@@ -171,7 +171,7 @@ the edge).
 | --- | --- | --- |
 | Auth | `POST /register`, `POST /login`, `POST /logout`, `POST /demo-sessions`, `GET /verify` | public / signed-in |
 | Invitations | `POST /invitations` | admin |
-| Admin users | `GET /admin/users`, `POST /admin/users/{id}/deactivate`, `POST /admin/users/{id}/activate`, `PUT /admin/users/{id}/role` (`user` or `template`) | admin; not on yourself, and never on or to `admin` |
+| Admin users | `GET /admin/users`, `POST /admin/users/{id}/deactivate`, `POST /admin/users/{id}/activate`, `PUT /admin/users/{id}/role` (`user` or `template`), `PUT /admin/users/{id}/password` | admin; role and deactivate never on yourself or another admin; password on yourself but never another admin; never a sandbox |
 | Collections | `POST /collections`, `GET /collections`, `GET /collections/{id}` | signed-in; list includes owned and granted |
 | Sharing | `GET`, `POST` (by username), `DELETE` under `/collections/{id}/grants` | collection owner; never a sandbox |
 | Video games | `/collections/{id}/consoles` and `/games` (list, create, update, delete) | read: owner or shared; write: owner |
