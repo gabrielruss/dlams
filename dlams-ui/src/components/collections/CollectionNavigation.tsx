@@ -10,8 +10,6 @@ import {
   DrawerHeader,
   DrawerTitle,
 } from "@/components/ui/drawer"
-import { useCurrentUser } from "@/components/auth/useAuthQueries"
-import { isDemo } from "@/lib/permissions"
 import CollectionStats from "./CollectionStats"
 import useCollections from "./useCollections"
 
@@ -23,7 +21,6 @@ function CollectionNavigation() {
     collectionsQuery,
     createCollectionMutation,
   } = useCollections()
-  const { data: user } = useCurrentUser()
   const [isCreateDrawerOpen, setIsCreateDrawerOpen] = useState(false)
   const form = useForm<{ name: string }>({ defaultValues: { name: "" } })
   const newCollectionName = form.watch("name")
@@ -58,18 +55,16 @@ function CollectionNavigation() {
     >
       <div className="flex shrink-0 items-center justify-between py-2 pl-3 pr-3">
         <h2 className="text-sm font-semibold">Collections</h2>
-        {!isDemo(user) && (
-          <Button
-            variant="outline"
-            size="icon"
-            type="button"
-            aria-label="New collection"
-            title="New collection"
-            onClick={openCreateDrawer}
-          >
-            <Plus aria-hidden="true" />
-          </Button>
-        )}
+        <Button
+          variant="outline"
+          size="icon"
+          type="button"
+          aria-label="New collection"
+          title="New collection"
+          onClick={openCreateDrawer}
+        >
+          <Plus aria-hidden="true" />
+        </Button>
       </div>
 
       {collectionsQuery.isError && (
@@ -85,11 +80,9 @@ function CollectionNavigation() {
       ) : collections.length === 0 ? (
         <div className="flex flex-col gap-3 px-3 py-2">
           <p className="text-sm text-muted-foreground">No collections yet.</p>
-          {!isDemo(user) && (
-            <Button variant="outline" type="button" onClick={openCreateDrawer}>
-              Create your first collection
-            </Button>
-          )}
+          <Button variant="outline" type="button" onClick={openCreateDrawer}>
+            Create your first collection
+          </Button>
         </div>
       ) : (
         <ul className="min-h-0 flex-1 overflow-y-auto pl-3">

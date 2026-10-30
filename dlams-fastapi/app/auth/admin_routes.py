@@ -1,7 +1,7 @@
 """
 admin_routes.py
 Admin-only user management: list users, deactivate and reactivate accounts,
-and switch an account between the `user` and `demo` roles.
+switch an account between the `user` and `template` roles, and reset passwords.
 """
 
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -9,11 +9,12 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.auth.schemas import (
+    AdminPasswordReset,
     AdminUserListResponse,
     AdminUserResponse,
     AdminUserRoleUpdate,
 )
-from app.auth.utils import get_current_user, require_admin
+from app.auth.utils import get_current_user, pwd_context, require_admin
 from app.models import User, UserRole
 from app.utils import get_db
 
@@ -83,7 +84,7 @@ def set_user_role(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ) -> AdminUserResponse:
-    """Switch an account between regular and demo. Demo accounts can only read."""
+    """Switch an account between regular and template. Templates can only read."""
     require_admin(current_user)
     if user_id == current_user.id:
         raise HTTPException(
@@ -96,6 +97,36 @@ def set_user_role(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Admin accounts cannot be changed here",
         )
+    if user.role == UserRole.SANDBOX.value:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Demo session accounts cannot be changed here",
+        )
     user.role = request.role
+    db.commit()
+    return AdminUserResponse.model_validate(user)
+
+
+@router.put("/{user_id}/password", response_model=AdminUserResponse)
+def reset_user_password(
+    user_id: int,
+    request: AdminPasswordReset,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+) -> AdminUserResponse:
+    """Set a new password for a regular, template, or the admin's own account."""
+    require_admin(current_user)
+    user = _get_user_or_404(db, user_id)
+    if user.role == UserRole.ADMIN.value and user.id != current_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Admin accounts cannot be changed here",
+        )
+    if user.role == UserRole.SANDBOX.value:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Demo session accounts cannot be changed here",
+        )
+    user.hashed_password = pwd_context.hash(request.password)
     db.commit()
     return AdminUserResponse.model_validate(user)

@@ -3,6 +3,11 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
+from app.auth.sandbox import (
+    check_collection_limit,
+    is_sandbox,
+    reject_sandbox_sharing,
+)
 from app.auth.utils import get_current_user
 from app.collections.permissions import get_collection_with_access
 from app.collections.schemas import (
@@ -69,6 +74,7 @@ def create_collection(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ) -> CollectionResponse:
+    check_collection_limit(db, current_user)
     collection = Collection(
         owner_id=current_user.id,
         name=request.name,
@@ -128,13 +134,14 @@ def create_grant(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ) -> GrantResponse:
+    reject_sandbox_sharing(current_user)
     _get_owned_collection(collection_id, db, current_user)
     target = (
         db.query(User)
         .filter(User.username == request.username)
         .first()
     )
-    if target is None:
+    if target is None or is_sandbox(target):
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="User not found",
@@ -170,6 +177,7 @@ def list_grants(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ) -> GrantListResponse:
+    reject_sandbox_sharing(current_user)
     _get_owned_collection(collection_id, db, current_user)
     users = (
         db.query(User)
@@ -196,6 +204,7 @@ def delete_grant(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ) -> None:
+    reject_sandbox_sharing(current_user)
     _get_owned_collection(collection_id, db, current_user)
     grant = (
         db.query(CollectionGrant)

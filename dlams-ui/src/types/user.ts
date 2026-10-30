@@ -1,7 +1,6 @@
-export type UserRole = "user" | "admin" | "demo"
+export type UserRole = "user" | "admin" | "template" | "sandbox"
 
-// Roles an admin can assign from user management. Never "admin".
-export type AssignableRole = Extract<UserRole, "user" | "demo">
+export type AssignableRole = Extract<UserRole, "user" | "template">
 
 export interface User {
   id: string

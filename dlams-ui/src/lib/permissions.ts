@@ -5,14 +5,14 @@ export function isAdmin(user: Pick<User, "role"> | null | undefined): boolean {
   return user?.role === "admin"
 }
 
-export function isDemo(user: Pick<User, "role"> | null | undefined): boolean {
-  return user?.role === "demo"
+export function isTemplate(user: Pick<User, "role"> | null | undefined): boolean {
+  return user?.role === "template"
 }
 
-export function canWriteCollection(
-  access: CollectionAccess,
-  user: Pick<User, "role"> | null | undefined,
-): boolean {
-  if (isDemo(user)) return false
+export function isSandbox(user: Pick<User, "role"> | null | undefined): boolean {
+  return user?.role === "sandbox"
+}
+
+export function canWriteCollection(access: CollectionAccess): boolean {
   return access === "owner"
 }

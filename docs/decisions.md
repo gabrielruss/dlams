@@ -18,6 +18,18 @@ replaces it is named. Proposals and open questions live in
   design. What stays out of tracked files is anything else about the host: IP
   addresses, paths, the network layout, and credentials.
 
+### Sharing UI and browser-local demo editing come first after launch — 2026-10-27
+- With the portfolio milestone complete, the first follow-ups are the sharing
+  screen (an owner can share a collection by username) and browser-local demo
+  editing (a demo visitor can edit in their own browser, never at the API). The
+  owner considers both critical missing features.
+- Search was added to the roadmap on 2026-10-28. **Reordered 2026-10-29
+  (owner):** browser-local demo editing comes first, right after the backup
+  restore test, then the sharing UI, then search.
+- **Supersedes** the 2026-10-14 decision to move them after the milestone,
+  which is now reached. The deferred API upgrades, off-device backups, and
+  further item types stay deferred.
+
 ### No screenshots in the README — 2026-10-27
 - The README links the live demo instead of showing screenshots. The owner does
   not want to maintain images that drift from the app, and a visitor can open
@@ -104,6 +116,70 @@ replaces it is named. Proposals and open questions live in
 
 ## Accounts and access
 
+### Demo sessions: a temporary sandbox account per visitor — 2026-10-29
+- "Try the demo" calls `POST /demo-sessions`, which needs no sign-in. It
+  deletes expired sandboxes, refuses with 503 when 10 are active, copies the
+  `demo-user` template (the oldest active `template` account) into a new account
+  with the `sandbox` role, a random username, and a random password nobody
+  knows, and sets the normal 30-minute session cookie
+  (`dlams-fastapi/app/auth/sandbox.py`).
+- A sandbox changes its own copy freely, up to 3 collections and 30 consoles
+  and games in total (the copied ones count). It cannot share, no one can
+  share with it, and an admin cannot change its role. It cannot touch the
+  template, because writes need ownership.
+- A sandbox lasts one session (30 minutes). It is deleted on sign-out, or by
+  the next "Try the demo" click after it expires, so no scheduled job is
+  needed. Deletion removes games, consoles, collections, labels, and then the
+  user, because consoles and games reference labels with `RESTRICT`.
+- The template is maintained by hand (its role is renamed `template`, below).
+  Its password is no longer public: the `VITE_DEMO_*` build variables and the
+  `DEMO_PASSWORD` secret were removed.
+- Reason: the owner wanted visitors to really use the app without lasting
+  writes to the Pi's database. The caps bound demo data to a few hundred small
+  rows. One shared demo account reset every hour was rejected: visitors would
+  overwrite each other, and anything typed would stay on the linked page until
+  the reset.
+- **Supersedes** browser-local demo editing (same day, below) and the public
+  demo credentials in "Demo behavior" (2026-10-02). It is the one exception to
+  invite-only registration (2026-10-09): sandbox accounts are created without
+  an invitation, and a visitor never chooses the name or role.
+- Later: an admin button to wipe all sandbox accounts.
+
+### Admins reset passwords through the API; no screen yet — 2026-10-29
+- `PUT /admin/users/{id}/password` sets a new password (6 to 30 characters,
+  like registration). An admin may reset a regular or template account and
+  their own, never another admin's and never a sandbox's. There is no UI;
+  the admin calls it from the browser console.
+- Reason: the template's password was public and the template is no longer
+  read-only, so it had to be changed, and there was no way to change any
+  password. A command run on the Pi was considered; the owner chose an API
+  endpoint.
+- A reset does not end existing sessions (they expire within 30 minutes).
+  Deactivating the account first ends them.
+- Not done: deleting a user. That still waits on the open question in the
+  plan about what happens to the user's data.
+
+### The `demo` role is renamed `template` — 2026-10-29
+- With demo sessions, nobody signs into the read-only account any more; it is
+  the template each sandbox is copied from, so its role is now `template`.
+  The visitor's temporary account is the `sandbox`. Migration `f4c2e8a7b913`
+  renames existing `demo` rows. The admin button reads "Make template". The
+  username `demo-user` is data and stays.
+- Only an admin switches an account between `user` and `template`.
+- **The read-only rule is removed** (owner, same day). Visitors no longer sign
+  into the template, so only its owner does, and the owner can now edit it
+  directly instead of switching it to `user` and back. The cost is that the
+  template's password now guards what every visitor sees, so it must be
+  private: the old public password has to be changed before this is deployed.
+  **Supersedes** the GET-only rule in "Demo accounts: an admin-assigned role,
+  GET-only at the API" (2026-10-14).
+
+### Superseded: Browser-local demo editing — 2026-10-29
+- **Superseded** the same day by "Demo sessions: a temporary sandbox account
+  per visitor". Never deployed. It was built twice, first as a list of changes
+  laid over the API data and then as a stand-in API over a `localStorage`
+  copy, and removed in favor of a real, private copy on the server.
+
 ### All sharing is read-only — 2026-10-16
 - Sharing a collection gives another user read access and nothing else. There
   is no `edit` or `demo` grant: the collection owner is the only user who ever
@@ -123,6 +199,8 @@ replaces it is named. Proposals and open questions live in
   Admins still have no implicit access to collections they do not own.
 
 ### Demo accounts: an admin-assigned role, GET-only at the API — 2026-10-14
+- **Superseded 2026-10-29:** the role is now `template` and is no longer
+  read-only (see "The `demo` role is renamed `template`").
 - A demo account is a user whose role is `demo` (alongside `user` and
   `admin`). Only an admin can set it, from admin user management, by changing
   an existing account's role between `user` and `demo`. No invitation
@@ -199,6 +277,8 @@ replaces it is named. Proposals and open questions live in
 
 ### Invite-only registration — 2026-10-09
 - **Supersedes** "keep public registration" (2026-10-04).
+- Exception since 2026-10-29: temporary `sandbox` demo accounts (see "Demo
+  sessions").
 - Registration requires an admin-issued, single-use invitation. Tokens are
   random, stored as SHA-256 hashes, expire after seven days, and are consumed
   in the same transaction that creates the account. New accounts always get
@@ -228,6 +308,9 @@ replaces it is named. Proposals and open questions live in
   `view-only`, and `demo` grant modes no longer exist.
 
 ### Demo behavior — 2026-10-02
+- **Partly superseded 2026-10-29** by "Demo sessions: a temporary sandbox
+  account per visitor": demo credentials are no longer public, and visitors
+  edit a server-side copy instead of a browser-local one.
 - Demo credentials are public and carry no authority; server-side
   authorization alone protects persistent writes.
 - Demo visitors may eventually edit a browser-local copy that survives

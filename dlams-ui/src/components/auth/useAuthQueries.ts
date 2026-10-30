@@ -27,6 +27,17 @@ export function useLogin() {
   })
 }
 
+export function useStartDemoSession() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: authApi.startDemoSession,
+    onSuccess: ({ user }) => {
+      queryClient.setQueryData(authKeys.currentUser, user)
+    },
+  })
+}
+
 export function useRegister() {
   return useMutation({
     mutationFn: authApi.register,

@@ -36,7 +36,7 @@ class RegistrationRoleTests(unittest.TestCase):
         self.engine.dispose()
 
     def test_registration_rejects_requested_privileged_roles(self) -> None:
-        for role in (UserRole.ADMIN.value, "demo"):
+        for role in (UserRole.ADMIN.value, "template"):
             with self.subTest(role=role):
                 with self.assertRaises(ValidationError):
                     RegisterRequest.model_validate(

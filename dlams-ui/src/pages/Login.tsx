@@ -14,12 +14,13 @@ import {
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { useLogin } from "@/components/auth/useAuthQueries"
+import { useLogin, useStartDemoSession } from "@/components/auth/useAuthQueries"
 import BrandLogo from "@/components/BrandLogo"
 
 function Login() {
   const navigate = useNavigate()
   const loginMutation = useLogin()
+  const demoSessionMutation = useStartDemoSession()
 
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
@@ -30,19 +31,19 @@ function Login() {
   })
 
   const onFormSubmit = (data: LoginFormValues) => {
+    demoSessionMutation.reset()
     loginMutation.mutate(data, { onSuccess: () => navigate("/") })
   }
 
-  const demoUsername = import.meta.env.VITE_DEMO_USERNAME
-  const demoPassword = import.meta.env.VITE_DEMO_PASSWORD
-  const isBusy = form.formState.isSubmitting || loginMutation.isPending
+  const isBusy =
+    form.formState.isSubmitting ||
+    loginMutation.isPending ||
+    demoSessionMutation.isPending
+  const error = loginMutation.error ?? demoSessionMutation.error
 
   const onDemoClick = () => {
-    if (!demoUsername || !demoPassword) return
-    loginMutation.mutate(
-      { username: demoUsername, password: demoPassword },
-      { onSuccess: () => navigate("/") },
-    )
+    loginMutation.reset()
+    demoSessionMutation.mutate(undefined, { onSuccess: () => navigate("/") })
   }
 
   return (
@@ -93,9 +94,9 @@ function Login() {
                   </FormItem>
                 )}
               />
-              {loginMutation.error && (
+              {error && (
                 <div role="alert" className="text-sm text-destructive">
-                  {loginMutation.error.message}
+                  {error.message}
                 </div>
               )}
               <Button
@@ -105,17 +106,15 @@ function Login() {
               >
                 {isBusy ? "Logging in..." : "Login"}
               </Button>
-              {demoUsername && demoPassword && (
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="w-full hover:cursor-pointer"
-                  disabled={isBusy}
-                  onClick={onDemoClick}
-                >
-                  Try the demo
-                </Button>
-              )}
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full hover:cursor-pointer"
+                disabled={isBusy}
+                onClick={onDemoClick}
+              >
+                Try the demo
+              </Button>
               <p className="text-center text-sm">
                 Have an invitation?{" "}
                 <Link className="underline" to="/register">

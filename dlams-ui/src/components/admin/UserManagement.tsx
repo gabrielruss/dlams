@@ -1,6 +1,6 @@
 import { useCurrentUser } from "@/components/auth/useAuthQueries"
 import { Button } from "@/components/ui/button"
-import { isAdmin, isDemo } from "@/lib/permissions"
+import { isAdmin, isTemplate } from "@/lib/permissions"
 import {
   Table,
   TableBody,
@@ -43,9 +43,8 @@ function UserManagement() {
       <p className="text-sm text-muted-foreground">
         Deactivated users can no longer log in, and lose access the next time
         they take an action or refresh. Their collections and data are kept,
-        and you can reactivate them at any time. Demo accounts are read-only:
-        they can sign in and look around, but the server rejects any change
-        they make.
+        and you can reactivate them at any time. "Try the demo" copies the
+        template account into a temporary sandbox account for each visitor.
       </p>
       {actionError && (
         <p role="alert" className="text-sm text-destructive">
@@ -56,8 +55,8 @@ function UserManagement() {
         <p role="status" className="text-sm">
           {completedAction.user.username} is now{" "}
           {completedAction.kind === "role"
-            ? isDemo(completedAction.user)
-              ? "a demo account"
+            ? isTemplate(completedAction.user)
+              ? "a template account"
               : "a regular account"
             : completedAction.user.is_active
               ? "active"
@@ -83,7 +82,7 @@ function UserManagement() {
             {users.map((user) => {
               const isSelf = user.username === currentUser?.username
               const isPendingAction = pendingUserId === user.id
-              const isDemoAccount = isDemo(user)
+              const isTemplateAccount = isTemplate(user)
               return (
                 <TableRow key={user.id}>
                   <TableHead scope="row">
@@ -113,21 +112,21 @@ function UserManagement() {
                             size="sm"
                             disabled={isPendingAction}
                             aria-label={`Make ${user.username} a ${
-                              isDemoAccount ? "regular" : "demo"
+                              isTemplateAccount ? "regular" : "template"
                             } account`}
                             onClick={() =>
                               applyAction({
                                 kind: "role",
                                 userId: user.id,
-                                role: isDemoAccount ? "user" : "demo",
+                                role: isTemplateAccount ? "user" : "template",
                               })
                             }
                           >
                             {isPendingAction && pendingKind === "role"
                               ? "Saving..."
-                              : isDemoAccount
+                              : isTemplateAccount
                                 ? "Make regular"
-                                : "Make demo"}
+                                : "Make template"}
                           </Button>
                         )}
                         <Button
