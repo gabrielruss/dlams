@@ -55,7 +55,7 @@ Applies across the DLAMS workspace. Project-local conventions take precedence wh
   depends on it.
 - TanStack Query v5 is installed and is the standard for server state.
 - Backend tests use `unittest`. Write new tests with `unittest` until pytest is adopted. Do not add pytest-only features.
-- Ruff and pytest are not configured. Never claim they were run. Adopting them is a separate, focused tooling change, not part of a feature.
+- Ruff lints and formats the backend (config in `dlams-fastapi/pyproject.toml`; CI runs both checks). A Claude Code hook (`.claude/hooks/ruff-format.sh`) formats each edited `.py` file. Type checking is Pylance on `basic` in the editor; there is no mypy. pytest is not configured; never claim it was run.
 - Redux is not used. Do not add it.
 - Backend runs on Python 3.13 (see `dlams-fastapi/Dockerfile`). Check project config before using newer language features.
 
@@ -71,6 +71,9 @@ Applies across the DLAMS workspace. Project-local conventions take precedence wh
   test with `server.use(...)` from `src/test/server.ts`. The API base in tests
   is `http://localhost/api`, and a request with no handler fails the test.
 - Backend tests (from `dlams-fastapi/`): `.venv/bin/python -m unittest discover -s tests -v`
+- Backend lint and format (from `dlams-fastapi/`): `.venv/bin/ruff check .` and
+  `.venv/bin/ruff format --check .` (drop `--check` to format; `ruff check
+  --fix .` applies safe fixes). Ruff comes from `requirements-dev.txt`.
 - Dev shortcuts (from the repo root): `make dev`, `make watch`, `make logs`,
   `make down`, `make test`; `make help` lists them.
 - Local Docker stack (from `dlams-deployment/`):

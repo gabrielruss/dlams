@@ -5,13 +5,14 @@ This file contains the FastAPI routes for the authentication module.
 
 import hashlib
 import secrets
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
+from app.auth.sandbox import create_sandbox, delete_sandbox, is_sandbox
 from app.auth.schemas import (
     AuthResponse,
     LoginRequest,
@@ -19,16 +20,15 @@ from app.auth.schemas import (
     RegistrationInvitationResponse,
     UserResponse,
 )
-from app.auth.sandbox import create_sandbox, delete_sandbox, is_sandbox
 from app.auth.utils import (
     ACCESS_TOKEN_EXPIRE_MINUTES,
     create_access_token,
     get_current_user,
     get_user_by_username,
+    pwd_context,
     require_admin,
 )
 from app.config import COOKIE_SECURE
-from app.auth.utils import pwd_context
 from app.models import RegistrationInvitation, User, UserRole
 from app.utils import get_db
 
@@ -54,10 +54,8 @@ def _set_session_cookie(response: Response, username: str) -> None:
 @router.post("/register")
 def register(user: RegisterRequest, db: Session = Depends(get_db)) -> dict[str, str]:
     """Create a regular account using a valid, unused invitation."""
-    now = datetime.now(timezone.utc)
-    invitation_hash = hashlib.sha256(
-        user.invitation_code.encode("utf-8")
-    ).hexdigest()
+    now = datetime.now(UTC)
+    invitation_hash = hashlib.sha256(user.invitation_code.encode("utf-8")).hexdigest()
     invitation = db.scalar(
         select(RegistrationInvitation)
         .where(
@@ -113,7 +111,7 @@ def create_registration_invitation(
     """Create a seven-day, single-use registration invitation for an admin."""
     require_admin(current_user)
 
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     expires_at = now + timedelta(days=7)
     token = secrets.token_urlsafe(32)
     db.add(
@@ -153,13 +151,13 @@ def login(
     if db_user is None:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect username or password"
+            detail="Incorrect username or password",
         )
 
     if not pwd_context.verify(login_data.password, str(db_user.hashed_password)):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect username or password"
+            detail="Incorrect username or password",
         )
 
     if not db_user.is_active:
@@ -171,8 +169,7 @@ def login(
     _set_session_cookie(response, login_data.username)
 
     return AuthResponse(
-        message="Login successful",
-        user=UserResponse.model_validate(db_user)
+        message="Login successful", user=UserResponse.model_validate(db_user)
     )
 
 
@@ -222,17 +219,16 @@ def logout(
 
 @router.get("/verify", response_model=AuthResponse)
 async def verify_user(current_user: User = Depends(get_current_user)):
-    """ Verify current user is auth'd """
-    return AuthResponse(
-        message="Verify successful",
-        user=current_user
-    )
+    """Verify current user is auth'd"""
+    return AuthResponse(message="Verify successful", user=current_user)
+
 
 @router.get("/protected")
-async def protected_route(current_user: User = Depends(get_current_user)
-                          ) -> dict[str, str]:
-    """ Test route to check if protected routes are working """
+async def protected_route(
+    current_user: User = Depends(get_current_user),
+) -> dict[str, str]:
+    """Test route to check if protected routes are working"""
     return {
         "message": "Protected route using current user",
-        "user": str(current_user.username)
+        "user": str(current_user.username),
     }

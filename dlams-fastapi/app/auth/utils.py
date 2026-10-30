@@ -1,15 +1,15 @@
-""" 
+"""
 utils.py
 This file contains utility functions for the authentication module.
 """
 
-from typing import Optional, Any
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
+from typing import Any
 
+from fastapi import Depends, HTTPException, Request, status
+from jose import JWTError, jwt
 from passlib.context import CryptContext
-from jose import jwt, JWTError
 from sqlalchemy.orm import Session
-from fastapi import Request, Depends, HTTPException, status
 
 from app.config import SECRET_KEY
 from app.models import User, UserRole
@@ -21,18 +21,19 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
-def get_user_by_username(username: str, db: Session) -> Optional[User]:
-    """ Get user from db by username """
+
+def get_user_by_username(username: str, db: Session) -> User | None:
+    """Get user from db by username"""
     return db.query(User).filter(User.username == username).first()
 
+
 def get_current_user(request: Request, db: Session = Depends(get_db)):
-    """ Verify JWT from cookie """
+    """Verify JWT from cookie"""
     token = request.cookies.get("access_token")
 
     if not token:
         raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Not authenticated"
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="Not authenticated"
         )
 
     try:
@@ -42,7 +43,7 @@ def get_current_user(request: Request, db: Session = Depends(get_db)):
         if username is None:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Invalid authentication credentials"
+                detail="Invalid authentication credentials",
             )
 
         username_str: str = str(username)
@@ -50,21 +51,19 @@ def get_current_user(request: Request, db: Session = Depends(get_db)):
     except JWTError as exc:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid authentication credentials"
+            detail="Invalid authentication credentials",
         ) from exc
 
     user = get_user_by_username(username_str, db)
 
     if user is None:
         raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="User not found"
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="User not found"
         )
 
     if not user.is_active:
         raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Account is deactivated"
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="Account is deactivated"
         )
 
     return user
@@ -77,6 +76,7 @@ def require_admin(current_user: User) -> None:
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Admin access required",
         )
+
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     """
@@ -91,7 +91,10 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
     """
     return pwd_context.verify(plain_password, hashed_password)
 
-def create_access_token(data: dict[str, str], expires_delta: Optional[timedelta] = None) -> str:
+
+def create_access_token(
+    data: dict[str, str], expires_delta: timedelta | None = None
+) -> str:
     """
     Create a JWT access token.
 
@@ -103,6 +106,8 @@ def create_access_token(data: dict[str, str], expires_delta: Optional[timedelta]
         str: The encoded JWT access token.
     """
     to_encode: dict[str, Any] = data.copy()
-    expire = datetime.now(timezone.utc) + (expires_delta or timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES))
+    expire = datetime.now(UTC) + (
+        expires_delta or timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    )
     to_encode.update({"exp": expire})
     return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)

@@ -1,7 +1,7 @@
 """Create the first DLAMS admin account from inside the API environment."""
 
-from getpass import getpass
 import sys
+from getpass import getpass
 
 from sqlalchemy import select
 from sqlalchemy.orm import Session

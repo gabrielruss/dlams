@@ -118,11 +118,14 @@ def create_sandbox(db: Session) -> User:
     delete_expired_sandboxes(db)
     db.commit()
 
-    active = db.scalar(
-        select(func.count())
-        .select_from(User)
-        .where(User.role == UserRole.SANDBOX.value)
-    ) or 0
+    active = (
+        db.scalar(
+            select(func.count())
+            .select_from(User)
+            .where(User.role == UserRole.SANDBOX.value)
+        )
+        or 0
+    )
     if active >= MAX_SANDBOXES:
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
@@ -157,11 +160,14 @@ def check_collection_limit(db: Session, user: User) -> None:
     """Refuse a new collection once a sandbox has reached its limit."""
     if not is_sandbox(user):
         return
-    count = db.scalar(
-        select(func.count())
-        .select_from(Collection)
-        .where(Collection.owner_id == user.id)
-    ) or 0
+    count = (
+        db.scalar(
+            select(func.count())
+            .select_from(Collection)
+            .where(Collection.owner_id == user.id)
+        )
+        or 0
+    )
     if count >= MAX_SANDBOX_COLLECTIONS:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
@@ -175,16 +181,22 @@ def check_item_limit(db: Session, collection: Collection) -> None:
     if owner is None or not is_sandbox(owner):
         return
     collection_ids = select(Collection.id).where(Collection.owner_id == owner.id)
-    consoles = db.scalar(
-        select(func.count())
-        .select_from(Console)
-        .where(Console.collection_id.in_(collection_ids))
-    ) or 0
-    games = db.scalar(
-        select(func.count())
-        .select_from(Game)
-        .where(Game.collection_id.in_(collection_ids))
-    ) or 0
+    consoles = (
+        db.scalar(
+            select(func.count())
+            .select_from(Console)
+            .where(Console.collection_id.in_(collection_ids))
+        )
+        or 0
+    )
+    games = (
+        db.scalar(
+            select(func.count())
+            .select_from(Game)
+            .where(Game.collection_id.in_(collection_ids))
+        )
+        or 0
+    )
     if consoles + games >= MAX_SANDBOX_ITEMS:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,

@@ -93,9 +93,10 @@ class SandboxAccountTests(unittest.TestCase):
         self.engine.dispose()
 
     def count(self, model, *conditions) -> int:
-        return self.db.scalar(
-            select(func.count()).select_from(model).where(*conditions)
-        ) or 0
+        return (
+            self.db.scalar(select(func.count()).select_from(model).where(*conditions))
+            or 0
+        )
 
     def sandbox_collection(self, sandbox: User) -> Collection:
         return self.db.scalars(

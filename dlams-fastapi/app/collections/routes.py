@@ -105,8 +105,7 @@ def list_collections(
         .all()
     )
     collections = [
-        _collection_response(collection, CollectionAccess.OWNER)
-        for collection in owned
+        _collection_response(collection, CollectionAccess.OWNER) for collection in owned
     ]
     collections.extend(
         _collection_response(collection, CollectionAccess.VIEW_ONLY)
@@ -136,11 +135,7 @@ def create_grant(
 ) -> GrantResponse:
     reject_sandbox_sharing(current_user)
     _get_owned_collection(collection_id, db, current_user)
-    target = (
-        db.query(User)
-        .filter(User.username == request.username)
-        .first()
-    )
+    target = db.query(User).filter(User.username == request.username).first()
     if target is None or is_sandbox(target):
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -188,8 +183,7 @@ def list_grants(
     )
     return GrantListResponse(
         grants=[
-            GrantResponse(user_id=user.id, username=user.username)
-            for user in users
+            GrantResponse(user_id=user.id, username=user.username) for user in users
         ]
     )
 

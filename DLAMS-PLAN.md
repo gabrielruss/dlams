@@ -12,39 +12,28 @@ Start here in a new session. This block is rewritten at the end of a session,
 never appended to. History lives in git and `docs/decisions.md`.
 
 - **Status.** The portfolio-ready milestone is **complete** (the owner's call,
-  2026-10-27). `main` is pushed through commit `400178a` ("readme"); at the end
-  of this session the sandbox demo work (API, UI, deploy config, docs) was
-  uncommitted, but run `git status` yourself: the owner commits and pushes
-  everything. Whether the last deploy run succeeded was not reported.
+  2026-10-27). Sandbox demo sessions are **deployed** (owner-reported,
+  2026-10-30): the `add-demo-edit` branch was merged and the deploy ran,
+  `demo-user`'s password was reset through `PUT /admin/users/3/password`, it
+  was reactivated, "Try the demo" works on the live site, and the
+  `DEMO_PASSWORD` secret is deleted. Run `git status` yourself: the owner
+  commits and pushes everything.
 - **What is verified.** Owner-reported: the mobile pass, CI passing
   (2026-10-26), `demo-user` on the `demo` role, and a `POST /collections` from
   its live session returning `403` (2026-10-27). Owner-run on 2026-10-29, output
   pasted: the backup restore test passed (see Known issues). Run by Claude on
   2026-10-29, after the sandbox demo work: `npm test` (15 tests in 4 files),
-  `npm run lint`, and `npm run build` pass in `dlams-ui`, and the 65 backend
-  tests pass in `dlams-fastapi/.venv`. Not run: migration `e7a3c5d91f20`
-  against PostgreSQL, and a demo session in a browser. Not reported: a phone and desktop
-  click-through of the live demo.
+  `npm run lint`, and `npm run build` pass in `dlams-ui`, and the 67 backend
+  tests pass in `dlams-fastapi/.venv`. Owner-reported: the password reset
+  endpoint works against the dev API and in production, and the migrations
+  `e7a3c5d91f20` and `f4c2e8a7b913` ran on deploy (no backup was taken first,
+  the owner's call). Not reported: a phone and desktop click-through of the
+  live demo.
 - **Next, in order:**
-  1. **Sandbox demo sessions** (item 9). Built and tested 2026-10-29, not
-     deployed. In this order, because `demo-user`'s current password was
-     public in the JavaScript bundle and the template is no longer read-only:
-     (1) **deactivate `demo-user`** in "Manage users" on the live site, so the
-     old password stops working; (2) back up the database (new migrations
-     `e7a3c5d91f20`, the `sandbox` role, and `f4c2e8a7b913`, which renames
-     `demo` to `template`); (3) push; (4) set a new password for `demo-user`
-     with `PUT /admin/users/{id}/password` (steps in
-     `dlams-deployment/README.md`, "Changing a password"); (5) reactivate
-     `demo-user`; (6) click "Try the demo" on the live site; (7) delete the
-     `DEMO_PASSWORD` GitHub secret.
-     Then, as its own change (owner, 2026-10-29): set up Ruff for the backend.
-     That means Ruff in a new `requirements-dev.txt` (the owner approved the
-     install), `[tool.ruff]` in `dlams-fastapi/pyproject.toml`, a one-time
-     reformat with nothing else in it, `ruff check` and `ruff format --check`
-     in `ci.yml`, both commands in `.github/copilot-instructions.md`, Ruff as
-     the format-on-save formatter and Pylance on `basic` in
-     `dlams.code-workspace`, and a Claude Code hook that formats edited `.py`
-     files. Type checking stays with Pylance (Pyright); no mypy.
+  1. **Ruff for the backend.** Done 2026-10-30, uncommitted (see
+     `docs/decisions.md`). The owner commits it as its own change; CI's new
+     Ruff steps have not run yet. In VS Code, install the recommended Ruff
+     extension for format-on-save.
   2. **Sharing UI** (item 8). The API already works; there is no screen.
      **Open question for the owner, to be settled before building** (see Open
      questions): where is the "Shared with" screen reached from.
@@ -197,10 +186,11 @@ workflow on a self-hosted runner (`.github/workflows/deploy.yml`).
   admin, and drawer screens), and `npm run lint` and `npm run build` pass. CI (lint, `npm test`, build, backend tests) passed on
   push (owner-reported, 2026-10-26).
 
-- API (2026-10-29, run by Claude in `dlams-fastapi/.venv`): 65 unit tests
+- API (2026-10-29, run by Claude in `dlams-fastapi/.venv`): 67 unit tests
   pass, including 13 for sandbox demo sessions (the copy, the 10-sandbox cap,
   expiry cleanup, the collection and item limits, blocked sharing, the
-  template staying untouched, and deletion on sign-out).
+  template staying untouched, and deletion on sign-out) and 5 for the admin
+  password reset.
 
 - Backup restore (2026-10-29, owner-run, output pasted): the 2026-10-29 03:15
   dump restored into a scratch database with 3 users, 3 collections, 6
@@ -474,8 +464,8 @@ is next, then the sharing UI, then search.
    there is no screen, so an owner cannot share one today. Build a full-page
    "Shared with" screen where a collection owner adds a user by username and
    removes users. Sharing is read-only, so there is no access-mode control.
-   A demo account is read-only at the API, so it cannot add a grant; its UI
-   should not offer the form. Mutations invalidate both the collection and
+   Sandbox accounts are refused on every sharing route, so their UI should
+   not offer the form. Mutations invalidate both the collection and
    collection-list keys.
 8a. **Search** (owner wants it "pretty quickly", 2026-10-28; not designed
    yet). Today there is no search anywhere: the console and game lists show
@@ -495,8 +485,8 @@ is next, then the sharing UI, then search.
    Follow the testing approach in `.github/copilot-instructions.md`: integration
    tests that type a query and assert on what is listed, plus an axe check; the
    field needs a visible label.
-9. **Sandbox demo sessions. Next to do** (owner, 2026-10-29). Built
-   2026-10-29, not deployed (see `docs/decisions.md`, "Demo sessions"). "Try
+9. **Sandbox demo sessions. Done** (owner, 2026-10-29). Built
+   2026-10-29, deployed 2026-10-30 (see `docs/decisions.md`, "Demo sessions"). "Try
    the demo" copies the `demo-user` template into a temporary `sandbox`
    account: at most 10 at once, 3 collections and 30 consoles and games each,
    no sharing, deleted on sign-out or after its 30-minute session. Replaces

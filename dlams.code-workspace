@@ -19,13 +19,21 @@
     "editor.formatOnSave": true,
     "editor.codeActionsOnSave": {
       "source.organizeImports": "explicit"
-    }
+    },
+    "[python]": {
+      "editor.defaultFormatter": "charliermarsh.ruff",
+      "editor.codeActionsOnSave": {
+        "source.organizeImports.ruff": "explicit",
+        "source.fixAll.ruff": "explicit"
+      }
+    },
+    "python.analysis.typeCheckingMode": "basic"
   },
   "extensions": {
     "recommendations": [
       "ms-python.python",
-      "ms-python.flake8",
-      "ms-python.black-formatter",
+      "ms-python.vscode-pylance",
+      "charliermarsh.ruff",
       "ms-vscode.vscode-typescript-next",
       "esbenp.prettier-vscode",
       "bradlc.vscode-tailwindcss"

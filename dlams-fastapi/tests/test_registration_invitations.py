@@ -1,7 +1,7 @@
 import hashlib
 import os
 import unittest
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from unittest.mock import patch
 
 os.environ.setdefault("DATABASE_URL", "sqlite:///:memory:")
@@ -88,9 +88,7 @@ class RegistrationInvitationTests(unittest.TestCase):
 
         invitation_code = self.create_invitation()
         saved_invitation = self.db.query(RegistrationInvitation).one()
-        saved_invitation.expires_at = datetime.now(timezone.utc) - timedelta(
-            minutes=1
-        )
+        saved_invitation.expires_at = datetime.now(UTC) - timedelta(minutes=1)
         self.db.commit()
 
         with self.assertRaises(HTTPException) as expired:
@@ -126,11 +124,7 @@ class RegistrationInvitationTests(unittest.TestCase):
         ):
             create_first_admin(self.db, "first-admin", "password")
 
-        created_admin = (
-            self.db.query(User)
-            .filter(User.username == "first-admin")
-            .one()
-        )
+        created_admin = self.db.query(User).filter(User.username == "first-admin").one()
         self.assertEqual(created_admin.role, UserRole.ADMIN.value)
         with self.assertRaises(ValueError):
             create_first_admin(self.db, "second-admin", "password")

@@ -16,16 +16,17 @@ The owner confirmed on 2026-10-16 that there is no data to keep; take a
 backup (dlams-deployment/scripts/backup-db.sh) before deploying anyway. The
 downgrade restores the previous (empty) table shapes.
 """
-from typing import Sequence, Union
 
-from alembic import op
+from collections.abc import Sequence
+
 import sqlalchemy as sa
 
+from alembic import op
 
 revision: str = "b8e1d6a42c07"
-down_revision: Union[str, Sequence[str], None] = "c91e5f7a2b64"
-branch_labels: Union[str, Sequence[str], None] = None
-depends_on: Union[str, Sequence[str], None] = None
+down_revision: str | Sequence[str] | None = "c91e5f7a2b64"
+branch_labels: str | Sequence[str] | None = None
+depends_on: str | Sequence[str] | None = None
 
 
 CONDITION_CHECK = "condition IN ('Loose', 'CIB', 'New', 'Item & Box')"
@@ -65,13 +66,9 @@ def _create_games(*, with_collection: bool) -> None:
         )
     op.create_table("games", *columns)
     op.create_index(op.f("ix_games_id"), "games", ["id"])
-    op.create_index(
-        op.f("ix_games_console_label_id"), "games", ["console_label_id"]
-    )
+    op.create_index(op.f("ix_games_console_label_id"), "games", ["console_label_id"])
     if with_collection:
-        op.create_index(
-            op.f("ix_games_collection_id"), "games", ["collection_id"]
-        )
+        op.create_index(op.f("ix_games_collection_id"), "games", ["collection_id"])
 
 
 def _create_consoles(*, with_collection: bool) -> None:
@@ -143,9 +140,7 @@ def upgrade() -> None:
         sa.PrimaryKeyConstraint("id"),
     )
     op.create_index(op.f("ix_console_labels_id"), "console_labels", ["id"])
-    op.create_index(
-        op.f("ix_console_labels_user_id"), "console_labels", ["user_id"]
-    )
+    op.create_index(op.f("ix_console_labels_user_id"), "console_labels", ["user_id"])
     op.create_index(
         "uq_console_labels_user_name_lower",
         "console_labels",

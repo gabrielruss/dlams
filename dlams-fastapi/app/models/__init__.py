@@ -1,11 +1,12 @@
-""" init for exporting all models """
-from app.models.user import RegistrationInvitation, User, UserRole
+"""init for exporting all models"""
+
 from app.models.collection import (
     Collection,
     CollectionAccess,
     CollectionGrant,
     CollectionType,
 )
+from app.models.user import RegistrationInvitation, User, UserRole
 from app.models.video_games import (
     Console,
     ConsoleLabel,

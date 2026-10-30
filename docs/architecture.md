@@ -58,6 +58,7 @@ the selected collection is in the URL.
 | Tokens | `python-jose` (HS256 JWT; pulls in `ecdsa`, `rsa`) |
 | Config | `python-dotenv` |
 | Tests | standard-library `unittest` |
+| Lint and format | Ruff (dev only, `requirements-dev.txt`; config in `pyproject.toml`) |
 
 Runtime images: API on `python:3.13-bookworm`, UI built on `node:20-alpine`
 and served by `nginx:alpine`, database `postgres:15` (development uses 14).

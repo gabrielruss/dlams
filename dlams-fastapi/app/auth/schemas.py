@@ -4,14 +4,19 @@ This file contains the Pydantic models for the authentication module.
 """
 
 from datetime import datetime
-from typing import Literal, Optional
+from typing import Literal
+
 from pydantic import BaseModel, Field
+
 from app.models import UserRole
+
 
 class LoginRequest(BaseModel):
     """Class representing the login request."""
+
     username: str
     password: str
+
 
 class RegisterRequest(LoginRequest):
     """Registration requires an invitation and never accepts a requested role."""
@@ -30,20 +35,25 @@ class RegistrationInvitationResponse(BaseModel):
     invitation_code: str
     expires_at: datetime
 
+
 class UserResponse(BaseModel):
-    """ Schema for user data """
+    """Schema for user data"""
+
     id: int
     username: str
-    email: Optional[str]
+    email: str | None
     created_at: datetime
     role: UserRole
 
     class Config:
-        """ Allows Pydantic to work with SQLAlchemy models """
+        """Allows Pydantic to work with SQLAlchemy models"""
+
         from_attributes = True
+
 
 class AuthResponse(BaseModel):
     """Schema for auth responses"""
+
     message: str
     user: UserResponse
 
@@ -58,7 +68,8 @@ class AdminUserResponse(BaseModel):
     created_at: datetime
 
     class Config:
-        """ Allows Pydantic to work with SQLAlchemy models """
+        """Allows Pydantic to work with SQLAlchemy models"""
+
         from_attributes = True
 
 

@@ -53,9 +53,7 @@ class CollectionPermissionTests(unittest.TestCase):
         self.engine.dispose()
 
     def add_grant(self, user: User) -> None:
-        self.db.add(
-            CollectionGrant(collection_id=self.collection.id, user_id=user.id)
-        )
+        self.db.add(CollectionGrant(collection_id=self.collection.id, user_id=user.id))
         self.db.commit()
 
     def test_owner_can_read_and_write_without_an_admin_role(self) -> None:

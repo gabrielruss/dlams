@@ -6,6 +6,11 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.auth.sandbox import check_item_limit
+from app.auth.utils import get_current_user
+from app.collections.permissions import (
+    get_readable_collection,
+    get_writable_collection,
+)
 from app.collections.video_games_schemas import (
     ConsoleCreate,
     ConsoleLabelListResponse,
@@ -20,10 +25,6 @@ from app.collections.video_games_schemas import (
     VideoGameCollectionStats,
     VideoGameCollectionStatsListResponse,
 )
-from app.collections.permissions import (
-    get_readable_collection,
-    get_writable_collection,
-)
 from app.models import (
     Collection,
     CollectionGrant,
@@ -34,7 +35,6 @@ from app.models import (
     User,
     VideoGameCondition,
 )
-from app.auth.utils import get_current_user
 from app.utils import get_db
 
 router = APIRouter(prefix="/collections/{collection_id}", tags=["video games"])
@@ -161,11 +161,11 @@ def _get_or_create_label(
 
 
 def _console_response(db: Session, console: Console) -> ConsoleResponse:
-    label = db.query(ConsoleLabel).filter(ConsoleLabel.id == console.console_label_id).one()
+    label = (
+        db.query(ConsoleLabel).filter(ConsoleLabel.id == console.console_label_id).one()
+    )
     game_count = (
-        db.query(func.count(Game.id))
-        .filter(Game.console_label_id == label.id)
-        .scalar()
+        db.query(func.count(Game.id)).filter(Game.console_label_id == label.id).scalar()
     )
     return ConsoleResponse(
         id=console.id,
@@ -178,7 +178,9 @@ def _console_response(db: Session, console: Console) -> ConsoleResponse:
 
 
 def _game_response(db: Session, game: Game) -> GameResponse:
-    label = db.query(ConsoleLabel).filter(ConsoleLabel.id == game.console_label_id).one()
+    label = (
+        db.query(ConsoleLabel).filter(ConsoleLabel.id == game.console_label_id).one()
+    )
     return GameResponse(
         id=game.id,
         name=game.name,

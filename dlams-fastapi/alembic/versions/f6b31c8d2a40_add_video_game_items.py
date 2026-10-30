@@ -5,16 +5,17 @@ Revises: e4c21b7a9d30
 Create Date: 2026-10-05
 
 """
-from typing import Sequence, Union
 
-from alembic import op
+from collections.abc import Sequence
+
 import sqlalchemy as sa
 
+from alembic import op
 
 revision: str = "f6b31c8d2a40"
-down_revision: Union[str, Sequence[str], None] = "e4c21b7a9d30"
-branch_labels: Union[str, Sequence[str], None] = None
-depends_on: Union[str, Sequence[str], None] = None
+down_revision: str | Sequence[str] | None = "e4c21b7a9d30"
+branch_labels: str | Sequence[str] | None = None
+depends_on: str | Sequence[str] | None = None
 
 
 CONDITION_CHECK = "condition IN ('Loose', 'CIB', 'New', 'Item & Box')"

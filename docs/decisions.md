@@ -12,6 +12,8 @@ replaces it is named. Proposals and open questions live in
   subdomain. They sign in as `demo-user`, which holds the `demo` role and is
   GET-only at the API, so it cannot change anything. This answers the earlier
   open question about the demo URL.
+- **Revised 2026-10-29:** visitors no longer sign in as `demo-user`; "Try the
+  demo" gives each one a temporary `sandbox` copy of it (see "Demo sessions").
 - The domain is not written in tracked files (public repository). **Revised
   2026-10-27:** the production domain is named in `dlams-deployment/nginx.conf`
   and will be linked from the README as the live demo link, so it is public by
@@ -29,6 +31,19 @@ replaces it is named. Proposals and open questions live in
 - **Supersedes** the 2026-10-14 decision to move them after the milestone,
   which is now reached. The deferred API upgrades, off-device backups, and
   further item types stay deferred.
+
+### Ruff lints and formats the backend — 2026-10-30
+- Ruff (pinned in `dlams-fastapi/requirements-dev.txt`, so the production
+  image does not install it) replaces nothing: there was no backend linter or
+  formatter. Rules: Ruff's defaults plus import sorting, bugbear, and
+  pyupgrade. `UP042` (`StrEnum`) is off because it changes how the role and
+  access enums print; `Depends` and `Query` are allowed as argument defaults,
+  the FastAPI pattern.
+- The whole backend was reformatted once, in a change with nothing else in it.
+  CI fails on a lint error or unformatted file. A Claude Code hook formats
+  each `.py` file Claude edits; it does not apply lint fixes, so an import
+  added before its use is not removed mid-edit.
+- Type checking stays with Pylance (Pyright, `basic`) in the editor; no mypy.
 
 ### No screenshots in the README — 2026-10-27
 - The README links the live demo instead of showing screenshots. The owner does

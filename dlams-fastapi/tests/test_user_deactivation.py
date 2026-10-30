@@ -1,6 +1,6 @@
 import os
 import unittest
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from types import SimpleNamespace
 from unittest.mock import patch
 
@@ -40,7 +40,7 @@ class UserDeactivationTests(unittest.TestCase):
         self.engine.dispose()
 
     def request_for(self, username: str) -> SimpleNamespace:
-        expires = datetime.now(timezone.utc) + timedelta(minutes=5)
+        expires = datetime.now(UTC) + timedelta(minutes=5)
         token = jwt.encode(
             {"sub": username, "exp": expires}, SECRET_KEY, algorithm=ALGORITHM
         )

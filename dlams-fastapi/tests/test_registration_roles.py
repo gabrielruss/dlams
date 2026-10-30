@@ -1,7 +1,7 @@
 import hashlib
 import os
 import unittest
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from unittest.mock import patch
 
 from pydantic import ValidationError
@@ -50,12 +50,10 @@ class RegistrationRoleTests(unittest.TestCase):
 
     def test_new_accounts_are_regular_users(self) -> None:
         invitation_code = "valid-invitation"
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         self.db.add(
             RegistrationInvitation(
-                token_hash=hashlib.sha256(
-                    invitation_code.encode("utf-8")
-                ).hexdigest(),
+                token_hash=hashlib.sha256(invitation_code.encode("utf-8")).hexdigest(),
                 created_by_id=self.admin.id,
                 created_at=now,
                 expires_at=now + timedelta(days=7),

@@ -2,11 +2,13 @@
 user.py
 This file contains all models for Users until this trash gets out of hand.
 """
-from datetime import datetime, UTC
+
+from datetime import UTC, datetime
 from enum import Enum
 
 from sqlalchemy import Boolean, CheckConstraint, DateTime, ForeignKey, String, true
 from sqlalchemy.orm import Mapped, mapped_column
+
 from app.db import Base
 
 
@@ -21,6 +23,7 @@ class UserRole(str, Enum):
 
 class User(Base):
     """Authenticated User Class"""
+
     __tablename__ = "users"
     __table_args__ = (
         CheckConstraint(

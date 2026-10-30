@@ -1,7 +1,7 @@
 """Video-game and console inventory models."""
 
-from enum import Enum
 from datetime import date
+from enum import Enum
 
 from sqlalchemy import (
     CheckConstraint,

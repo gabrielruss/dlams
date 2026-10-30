@@ -5,16 +5,17 @@ Revises: 951a8354c293
 Create Date: 2026-10-04
 
 """
-from typing import Sequence, Union
 
-from alembic import op
+from collections.abc import Sequence
+
 import sqlalchemy as sa
 
+from alembic import op
 
 revision: str = "d0af1c2b4e67"
-down_revision: Union[str, Sequence[str], None] = "951a8354c293"
-branch_labels: Union[str, Sequence[str], None] = None
-depends_on: Union[str, Sequence[str], None] = None
+down_revision: str | Sequence[str] | None = "951a8354c293"
+branch_labels: str | Sequence[str] | None = None
+depends_on: str | Sequence[str] | None = None
 
 
 def upgrade() -> None:
