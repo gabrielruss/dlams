@@ -4,7 +4,7 @@ This file contains utility functions for the authentication module.
 """
 
 from datetime import UTC, datetime, timedelta
-from typing import Any
+from typing import Annotated, Any
 
 from fastapi import Depends, HTTPException, Request, status
 from jose import JWTError, jwt
@@ -13,7 +13,7 @@ from sqlalchemy.orm import Session
 
 from app.config import SECRET_KEY
 from app.models import User, UserRole
-from app.utils import get_db
+from app.utils import DbSession
 
 # Set up bcrypt context for password hashing
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -27,7 +27,7 @@ def get_user_by_username(username: str, db: Session) -> User | None:
     return db.query(User).filter(User.username == username).first()
 
 
-def get_current_user(request: Request, db: Session = Depends(get_db)):
+def get_current_user(request: Request, db: DbSession) -> User:
     """Verify JWT from cookie"""
     token = request.cookies.get("access_token")
 
@@ -67,6 +67,9 @@ def get_current_user(request: Request, db: Session = Depends(get_db)):
         )
 
     return user
+
+
+CurrentUser = Annotated[User, Depends(get_current_user)]
 
 
 def require_admin(current_user: User) -> None:

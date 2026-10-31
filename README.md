@@ -1,6 +1,6 @@
 # DLAMS
 
-A collection tracker I built for fun. Accounts are invite-only, and visitors can try the demo in a temporary account that is deleted after 30 minutes. Live demo: <https://dontlookatmystuff.com>
+A collection tracker I built for fun. Accounts are invite-only, and visitors can try the demo in a temporary account. Live demo: <https://dontlookatmystuff.com>
 
 ## Architecture
 

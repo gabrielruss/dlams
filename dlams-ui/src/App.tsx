@@ -1,9 +1,18 @@
 import { Route, Routes, Navigate } from "react-router-dom"
-import { AdminUsers, Register, Login, Home } from "./pages"
+import { AdminUsers, Register, Login, Home, SharedCollection } from "./pages"
 import { useCurrentUser } from "./components/auth/useAuthQueries"
 import { isAdmin } from "./lib/permissions"
 
 function App() {
+  return (
+    <Routes>
+      <Route path="/s/:token" element={<SharedCollection />} />
+      <Route path="*" element={<SessionRoutes />} />
+    </Routes>
+  )
+}
+
+function SessionRoutes() {
   const currentUserQuery = useCurrentUser()
   const user = currentUserQuery.data
 

@@ -2,7 +2,9 @@
 sandbox.py
 Temporary demo accounts. Each "Try the demo" click copies the demo template
 account into a sandbox account that the visitor can change freely. Sandboxes
-are limited in number and size and are deleted after one session.
+are limited in number and size. The visitor's session lasts 30 minutes; the
+account stays for 7 days so its share links keep working, unless its slot is
+needed sooner.
 """
 
 import secrets
@@ -10,12 +12,13 @@ import uuid
 from datetime import UTC, datetime, timedelta
 
 from fastapi import HTTPException, status
-from sqlalchemy import delete, func, select
+from sqlalchemy import case, delete, exists, func, select
 from sqlalchemy.orm import Session
 
 from app.auth.utils import ACCESS_TOKEN_EXPIRE_MINUTES, pwd_context
 from app.models import (
     Collection,
+    CollectionLink,
     Console,
     ConsoleLabel,
     Game,
@@ -23,7 +26,8 @@ from app.models import (
     UserRole,
 )
 
-SANDBOX_LIFETIME = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+SANDBOX_SESSION = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+SANDBOX_LIFETIME = timedelta(days=7)
 MAX_SANDBOXES = 10
 MAX_SANDBOX_COLLECTIONS = 3
 MAX_SANDBOX_ITEMS = 30
@@ -39,6 +43,9 @@ def delete_sandbox(db: Session, user: User) -> None:
     collection_ids = db.scalars(
         select(Collection.id).where(Collection.owner_id == user.id)
     ).all()
+    db.execute(
+        delete(CollectionLink).where(CollectionLink.collection_id.in_(collection_ids))
+    )
     db.execute(delete(Game).where(Game.collection_id.in_(collection_ids)))
     db.execute(delete(Console).where(Console.collection_id.in_(collection_ids)))
     db.execute(delete(Collection).where(Collection.owner_id == user.id))
@@ -47,8 +54,8 @@ def delete_sandbox(db: Session, user: User) -> None:
 
 
 def delete_expired_sandboxes(db: Session) -> None:
-    """Delete every sandbox older than one session. The caller commits."""
-    cutoff = datetime.now(UTC).replace(tzinfo=None) - SANDBOX_LIFETIME
+    """Delete every sandbox older than its lifetime. The caller commits."""
+    cutoff = _now() - SANDBOX_LIFETIME
     expired = db.scalars(
         select(User).where(
             User.role == UserRole.SANDBOX.value,
@@ -57,6 +64,27 @@ def delete_expired_sandboxes(db: Session) -> None:
     ).all()
     for user in expired:
         delete_sandbox(db, user)
+
+
+def _now() -> datetime:
+    return datetime.now(UTC).replace(tzinfo=None)
+
+
+def _sandbox_to_replace(db: Session) -> User | None:
+    """The sandbox to delete for a new one: the oldest whose session is over,
+    preferring one without share links. None while every sandbox is in use."""
+    has_links = exists().where(
+        CollectionLink.collection_id == Collection.id,
+        Collection.owner_id == User.id,
+    )
+    return db.scalars(
+        select(User)
+        .where(
+            User.role == UserRole.SANDBOX.value,
+            User.created_at < _now() - SANDBOX_SESSION,
+        )
+        .order_by(case((has_links, 1), else_=0), User.created_at, User.id)
+    ).first()
 
 
 def _copy_template(db: Session, template: User, sandbox: User) -> None:
@@ -127,10 +155,14 @@ def create_sandbox(db: Session) -> User:
         or 0
     )
     if active >= MAX_SANDBOXES:
-        raise HTTPException(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail="The demo is busy. Try again in a few minutes.",
-        )
+        replaced = _sandbox_to_replace(db)
+        if replaced is None:
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail="The demo is busy. Try again in a few minutes.",
+            )
+        delete_sandbox(db, replaced)
+        db.commit()
 
     template = db.scalars(
         select(User)

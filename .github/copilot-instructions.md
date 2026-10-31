@@ -127,8 +127,15 @@ cached copy.
 
 - Follow the UI stack: Vite, Tailwind CSS, shadcn/ui, React Router,
   and TanStack Query v5 for server state.
-- Prefer the existing shadcn-style components in `src/components/ui/`.
-  shadcn/ui components are maintained in the project source; do not expect a
+- New and changed code must use the installed components in
+  `src/components/ui/` (`Button`, `Input`, `Label`, `Textarea`, ...), never a
+  raw `<button>`, `<input>`, `<label>`, `<select>`, or `<textarea>`. Older
+  raw elements are not a pattern to copy (plan item 6a replaces them). If no
+  installed component fits, give the owner the install command and wait.
+  Destructive final actions are `<Button variant="outline"
+  className="border-destructive text-destructive">`, not the solid
+  `destructive` variant.
+- shadcn/ui components are maintained in the project source; do not expect a
   `shadcn` runtime package. Add or adapt components using the project's
   established shadcn conventions. When a shadcn component is needed, the owner
   adds it with the shadcn CLI (see above); review its generated source and
@@ -142,9 +149,24 @@ cached copy.
   behavior into focused custom hooks so components primarily describe their
   rendered structure. Keep hooks feature-scoped and avoid extracting trivial
   one-off presentation state without a readability benefit.
-- Use React Hook Form for submitted data-entry forms, including simple
-  collection and item forms. Keep standalone controls such as selectors and
-  search fields as ordinary inputs unless they belong to a submitted form.
+- Every submitted form, even a one-field one, uses one pattern (decided
+  2026-10-31; `Login.tsx` and the Share drawer's link-name form follow it;
+  the create-collection, console, and game forms move to it with plan
+  item 6a):
+  1. A zod schema in `src/schemas/<feature>.ts` with limits matching the
+     API, and `type <Name>FormValues = z.infer<typeof schema>`.
+  2. `useForm<Values>({ resolver: zodResolver(schema), defaultValues })`,
+     in the feature hook when there is one, otherwise in the component.
+  3. `<Form {...form}>` around `<form onSubmit={form.handleSubmit(...)}>`;
+     each field is `FormField` > `FormItem` > `FormLabel`, `FormControl`
+     (around `Input`, `Textarea`, a select, a checkbox, or the combobox), and
+     `FormMessage`. No raw `<label>` or `useId` wiring: `FormItem` connects
+     the label, `aria-invalid`, and the error message.
+  4. A mutation's error shows in a `<p role="alert">` below the fields.
+  5. Submit is a default `Button`, disabled and relabeled ("Creating...")
+     while pending; cancel is `variant="outline"`.
+  Standalone controls that are not submitted (a search field, a selector)
+  stay a plain `Input` without a form.
 - Keep pages structural. `Home` and other route pages compose feature components and must not own collection fetching, selection, or item CRUD.
 - Organize by feature/domain. Keep related components, hooks, API functions,
   and types easy to locate, but do not force unrelated responsibilities into
@@ -241,8 +263,10 @@ test and which kind.
   with. All sharing is read-only: a shared user can read but never write
   through the API. The demo template account (role `template`) is the source
   demo sessions copy. Demo-session accounts (role `sandbox`,
-  `app/auth/sandbox.py`) write only to their own copy, within limits, and can
-  never share.
+  `app/auth/sandbox.py`) write only to their own copy, within limits; they
+  can create read-only share links but never share with users. A share link
+  (`/shared/{token}`) is the only way to read a collection without signing
+  in, and it is never an access level in the permission code.
 - Global `admin` does not grant implicit access to collections the admin does
   not own or have been shared.
 - Enforce ownership/grants on every protected endpoint. Never trust a client-supplied owner, role, or cross-collection resource ID.
@@ -255,10 +279,12 @@ test and which kind.
 
 - Follow PEP 8. Use modern type hints (`X | None`, built-in generics) and annotate handlers and helpers.
 - Pydantic v2 schemas with explicit request/response contracts and `response_model` where a response is defined.
+- Request schemas (the bodies routes accept) set `model_config = ConfigDict(extra="forbid")`, so an undeclared field is a 422 instead of being silently dropped (decided 2026-10-31). Response schemas do not need it. `LinkCreate` follows this; the other request schemas move to it with plan item 6d.
 - Organize routers, schemas, services, and tests by resource. Keep console and game endpoints in separate modules.
 - Keep handlers thin: handle HTTP concerns, validation, authorization, and orchestration. Extract substantial or reused domain logic into a service/helper; do not add a service layer for trivial one-off operations.
-- Use FastAPI dependencies for DB sessions and current identity; prefer `Annotated` aliases.
-- For new and refactored code, use SQLAlchemy 2.0 style: `DeclarativeBase`, `Mapped`/`mapped_column`, and `select()` with `Session.execute()`/`scalars()`/`scalar()`. Avoid `declarative_base()` and `Session.query()` in new code; migrate existing uses when refactoring the relevant code, not as unrelated cleanup.
+- Dependencies are always `Annotated` aliases, never `x: T = Depends(f)` (decided 2026-10-31): `DbSession` (`app/utils.py`), `CurrentUser` (`app/auth/utils.py`), and `CollectionWithAccess`, `ReadableCollection`, `WritableCollection`, `OwnedCollection` (`app/collections/permissions.py`). Add a new alias beside its dependency function.
+- Collection access is declared in the route signature through those aliases, never checked by a helper called in the body. `ReadableCollection`: owner or grant. `WritableCollection`: owner; a grant reader gets 403. `OwnedCollection`: owner only, anyone else gets 404; use it for managing who can see a collection (grants, links). Route tests pass the collection in directly (as `create_link(request, collection, db)`), and the access rules are tested on the dependency functions, plus a test that each route declares its dependency.
+- Queries use SQLAlchemy 2.0 `select()` with `db.scalars()`/`db.scalar()`/`db.get()`, never `db.query()`. Models use `Mapped`/`mapped_column`. `app/collections/routes.py`, `shared_routes.py`, and `permissions.py` follow this; `video_games_routes.py` (except `collection_consoles`, `collection_games`, `list_consoles`, and `list_games`, which already do), `app/auth/utils.py`, and `app/db.py` (`declarative_base()`) move to it with plan item 6d. New code follows these rules even inside a file that has not been converted yet.
 - Transactions: commit successful writes, roll back failures before reuse, and never turn a DB failure into a success-shaped response.
 - Return intentional status codes and error details. No broad `except`, and never expose internal exception details to clients.
 - Enforce durable invariants with DB constraints (foreign keys, unique/check constraints, indexes) in addition to API validation.

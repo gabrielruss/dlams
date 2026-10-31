@@ -1,6 +1,7 @@
 import { useRef } from "react"
 import { Controller } from "react-hook-form"
 
+import { Button } from "@/components/ui/button"
 import {
   Drawer,
   DrawerClose,
@@ -11,6 +12,7 @@ import {
 import type { GameRecord } from "@/types/videoGames"
 import { videoGameConditions } from "@/types/videoGames"
 import ConsoleLabelCombobox from "./ConsoleLabelCombobox"
+import GameList from "./GameList"
 import useConsoleLabels from "./useConsoleLabels"
 import useGameManager from "./useGameManager"
 
@@ -29,7 +31,8 @@ function GameManager({
     form,
     editingId,
     formError,
-    listError,
+    deleteError,
+    isDeleting,
     isDrawerOpen,
     isSaving,
     resetForm,
@@ -41,6 +44,7 @@ function GameManager({
   } = useGameManager({ collectionId })
   const consoleLabelOptions = useConsoleLabels(canWrite)
   const drawerRef = useRef<HTMLDivElement>(null)
+  const editingGame = games.find((game) => game.id === editingId)
   const name = form.watch("name")
   const consoleLabel = form.watch("consoleLabel")
 
@@ -182,58 +186,32 @@ function GameManager({
                   </button>
                 </div>
               </form>
+              {editingGame && (
+                <div className="mt-6 flex flex-col gap-2 border-t pt-4">
+                  {deleteError && (
+                    <p role="alert" className="text-sm text-destructive">
+                      {deleteError}
+                    </p>
+                  )}
+                  <Button
+                    className="border-destructive text-destructive"
+                    type="button"
+                    variant="outline"
+                    disabled={isDeleting}
+                    onClick={() => deleteGame(editingGame)}
+                  >
+                    {isDeleting ? "Deleting..." : "Delete game"}
+                  </Button>
+                </div>
+              )}
             </div>
           </DrawerContent>
         </Drawer>
       )}
-      {listError && (
-        <p role="alert" className="text-sm text-destructive">
-          {listError}
-        </p>
-      )}
-      {games.length === 0 ? (
-        <p className="text-sm text-muted-foreground">
-          No games in this collection yet.
-        </p>
-      ) : (
-        <ul className="divide-y">
-          {games.map((game) => (
-            <li
-              key={game.id}
-              className="flex flex-wrap items-center justify-between gap-2 py-3"
-            >
-              <div>
-                <p className="font-medium">{game.name}</p>
-                <p className="text-sm text-muted-foreground">
-                  {game.console_label} · {game.condition}
-                  {game.completed ? " · Completed" : ""}
-                  {game.last_played ? ` · Last played ${game.last_played}` : ""}
-                </p>
-              </div>
-              {canWrite && (
-                <div className="flex gap-2">
-                  <button
-                    className="rounded-md border px-3 py-2 text-sm md:py-1"
-                    type="button"
-                    aria-label={`Edit ${game.name}`}
-                    onClick={() => editGame(game)}
-                  >
-                    Edit
-                  </button>
-                  <button
-                    className="rounded-md border px-3 py-2 text-sm md:py-1"
-                    type="button"
-                    aria-label={`Delete ${game.name}`}
-                    onClick={() => deleteGame(game)}
-                  >
-                    Delete
-                  </button>
-                </div>
-              )}
-            </li>
-          ))}
-        </ul>
-      )}
+      <GameList
+        games={games}
+        onSelect={canWrite ? editGame : undefined}
+      />
     </section>
   )
 }

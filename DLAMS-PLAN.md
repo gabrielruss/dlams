@@ -1,86 +1,101 @@
 # DLAMS plan
 
-Last updated: 2026-10-29
+Last updated: 2026-10-30
 
 The current state of the project. For why things are the way they are, see
 [`docs/decisions.md`](./docs/decisions.md). For the full history up to
 2026-10-09, see [`docs/archive/`](./docs/archive/).
 
-## Where we left off (2026-10-29)
+## Where we left off (2026-10-30)
 
 Start here in a new session. This block is rewritten at the end of a session,
 never appended to. History lives in git and `docs/decisions.md`.
 
-- **Status.** The portfolio-ready milestone is **complete** (the owner's call,
-  2026-10-27). Sandbox demo sessions are **deployed** (owner-reported,
-  2026-10-30): the `add-demo-edit` branch was merged and the deploy ran,
-  `demo-user`'s password was reset through `PUT /admin/users/3/password`, it
-  was reactivated, "Try the demo" works on the live site, and the
-  `DEMO_PASSWORD` secret is deleted. Run `git status` yourself: the owner
-  commits and pushes everything.
-- **What is verified.** Owner-reported: the mobile pass, CI passing
-  (2026-10-26), `demo-user` on the `demo` role, and a `POST /collections` from
-  its live session returning `403` (2026-10-27). Owner-run on 2026-10-29, output
-  pasted: the backup restore test passed (see Known issues). Run by Claude on
-  2026-10-29, after the sandbox demo work: `npm test` (15 tests in 4 files),
-  `npm run lint`, and `npm run build` pass in `dlams-ui`, and the 67 backend
-  tests pass in `dlams-fastapi/.venv`. Owner-reported: the password reset
-  endpoint works against the dev API and in production, and the migrations
-  `e7a3c5d91f20` and `f4c2e8a7b913` ran on deploy (no backup was taken first,
-  the owner's call). Not reported: a phone and desktop click-through of the
-  live demo.
+- **Status.** The portfolio-ready milestone is complete (2026-10-27). Sandbox
+  demo sessions are deployed and working (owner-reported, 2026-10-30).
+  Ruff is committed (`3a33b67`, "adding ruff and formatting"). **Read-only
+  link sharing (item 8, all three steps) was built on 2026-10-30 on branch
+  `add-share`, uncommitted; the owner was testing it and checking it in at
+  the end of the session.** Run `git status` and `git log` first
+  to see what landed: the owner commits and pushes everything, and a push to
+  `main` deploys.
+- **What was built 2026-10-30, not yet confirmed live:**
+  - **Ruff** (committed): `requirements-dev.txt`, `pyproject.toml`, CI steps,
+    VS Code settings, and a Claude Code hook in `.claude/` that formats each
+    edited `.py` file. Whether CI's Ruff steps passed was not reported.
+  - **Share links:** `collection_links` table (migration `a3d9f61c2b84`),
+    owner routes under `/collections/{id}/links` (at most 5 per collection,
+    sandboxes allowed), and the Share drawer (`ShareCollectionDrawer.tsx`):
+    "Create read-only link" with an optional name, then "Copy link" and
+    "Delete link" per link; the delete confirm button reads "Don't Look At My
+    Stuff". "N active links" shows under the Share button.
+  - **The link page:** public `GET /shared/{token}` (`shared_routes.py`) and
+    `/s/:token` (`pages/SharedCollection.tsx`), routed before the session
+    check; read-only lists, no owner details. Nginx: rate limit (30/min per
+    address) and `noindex` / `no-referrer` headers; `nginx -t` passed only on
+    a copy without the certificate lines.
+  - **Seven-day sandboxes:** kept 7 days for their links; sign-out no longer
+    deletes them; a full demo replaces the oldest sandbox past its 30-minute
+    session, one without links first, else says "busy".
+  - **UI changes along the way:** list rows open the edit drawer and Delete
+    lives in the drawer (`ListRow`, `ConsoleList`, `GameList`); console game
+    counts were removed from the API and UI (a stats area is item 10c).
+- **What is verified.** Run by Claude on 2026-10-30: 29 UI tests, lint, and
+  build in `dlams-ui`; 79 backend tests and Ruff in `dlams-fastapi/.venv`.
+  Not run: migration `a3d9f61c2b84` against PostgreSQL (its SQL was rendered
+  offline), the Nginx config on the Pi, any of the new UI in a real browser
+  (the owner was about to). Owner-reported earlier: the backup restore test
+  passed (2026-10-29), CI passed (2026-10-26).
 - **Next, in order:**
-  1. **Ruff for the backend.** Done 2026-10-30, uncommitted (see
-     `docs/decisions.md`). The owner commits it as its own change; CI's new
-     Ruff steps have not run yet. In VS Code, install the recommended Ruff
-     extension for format-on-save.
-  2. **Sharing UI** (item 8). The API already works; there is no screen.
-     **Open question for the owner, to be settled before building** (see Open
-     questions): where is the "Shared with" screen reached from.
-  3. **Search** (item 8a, scope still to settle).
-  4. The manual half of the accessibility audit (item 6: keyboard pass,
-     including the raw buttons' focus outline, 200% zoom, the phone menu); the
-     shadcn-everywhere cleanup (item 6a, needs the owner's styling go-ahead and
-     possibly `select` and `checkbox` installs); Playwright end-to-end checks
-     if wanted (needs package approval); then items 10 and 11.
-- **Waiting on the owner:** the sharing-screen entry-point question; whether to
-  take the `zod` fix (`npm audit fix`); the search scope questions when search
-  starts.
+  1. **Confirm the ship.** Ask the owner what landed and whether the deploy
+     ran. On the live site: create a link and open it in a private window;
+     delete it and see "This link is no longer active."; start a demo, share
+     a link, sign out, and check the link still works. Check CI's Ruff steps
+     passed.
+  2. **Search** (item 8a): scope questions to settle with the owner first.
+  3. The manual half of the accessibility audit (item 6), the
+     shadcn-everywhere cleanup (item 6a, needs the styling go-ahead), finding
+     repeated component styling (6b), the styling cleanup (6c), and the
+     backend consistency pass (6d), then
+     items 9a (admin wipe-sandboxes button), 10a-10c (later sharing ideas,
+     color themes, stats area), and 11.
+- **Waiting on the owner:** whether to take the `zod` fix (`npm audit fix`);
+  the search scope questions.
 - **Things to remember about the code.**
   - Tests sit beside the feature they cover. `renderApp(route)` in
-    `dlams-ui/src/test/renderApp.tsx` renders the real app with a fresh
-    `QueryClient` (production's 30 s stale time) and a `userEvent`; register
-    MSW handlers per test with `server.use(...)`; add an axe check with
-    `expectNoViolations(container)` from `src/test/axe.ts`. An unhandled
-    request fails the test. The approach is in `.github/copilot-instructions.md`
-    ("Testing").
-  - Generated shadcn files need the owner's approval to edit. The local edits to
-    `components/ui/combobox.tsx` (a `container` prop, the removed unused
-    `children`, an `aria-label` on the trigger) are listed in
-    `.github/copilot-instructions.md` and must be re-applied after a reinstall.
-    The owner runs the shadcn CLI; never hand-write a missing component.
-  - In our own components never use the `cn` helper (shadcn files only), do not
-    add code comments, and never use the owner's name in tests or fixtures
-    (use `test-user`, `demo-user`).
-  - Styling: the styling pass is complete, so ask before any styling change.
-    The app font is Fira Code; the logo font is Półtawski Nowy. `red` is the
-    brand color used for the logo D and the selected-collection bar; `teal` is
-    still a theme color but nothing uses it. The sidebar access badge is a black
-    pill with white text. Light-theme contrast tokens were changed 2026-10-27
-    (see `docs/decisions.md`). A raw `<button>`/`<input>`/`<select>`/`<label>`
-    cleanup is item 6a.
-  - The demo: "Try the demo" calls `POST /demo-sessions`, which copies the
-    `demo-user` account (role `template`) into a temporary `sandbox`
-    account for one
-    30-minute session (`app/auth/sandbox.py`). No credentials are in the
-    bundle.
-- **How the owner likes to work:** one decision per message; confirm when a
-  reply is ambiguous or has two parts; give a recommendation and one question
-  rather than several; keep docs and the README trim with no fluff. For
-  commands on the Pi, give one command per code block and wait for the output
-  (multi-line pastes have garbled in the owner's terminal). Do not offer to
-  commit or push. Ask before any styling change, but the owner's direct request
-  counts as the go-ahead for that change.
+    `dlams-ui/src/test/renderApp.tsx` renders the real app; register MSW
+    handlers per test with `server.use(...)`; add an axe check with
+    `expectNoViolations(container)`. An unhandled request fails the test, so
+    any test that opens an owned collection needs a
+    `GET /collections/1/links` handler (the Share button loads the links).
+    Inside a Vaul drawer, use `element.focus()` and `user.keyboard(...)`
+    instead of clicks: pointer events throw in jsdom.
+  - Backend tests call route functions directly against SQLite, which does
+    not enforce foreign keys; delete child rows explicitly (as
+    `delete_sandbox` does) and test that.
+  - Share links are not an access level: `/shared/{token}` looks the token up
+    and returns read-only data. Keep it out of `permissions.py`.
+  - Generated shadcn files need the owner's approval to edit (local edits to
+    `components/ui/combobox.tsx` are listed in
+    `.github/copilot-instructions.md`). The owner runs the shadcn CLI.
+  - In our own components never use the `cn` helper, do not add code
+    comments, and never use the owner's name in tests or fixtures (use
+    `test-user`, `demo-user`).
+  - Styling: ask before any styling change; the owner's direct request is the
+    go-ahead. Destructive final actions use the red outline style
+    (`border border-destructive text-destructive`). `red` is the brand color
+    (logo D, selected-collection bar). A console color theme was tried and
+    reverted (item 10b holds the notes).
+  - Backend: run `.venv/bin/ruff check .` and `.venv/bin/ruff format --check .`
+    from `dlams-fastapi/` along with the tests; CI runs both.
+- **How the owner likes to work:** one decision per message; give a
+  recommendation and one question rather than several; the owner often edits
+  UI wording directly, so read the current file before changing text and
+  keep their wording; they like to see a change before committing to it and
+  will revert freely, so keep changes small and easy to undo; prefer fewer
+  features over messy code. For commands on the Pi, give one command per code
+  block and wait for the output. Do not offer to commit or push. Docs stay
+  trim, facts only.
 
 ## How to use this document
 
@@ -171,26 +186,36 @@ workflow on a self-hosted runner (`.github/workflows/deploy.yml`).
   `b8e1d6a42c07` recreated the affected tables, deleting their rows (the
   owner had nothing to keep). Decision in `docs/decisions.md`.
 
+**Built 2026-10-30, shipping at the end of that session**
+
+- **Read-only link sharing:** up to 5 named links per collection from a
+  Share drawer, a public read-only page at `/s/<token>`, and demo sandboxes
+  kept 7 days so their links work. Item 8.
+- **List rows open the editor;** Delete is in the edit drawer.
+- **Ruff** lints and formats the backend in CI.
+
 **Not implemented**
 
-- Sharing UI (add and remove who a collection is shared with).
+- Sharing with a user by username has an API but no screen (item 10a).
 - Search (no search or filter exists in the UI or API).
 - An admin button to wipe all sandbox accounts.
 - Item types other than video games.
 
 **Verification baseline**
 
-- UI (2026-10-29, run by Claude): `npm test` passes (15 tests: login, the demo
-  session button, the owner and shared access views, the admin page, and axe
+- UI (2026-10-30, run by Claude): `npm test` passes (29 tests: login, the demo
+  session button, the owner and shared access views, the share-link drawer,
+  the admin page, and axe
   checks on the login, register, collection,
   admin, and drawer screens), and `npm run lint` and `npm run build` pass. CI (lint, `npm test`, build, backend tests) passed on
   push (owner-reported, 2026-10-26).
 
-- API (2026-10-29, run by Claude in `dlams-fastapi/.venv`): 67 unit tests
-  pass, including 13 for sandbox demo sessions (the copy, the 10-sandbox cap,
+- API (2026-10-30, run by Claude in `dlams-fastapi/.venv`): 79 unit tests
+  pass, including 15 for sandbox demo sessions (the copy, the 10-sandbox cap,
   expiry cleanup, the collection and item limits, blocked sharing, the
-  template staying untouched, and deletion on sign-out) and 5 for the admin
-  password reset.
+  template staying untouched, the 7-day lifetime, which sandbox a full demo
+  replaces, and sign-out keeping the sandbox), 5 for the admin
+  password reset, 8 for share links, and 3 for the shared-collection route.
 
 - Backup restore (2026-10-29, owner-run, output pasted): the 2026-10-29 03:15
   dump restored into a scratch database with 3 users, 3 collections, 6
@@ -383,33 +408,95 @@ In order. Items 1 to 7 are the path to the portfolio milestone.
    style, so check their focus outline in the keyboard pass.
    Still to check by hand: contrast, keyboard, drawers, 200% zoom, phone menu.
 6a. **Use the shadcn components everywhere (before go-live).** Scanned
-   2026-10-27, nothing changed yet. This is a styling change, so it needs the
-   owner's go-ahead and scope first. Installed in `components/ui/`: `button`,
-   `card`, `combobox`, `drawer`, `form`, `input-group`, `input`, `label`,
-   `table`, `textarea`. Raw HTML found in app code (outside `components/ui/`):
-   - **17 raw `<button>`s** where `Button` should be used: the session Retry
+   2026-10-27; rescanned 2026-10-31. New code must already use them (owner,
+   2026-10-31; rule in `.github/copilot-instructions.md`, "Frontend"), and the
+   `add-share` branch's new elements were converted (Share drawer, the drawer
+   Delete buttons, `ListRow` as `Button variant="ghost"`). Converting the older
+   ones is a styling change, so it needs the owner's go-ahead and scope first.
+   Installed in `components/ui/`: `button`, `card`, `combobox`, `drawer`,
+   `form`, `input-group`, `input`, `label`, `table`, `textarea`.
+   **Consistency check** (run it for this item and before each push that
+   touches the UI; it should print nothing once 6a is done), from
+   `dlams-ui/`:
+   `grep -rnE '<(button|input|label|select|textarea)([ >]|$)' src --include='*.tsx' | grep -v 'src/components/ui/' | grep -v '\.test\.tsx'`.
+   Raw HTML it found on 2026-10-31 (outside `components/ui/`):
+   - **13 raw `<button>`s** where `Button` should be used: the session Retry
      (`App.tsx`); the invite drawer's Close (`RegistrationInviteManager.tsx`);
      in `ConsoleManager.tsx` and `GameManager.tsx` each, the Add button, the
-     drawer Close, two form buttons (submit and cancel), and the row Edit and
-     Delete (6 each); in `CollectionNavigation.tsx` the collection row button,
-     the drawer Close, and the create submit. The collection row button is a
-     list-style toggle and may want `Button variant="ghost"` or to stay custom.
+     drawer Close, and the form's submit and cancel (4 each); in
+     `CollectionNavigation.tsx` the collection row button, the drawer Close,
+     and the create submit. The collection row button is a list-style toggle;
+     `Button variant="ghost"` as in `ListRow` likely fits.
    - **5 raw `<input>`s** (4 text, 1 checkbox) in `ConsoleManager`,
      `GameManager`, and `CollectionNavigation`, where `Input` is used elsewhere
-     (login, register, invite link).
+     (login, register, invite link, share drawer).
    - **2 raw `<select>`s** (the condition fields in `ConsoleManager` and
      `GameManager`). No shadcn `select` is installed; the owner would run
      `npx shadcn@latest add select`. The checkbox has no shadcn component
      installed either (`checkbox`).
-   - **8 raw `<label>`s** across the three drawer forms, where `Label` or
-     `FormLabel` should be used. `Form`/`FormField` are used on login and
-     register but the drawer forms use `react-hook-form` `register` directly.
-   - `textarea` is installed but unused. `input-group` and `label` are only
-     used inside the generated `combobox` and `form` files.
+   - **10 raw `<label>`s** across the three drawer forms and the invite
+     drawer, where `Label` or `FormLabel` should be used. `Form`/`FormField`
+     are used on login and register but the drawer forms use
+     `react-hook-form` `register` directly. Convert them to the form pattern
+     in `.github/copilot-instructions.md` ("Frontend", decided 2026-10-31):
+     a zod schema plus `Form`/`FormField`.
+   - `textarea` is installed but unused. `input-group` is only used inside
+     the generated `combobox`.
    Doing this also gives these controls the shadcn focus ring, which the
    keyboard check in item 6 flags as missing on the raw buttons. Re-run the
    tests afterward; the axe checks and the `Edit`/`Delete` name tests cover
    these screens.
+6b. **Identify repeated component styling** (owner, 2026-10-31; after 6a).
+   Read-only first: list the Tailwind class strings repeated across
+   components, where each appears, and whether the behavior and meaning are
+   also shared (the extraction rule in `.github/copilot-instructions.md`,
+   "Frontend"). Propose which to extract into a component and which to leave;
+   the owner picks. Seen so far, not yet counted: the red-outline destructive
+   `Button` (Share drawer, Delete console, Delete game), the drawer header
+   with its Close button, and the bordered list section
+   (`flex flex-col gap-4 rounded-lg border p-4`).
+6c. **Styling cleanup** (owner, 2026-10-31; after 6a and 6b). A styling
+   change, so the owner sets the scope first. Candidates: classes made
+   redundant by the shadcn components (overrides that repeat a variant's own
+   classes), one-off spacing, sizes, and text styles that differ between
+   screens for no reason, and unused tokens (`teal` in `index.css`). Re-run
+   the tests and the 6a consistency check afterward, and check the changed
+   screens in a browser.
+6d. **Backend consistency pass** (owner, 2026-10-31). The patterns are in
+   `.github/copilot-instructions.md`, "Backend": `Annotated` dependency
+   aliases, collection access through `permissions.py` dependencies, and
+   `select()` only. Done 2026-10-31 on `add-share`: the aliases and
+   `get_owned_collection` exist, and `collections/routes.py` (collections,
+   grants, links), `shared_routes.py`, and `permissions.py` follow them.
+   Still to do:
+   - `video_games_routes.py`: 15 `db.query()` calls, `Depends(...)` defaults,
+     and split it into console and game modules. The list helpers and
+     routes (`collection_consoles`, `collection_games`, `list_consoles`,
+     `list_games`) were converted 2026-10-31. Fix the extra query per row:
+     `_console_response` and `_game_response` each query the row's label,
+     so listing 30 games costs 31 queries; select the label with the row
+     (`select(Console, ConsoleLabel).join(...)`) instead.
+   - `app/auth/` (`routes.py`, `admin_routes.py`, the rest of `utils.py`):
+     `Depends(...)` defaults to aliases, missing types.
+   - `app/db.py`: `declarative_base()` to `DeclarativeBase`.
+   - Turn on Ruff's `FAST` rules in `pyproject.toml`. Dry run 2026-10-31
+     (`ruff check . --select FAST`): 67 findings. FAST002 (non-`Annotated`
+     dependency) is the rule to keep. FAST003 is a false positive when a
+     dependency reads the path parameter (`OwnedCollection`); ignore it.
+     FAST001 flags `response_model` that repeats the return type; decide
+     whether to drop those or ignore the rule (the conventions currently
+     ask for `response_model`). Its fixes are unsafe and can reorder
+     parameters the tests pass by position, so review and re-run the tests.
+   - `extra="forbid"` on every request schema (decided 2026-10-31; only
+     `LinkCreate` has it). The other ten: `LoginRequest`,
+     `RegisterRequest`, `AdminUserRoleUpdate`, `AdminPasswordReset`
+     (`auth/schemas.py`), `CollectionCreate`, `GrantCreate`
+     (`collections/schemas.py`), `ConsoleCreate`, `ConsoleUpdate`,
+     `GameCreate`, `GameUpdate` (`video_games_schemas.py`). For each, first
+     compare the body the
+     matching `dlams-ui/src/lib/api/` module sends: the UI tests mock the API
+     with MSW and will not catch a 422, so an extra field would only fail in
+     the real app. Then run both test suites and try each form in a browser.
 7. **README and a final check.** Done 2026-10-27 (owner's call). The root
    `README.md` was rewritten as the front door (no screenshots: the live demo
    shows the app and there is nothing to keep current; see
@@ -458,15 +545,47 @@ After the milestone. Items 9, 8, and 8a are the first follow-ups (owner
 priority, 2026-10-27 to 2026-10-29), in that order: browser-local demo editing
 is next, then the sharing UI, then search.
 
-8. **Sharing UI. After demo editing** (owner, 2026-10-29; it was next on
-   2026-10-28). The API can share a collection (`GET`,
-   `POST` by username, and `DELETE` under `/collections/{id}/grants`), but
-   there is no screen, so an owner cannot share one today. Build a full-page
-   "Shared with" screen where a collection owner adds a user by username and
-   removes users. Sharing is read-only, so there is no access-mode control.
-   Sandbox accounts are refused on every sharing route, so their UI should
-   not offer the form. Mutations invalidate both the collection and
-   collection-list keys.
+8. **Read-only link sharing. Built** (owner, 2026-10-30). Design in
+   `docs/decisions.md`, "Sharing by link, and seven-day demo sandboxes". Each
+   step ships on its own:
+   1. **Share links.** Built 2026-10-30, uncommitted. Backend:
+      `CollectionLink` model and migration `a3d9f61c2b84` (`collection_links`,
+      cascades from the collection; the SQL was rendered offline for
+      PostgreSQL, not run against it); `GET`, `POST`, `DELETE` under
+      `/collections/{id}/links`, owner only, sandboxes included, at most 5;
+      `delete_sandbox` deletes links first; 8 tests in
+      `test_collection_links.py`. UI: a Share button on the selected
+      collection's heading (owners, sandboxes included) opens
+      `ShareCollectionDrawer`: "Create read-only link" with an optional
+      inline name, then each link with stacked "Copy link" and "Delete link" buttons;
+      deleting asks first, and the confirm button reads "Don't Look At My
+      Stuff"; links are `/s/<token>`, which step 2
+      serves. The URL is shown only if copying fails. At 5 links the button
+      gives way to a note. Under the Share button, small text reads "2 active
+      links" (hidden at 0; it is the button's description for screen
+      readers), from the same cached query the drawer uses; 9 tests. Until step 2 ships, a
+      copied link opens nothing, so ship steps 1 and 2 together.
+   2. **The link page.** Built 2026-10-30, uncommitted. `GET /shared/{token}`
+      (`shared_routes.py`, public) returns the collection's name, type,
+      consoles, and games through the same helpers as the signed-in lists
+      (`collection_consoles`, `collection_games`); 3 tests. `/s/:token`
+      (`pages/SharedCollection.tsx`) is routed before the session check: a
+      sidebar with the wordmark, name, type, and counts; the read-only
+      message; `ConsoleList` and `GameList`, which were split out of the
+      managers so this page carries no edit code; 3 tests. Nginx rate limit
+      and headers added; the config passed `nginx -t` with the certificate
+      lines removed, not run on the Pi. Console rows no longer show a game
+      count (removed from the API and UI 2026-10-30; see item 10c).
+   3. **Seven-day sandboxes.** Built 2026-10-30, uncommitted.
+      `SANDBOX_LIFETIME` is 7 days and `SANDBOX_SESSION` 30 minutes; a full
+      demo deletes the oldest sandbox past its session, one without links
+      first (`_sandbox_to_replace`), else answers "busy"; `logout` is back to
+      only clearing the cookie. The demo notice now says the visitor can't
+      get back after signing out or 30 minutes, and links keep working for
+      7 days. 15 sandbox tests.
+   **All three steps are built and uncommitted; ship them together**
+   (migration `a3d9f61c2b84` runs on deploy, and the Nginx config changes
+   take effect when the deploy reloads Nginx).
 8a. **Search** (owner wants it "pretty quickly", 2026-10-28; not designed
    yet). Today there is no search anywhere: the console and game lists show
    everything in the selected collection, and the API has no search or filter
@@ -489,21 +608,32 @@ is next, then the sharing UI, then search.
    2026-10-29, deployed 2026-10-30 (see `docs/decisions.md`, "Demo sessions"). "Try
    the demo" copies the `demo-user` template into a temporary `sandbox`
    account: at most 10 at once, 3 collections and 30 consoles and games each,
-   no sharing, deleted on sign-out or after its 30-minute session. Replaces
-   the browser-local editing plan.
+   no sharing with users, a 30-minute session, and (since 2026-10-30,
+   item 8 step 3) kept 7 days for its share links. Replaces the
+   browser-local editing plan.
 9a. **Admin button to wipe all sandbox accounts** (owner, 2026-10-29; later).
-10. **Demo sharing walkthrough.** **On hold (2026-10-29):** sandbox accounts
-   cannot share, so this needs rethinking before it is built. After signing in as `demo-user`, a visitor
-   opens the sharing area and clicks "Share my collection"; a "View the app
-   as the shared user" button then appears. It signs in as a second demo
-   account, `demo-shared`, through the normal login (no session-swap
-   endpoint and no special cases; its credentials are public like
-   `demo-user`'s). `demo-shared` holds a real, fixed view-only grant on the
-   demo collection, and the visitor's browser-local edits are applied to what
-   it shows. All sharing is read-only, so no sharing form has an access-mode control. The share action is simulated in
-   the browser, because all visitors share one server state. Depends on the
-   sharing UI (8) and browser-local demo editing (9). Proposed
-   2026-10-14.
+10. **Demo sharing walkthrough. Replaced 2026-10-30** by share links that
+   sandboxes can use (item 8).
+10b. **Console color themes** (owner, 2026-10-30; later). Tried and reverted
+   the same day: an NES theme (controller light grey `#c5c5c5`, dark grey
+   `#3d3d3d`, black `#1a1a1a`, red `#c3232b`, approximations) setting only the
+   logo D, button, and text colors, with white backgrounds kept, built as a
+   `--nes-*` palette mapped onto the tokens so SNES and other themes can
+   follow. Lessons: secondary buttons are white with a border today, so a
+   secondary color needs `bg-secondary` on them; a grey sidebar makes its two
+   secondary buttons disappear.
+10c. **Stats area** (owner, 2026-10-30; later). A dedicated place on the
+   page for collection statistics, instead of numbers inside the lists.
+   Console game counts were removed from the rows and the API for now. If a
+   stat counts across collections, show the cross-collection part only to
+   the owner: a share link must not hint at collections that were not
+   shared. Design it before building (what to show, where it sits).
+10a. **Later sharing ideas** (owner, 2026-10-30): a People section in the
+   share drawer (share by username on the existing grants API; built and
+   removed 2026-10-30; settle first whether "User not found" should also
+   cover deactivated accounts, and add a rate limit), owners inviting people,
+   contributor (edit) access for shared users, a "keep this account" resume
+   link for sandboxes, and "last opened" on share links.
 11. **Further item types**, after the shared-fields question is settled. As
     the first step, split the sandbox template copy (`_copy_template` in
     `dlams-fastapi/app/auth/sandbox.py`) into one copier per collection type,
@@ -541,14 +671,11 @@ is next, then the sharing UI, then search.
   from the API). Several have no fixed version (`ecdsa`, `python-jose`).
   Upgrading is deferred (decided 2026-10-12) and is a separate, explicitly
   requested change because FastAPI 0.115.12 requires `starlette<0.47`.
-- Frontend test tooling was installed 2026-10-26 and has 15 tests, including `vitest-axe` accessibility checks. `npm audit` reports 4
+- Frontend test tooling was installed 2026-10-26 and has 29 tests, including `vitest-axe` accessibility checks. `npm audit` reports 4
   vulnerabilities after the install: `vitest`/`@vitest/mocker` and `tinypool`
   (dev-only; the fix is a downgrade to Vitest 2.0.5) and `zod` (runtime; `npm
   audit fix` resolves it). Upgrades are deferred. Backend tests use `unittest`; Ruff and
   pytest are not configured.
-- Backend debt: `video_games_routes.py` combines console and game routes and
-  uses `Session.query()`; `app/db.py` uses `declarative_base()`; older auth
-  handlers lack complete type and response declarations.
 - Migration `951a8354c293` uses a PostgreSQL-only `ALTER COLUMN`, so the full
   migration chain cannot be replayed on SQLite.
 - `dlams-fastapi/.env.example` was only used by the deleted legacy
@@ -566,15 +693,5 @@ is next, then the sharing UI, then search.
   delete; backups exist only on the Pi, so a hard delete is hard to undo.
 - Should collection owners, not only admins, be able to invite someone with a
   grant on their own collection attached?
-- Where is the sharing screen reached from? Asked 2026-10-28, for the owner
-  to answer next. Options: (a) a link on each collection row in the sidebar,
-  or (b) a "Share" control on the selected collection's page heading in the
-  workspace, opening a full-page route such as `/collections/:id/sharing` (the
-  plan calls for a full-page screen; today the routes are `/`, `/login`,
-  `/register`, `/admin/users`, with the selected collection in the `?collection=`
-  search param). Claude's recommendation is (b): the sidebar rows are already
-  dense, especially on a phone, and sharing acts on the collection you are
-  looking at. Shared collections need no control at all, because only owners
-  can share, and demo accounts must not see it.
 - What features beyond the first game-list workflow are in scope for the
   private app and for the demo?

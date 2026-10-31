@@ -1,14 +1,14 @@
 """CRUD endpoints for video-game console inventory and games."""
 
 from fastapi import APIRouter, Depends, HTTPException, Response, status
-from sqlalchemy import func, or_
+from sqlalchemy import func, or_, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.auth.sandbox import check_item_limit
 from app.auth.utils import get_current_user
 from app.collections.permissions import (
-    get_readable_collection,
+    ReadableCollection,
     get_writable_collection,
 )
 from app.collections.video_games_schemas import (
@@ -35,7 +35,7 @@ from app.models import (
     User,
     VideoGameCondition,
 )
-from app.utils import get_db
+from app.utils import DbSession, get_db
 
 router = APIRouter(prefix="/collections/{collection_id}", tags=["video games"])
 stats_router = APIRouter(prefix="/collections", tags=["video games"])
@@ -164,16 +164,12 @@ def _console_response(db: Session, console: Console) -> ConsoleResponse:
     label = (
         db.query(ConsoleLabel).filter(ConsoleLabel.id == console.console_label_id).one()
     )
-    game_count = (
-        db.query(func.count(Game.id)).filter(Game.console_label_id == label.id).scalar()
-    )
     return ConsoleResponse(
         id=console.id,
         console_label_id=label.id,
         label=label.name,
         edition=console.edition,
         condition=VideoGameCondition(console.condition),
-        game_count=game_count or 0,
     )
 
 
@@ -217,21 +213,29 @@ def create_console(
     return _console_response(db, console)
 
 
+def collection_consoles(db: Session, collection_id: int) -> list[ConsoleResponse]:
+    rows = db.scalars(
+        select(Console)
+        .join(ConsoleLabel, ConsoleLabel.id == Console.console_label_id)
+        .where(Console.collection_id == collection_id)
+        .order_by(ConsoleLabel.name, Console.id)
+    ).all()
+    return [_console_response(db, console) for console in rows]
+
+
+def collection_games(db: Session, collection_id: int) -> list[GameResponse]:
+    rows = db.scalars(
+        select(Game).where(Game.collection_id == collection_id).order_by(Game.id)
+    ).all()
+    return [_game_response(db, game) for game in rows]
+
+
 @router.get("/consoles", response_model=ConsoleListResponse)
 def list_consoles(
-    collection: Collection = Depends(get_readable_collection),
-    db: Session = Depends(get_db),
+    collection: ReadableCollection,
+    db: DbSession,
 ) -> ConsoleListResponse:
-    rows = (
-        db.query(Console)
-        .join(ConsoleLabel, ConsoleLabel.id == Console.console_label_id)
-        .filter(Console.collection_id == collection.id)
-        .order_by(ConsoleLabel.name, Console.id)
-        .all()
-    )
-    return ConsoleListResponse(
-        consoles=[_console_response(db, console) for console in rows]
-    )
+    return ConsoleListResponse(consoles=collection_consoles(db, collection.id))
 
 
 @router.put("/consoles/{console_id}", response_model=ConsoleResponse)
@@ -353,16 +357,10 @@ def create_game(
 
 @router.get("/games", response_model=GameListResponse)
 def list_games(
-    collection: Collection = Depends(get_readable_collection),
-    db: Session = Depends(get_db),
+    collection: ReadableCollection,
+    db: DbSession,
 ) -> GameListResponse:
-    rows = (
-        db.query(Game)
-        .filter(Game.collection_id == collection.id)
-        .order_by(Game.id)
-        .all()
-    )
-    return GameListResponse(games=[_game_response(db, game) for game in rows])
+    return GameListResponse(games=collection_games(db, collection.id))
 
 
 @router.put("/games/{game_id}", response_model=GameResponse)

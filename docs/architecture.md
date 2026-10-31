@@ -77,9 +77,12 @@ and served by `nginx:alpine`, database `postgres:15` (development uses 14).
   per-feature hooks (`useCollections`, `useVideoGamesCollection`,
   `useAdminUsers`, ...). After a write, queries are invalidated rather than
   patched by hand.
-- **Routing.** React Router in `App.tsx`: `/` (home), `/login`, `/register`,
-  `/admin/users`. `App` first resolves the current user; unauthenticated
-  visitors are redirected to `/login`, non-admins away from `/admin/users`.
+- **Routing.** React Router in `App.tsx`: `/s/:token` (a share link's
+  read-only page, `pages/SharedCollection.tsx`) is matched first and never
+  checks a session. Everything else goes through `SessionRoutes`: `/` (home),
+  `/login`, `/register`, `/admin/users`; it first resolves the current user;
+  unauthenticated visitors are redirected to `/login`, non-admins away from
+  `/admin/users`.
   The selected collection is kept in the URL.
 
 ## Authentication and sessions
@@ -101,9 +104,12 @@ and served by `nginx:alpine`, database `postgres:15` (development uses 14).
   environment (`python -m app.auth.bootstrap_admin`).
 - **Demo sessions.** `POST /demo-sessions` (no sign-in) copies the `template`
   template account into a new `sandbox` account and sets its session cookie.
-  At most 10 sandboxes exist; each is deleted on sign-out or, once its
-  30-minute session is over, by the next demo request
-  (`app/auth/sandbox.py`).
+  The visitor's session lasts 30 minutes and nobody can sign back in, but
+  the account stays for 7 days so its share links keep working; the next
+  demo request after that deletes it. At most 10 exist: when a new demo
+  needs a slot, the oldest sandbox past its session is deleted, one without
+  share links first; if every sandbox is mid-session, the demo is busy
+  (`app/auth/sandbox.py`). Signing out does not delete a sandbox.
 
 ## Authorization model
 
@@ -140,6 +146,7 @@ Two independent layers:
 
 ```
 users ─┬─< collections ─┬─< collection_grants >── users
+       │                ├─< collection_links
        │                ├─< games ──────┐
        │                └─< consoles ───┤
        ├─< console_labels >─────────────┘
@@ -152,6 +159,7 @@ users ─┬─< collections ─┬─< collection_grants >── users
 | `registration_invitations` | `token_hash` (unique), `created_by_id` (RESTRICT), `expires_at`, `redeemed_at`. |
 | `collections` | `owner_id` (CASCADE), `name`, `type` (check constraint; only `video_game`). |
 | `collection_grants` | One row per (collection, user), unique: that user can read the collection. Cascades from both collection and user. |
+| `collection_links` | Read-only share links: `collection_id` (cascades), optional `name` (50), unique random `token` (128 bits), `created_at`. At most 5 per collection, enforced by the API. |
 | `console_labels` | Platform names owned by a user (`user_id`, CASCADE), reused across that user's collections; unique per user ignoring case. Created from the console or game form; deleted when no console and no game uses them. |
 | `consoles` | One physical console: `collection_id` (CASCADE), required `console_label_id`, `edition`, `condition`. |
 | `games` | One owned game: `collection_id` (CASCADE), required `console_label_id`, `name`, `condition`, `last_played`, `completed`. |
@@ -174,7 +182,9 @@ the edge).
 | Invitations | `POST /invitations` | admin |
 | Admin users | `GET /admin/users`, `POST /admin/users/{id}/deactivate`, `POST /admin/users/{id}/activate`, `PUT /admin/users/{id}/role` (`user` or `template`), `PUT /admin/users/{id}/password` | admin; role and deactivate never on yourself or another admin; password on yourself but never another admin; never a sandbox |
 | Collections | `POST /collections`, `GET /collections`, `GET /collections/{id}` | signed-in; list includes owned and granted |
-| Sharing | `GET`, `POST` (by username), `DELETE` under `/collections/{id}/grants` | collection owner; never a sandbox |
+| Sharing | `GET`, `POST` (by username), `DELETE` under `/collections/{id}/grants` | collection owner; never a sandbox (no UI yet) |
+| Share links | `GET`, `POST` (optional `name`), `DELETE /{link_id}` under `/collections/{id}/links` | collection owner, sandboxes included |
+| Shared collection | `GET /shared/{token}`: the collection's name, type, consoles, and games; nothing about the owner. 404 "This link is no longer active." | public (no sign-in) |
 | Video games | `/collections/{id}/consoles` and `/games` (list, create, update, delete) | read: owner or shared; write: owner |
 | Console labels | `GET /console-labels` (the signed-in user's labels) | signed-in |
 | Stats | `GET /collections/video-game-stats` | signed-in; owned and granted collections |
@@ -255,7 +265,10 @@ styling changes need approval (see the conventions file for the rule).
   rebuilt. Images are built on the Pi, so builds are slow and CI does not
   run tests or lint before deploying.
 - **Nginx** routes `/` to the `ui` container and `/api/` to the `api`
-  container (prefix stripped).
+  container (prefix stripped). Share links: `/api/shared/` (and `/shared/` on
+  the API host) are rate-limited to 30 requests a minute per address (burst
+  10, then 429); those routes and the `/s/` pages send
+  `X-Robots-Tag: noindex` and `Referrer-Policy: no-referrer`.
 
 ## Configuration
 

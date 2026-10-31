@@ -54,6 +54,7 @@ function useConsoleManager({ collectionId }: UseConsoleManagerOptions) {
     setEditingId(null)
     setIsDrawerOpen(false)
     saveMutation.reset()
+    deleteMutation.reset()
   }
 
   const saveConsole = (values: ConsoleFormValues) => {
@@ -92,14 +93,15 @@ function useConsoleManager({ collectionId }: UseConsoleManagerOptions) {
       : consoleRecord.label
     if (!window.confirm(`Delete ${description}?`)) return
     deleteMutation.reset()
-    deleteMutation.mutate(consoleRecord.id)
+    deleteMutation.mutate(consoleRecord.id, { onSuccess: resetForm })
   }
 
   return {
     form,
     editingId,
     formError: saveMutation.error?.message ?? null,
-    listError: deleteMutation.error?.message ?? null,
+    deleteError: deleteMutation.error?.message ?? null,
+    isDeleting: deleteMutation.isPending,
     isDrawerOpen,
     isSaving: saveMutation.isPending,
     resetForm,

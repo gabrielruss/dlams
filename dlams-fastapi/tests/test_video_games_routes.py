@@ -15,7 +15,6 @@ from app.collections.video_games_routes import (
     delete_console,
     delete_game,
     list_console_labels,
-    list_consoles,
     list_games,
     update_console,
     update_game,
@@ -176,30 +175,6 @@ class VideoGamesRouteTests(unittest.TestCase):
         delete_game(first.id, self.collection, self.db)
 
         self.assertEqual(self.db.query(ConsoleLabel).count(), 1)
-
-    def test_console_game_count_includes_the_label_across_collections(self) -> None:
-        other = Collection(owner_id=self.collection.owner_id, name="Other")
-        self.db.add(other)
-        self.db.commit()
-        first = self.add_console("Original white")
-        second = self.add_console("Star Wars edition")
-        self.add_game()
-        create_game(
-            GameCreate(
-                name="Elsewhere",
-                condition=VideoGameCondition.NEW,
-                console_label="Xbox 360",
-            ),
-            other,
-            self.db,
-        )
-
-        listed = list_consoles(self.collection, self.db).consoles
-
-        self.assertEqual(
-            [(c.id, c.game_count) for c in listed],
-            [(first.id, 2), (second.id, 2)],
-        )
 
     def test_label_list_only_includes_the_signed_in_users_labels(self) -> None:
         stranger = User(username="stranger", hashed_password="hash")

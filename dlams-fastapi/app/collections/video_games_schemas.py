@@ -25,7 +25,6 @@ class ConsoleResponse(BaseModel):
     label: str
     edition: str | None
     condition: VideoGameCondition
-    game_count: int
 
 
 class ConsoleListResponse(BaseModel):

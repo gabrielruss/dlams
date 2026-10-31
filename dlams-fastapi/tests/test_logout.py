@@ -1,5 +1,4 @@
 import unittest
-from types import SimpleNamespace
 from unittest.mock import patch
 
 from fastapi import Response
@@ -10,8 +9,7 @@ from app.auth.routes import logout
 class LogoutRouteTests(unittest.TestCase):
     def test_logout_clears_access_cookie(self) -> None:
         with patch("app.auth.routes.COOKIE_SECURE", True):
-            request = SimpleNamespace(cookies={}, method="POST")
-            response = logout(request, Response(), None)
+            response = logout(Response())
 
         self.assertEqual(response.status_code, 204)
         set_cookie = response.headers["set-cookie"]

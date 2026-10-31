@@ -1,6 +1,7 @@
 import { useRef } from "react"
 import { Controller } from "react-hook-form"
 
+import { Button } from "@/components/ui/button"
 import {
   Drawer,
   DrawerClose,
@@ -14,6 +15,7 @@ import type {
 import { videoGameConditions } from "@/types/videoGames"
 import { isVideoGameCondition } from "./videoGameOptions"
 import ConsoleLabelCombobox from "./ConsoleLabelCombobox"
+import ConsoleList from "./ConsoleList"
 import useConsoleLabels from "./useConsoleLabels"
 import useConsoleManager from "./useConsoleManager"
 
@@ -32,7 +34,8 @@ function ConsoleManager({
     form,
     editingId,
     formError,
-    listError,
+    deleteError,
+    isDeleting,
     isDrawerOpen,
     isSaving,
     resetForm,
@@ -43,6 +46,9 @@ function ConsoleManager({
   } = useConsoleManager({ collectionId })
   const consoleLabelOptions = useConsoleLabels(canWrite)
   const drawerRef = useRef<HTMLDivElement>(null)
+  const editingConsole = consoles.find(
+    (consoleRecord) => consoleRecord.id === editingId
+  )
   const label = form.watch("label")
 
   return (
@@ -170,63 +176,33 @@ function ConsoleManager({
               </button>
             </div>
               </form>
+              {editingConsole && (
+                <div className="mt-6 flex flex-col gap-2 border-t pt-4">
+                  {deleteError && (
+                    <p role="alert" className="text-sm text-destructive">
+                      {deleteError}
+                    </p>
+                  )}
+                  <Button
+                    className="border-destructive text-destructive"
+                    type="button"
+                    variant="outline"
+                    disabled={isDeleting}
+                    onClick={() => deleteConsole(editingConsole)}
+                  >
+                    {isDeleting ? "Deleting..." : "Delete console"}
+                  </Button>
+                </div>
+              )}
             </div>
           </DrawerContent>
         </Drawer>
       )}
 
-      {listError && (
-        <p role="alert" className="text-sm text-destructive">
-          {listError}
-        </p>
-      )}
-      {consoles.length === 0 ? (
-        <p className="text-sm text-muted-foreground">
-          No consoles in this collection yet.
-        </p>
-      ) : (
-        <ul className="divide-y">
-          {consoles.map((consoleRecord) => {
-            const name = consoleRecord.edition
-              ? `${consoleRecord.label} — ${consoleRecord.edition}`
-              : consoleRecord.label
-            return (
-              <li
-                key={consoleRecord.id}
-                className="flex flex-wrap items-center justify-between gap-2 py-3"
-              >
-                <div>
-                  <p className="font-medium">{name}</p>
-                  <p className="text-sm text-muted-foreground">
-                    {consoleRecord.condition} · {consoleRecord.game_count}{" "}
-                    {consoleRecord.game_count === 1 ? "game" : "games"}
-                  </p>
-                </div>
-                {canWrite && (
-                  <div className="flex gap-2">
-                    <button
-                      className="rounded-md border px-3 py-2 text-sm md:py-1"
-                      type="button"
-                      aria-label={`Edit ${name}`}
-                      onClick={() => editConsole(consoleRecord)}
-                    >
-                      Edit
-                    </button>
-                    <button
-                      className="rounded-md border px-3 py-2 text-sm md:py-1"
-                      type="button"
-                      aria-label={`Delete ${name}`}
-                      onClick={() => deleteConsole(consoleRecord)}
-                    >
-                      Delete
-                    </button>
-                  </div>
-                )}
-              </li>
-            )
-          })}
-        </ul>
-      )}
+      <ConsoleList
+        consoles={consoles}
+        onSelect={canWrite ? editConsole : undefined}
+      />
     </section>
   )
 }

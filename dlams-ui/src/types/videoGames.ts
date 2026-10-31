@@ -13,7 +13,6 @@ export interface ConsoleRecord {
   label: string
   edition: string | null
   condition: VideoGameCondition
-  game_count: number
 }
 
 export interface ConsoleLabel {

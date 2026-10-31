@@ -10,6 +10,7 @@ from sqlalchemy.orm import Session
 
 from app.collections.permissions import (
     get_collection_access,
+    get_owned_collection,
     get_readable_collection,
     get_writable_collection,
 )
@@ -122,21 +123,11 @@ class CollectionPermissionTests(unittest.TestCase):
         self.db.commit()
         request = GrantCreate(username="target")
 
-        result = create_grant(
-            request,
-            self.collection.id,
-            self.db,
-            self.owner,
-        )
+        result = create_grant(request, self.collection, self.db, self.owner)
         self.assertEqual(result.user_id, target.id)
 
         with self.assertRaises(HTTPException) as raised:
-            create_grant(
-                request,
-                self.collection.id,
-                self.db,
-                self.admin,
-            )
+            get_owned_collection(self.collection.id, self.db, self.admin)
         self.assertEqual(raised.exception.status_code, 404)
 
         with self.assertRaises(HTTPException) as raised:
