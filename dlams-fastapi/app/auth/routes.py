@@ -7,12 +7,12 @@ import hashlib
 import secrets
 from datetime import UTC, datetime, timedelta
 
-from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
+from fastapi import APIRouter, Depends, HTTPException, Response, status
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
-from app.auth.sandbox import create_sandbox, delete_sandbox, is_sandbox
+from app.auth.sandbox import create_sandbox
 from app.auth.schemas import (
     AuthResponse,
     LoginRequest,
@@ -192,20 +192,8 @@ def create_demo_session(
 
 
 @router.post("/logout", status_code=status.HTTP_204_NO_CONTENT)
-def logout(
-    request: Request,
-    response: Response,
-    db: Session = Depends(get_db),
-) -> Response:
-    """Clear the authentication cookie, deleting a demo session's account."""
-    try:
-        current_user = get_current_user(request, db)
-    except HTTPException:
-        current_user = None
-    if current_user is not None and is_sandbox(current_user):
-        delete_sandbox(db, current_user)
-        db.commit()
-
+def logout(response: Response) -> Response:
+    """Clear the authentication cookie for this browser session."""
     response.delete_cookie(
         key="access_token",
         httponly=True,

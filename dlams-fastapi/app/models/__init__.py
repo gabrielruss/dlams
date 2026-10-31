@@ -4,6 +4,7 @@ from app.models.collection import (
     Collection,
     CollectionAccess,
     CollectionGrant,
+    CollectionLink,
     CollectionType,
 )
 from app.models.user import RegistrationInvitation, User, UserRole
@@ -19,6 +20,7 @@ __all__ = [
     "Collection",
     "CollectionAccess",
     "CollectionGrant",
+    "CollectionLink",
     "CollectionType",
     "ConsoleLabel",
     "Game",

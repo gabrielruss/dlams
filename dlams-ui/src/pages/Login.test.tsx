@@ -67,6 +67,9 @@ describe("signing in", () => {
       http.get(`${api}/console-labels`, () =>
         HttpResponse.json({ labels: [] }),
       ),
+      http.get(`${api}/collections/1/links`, () =>
+        HttpResponse.json({ links: [] }),
+      ),
     )
 
     const { user } = renderApp("/")

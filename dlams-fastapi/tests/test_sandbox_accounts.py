@@ -1,13 +1,11 @@
 import os
 import unittest
 from datetime import UTC, datetime, timedelta
-from types import SimpleNamespace
 
 os.environ.setdefault("DATABASE_URL", "sqlite:///:memory:")
 os.environ.setdefault("SECRET_KEY", "test-only-secret")
 
 from fastapi import HTTPException, Response
-from jose import jwt
 from sqlalchemy import create_engine, func, select
 from sqlalchemy.orm import Session
 
@@ -15,21 +13,21 @@ from app.auth.admin_routes import set_user_role
 from app.auth.routes import create_demo_session, logout
 from app.auth.sandbox import MAX_SANDBOXES, create_sandbox
 from app.auth.schemas import AdminUserRoleUpdate
-from app.auth.utils import ALGORITHM
 from app.collections.permissions import get_writable_collection
 from app.collections.routes import (
     create_collection,
     create_grant,
+    create_link,
     delete_grant,
     list_grants,
 )
-from app.collections.schemas import CollectionCreate, GrantCreate
+from app.collections.schemas import CollectionCreate, GrantCreate, LinkCreate
 from app.collections.video_games_routes import create_game, delete_game
 from app.collections.video_games_schemas import GameCreate
-from app.config import SECRET_KEY
 from app.db import Base
 from app.models import (
     Collection,
+    CollectionLink,
     Console,
     ConsoleLabel,
     Game,
@@ -138,9 +136,18 @@ class SandboxAccountTests(unittest.TestCase):
         ).all()
         self.assertEqual(set(game_labels), {labels[0].id})
 
-    def test_refuses_a_sandbox_beyond_the_limit(self) -> None:
-        for _ in range(MAX_SANDBOXES):
-            create_sandbox(self.db)
+    def age(self, sandbox: User, **delta) -> None:
+        sandbox.created_at = datetime.now(UTC).replace(tzinfo=None) - timedelta(**delta)
+        self.db.commit()
+
+    def share(self, sandbox: User) -> None:
+        create_link(LinkCreate(name=None), self.sandbox_collection(sandbox), self.db)
+
+    def fill_slots(self) -> list[User]:
+        return [create_sandbox(self.db) for _ in range(MAX_SANDBOXES)]
+
+    def test_the_demo_is_busy_when_every_sandbox_is_mid_session(self) -> None:
+        self.fill_slots()
 
         with self.assertRaises(HTTPException) as raised:
             create_sandbox(self.db)
@@ -148,21 +155,53 @@ class SandboxAccountTests(unittest.TestCase):
         self.assertEqual(raised.exception.status_code, 503)
         self.assertEqual(self.count(User, User.role == UserRole.SANDBOX.value), 10)
 
-    def test_deletes_expired_sandboxes_before_creating_one(self) -> None:
+    def test_a_full_demo_replaces_the_oldest_finished_sandbox_without_links(
+        self,
+    ) -> None:
+        sandboxes = self.fill_slots()
+        oldest_with_link, older, newer = sandboxes[:3]
+        self.age(oldest_with_link, hours=5)
+        self.share(oldest_with_link)
+        self.age(older, hours=2)
+        self.age(newer, hours=1)
+        replaced, kept = older.username, oldest_with_link.username
+
+        create_sandbox(self.db)
+
+        self.assertEqual(self.count(User, User.username == replaced), 0)
+        self.assertEqual(self.count(User, User.username == kept), 1)
+        self.assertEqual(self.count(User, User.role == UserRole.SANDBOX.value), 10)
+
+    def test_a_full_demo_replaces_a_sandbox_with_links_as_a_last_resort(
+        self,
+    ) -> None:
+        sandboxes = self.fill_slots()
+        older, newer = sandboxes[:2]
+        for sandbox, hours in ((older, 3), (newer, 2)):
+            self.age(sandbox, hours=hours)
+            self.share(sandbox)
+        replaced = older.username
+
+        create_sandbox(self.db)
+
+        self.assertEqual(self.count(User, User.username == replaced), 0)
+        self.assertEqual(self.count(User, User.username == newer.username), 1)
+        self.assertEqual(self.count(CollectionLink), 1)
+
+    def test_deletes_sandboxes_older_than_seven_days(self) -> None:
         expired = create_sandbox(self.db)
-        expired.created_at = datetime.now(UTC).replace(tzinfo=None) - timedelta(
-            minutes=31
-        )
-        self.db.commit()
+        finished = create_sandbox(self.db)
+        self.age(expired, days=7, minutes=1)
+        self.age(finished, hours=1)
         expired_username = expired.username
 
         create_sandbox(self.db)
 
         self.assertEqual(self.count(User, User.username == expired_username), 0)
-        self.assertEqual(self.count(User, User.role == UserRole.SANDBOX.value), 1)
-        self.assertEqual(self.count(Collection), 2)
-        self.assertEqual(self.count(ConsoleLabel), 2)
-        self.assertEqual(self.count(Game), 4)
+        self.assertEqual(self.count(User, User.username == finished.username), 1)
+        self.assertEqual(self.count(User, User.role == UserRole.SANDBOX.value), 2)
+        self.assertEqual(self.count(Collection), 3)
+        self.assertEqual(self.count(Game), 6)
 
     def test_fails_clearly_without_a_template(self) -> None:
         self.template.role = UserRole.USER.value
@@ -210,10 +249,10 @@ class SandboxAccountTests(unittest.TestCase):
 
         for attempt in (
             lambda: create_grant(
-                GrantCreate(username="member"), collection.id, self.db, sandbox
+                GrantCreate(username="member"), collection, self.db, sandbox
             ),
-            lambda: list_grants(collection.id, self.db, sandbox),
-            lambda: delete_grant(collection.id, self.member.id, self.db, sandbox),
+            lambda: list_grants(collection, self.db, sandbox),
+            lambda: delete_grant(self.member.id, collection, self.db, sandbox),
         ):
             with self.assertRaises(HTTPException) as raised:
                 attempt()
@@ -228,7 +267,7 @@ class SandboxAccountTests(unittest.TestCase):
         with self.assertRaises(HTTPException) as raised:
             create_grant(
                 GrantCreate(username=sandbox.username),
-                collection.id,
+                collection,
                 self.db,
                 self.member,
             )
@@ -258,26 +297,14 @@ class SandboxAccountTests(unittest.TestCase):
 
         self.assertEqual(raised.exception.status_code, 404)
 
-    def test_signing_out_deletes_the_sandbox(self) -> None:
+    def test_signing_out_keeps_the_sandbox_and_its_links(self) -> None:
         sandbox = create_sandbox(self.db)
-        sandbox_id = sandbox.id
-        token = jwt.encode(
-            {
-                "sub": sandbox.username,
-                "exp": datetime.now(UTC) + timedelta(minutes=5),
-            },
-            SECRET_KEY,
-            algorithm=ALGORITHM,
-        )
-        request = SimpleNamespace(cookies={"access_token": token}, method="POST")
+        self.share(sandbox)
 
-        logout(request, Response(), self.db)
+        logout(Response())
 
-        self.assertEqual(self.count(User, User.id == sandbox_id), 0)
-        self.assertEqual(self.count(Collection, Collection.owner_id == sandbox_id), 0)
-        self.assertEqual(
-            self.count(Game, Game.collection_id == self.template_collection.id), 2
-        )
+        self.assertEqual(self.count(User, User.id == sandbox.id), 1)
+        self.assertEqual(self.count(CollectionLink), 1)
 
     def test_an_admin_cannot_change_a_sandbox_role(self) -> None:
         sandbox = create_sandbox(self.db)

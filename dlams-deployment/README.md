@@ -304,9 +304,12 @@ Nobody signs into the template during a demo.
 the template's collections, labels, consoles, and games into a temporary
 `sandbox` account and signs the visitor in as it. The visitor can add, edit,
 and delete in that copy (up to 3 collections and 30 consoles and games,
-copied ones included) but cannot share. A sandbox is deleted when the visitor
-signs out, or by the next "Try the demo" click once its 30-minute session has
-ended. At most 10 exist at once; the 11th visitor is told the demo is busy.
+copied ones included) and can share collections by read-only link, but not
+with other users. The visitor's session lasts 30 minutes and nobody can sign
+back into a sandbox; it stays for 7 days so its links keep working, then the
+next "Try the demo" click deletes it. At most 10 exist at once: a new visitor
+replaces the oldest sandbox whose session is over (one without links first),
+and is told the demo is busy only if all 10 are mid-session.
 
 Provision the template once on production, signed in as an admin:
 
@@ -322,8 +325,9 @@ Provision the template once on production, signed in as an admin:
    choose "Make template" on the `demo-user` row.
 4. **Verify as a visitor.** In a private window, click "Try the demo". You
    should land in a copy of the collection with add, edit, and delete
-   controls and a note that the session ends after 30 minutes. Sign out, and
-   the sandbox account should disappear from "Manage users".
+   controls and the demo session note. The sandbox account appears in
+   "Manage users"; signing out leaves it there until it is replaced or 7
+   days pass.
 
 Things to know:
 

@@ -1,4 +1,6 @@
+import { canWriteCollection } from "@/lib/permissions"
 import { resolveCollectionWorkspace } from "./collectionWorkspaceResolver"
+import ShareCollectionDrawer from "./ShareCollectionDrawer"
 import useCollections from "./useCollections"
 
 function CollectionWorkspace() {
@@ -7,12 +9,17 @@ function CollectionWorkspace() {
   const SelectedWorkspace = collection
     ? resolveCollectionWorkspace(collection.type)
     : undefined
+  const canShare =
+    collection !== undefined && canWriteCollection(collection.access)
 
   return (
     <section className="flex flex-col gap-5">
-      <h1 className="text-2xl font-semibold md:text-3xl">
-        {collection?.name ?? "Your collections"}
-      </h1>
+      <header className="flex flex-wrap items-center justify-between gap-3">
+        <h1 className="text-2xl font-semibold md:text-3xl">
+          {collection?.name ?? "Your collections"}
+        </h1>
+        {canShare && <ShareCollectionDrawer collection={collection} />}
+      </header>
       {collectionsQuery.isError && (
         <p
           role="alert"

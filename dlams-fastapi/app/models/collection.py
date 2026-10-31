@@ -1,9 +1,11 @@
 """Collection models and the access levels a user can have to one."""
 
+from datetime import UTC, datetime
 from enum import Enum
 
 from sqlalchemy import (
     CheckConstraint,
+    DateTime,
     ForeignKey,
     String,
     UniqueConstraint,
@@ -74,4 +76,24 @@ class CollectionGrant(Base):
         ForeignKey("users.id", ondelete="CASCADE"),
         nullable=False,
         index=True,
+    )
+
+
+class CollectionLink(Base):
+    """A read-only share link to a collection, opened by its token."""
+
+    __tablename__ = "collection_links"
+
+    id: Mapped[int] = mapped_column(primary_key=True, index=True)
+    collection_id: Mapped[int] = mapped_column(
+        ForeignKey("collections.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    name: Mapped[str | None] = mapped_column(String(50), nullable=True)
+    token: Mapped[str] = mapped_column(String(32), unique=True, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+        default=lambda: datetime.now(UTC),
     )

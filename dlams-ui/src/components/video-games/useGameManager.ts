@@ -62,6 +62,7 @@ function useGameManager({ collectionId }: UseGameManagerOptions) {
     setEditingId(null)
     setIsDrawerOpen(false)
     saveMutation.reset()
+    deleteMutation.reset()
   }
 
   const saveGame = (values: GameFormValues) => {
@@ -99,14 +100,15 @@ function useGameManager({ collectionId }: UseGameManagerOptions) {
   const deleteGame = (game: GameRecord) => {
     if (!window.confirm(`Delete "${game.name}"? This cannot be undone.`)) return
     deleteMutation.reset()
-    deleteMutation.mutate(game.id)
+    deleteMutation.mutate(game.id, { onSuccess: resetForm })
   }
 
   return {
     form,
     editingId,
     formError: saveMutation.error?.message ?? null,
-    listError: deleteMutation.error?.message ?? null,
+    deleteError: deleteMutation.error?.message ?? null,
+    isDeleting: deleteMutation.isPending,
     isDrawerOpen,
     isSaving: saveMutation.isPending,
     resetForm,

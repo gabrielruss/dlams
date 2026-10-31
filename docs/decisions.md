@@ -131,6 +131,58 @@ replaces it is named. Proposals and open questions live in
 
 ## Accounts and access
 
+### Sharing by link, and seven-day demo sandboxes — 2026-10-30
+Built 2026-10-30, not deployed: share links, the link page, and seven-day
+sandboxes. Build steps are item 8 in `DLAMS-PLAN.md`.
+- **Read-only links only, to start** (owner, same day). Sharing with a user
+  by username has an API (grants) but no screen; a People section was built
+  and removed before it shipped, to start simple and to avoid the username
+  lookup questions (whether a failed lookup reveals which accounts exist).
+  A collection can have up to 5 links, each named when it is created, so one
+  person's link can be ended without breaking the others. Link access is
+  always read-only. A link is ended by deleting it: "Delete link", then a
+  confirm button labeled "Don't Look At My Stuff"; there is no on/off switch. The token is random
+  (128 bits). Links are deleted with their collection.
+- **A Share button** on the selected collection's heading, shown only to its
+  owner, opens a drawer for that collection: read-only links first (a "Create
+  read-only link" button with an inline name field, then each link with a
+  copy button and a delete button, confirmed inline. Sandboxes get
+  the same drawer. A separate
+  page was considered and rejected: sharing one collection is a small task,
+  and forms already open in drawers.
+- **The link page** needs no account and shows a single read-only collection:
+  the sidebar holds only that collection's name, type, and counts, with no
+  buttons and no sharing controls. A message says the view is read-only. A
+  deleted link says only that it is no longer active. Link pages are
+  rate-limited, not indexed by search engines, and do not pass the URL on as
+  a referrer. The page is its own small component that renders the existing
+  console and game lists with writing off; it sits outside the sign-in check.
+  Link access is one public route that looks the token up; it is not an
+  access level in the permission code.
+- **Read-only first.** A People section, owners inviting people, and
+  contributor (edit) access for shared users are later ideas; the link page's message changes if they
+  ship. Reviving edit access would reverse "All sharing is read-only".
+- **Sandboxes last 7 days** from creation, then are deleted, full stop. At
+  most 10 exist. When a new demo needs a slot, the oldest sandbox whose
+  30-minute session is over and that has no links is deleted; failing that,
+  the oldest whose session is over (its links stop working); if all 10 are
+  mid-session, the demo is busy. Signing out no longer deletes a sandbox, and
+  nobody can sign back into one, so after its session it is frozen and only
+  its links still show it. The demo notice says so.
+- **Sandboxes share by link only,** never with real users, and no one shares
+  with them.
+- **Cut to keep the code simple** (owner, same day): a "keep this account"
+  resume link (a second, password-less way to sign in; deferred), "last
+  opened" on links, and ranking sandboxes by recent link views. A "keep in my
+  sidebar" option for link viewers was rejected as too complicated.
+- Reason: the owner wants sharing to be a nice experience for real users, and
+  the demo to run the same code with temporary data, so a visitor can share a
+  link that still works the next day. The owner prefers fewer features over
+  messy code.
+- **Revises** "Demo sessions" (below): the 30-minute lifetime, deletion on
+  sign-out, and the 503 at 10 sandboxes change. **Replaces** the on-hold demo
+  sharing walkthrough (plan item 10).
+
 ### Demo sessions: a temporary sandbox account per visitor — 2026-10-29
 - "Try the demo" calls `POST /demo-sessions`, which needs no sign-in. It
   deletes expired sandboxes, refuses with 503 when 10 are active, copies the
@@ -144,7 +196,8 @@ replaces it is named. Proposals and open questions live in
   template, because writes need ownership.
 - A sandbox lasts one session (30 minutes). It is deleted on sign-out, or by
   the next "Try the demo" click after it expires, so no scheduled job is
-  needed. Deletion removes games, consoles, collections, labels, and then the
+  needed. **Revised 2026-10-30:** it now stays 7 days and sign-out keeps it
+  (see "Sharing by link, and seven-day demo sandboxes"). Deletion removes games, consoles, collections, labels, and then the
   user, because consoles and games reference labels with `RESTRICT`.
 - The template is maintained by hand (its role is renamed `template`, below).
   Its password is no longer public: the `VITE_DEMO_*` build variables and the
@@ -361,6 +414,11 @@ replaces it is named. Proposals and open questions live in
   console's game count is the number of games with its label across all of the
   owner's collections (changed 2026-10-17; it counted only its own collection),
   so every console with that label shows the same number.
+  **Removed 2026-10-30** (owner): consoles no longer carry a game count in
+  the API or the UI; per-item numbers mixed an inventory list with
+  statistics. A stats area is a later roadmap item (plan item 10c). The
+  same day, a split count ("1 game here, 2 in other collections", the other
+  number for the owner only) was built and then removed with it.
 - Deferred, not rejected: a rename-label action (the link from items to
   labels is a real foreign key, so a rename would update every item), and a
   small screen to manage labels.
@@ -398,12 +456,26 @@ replaces it is named. Proposals and open questions live in
 - Deleting a console edition is allowed while another edition of the same
   label remains; deleting the last edition is blocked while games use the
   label. Game deletion asks for confirmation.
-- Duplicate game and console names are allowed within a collection. A console
-  game count is derived, never stored.
+- Duplicate game and console names are allowed within a collection.
 - The module is named `video_games` (not `catalog`) to avoid implying a
   shared reference catalog.
 
 ## Code and UI conventions
+
+### List rows open the editor; Delete lives in the drawer — 2026-10-30
+- Console and game rows have no buttons. For an owner, the whole row is one
+  button (named "Edit <item>" for screen readers, with a chevron and a hover
+  tint) that opens the edit drawer. The drawer ends with a red-outlined
+  "Delete console" / "Delete game", set apart by a rule, shown only when
+  editing an existing item; it still asks the browser to confirm, and a
+  successful delete closes the drawer.
+- Reason: side-by-side Edit and Delete under every row (tried the same day,
+  half width each) doubled each row's height, repeated two large buttons
+  down the list, and gave Delete the same weight as Edit. Tapping the row
+  is the common list pattern (iOS, Material) and keeps the destructive
+  action one deliberate step away.
+- `ConsoleList`, `GameList`, and `ListRow` render the rows; the read-only
+  link page uses the same lists without `onSelect`.
 
 ### Login branding: backdrop text, two fonts, two brand colors — 2026-10-18
 - The login page shows "DON'T LOOK AT MY STUFF" as a faint full-screen
