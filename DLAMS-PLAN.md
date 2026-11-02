@@ -706,8 +706,13 @@ is next, then the sharing UI, then search.
    match."); sidebar counts stay totals. 3 new tests. With this, search
    (8a) is built; it ships with the next push. The share page filters in
    place instead of reusing `SearchResults` (signed-in data, URL state,
-   and click-through would each have needed a switch); the owner may
-   revisit how the logged-out search looks later. The searchable fields
+   and click-through would each have needed a switch). A results panel
+   there was considered and dropped (owner, 2026-11-02): a visitor cannot
+   open anything, so a list of results adds nothing over filtering. Revisit
+   if items get a read-only "view more" detail view, since then results
+   would have somewhere to go; the plan then is one display-only
+   `SearchResultsPanel` rendered by both pages, with separate logic in
+   each. The searchable fields
    per type are written twice, in `video_games_items.py` and in
    `consoleSearchable` / `gameSearchable`; keep them in step, and expect
    each new item type (item 11) to add both.
@@ -791,7 +796,16 @@ is next, then the sharing UI, then search.
    the collection list and stats queries are invalidated. Where the
    controls sit (the collection heading beside Share, or the sidebar row)
    is a styling question for the owner.
-8c. **Gzip in Nginx. Done** (deployed 2026-11-01, `e4366a2`). `gzip on` in
+   **API built 2026-11-02 (branch `edit-delete-collection`, uncommitted):**
+   `PUT /collections/{id}` renames (`CollectionUpdate`, `name` only,
+   `extra="forbid"`, trimmed, blank is 422) and `DELETE /collections/{id}`
+   deletes the links, grants, games, and consoles explicitly, then the
+   collection, then the owner's labels its items used that nothing else
+   uses now. Both depend on `WritableCollection`. 7 tests in
+   `test_collection_edit_delete.py`. Next layer: the UI data layer
+   (API functions and mutations, invalidating the collection list, stats,
+   `itemKeys.all`, and console labels), then the controls. The UI must
+   also invalidate `itemKeys.all` (search) on rename and delete. **Gzip in Nginx. Done** (deployed 2026-11-01, `e4366a2`). `gzip on` in
    the `http` block of `nginx.conf` for JSON, JS, CSS, and SVG (HTML is
    always included), over 1 KB, level 5, with `Vary: Accept-Encoding` and
    proxied responses included. `nginx -t` passed locally. The deploy did

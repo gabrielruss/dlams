@@ -3,7 +3,7 @@
 import secrets
 
 from fastapi import APIRouter, HTTPException, status
-from sqlalchemy import func, select
+from sqlalchemy import delete, exists, func, select
 
 from app.auth.sandbox import (
     check_collection_limit,
@@ -11,11 +11,16 @@ from app.auth.sandbox import (
     reject_sandbox_sharing,
 )
 from app.auth.utils import CurrentUser
-from app.collections.permissions import CollectionWithAccess, OwnedCollection
+from app.collections.permissions import (
+    CollectionWithAccess,
+    OwnedCollection,
+    WritableCollection,
+)
 from app.collections.schemas import (
     CollectionCreate,
     CollectionListResponse,
     CollectionResponse,
+    CollectionUpdate,
     GrantCreate,
     GrantListResponse,
     GrantResponse,
@@ -29,6 +34,9 @@ from app.models import (
     CollectionGrant,
     CollectionLink,
     CollectionType,
+    Console,
+    ConsoleLabel,
+    Game,
     User,
 )
 from app.utils import DbSession
@@ -103,6 +111,57 @@ def list_collections(
 def read_collection(found: CollectionWithAccess) -> CollectionResponse:
     collection, access = found
     return _collection_response(collection, access)
+
+
+@router.put("/{collection_id}", response_model=CollectionResponse)
+def update_collection(
+    request: CollectionUpdate,
+    collection: WritableCollection,
+    db: DbSession,
+) -> CollectionResponse:
+    name = request.name.strip()
+    if not name:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="Collection name cannot be blank",
+        )
+    collection.name = name
+    db.commit()
+    db.refresh(collection)
+    return _collection_response(collection, CollectionAccess.OWNER)
+
+
+@router.delete("/{collection_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_collection(collection: WritableCollection, db: DbSession) -> None:
+    label_ids = set(
+        db.scalars(
+            select(Console.console_label_id).where(
+                Console.collection_id == collection.id
+            )
+        ).all()
+    ) | set(
+        db.scalars(
+            select(Game.console_label_id).where(Game.collection_id == collection.id)
+        ).all()
+    )
+    db.execute(
+        delete(CollectionLink).where(CollectionLink.collection_id == collection.id)
+    )
+    db.execute(
+        delete(CollectionGrant).where(CollectionGrant.collection_id == collection.id)
+    )
+    db.execute(delete(Game).where(Game.collection_id == collection.id))
+    db.execute(delete(Console).where(Console.collection_id == collection.id))
+    db.delete(collection)
+    if label_ids:
+        db.execute(
+            delete(ConsoleLabel).where(
+                ConsoleLabel.id.in_(label_ids),
+                ~exists().where(Console.console_label_id == ConsoleLabel.id),
+                ~exists().where(Game.console_label_id == ConsoleLabel.id),
+            )
+        )
+    db.commit()
 
 
 @router.post(

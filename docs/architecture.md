@@ -192,6 +192,7 @@ the edge).
 | Invitations | `POST /invitations` | admin |
 | Admin users | `GET /admin/users`, `POST /admin/users/{id}/deactivate`, `POST /admin/users/{id}/activate`, `PUT /admin/users/{id}/role` (`user` or `template`), `PUT /admin/users/{id}/password` | admin; role and deactivate never on yourself or another admin; password on yourself but never another admin; never a sandbox |
 | Collections | `POST /collections`, `GET /collections`, `GET /collections/{id}` | signed-in; list includes owned and granted |
+| Edit and delete collections | `PUT /collections/{id}` (rename; body `name` only), `DELETE /collections/{id}` (also deletes its consoles, games, grants, and share links, then any of the owner's console labels nothing else uses) | collection owner, sandboxes included; a grant reader gets 403 |
 | Sharing | `GET`, `POST` (by username), `DELETE` under `/collections/{id}/grants` | collection owner; never a sandbox (no UI yet) |
 | Share links | `GET`, `POST` (optional `name`), `DELETE /{link_id}` under `/collections/{id}/links` | collection owner, sandboxes included |
 | Shared collection | `GET /shared/{token}`: the collection's name, type, consoles, and games; nothing about the owner. 404 "This link is no longer active." | public (no sign-in) |
