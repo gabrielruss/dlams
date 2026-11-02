@@ -1,7 +1,8 @@
-import { useState } from "react"
+import { useCallback } from "react"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { useForm } from "react-hook-form"
 
+import useItemEditor from "@/components/collections/useItemEditor"
 import { gamesApi } from "@/lib/api/games"
 import type {
   GameCreate,
@@ -21,9 +22,18 @@ interface GameFormValues {
 
 interface UseGameManagerOptions {
   collectionId: number
+  games: GameRecord[]
 }
 
-function useGameManager({ collectionId }: UseGameManagerOptions) {
+const gameFormValues = (game: GameRecord): GameFormValues => ({
+  name: game.name,
+  condition: game.condition,
+  consoleLabel: game.console_label,
+  lastPlayed: game.last_played ?? "",
+  completed: game.completed,
+})
+
+function useGameManager({ collectionId, games }: UseGameManagerOptions) {
   const queryClient = useQueryClient()
   const form = useForm<GameFormValues>({
     defaultValues: {
@@ -34,36 +44,34 @@ function useGameManager({ collectionId }: UseGameManagerOptions) {
       completed: false,
     },
   })
-  const [editingId, setEditingId] = useState<number | null>(null)
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false)
 
   const saveMutation = useMutation({
-    mutationFn: ({
-      id,
-      data,
-    }: {
-      id: number | null
-      data: GameCreate
-    }) =>
+    mutationFn: ({ id, data }: { id: number | null; data: GameCreate }) =>
       id === null
         ? gamesApi.create(collectionId, data)
         : gamesApi.update(collectionId, id, data),
-    onSuccess: () =>
-      invalidateVideoGameCollection(queryClient, collectionId),
+    onSuccess: () => invalidateVideoGameCollection(queryClient, collectionId),
   })
   const deleteMutation = useMutation({
     mutationFn: (gameId: number) => gamesApi.delete(collectionId, gameId),
-    onSuccess: () =>
-      invalidateVideoGameCollection(queryClient, collectionId),
+    onSuccess: () => invalidateVideoGameCollection(queryClient, collectionId),
   })
 
-  const resetForm = () => {
-    form.reset()
-    setEditingId(null)
-    setIsDrawerOpen(false)
-    saveMutation.reset()
-    deleteMutation.reset()
-  }
+  const { reset: resetSave } = saveMutation
+  const { reset: resetDelete } = deleteMutation
+  const clearErrors = useCallback(() => {
+    resetSave()
+    resetDelete()
+  }, [resetSave, resetDelete])
+
+  const { editingItem, editingId, isEditorOpen, edit, startNew, close } =
+    useItemEditor({
+      type: "game",
+      items: games,
+      form,
+      toFormValues: gameFormValues,
+      onReset: clearErrors,
+    })
 
   const saveGame = (values: GameFormValues) => {
     const data: GameCreate = {
@@ -73,48 +81,28 @@ function useGameManager({ collectionId }: UseGameManagerOptions) {
       last_played: values.lastPlayed || null,
       completed: values.completed,
     }
-    saveMutation.mutate(
-      { id: editingId, data },
-      { onSuccess: resetForm }
-    )
-  }
-
-  const editGame = (game: GameRecord) => {
-    setEditingId(game.id)
-    form.reset({
-      name: game.name,
-      condition: game.condition,
-      consoleLabel: game.console_label,
-      lastPlayed: game.last_played ?? "",
-      completed: game.completed,
-    })
-    saveMutation.reset()
-    setIsDrawerOpen(true)
-  }
-
-  const startNewGame = () => {
-    resetForm()
-    setIsDrawerOpen(true)
+    saveMutation.mutate({ id: editingId, data }, { onSuccess: close })
   }
 
   const deleteGame = (game: GameRecord) => {
     if (!window.confirm(`Delete "${game.name}"? This cannot be undone.`)) return
     deleteMutation.reset()
-    deleteMutation.mutate(game.id, { onSuccess: resetForm })
+    deleteMutation.mutate(game.id, { onSuccess: close })
   }
 
   return {
     form,
     editingId,
+    editingGame: editingItem,
     formError: saveMutation.error?.message ?? null,
     deleteError: deleteMutation.error?.message ?? null,
     isDeleting: deleteMutation.isPending,
-    isDrawerOpen,
+    isDrawerOpen: isEditorOpen,
     isSaving: saveMutation.isPending,
-    resetForm,
+    resetForm: close,
     saveGame,
-    editGame,
-    startNewGame,
+    editGame: edit,
+    startNewGame: startNew,
     deleteGame,
     isVideoGameCondition,
   }

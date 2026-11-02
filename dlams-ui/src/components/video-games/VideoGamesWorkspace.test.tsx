@@ -99,6 +99,46 @@ describe("video game collection access", () => {
     ).toBeInTheDocument()
   })
 
+  it("opens an item's drawer from the URL", async () => {
+    signInWithCollection("owner")
+
+    renderApp("/?collection=1&item=console-1")
+
+    const drawer = await screen.findByRole("dialog")
+    expect(
+      within(drawer).getByRole("heading", { name: "Edit console" })
+    ).toBeInTheDocument()
+    expect(within(drawer).getByLabelText("Edition / details")).toHaveValue(
+      "Original White"
+    )
+  })
+
+  it("opens nothing for an item that is not in the collection", async () => {
+    signInWithCollection("owner")
+
+    renderApp("/?collection=1&item=game-99")
+
+    expect(await screen.findByText("Halo 3")).toBeInTheDocument()
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument()
+  })
+
+  it("closes an item's drawer and keeps the collection", async () => {
+    signInWithCollection("owner")
+
+    const { user } = renderApp("/")
+    await user.click(await screen.findByRole("button", { name: "Edit Halo 3" }))
+    const drawer = await screen.findByRole("dialog")
+    within(drawer).getByRole("button", { name: "Close drawer" }).focus()
+    await user.keyboard("{Enter}")
+
+    await waitFor(() =>
+      expect(screen.queryByRole("dialog")).not.toBeInTheDocument()
+    )
+    expect(
+      screen.getByRole("heading", { name: "Retro game shelf" })
+    ).toBeInTheDocument()
+  })
+
   it("deletes a game from its drawer after confirming", async () => {
     signInWithCollection("owner")
     let deleted = false

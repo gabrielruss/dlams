@@ -1,7 +1,8 @@
-import { useState } from "react"
+import { useCallback } from "react"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { useForm } from "react-hook-form"
 
+import useItemEditor from "@/components/collections/useItemEditor"
 import { consolesApi } from "@/lib/api/consoles"
 import type {
   ConsoleCreate,
@@ -18,44 +19,54 @@ interface ConsoleFormValues {
 
 interface UseConsoleManagerOptions {
   collectionId: number
+  consoles: ConsoleRecord[]
 }
 
-function useConsoleManager({ collectionId }: UseConsoleManagerOptions) {
+const consoleFormValues = (
+  consoleRecord: ConsoleRecord,
+): ConsoleFormValues => ({
+  label: consoleRecord.label,
+  edition: consoleRecord.edition ?? "",
+  condition: consoleRecord.condition,
+})
+
+function useConsoleManager({
+  collectionId,
+  consoles,
+}: UseConsoleManagerOptions) {
   const queryClient = useQueryClient()
   const form = useForm<ConsoleFormValues>({
     defaultValues: { label: "", edition: "", condition: "Loose" },
   })
-  const [editingId, setEditingId] = useState<number | null>(null)
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false)
 
   const saveMutation = useMutation({
-    mutationFn: ({
-      id,
-      data,
-    }: {
-      id: number | null
-      data: ConsoleCreate
-    }) =>
+    mutationFn: ({ id, data }: { id: number | null; data: ConsoleCreate }) =>
       id === null
         ? consolesApi.create(collectionId, data)
         : consolesApi.update(collectionId, id, data),
-    onSuccess: () =>
-      invalidateVideoGameCollection(queryClient, collectionId),
+    onSuccess: () => invalidateVideoGameCollection(queryClient, collectionId),
   })
   const deleteMutation = useMutation({
     mutationFn: (consoleId: number) =>
       consolesApi.delete(collectionId, consoleId),
-    onSuccess: () =>
-      invalidateVideoGameCollection(queryClient, collectionId),
+    onSuccess: () => invalidateVideoGameCollection(queryClient, collectionId),
   })
 
-  const resetForm = () => {
-    form.reset()
-    setEditingId(null)
-    setIsDrawerOpen(false)
-    saveMutation.reset()
-    deleteMutation.reset()
-  }
+  const { reset: resetSave } = saveMutation
+  const { reset: resetDelete } = deleteMutation
+  const clearErrors = useCallback(() => {
+    resetSave()
+    resetDelete()
+  }, [resetSave, resetDelete])
+
+  const { editingItem, editingId, isEditorOpen, edit, startNew, close } =
+    useItemEditor({
+      type: "console",
+      items: consoles,
+      form,
+      toFormValues: consoleFormValues,
+      onReset: clearErrors,
+    })
 
   const saveConsole = (values: ConsoleFormValues) => {
     const data: ConsoleCreate = {
@@ -63,28 +74,7 @@ function useConsoleManager({ collectionId }: UseConsoleManagerOptions) {
       edition: values.edition.trim() || null,
       condition: values.condition,
     }
-    saveMutation.mutate(
-      { id: editingId, data },
-      { onSuccess: resetForm }
-    )
-  }
-
-  const editConsole = (consoleRecord: ConsoleRecord) => {
-    setEditingId(consoleRecord.id)
-    form.reset({
-      label: consoleRecord.label,
-      edition: consoleRecord.edition ?? "",
-      condition: consoleRecord.condition,
-    })
-    saveMutation.reset()
-    setIsDrawerOpen(true)
-  }
-
-  const startNewConsole = () => {
-    form.reset()
-    setEditingId(null)
-    saveMutation.reset()
-    setIsDrawerOpen(true)
+    saveMutation.mutate({ id: editingId, data }, { onSuccess: close })
   }
 
   const deleteConsole = (consoleRecord: ConsoleRecord) => {
@@ -93,21 +83,22 @@ function useConsoleManager({ collectionId }: UseConsoleManagerOptions) {
       : consoleRecord.label
     if (!window.confirm(`Delete ${description}?`)) return
     deleteMutation.reset()
-    deleteMutation.mutate(consoleRecord.id, { onSuccess: resetForm })
+    deleteMutation.mutate(consoleRecord.id, { onSuccess: close })
   }
 
   return {
     form,
     editingId,
+    editingConsole: editingItem,
     formError: saveMutation.error?.message ?? null,
     deleteError: deleteMutation.error?.message ?? null,
     isDeleting: deleteMutation.isPending,
-    isDrawerOpen,
+    isDrawerOpen: isEditorOpen,
     isSaving: saveMutation.isPending,
-    resetForm,
+    resetForm: close,
     saveConsole,
-    editConsole,
-    startNewConsole,
+    editConsole: edit,
+    startNewConsole: startNew,
     deleteConsole,
   }
 }

@@ -41,6 +41,7 @@ Versions are the declared ranges from `dlams-ui/package.json` and
 | Styling | Tailwind CSS 4 (`@tailwindcss/vite`), `tw-animate-css`, `tailwind-merge`, `clsx`, `class-variance-authority`, `cn` |
 | Components | shadcn/ui pattern over Radix (`@radix-ui/react-label`, `@radix-ui/react-slot`, and the `radix-ui` umbrella package that newer generated components import) and Base UI (`@base-ui/react`, used by the Combobox), `vaul` (drawers), `lucide-react` (icons) |
 | Lint | ESLint 9 with `typescript-eslint`, `react-hooks`, `react-refresh` (its export rule is off under `src/components/ui/`, where the shadcn CLI writes files) |
+| Format | Prettier 3, pinned (`.prettierrc`: no semicolons; `src/components/ui/` ignored) |
 
 There is no client-side store library: server state is TanStack Query, and
 the selected collection is in the URL.

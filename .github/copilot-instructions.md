@@ -63,6 +63,11 @@ Applies across the DLAMS workspace. Project-local conventions take precedence wh
 
 - Frontend build (from `dlams-ui/`): `npm run build`
 - Frontend lint (from `dlams-ui/`): `npm run lint`
+- Frontend format (from `dlams-ui/`): `npm run format:check`, or
+  `npm run format` to apply. Prettier (pinned in `devDependencies`, config
+  in `.prettierrc`, generated `src/components/ui/` ignored) is also what
+  VS Code formats with on save, and a Claude Code hook
+  (`.claude/hooks/prettier-format.sh`) formats each edited UI file.
 - Hybrid host UI (from `dlams-ui/`): `npm run dev:hybrid`
 - Frontend tests (from `dlams-ui/`): `npm test` (Vitest, one run) or
   `npm run test:watch`. Tests sit beside the code as `*.test.tsx`. Use
@@ -136,7 +141,10 @@ cached copy.
   installed component fits, give the owner the install command and wait.
   Destructive final actions are `<Button variant="outline"
   className="border-destructive text-destructive">`, not the solid
-  `destructive` variant.
+  `destructive` variant. Deleting an item from its edit drawer starts with a
+  red trash-can icon (`variant="ghost" size="icon"`, `text-destructive`,
+  `aria-label` and `title` "Delete <type>") at the top right of the item
+  area, never in the drawer header beside Close (decided 2026-11-02).
 - shadcn/ui components are maintained in the project source; do not expect a
   `shadcn` runtime package. Add or adapt components using the project's
   established shadcn conventions. When a shadcn component is needed, the owner

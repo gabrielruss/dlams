@@ -486,8 +486,9 @@ In order. Items 1 to 7 are the path to the portfolio milestone.
    also shared (the extraction rule in `.github/copilot-instructions.md`,
    "Frontend"). Propose which to extract into a component and which to leave;
    the owner picks. Seen so far, not yet counted: the red-outline destructive
-   `Button` (Share drawer, Delete console, Delete game), the drawer header
-   with its Close button, and the bordered list section
+   `Button` (Share drawer), the item drawer's trash-can Delete and its
+   pinned Save / Cancel footer (console and game, 2026-11-02), the drawer
+   header with its Close button, and the bordered list section
    (`flex flex-col gap-4 rounded-lg border p-4`).
 6c. **Styling cleanup** (owner, 2026-10-31; after 6a and 6b). A styling
    change, so the owner sets the scope first. Candidates: classes made
@@ -544,11 +545,10 @@ In order. Items 1 to 7 are the path to the portfolio milestone.
    the raw query result (callers use `data`), and `useConsoleLabels`
    returns a bare `string[]` with no pending or error state, so a failed
    label load is silent. Re-run the UI tests after each change.
-   Also: the one ternary chain over the two-`?` limit (rule in
-   `.github/copilot-instructions.md`, 2026-11-02), the loading / workspace
-   / unsupported type / no collections chain in
-   `components/collections/CollectionWorkspace.tsx` (three `?`). The nine
-   two-`?` chains found the same day are within the limit.
+   Ternary chains (two-`?` limit in `.github/copilot-instructions.md`,
+   2026-11-02): the only one over it, in `CollectionWorkspace.tsx`, was
+   fixed the same day (`CollectionBody` with early returns); nine two-`?`
+   chains are within the limit.
 7. **README and a final check.** Done 2026-10-27 (owner's call). The root
    `README.md` was rewritten as the front door (no screenshots: the live demo
    shows the app and there is nothing to keep current; see
@@ -671,13 +671,31 @@ is next, then the sharing UI, then search.
    in a status line. A result sets `?collection=<id>&item=<type>-<id>`
    (a new history entry); the item's drawer does not open from the URL
    yet (next step). 10 tests in `Search.test.tsx`, including axe.
-   **Next step, decided 2026-11-02 (owner):** `?item=` is the one way an
-   existing item's edit drawer opens. Search results and row clicks in a
-   collection both set it (a new history entry, so back closes the
-   drawer); the console and game managers open the drawer from it once
-   their lists load, and closing the drawer removes it. The Add drawers
-   stay in local state (no item to name). Waiting until the owner has
-   reviewed the search code.
+   Item drawers from the URL (2026-11-02, uncommitted, not yet tried in a
+   browser): `?item=` is the one way an existing item's edit drawer opens
+   (`components/collections/useOpenItem.ts`). Search results and row
+   clicks both set it; the console and game hooks take their lists and
+   open the drawer when `item` names one of them, so an unknown or
+   deleted item opens nothing. A row click pushes a history entry marked
+   in its state, and closing that drawer goes back one step; a drawer
+   opened from search or a pasted URL closes by removing `item` (replace),
+   which leaves the user in that collection. The Add drawers stay in local
+   state. 4 new tests (from the URL, unknown item, close, and a search
+   result opening its drawer). Back and forward are not covered by tests
+   (MemoryRouter); check them by hand.
+   The editing logic both managers shared is one hook,
+   `components/collections/useItemEditor.ts` (owner, 2026-11-02, after an
+   AHA review; named for what it owns, which item is being edited, not
+   for the drawer that shows it). The URL stays the single source of
+   truth for that item, so no store is involved: reading `?item=` through
+   `useOpenItem`, the Add state,
+   finding the item, loading the form once per item, and closing. Each
+   manager passes its type, list, form, a `toFormValues` function, and an
+   `onReset` that clears its mutation errors; forms, payloads, API calls,
+   and confirm text stay per type. A new item type adds one
+   `useItemEditor` call. Deliberately not shared yet: the mutation wiring
+   and the drawer markup (header, Close, delete section; see 6b). Revisit
+   both when a third item type arrives (item 11).
    - **Scope.** Signed in: always every collection the user owns, with no
      option to limit it to the selected one, and not collections shared
      with them (an "include shared collections" checkbox is left for later,
@@ -892,7 +910,12 @@ is next, then the sharing UI, then search.
   vulnerabilities after the install: `vitest`/`@vitest/mocker` and `tinypool`
   (dev-only; the fix is a downgrade to Vitest 2.0.5) and `zod` (runtime; `npm
   audit fix` resolves it). Upgrades are deferred. Backend tests use `unittest`; Ruff and
-  pytest are not configured.
+  pytest are not configured. **2026-11-02:** the Prettier install's audit
+  summary showed 16 (13 moderate, 1 high, 2 critical); Prettier has no
+  dependencies, so these arrived some other way since 2026-10-26. Not yet
+  read with `npm audit`. The same install warned `EBADENGINE`: the owner's
+  Mac runs Node 23, which `eslint-visitor-keys` does not list as supported
+  (the Docker build uses Node 20).
 - Migration `951a8354c293` uses a PostgreSQL-only `ALTER COLUMN`, so the full
   migration chain cannot be replayed on SQLite.
 - `dlams-fastapi/.env.example` was only used by the deleted legacy

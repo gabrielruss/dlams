@@ -195,15 +195,36 @@ describe("search", () => {
     ).not.toBeInTheDocument()
   })
 
-  it("opens a result's collection", async () => {
+  it("opens a result's collection with its edit drawer open", async () => {
     signInWithItems()
+    server.use(
+      http.get(`${api}/collections/2/games`, () =>
+        HttpResponse.json({
+          games: [
+            {
+              id: 2,
+              name: "Pokémon Red",
+              condition: "Loose",
+              console_label_id: 2,
+              console_label: "Game Boy",
+              last_played: null,
+              completed: true,
+            },
+          ],
+        })
+      )
+    )
     const { user } = await openSearch()
     await screen.findByText("3 results")
 
     await user.click(screen.getByRole("button", { name: "Edit Pokémon Red" }))
 
+    const drawer = await screen.findByRole("dialog")
+    expect(within(drawer).getByLabelText("Game name")).toHaveValue(
+      "Pokémon Red"
+    )
     expect(
-      await screen.findByRole("heading", { name: "Games to sell" })
+      screen.getByRole("heading", { name: "Games to sell", hidden: true })
     ).toBeInTheDocument()
   })
 

@@ -488,6 +488,12 @@ seven-day sandboxes. Build steps are item 8 in `DLAMS-PLAN.md`.
   alphabetically. A result opens its collection with its editor open.
   Search mode is in the URL (`?q=`), so back and refresh work. Details are
   in plan item 8a.
+- **`?item=` opens every edit drawer** (owner, 2026-11-02). Row clicks
+  set it too, not only search results, so there is one way an existing
+  item's drawer opens: back closes it, refresh keeps it, and the managers
+  read one source. Chosen over URL for search and local state for rows,
+  which would have kept two paths in sync. The Add drawers stay in local
+  state, since a new item has no id to name.
 - Reason: the owner's call. Searching across collections finds an item
   without knowing which one holds it; keeping to owned collections keeps
   the first version simple. Everything below the bar is scoped to the
@@ -542,6 +548,16 @@ seven-day sandboxes. Build steps are item 8 in `DLAMS-PLAN.md`.
   action one deliberate step away.
 - `ConsoleList`, `GameList`, and `ListRow` render the rows; the read-only
   link page uses the same lists without `onSelect`.
+- **Revised 2026-11-02 (owner): the edit drawer's layout.** The header holds
+  drawer controls only (title and Close). Save and Cancel sit in a footer
+  pinned to the bottom, full width, Save above Cancel. Delete is a red
+  trash-can icon button (named and titled "Delete game" / "Delete
+  console") at the top right of the item area, under the header's border:
+  item actions live with the item, apart from both the drawer's Close and
+  Save, and most visits never delete. It still confirms first. Replaces
+  the red-outlined Delete at the end of the drawer, which outweighed Save
+  and sat beside it; chosen over a trash icon beside Close (mixes drawer
+  and item actions) and one beside Cancel in the footer (an easy mis-tap).
 
 ### Login branding: backdrop text, two fonts, two brand colors — 2026-10-18
 - The login page shows "DON'T LOOK AT MY STUFF" as a faint full-screen

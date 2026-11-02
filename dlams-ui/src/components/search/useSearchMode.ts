@@ -1,6 +1,11 @@
 import { useSearchParams } from "react-router-dom"
 
-import { COLLECTION_PARAM, ITEM_PARAM, SEARCH_PARAM } from "@/lib/urlParams"
+import {
+  COLLECTION_PARAM,
+  ITEM_PARAM,
+  SEARCH_PARAM,
+  itemParamValue,
+} from "@/lib/urlParams"
 import type { OwnedItem } from "@/types/items"
 
 function useSearchMode() {
@@ -43,7 +48,7 @@ function useSearchMode() {
   const openItem = (item: OwnedItem) => {
     setSearchParams({
       [COLLECTION_PARAM]: String(item.collection_id),
-      [ITEM_PARAM]: `${item.type}-${item.id}`,
+      [ITEM_PARAM]: itemParamValue(item.type, item.id),
     })
   }
 
