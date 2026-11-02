@@ -3,14 +3,15 @@ import ListRow from "@/components/collections/ListRow"
 
 interface GameListProps {
   games: GameRecord[]
+  emptyMessage?: string
   onSelect?: (game: GameRecord) => void
 }
 
-function GameList({ games, onSelect }: GameListProps) {
+function GameList({ games, emptyMessage, onSelect }: GameListProps) {
   if (games.length === 0) {
     return (
       <p className="text-sm text-muted-foreground">
-        No games in this collection yet.
+        {emptyMessage ?? "No games in this collection yet."}
       </p>
     )
   }

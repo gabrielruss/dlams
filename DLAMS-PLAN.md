@@ -45,14 +45,11 @@ never appended to. History lives in git and `docs/decisions.md`.
 - **Next, in order:**
   1. **Deploy picks up `nginx.conf` changes** (Known issues): workflow
      fixed in source 2026-11-01; confirm on the next deploy.
-  2. **Search** (item 8a): designed, ready to build. Read 8a in full first.
-     In short: always every owned collection (signed in); a new endpoint
-     lists every owned item in one type-neutral shape with no query per
-     row; one TypeScript matching function and search field serve both the
-     signed-in search and the share link page (which filters its own
-     lists); a "Search all collections" bar above the collection takes
-     over the page on focus, with `?q=` in the URL; a result opens its
-     collection with its editor open (`?collection=7&item=game-12`).
+  2. **Search** (item 8a): built 2026-11-02 on `add-search`, not yet
+     deployed. Endpoint `GET /items`, the matcher, the signed-in takeover
+     bar with `?q=`, `?item=` opening every edit drawer
+     (`useItemEditor`), and the share link page's field. Check it in the
+     browser, then push; the same deploy confirms item 1.
   3. **Edit and delete collections** (item 8b).
   4. Then: the manual accessibility audit (6), shadcn everywhere (6a),
      repeated styling (6b), styling cleanup (6c), backend consistency
@@ -696,6 +693,24 @@ is next, then the sharing UI, then search.
    `useItemEditor` call. Deliberately not shared yet: the mutation wiring
    and the drawer markup (header, Close, delete section; see 6b). Revisit
    both when a third item type arrives (item 11).
+   Share link page search (2026-11-02, uncommitted, not yet tried in a
+   browser): a "Search this collection" field under the read-only note
+   narrows the page's console and game lists in place (query in local
+   state, not the URL; no takeover, rows stay unclickable). Shared
+   pieces: `SearchField` (the labeled search input; Escape is up to the
+   caller) now also renders the signed-in bar, and `useListSearch`
+   filters any list with `searchEntries`, returning it unchanged when the
+   query is blank. Mappings are `consoleSearchable` and `gameSearchable`
+   in `videoGameOptions.ts`. A status line says "N of M items match" or
+   "Nothing matches"; each list takes an `emptyMessage` ("No games
+   match."); sidebar counts stay totals. 3 new tests. With this, search
+   (8a) is built; it ships with the next push. The share page filters in
+   place instead of reusing `SearchResults` (signed-in data, URL state,
+   and click-through would each have needed a switch); the owner may
+   revisit how the logged-out search looks later. The searchable fields
+   per type are written twice, in `video_games_items.py` and in
+   `consoleSearchable` / `gameSearchable`; keep them in step, and expect
+   each new item type (item 11) to add both.
    - **Scope.** Signed in: always every collection the user owns, with no
      option to limit it to the selected one, and not collections shared
      with them (an "include shared collections" checkbox is left for later,

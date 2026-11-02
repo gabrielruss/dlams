@@ -4,14 +4,15 @@ import { consoleName } from "./videoGameOptions"
 
 interface ConsoleListProps {
   consoles: ConsoleRecord[]
+  emptyMessage?: string
   onSelect?: (consoleRecord: ConsoleRecord) => void
 }
 
-function ConsoleList({ consoles, onSelect }: ConsoleListProps) {
+function ConsoleList({ consoles, emptyMessage, onSelect }: ConsoleListProps) {
   if (consoles.length === 0) {
     return (
       <p className="text-sm text-muted-foreground">
-        No consoles in this collection yet.
+        {emptyMessage ?? "No consoles in this collection yet."}
       </p>
     )
   }

@@ -32,6 +32,15 @@ function shareCollection() {
             last_played: null,
             completed: true,
           },
+          {
+            id: 2,
+            name: "Pokémon Red",
+            condition: "Loose",
+            console_label_id: 2,
+            console_label: "Game Boy",
+            last_played: null,
+            completed: false,
+          },
         ],
       }),
     ),
@@ -71,6 +80,57 @@ describe("the shared collection page", () => {
     expect(await screen.findByRole("alert")).toHaveTextContent(
       "This link is no longer active.",
     )
+  })
+
+  it("narrows its lists as you type, ignoring accents", async () => {
+    shareCollection()
+    const { user } = renderApp("/s/token-1")
+    await screen.findByText("Halo 3")
+
+    await user.type(
+      screen.getByRole("searchbox", { name: "Search this collection" }),
+      "pokemon",
+    )
+
+    expect(screen.getByText("Pokémon Red")).toBeInTheDocument()
+    expect(screen.queryByText("Halo 3")).not.toBeInTheDocument()
+    expect(screen.getByText("No consoles match.")).toBeInTheDocument()
+    expect(screen.getByRole("status")).toHaveTextContent("1 of 3 items match")
+  })
+
+  it("matches a game by its console", async () => {
+    shareCollection()
+    const { user } = renderApp("/s/token-1")
+    await screen.findByText("Halo 3")
+
+    await user.type(
+      screen.getByRole("searchbox", { name: "Search this collection" }),
+      "xbox",
+    )
+
+    expect(screen.getByText("Halo 3")).toBeInTheDocument()
+    expect(screen.getByText("Xbox 360 — Original White")).toBeInTheDocument()
+    expect(screen.queryByText("Pokémon Red")).not.toBeInTheDocument()
+  })
+
+  it("says when nothing matches, and clears on Escape", async () => {
+    shareCollection()
+    const { user } = renderApp("/s/token-1")
+    await screen.findByText("Halo 3")
+    const searchBox = screen.getByRole("searchbox", {
+      name: "Search this collection",
+    })
+
+    await user.type(searchBox, "zelda")
+    expect(screen.getByRole("status")).toHaveTextContent(
+      'Nothing matches "zelda".',
+    )
+    expect(screen.getByText("No games match.")).toBeInTheDocument()
+
+    await user.keyboard("{Escape}")
+    expect(searchBox).toHaveValue("")
+    expect(screen.getByText("Halo 3")).toBeInTheDocument()
+    expect(screen.getByText("Pokémon Red")).toBeInTheDocument()
   })
 
   it("has no accessibility violations", async () => {
