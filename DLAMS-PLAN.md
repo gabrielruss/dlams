@@ -43,8 +43,8 @@ never appended to. History lives in git and `docs/decisions.md`.
   steps). Not run: Pylance after the `int | None` count fix in
   `create_link`. Earlier: backup restore test passed (2026-10-29).
 - **Next, in order:**
-  1. **Gzip in Nginx** (item 8c): waiting on the owner's go-ahead; best
-     before search, which loads every owned item in one response.
+  1. **Deploy picks up `nginx.conf` changes** (Known issues): workflow
+     fixed in source 2026-11-01; confirm on the next deploy.
   2. **Search** (item 8a): designed, ready to build. Read 8a in full first.
      In short: always every owned collection (signed in); a new endpoint
      lists every owned item in one type-neutral shape with no query per
@@ -61,7 +61,7 @@ never appended to. History lives in git and `docs/decisions.md`.
      color themes (10b), further item types (11), item images (12, added
      2026-10-31; do the dependency upgrades first), moving items between
      collections of the same type (13), and a duplicate item finder (14).
-- **Waiting on the owner:** gzip (8c); whether to take the `zod` fix
+- **Waiting on the owner:** whether to take the `zod` fix
   (`npm audit fix`); in 6d, whether to drop the `response_model`s Ruff's
   FAST001 calls redundant; before 6a, running
   `npx shadcn@latest add select checkbox`.
@@ -698,18 +698,14 @@ is next, then the sharing UI, then search.
    the collection list and stats queries are invalidated. Where the
    controls sit (the collection heading beside Share, or the sidebar row)
    is a styling question for the owner.
-8c. **Turn on gzip in Nginx** (found 2026-10-31). Nothing in
-   `dlams-deployment/` enables it, so JSON and the JS bundle (about 647 kB,
-   the large-chunk warning in Known issues) are sent uncompressed. Compress
-   `application/json`, JS, and CSS. A deployment change: needs the owner's
-   go-ahead, `nginx -t`, and a check in the browser's network panel that
-   responses carry `Content-Encoding: gzip`. Best done before search, which
-   loads every owned item in one response.
-   **Written 2026-11-01:** `gzip on` in the `http` block of `nginx.conf` for
-   JSON, JS, CSS, and SVG (HTML is always included), over 1 KB, level 5,
-   with `Vary: Accept-Encoding` and proxied responses included. `nginx -t`
-   passed locally (`nginx:alpine`, certificate lines removed, stub upstream
-   hosts); not yet checked on the Pi or in the browser's network panel.
+8c. **Gzip in Nginx. Done** (deployed 2026-11-01, `e4366a2`). `gzip on` in
+   the `http` block of `nginx.conf` for JSON, JS, CSS, and SVG (HTML is
+   always included), over 1 KB, level 5, with `Vary: Accept-Encoding` and
+   proxied responses included. `nginx -t` passed locally. The deploy did
+   not apply it (see Known issues); after the owner recreated the Nginx
+   container on the Pi, `curl` from the Pi showed the JS bundle served with
+   `Content-Encoding: gzip` and `Vary: Accept-Encoding` (owner-pasted). The
+   same recreate put the 2026-10-31 share-link rate limit and headers live.
 9. **Sandbox demo sessions. Done** (owner, 2026-10-29). Built
    2026-10-29, deployed 2026-10-30 (see `docs/decisions.md`, "Demo sessions"). "Try
    the demo" copies the `demo-user` template into a temporary `sandbox`
@@ -804,6 +800,13 @@ is next, then the sharing UI, then search.
   in a browser. Left as is (admin-only, not on the visitor path). The cheap
   fixes are hiding the Created column below `md` or stacking each user as a
   card.
+- The deploy did not apply `nginx.conf` changes (found 2026-11-01). Compose
+  mounts the single file into the Nginx container; `git pull` replaces the
+  file, so the container kept reading the old one, and `nginx -s reload`
+  reloaded that. Fixed in source 2026-11-01, not yet deployed: `deploy.yml`
+  now runs `docker compose up -d --force-recreate nginx` instead of the
+  reload, so every deploy restarts Nginx (about a second) on the current
+  file. Remove this entry once a deploy has run with it.
 - A push to `main` deploys even if CI fails, because the deploy workflow does
   not wait for CI. Decide whether to gate the deploy on it later.
 - The UI build emits a Vite large-chunk warning (about 647 kB on 2026-10-17,

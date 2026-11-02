@@ -270,7 +270,9 @@ styling changes need approval (see the conventions file for the rule).
   (self-hosted, so the Pi polls GitHub for jobs and nothing connects in to
   it). A push to `main` triggers `.github/workflows/deploy.yml`, which runs
   on that runner: `git pull` in the checkout, `docker compose up -d --build
-  api ui nginx`, reload nginx, and list containers. The `db` service is not
+  api ui nginx`, recreate the `nginx` container (it mounts `nginx.conf` as
+  a single file, which a reload would not re-read after `git pull`), and
+  list containers. The `db` service is not
   rebuilt. Images are built on the Pi, so builds are slow and CI does not
   run tests or lint before deploying.
 - **Nginx** routes `/` to the `ui` container and `/api/` to the `api`

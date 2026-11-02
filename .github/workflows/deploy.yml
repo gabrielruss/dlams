@@ -14,5 +14,5 @@ jobs:
           git pull origin main
           cd dlams-deployment
           docker compose up -d --build api ui nginx
-          docker compose exec -T nginx nginx -s reload
+          docker compose up -d --force-recreate nginx
           docker compose ps
