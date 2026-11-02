@@ -56,7 +56,7 @@ never appended to. History lives in git and `docs/decisions.md`.
   3. **Edit and delete collections** (item 8b).
   4. Then: the manual accessibility audit (6), shadcn everywhere (6a),
      repeated styling (6b), styling cleanup (6c), backend consistency
-     (6d), admins delete users (9a, replaces the wipe-sandboxes button),
+     (6d), frontend hook consistency (6e), admins delete users (9a, replaces the wipe-sandboxes button),
      stats area (10c, moved up 2026-10-31), later sharing ideas (10a),
      color themes (10b), further item types (11), item images (12, added
      2026-10-31; do the dependency upgrades first), moving items between
@@ -69,9 +69,12 @@ never appended to. History lives in git and `docs/decisions.md`.
   - Tests sit beside the feature they cover. `renderApp(route)` in
     `dlams-ui/src/test/renderApp.tsx` renders the real app; register MSW
     handlers per test with `server.use(...)`; add an axe check with
-    `expectNoViolations(container)`. An unhandled request fails the test, so
-    any test that opens an owned collection needs a
-    `GET /collections/1/links` handler (the Share button loads the links).
+    `expectNoViolations(container)`. A request with no handler fails with a
+    network error and prints `[MSW] Error: intercepted a request without a
+    matching request handler`; the test itself fails only if what it checks
+    depends on that request, so read the output for MSW errors. Any test
+    that opens an owned collection needs `GET /collections/1/links` (the
+    Share button) and `GET /console-labels` handlers.
     Inside a Vaul drawer, use `element.focus()` and `user.keyboard(...)`
     instead of clicks: pointer events throw in jsdom. MSW mocks never return
     a 422, so they cannot catch a body a schema rejects.
@@ -108,7 +111,9 @@ never appended to. History lives in git and `docs/decisions.md`.
   recommendation and one question rather than several; the owner often edits
   UI wording directly, so read the current file before changing text and
   keep their wording; they like to see a change before committing to it and
-  will revert freely, so keep changes small and easy to undo; prefer fewer
+  will revert freely, so keep changes small and easy to undo; build features
+  in layers (endpoint, then data layer, then visible UI), one step per
+  review, which the owner said keeps a change from being overwhelming; prefer fewer
   features over messy code, and one consistent pattern over several. They
   like UX ideas weighed honestly and will push back with their own. They
   are newer to Python and SQLAlchemy than to JS, so JS comparisons help.
@@ -526,6 +531,24 @@ In order. Items 1 to 7 are the path to the portfolio milestone.
      matching `dlams-ui/src/lib/api/` module sends: the UI tests mock the API
      with MSW and will not catch a 422, so an extra field would only fail in
      the real app. Then run both test suites and try each form in a browser.
+6e. **Frontend hook consistency check** (owner, 2026-11-02). Go through
+   every hook in `dlams-ui/src` and check two things. First, a hook named
+   for data returns that data under that name (`useOwnedItems` returns
+   `ownedItems`); a name that is hard to match usually means the hook does
+   two jobs, so split the job rather than stretch the name (search's
+   `useOwnedItems` was fixed this way). Second, query hooks return one
+   shape: a named object with the data plus `isPending`, `isError`, and
+   `error` (the conventions file's "destructure" rule), and the screen
+   using it shows pending and error states. Found 2026-11-02, not
+   converted: `useCurrentUser` and `useVideoGameCollectionStats` return
+   the raw query result (callers use `data`), and `useConsoleLabels`
+   returns a bare `string[]` with no pending or error state, so a failed
+   label load is silent. Re-run the UI tests after each change.
+   Also: the one ternary chain over the two-`?` limit (rule in
+   `.github/copilot-instructions.md`, 2026-11-02), the loading / workspace
+   / unsupported type / no collections chain in
+   `components/collections/CollectionWorkspace.tsx` (three `?`). The nine
+   two-`?` chains found the same day are within the limit.
 7. **README and a final check.** Done 2026-10-27 (owner's call). The root
    `README.md` was rewritten as the front door (no screenshots: the live demo
    shows the app and there is nothing to keep current; see
@@ -629,14 +652,32 @@ is next, then the sharing UI, then search.
    " · ". Sorted by title ignoring case; one query per item type; 7 tests
    in `test_owned_items.py`. Owner-checked 2026-11-02 in Postman against
    the dev stack: items from two owned collections, sorted, in that shape.
-   UI data layer (2026-11-02, uncommitted, not used by any screen yet):
+   UI data layer (2026-11-02, uncommitted):
    `types/items.ts`, `lib/api/items.ts` (`itemKeys`), and in
-   `components/search/` the matcher `searchIndex.ts` (`buildSearchIndex`
-   takes any value plus a function giving its title and keywords, so the
-   share link page can index its consoles and games; `searchIndex` filters
-   and ranks) with 5 tests, and `useOwnedItems` (indexes once through the
-   query's `select`). `invalidateVideoGameCollection` also invalidates
+   `components/search/` the matcher `searchEntries.ts`
+   (`buildSearchEntries` takes any value plus a function giving its title
+   and keywords, so the share link page can prepare its consoles and
+   games; `searchEntries` filters and ranks) with 5 tests, and
+   `useOwnedItems`, which returns `ownedItems` (`SearchResults` builds the
+   entries with `useMemo`). `invalidateVideoGameCollection` also invalidates
    `itemKeys.all`; item 8b must do the same on rename and delete.
+   Search bar and results (2026-11-02, uncommitted; owner saw it in the
+   browser and approved the look): `SearchBar` above the page in `pages/Home.tsx`, and
+   `SearchResults` in place of the collection while `?q=` is in the URL
+   (`useSearchMode`; URL names in `lib/urlParams.ts`). Focusing or typing
+   opens it; the first Escape clears the text, the next closes; "Close
+   search" and picking a sidebar collection close it; the sidebar shows no
+   selection while open. Results reuse `ListRow`, at most 50 with a count
+   in a status line. A result sets `?collection=<id>&item=<type>-<id>`
+   (a new history entry); the item's drawer does not open from the URL
+   yet (next step). 10 tests in `Search.test.tsx`, including axe.
+   **Next step, decided 2026-11-02 (owner):** `?item=` is the one way an
+   existing item's edit drawer opens. Search results and row clicks in a
+   collection both set it (a new history entry, so back closes the
+   drawer); the console and game managers open the drawer from it once
+   their lists load, and closing the drawer removes it. The Add drawers
+   stay in local state (no item to name). Waiting until the owner has
+   reviewed the search code.
    - **Scope.** Signed in: always every collection the user owns, with no
      option to limit it to the selected one, and not collections shared
      with them (an "include shared collections" checkbox is left for later,

@@ -17,7 +17,7 @@ export function normalizeForSearch(value: string) {
     .toLowerCase()
 }
 
-export function buildSearchIndex<T>(
+export function buildSearchEntries<T>(
   values: T[],
   toSearchable: (value: T) => Searchable,
 ): SearchEntry<T>[] {
@@ -39,10 +39,10 @@ function rank(entry: SearchEntry<unknown>, query: string, words: string[]) {
   return 2
 }
 
-export function searchIndex<T>(index: SearchEntry<T>[], query: string): T[] {
+export function searchEntries<T>(entries: SearchEntry<T>[], query: string): T[] {
   const normalizedQuery = normalizeForSearch(query).trim()
   const words = normalizedQuery.split(/\s+/).filter(Boolean) // put every word in an array and filter out ""
-  return index
+  return entries
     .filter((entry) => words.every((word) => entry.text.includes(word))) // every word of the search must appear in the entry
     .map((entry) => ({ entry, rank: rank(entry, normalizedQuery, words) }))
     .sort(

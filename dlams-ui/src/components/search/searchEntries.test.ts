@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest"
 
-import { buildSearchIndex, searchIndex } from "./searchIndex"
+import { buildSearchEntries, searchEntries } from "./searchEntries"
 
 const items = [
   { title: "Halo 3", keywords: ["Xbox 360"] },
@@ -12,11 +12,11 @@ const items = [
   { title: "Mario Kart 64", keywords: ["N64"] },
 ]
 
-const index = buildSearchIndex(items, (item) => item)
+const entries = buildSearchEntries(items, (item) => item)
 const titles = (query: string) =>
-  searchIndex(index, query).map((item) => item.title)
+  searchEntries(entries, query).map((item) => item.title)
 
-describe("searchIndex", () => {
+describe("searchEntries", () => {
   it("lists everything alphabetically for an empty query", () => {
     expect(titles("  ")).toEqual([
       "Halo 3",
@@ -40,11 +40,11 @@ describe("searchIndex", () => {
   })
 
   it("does not search the details", () => {
-    const withDetails = buildSearchIndex(
+    const withDetails = buildSearchEntries(
       [{ title: "Halo 3", keywords: ["Xbox 360"], details: ["Loose"] }],
       ({ title, keywords }) => ({ title, keywords })
     )
-    expect(searchIndex(withDetails, "loose")).toEqual([])
+    expect(searchEntries(withDetails, "loose")).toEqual([])
   })
 
   it("ranks titles starting with the query, then other title matches, then keyword matches", () => {

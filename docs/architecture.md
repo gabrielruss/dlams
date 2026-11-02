@@ -83,7 +83,9 @@ and served by `nginx:alpine`, database `postgres:15` (development uses 14).
   `/login`, `/register`, `/admin/users`; it first resolves the current user;
   unauthenticated visitors are redirected to `/login`, non-admins away from
   `/admin/users`.
-  The selected collection is kept in the URL.
+  The selected collection is kept in the URL (`?collection=`), and so is
+  search mode (`?q=`, present even when empty) and the item a search result
+  opens (`?item=game-12`); the names are in `lib/urlParams.ts`.
 
 ## Authentication and sessions
 
@@ -228,6 +230,7 @@ dlams-ui/src/
     admin/                   user management table and hook
     collections/             navigation, workspace dispatch, stats, the Share
                              drawer, ListRow (the item row any type uses)
+    search/                  search bar, results panel, matcher, hooks
     video-games/             console and game managers, workspace, hooks
     ui/                      shadcn/ui primitives (button, drawer, form, ...)
   lib/api/                   fetch client and one module per resource

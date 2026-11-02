@@ -10,6 +10,7 @@ import {
   DrawerHeader,
   DrawerTitle,
 } from "@/components/ui/drawer"
+import useSearchMode from "@/components/search/useSearchMode"
 import CollectionStats from "./CollectionStats"
 import useCollections from "./useCollections"
 
@@ -21,6 +22,7 @@ function CollectionNavigation() {
     collectionsQuery,
     createCollectionMutation,
   } = useCollections()
+  const { isOpen: isSearching } = useSearchMode()
   const [isCreateDrawerOpen, setIsCreateDrawerOpen] = useState(false)
   const form = useForm<{ name: string }>({ defaultValues: { name: "" } })
   const newCollectionName = form.watch("name")
@@ -87,7 +89,8 @@ function CollectionNavigation() {
       ) : (
         <ul className="min-h-0 flex-1 overflow-y-auto pl-3">
           {collections.map((collection) => {
-            const selected = collection.id === selectedCollectionId
+            const selected =
+              !isSearching && collection.id === selectedCollectionId
             return (
               <li key={collection.id} className="border-b last:border-b-0">
                 <button

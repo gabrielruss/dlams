@@ -1,14 +1,35 @@
 import { canWriteCollection } from "@/lib/permissions"
+import type { Collection } from "@/types/collections"
 import { resolveCollectionWorkspace } from "./collectionWorkspaceResolver"
 import ShareCollectionDrawer from "./ShareCollectionDrawer"
 import useCollections from "./useCollections"
 
+interface CollectionBodyProps {
+  isPending: boolean
+  collection: Collection | undefined
+}
+
+function CollectionBody({ isPending, collection }: CollectionBodyProps) {
+  if (isPending) return <p>Loading collections...</p>
+  if (!collection) {
+    return <p>Create a collection to start tracking consoles and games.</p>
+  }
+
+  const SelectedWorkspace = resolveCollectionWorkspace(collection.type)
+  if (!SelectedWorkspace) {
+    return (
+      <p role="status">
+        This collection type is not supported in the current UI yet.
+      </p>
+    )
+  }
+
+  return <SelectedWorkspace collection={collection} />
+}
+
 function CollectionWorkspace() {
   const { selectedCollection, collectionsQuery } = useCollections()
   const collection = selectedCollection
-  const SelectedWorkspace = collection
-    ? resolveCollectionWorkspace(collection.type)
-    : undefined
   const canShare =
     collection !== undefined && canWriteCollection(collection.access)
 
@@ -28,17 +49,10 @@ function CollectionWorkspace() {
           {collectionsQuery.error.message}
         </p>
       )}
-      {collectionsQuery.isPending ? (
-        <p>Loading collections...</p>
-      ) : collection && SelectedWorkspace ? (
-        <SelectedWorkspace collection={collection} />
-      ) : collection ? (
-        <p role="status">
-          This collection type is not supported in the current UI yet.
-        </p>
-      ) : (
-        <p>Create a collection to start tracking consoles and games.</p>
-      )}
+      <CollectionBody
+        isPending={collectionsQuery.isPending}
+        collection={collection}
+      />
     </section>
   )
 }
