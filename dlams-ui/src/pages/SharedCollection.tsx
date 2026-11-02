@@ -10,7 +10,7 @@ import { collectionTypeNames } from "@/types/collections"
 function SharedCollection() {
   const { token = "" } = useParams()
   const { data, isPending, error } = useQuery(
-    sharedCollectionQueryOptions(token)
+    sharedCollectionQueryOptions(token),
   )
 
   return (
@@ -18,7 +18,11 @@ function SharedCollection() {
       <meta name="robots" content="noindex" />
       <meta name="referrer" content="no-referrer" />
       <header className="flex h-14 shrink-0 items-center border-b bg-sidebar px-4 md:hidden">
-        <Link className="relative block h-9 w-40" to="/" aria-label="DLAMS home">
+        <Link
+          className="relative block h-9 w-40"
+          to="/"
+          aria-label="DLAMS home"
+        >
           <Wordmark className="absolute inset-0" />
         </Link>
       </header>
@@ -39,7 +43,10 @@ function SharedCollection() {
             <p className="text-xs text-muted-foreground">
               {collectionTypeNames[data.type]}
             </p>
-            <ItemCounts consoles={data.consoles.length} games={data.games.length} />
+            <ItemCounts
+              consoles={data.consoles.length}
+              games={data.games.length}
+            />
           </div>
         )}
       </aside>

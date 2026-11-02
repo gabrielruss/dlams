@@ -12,7 +12,7 @@ export const linkKeys = {
 export const linksApi = {
   list: (collectionId: number) =>
     apiRequest<{ links: CollectionLink[] }>(
-      `/collections/${collectionId}/links`
+      `/collections/${collectionId}/links`,
     ),
   create: (collectionId: number, name: string | null) =>
     apiRequest<CollectionLink>(`/collections/${collectionId}/links`, {

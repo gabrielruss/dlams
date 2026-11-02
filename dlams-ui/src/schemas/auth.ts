@@ -11,7 +11,7 @@ export const loginSchema = z.object({
     .min(6, "Password too short")
     .max(
       30,
-      "What are you going for extra credit or something? Make it shorter..."
+      "What are you going for extra credit or something? Make it shorter...",
     ),
 })
 

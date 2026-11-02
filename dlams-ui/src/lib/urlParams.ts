@@ -11,7 +11,7 @@ export const itemParamValue = (type: ItemType, id: number) =>
 
 export function parseItemParam(
   value: string | null,
-  type: ItemType
+  type: ItemType,
 ): number | undefined {
   const prefix = itemPrefix(type)
   if (!value?.startsWith(prefix)) return undefined

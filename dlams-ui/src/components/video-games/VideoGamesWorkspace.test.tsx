@@ -13,7 +13,7 @@ function signInWithCollection(access: CollectionAccess) {
     http.get(`${api}/verify`, () =>
       HttpResponse.json({
         user: { id: "2", username: "test-user", role: "user" },
-      })
+      }),
     ),
     http.get(`${api}/collections`, () =>
       HttpResponse.json({
@@ -26,12 +26,12 @@ function signInWithCollection(access: CollectionAccess) {
             access,
           },
         ],
-      })
+      }),
     ),
     http.get(`${api}/collections/video-game-stats`, () =>
       HttpResponse.json({
         stats: [{ collection_id: 1, game_count: 1, console_count: 1 }],
-      })
+      }),
     ),
     http.get(`${api}/collections/1/consoles`, () =>
       HttpResponse.json({
@@ -44,7 +44,7 @@ function signInWithCollection(access: CollectionAccess) {
             condition: "CIB",
           },
         ],
-      })
+      }),
     ),
     http.get(`${api}/collections/1/games`, () =>
       HttpResponse.json({
@@ -59,14 +59,12 @@ function signInWithCollection(access: CollectionAccess) {
             completed: false,
           },
         ],
-      })
+      }),
     ),
-    http.get(`${api}/console-labels`, () =>
-      HttpResponse.json({ labels: [] })
-    ),
+    http.get(`${api}/console-labels`, () => HttpResponse.json({ labels: [] })),
     http.get(`${api}/collections/1/links`, () =>
-      HttpResponse.json({ links: [] })
-    )
+      HttpResponse.json({ links: [] }),
+    ),
   )
 }
 
@@ -78,24 +76,24 @@ describe("video game collection access", () => {
 
     expect(await screen.findByText("Halo 3")).toBeInTheDocument()
     expect(
-      screen.getByRole("button", { name: "New collection" })
+      screen.getByRole("button", { name: "New collection" }),
     ).toBeInTheDocument()
     expect(
-      screen.getByRole("button", { name: "Add console" })
+      screen.getByRole("button", { name: "Add console" }),
     ).toBeInTheDocument()
     expect(screen.getByRole("button", { name: "Add game" })).toBeInTheDocument()
     expect(
-      screen.getByRole("button", { name: "Edit Xbox 360 — Original White" })
+      screen.getByRole("button", { name: "Edit Xbox 360 — Original White" }),
     ).toBeInTheDocument()
     expect(
-      screen.queryByRole("button", { name: /^Delete/ })
+      screen.queryByRole("button", { name: /^Delete/ }),
     ).not.toBeInTheDocument()
 
     await user.click(screen.getByRole("button", { name: "Edit Halo 3" }))
     const drawer = await screen.findByRole("dialog")
     expect(within(drawer).getByLabelText("Game name")).toHaveValue("Halo 3")
     expect(
-      within(drawer).getByRole("button", { name: "Delete game" })
+      within(drawer).getByRole("button", { name: "Delete game" }),
     ).toBeInTheDocument()
   })
 
@@ -106,10 +104,10 @@ describe("video game collection access", () => {
 
     const drawer = await screen.findByRole("dialog")
     expect(
-      within(drawer).getByRole("heading", { name: "Edit console" })
+      within(drawer).getByRole("heading", { name: "Edit console" }),
     ).toBeInTheDocument()
     expect(within(drawer).getByLabelText("Edition / details")).toHaveValue(
-      "Original White"
+      "Original White",
     )
   })
 
@@ -132,10 +130,10 @@ describe("video game collection access", () => {
     await user.keyboard("{Enter}")
 
     await waitFor(() =>
-      expect(screen.queryByRole("dialog")).not.toBeInTheDocument()
+      expect(screen.queryByRole("dialog")).not.toBeInTheDocument(),
     )
     expect(
-      screen.getByRole("heading", { name: "Retro game shelf" })
+      screen.getByRole("heading", { name: "Retro game shelf" }),
     ).toBeInTheDocument()
   })
 
@@ -146,7 +144,7 @@ describe("video game collection access", () => {
       http.delete(`${api}/collections/1/games/1`, () => {
         deleted = true
         return new HttpResponse(null, { status: 204 })
-      })
+      }),
     )
     vi.spyOn(window, "confirm").mockReturnValueOnce(true)
 
@@ -157,11 +155,11 @@ describe("video game collection access", () => {
     await user.keyboard("{Enter}")
 
     await waitFor(() =>
-      expect(screen.queryByRole("dialog")).not.toBeInTheDocument()
+      expect(screen.queryByRole("dialog")).not.toBeInTheDocument(),
     )
     expect(deleted).toBe(true)
     expect(window.confirm).toHaveBeenCalledWith(
-      'Delete "Halo 3"? This cannot be undone.'
+      'Delete "Halo 3"? This cannot be undone.',
     )
   })
 
@@ -174,7 +172,7 @@ describe("video game collection access", () => {
     const drawer = await screen.findByRole("dialog")
 
     expect(
-      within(drawer).queryByRole("button", { name: "Delete game" })
+      within(drawer).queryByRole("button", { name: "Delete game" }),
     ).not.toBeInTheDocument()
   })
 
@@ -185,16 +183,16 @@ describe("video game collection access", () => {
 
     expect(await screen.findByText("Halo 3")).toBeInTheDocument()
     expect(
-      screen.queryByRole("button", { name: "Add console" })
+      screen.queryByRole("button", { name: "Add console" }),
     ).not.toBeInTheDocument()
     expect(
-      screen.queryByRole("button", { name: "Add game" })
+      screen.queryByRole("button", { name: "Add game" }),
     ).not.toBeInTheDocument()
     expect(
-      screen.queryByRole("button", { name: /^Edit/ })
+      screen.queryByRole("button", { name: /^Edit/ }),
     ).not.toBeInTheDocument()
     expect(
-      screen.queryByRole("button", { name: /^Delete/ })
+      screen.queryByRole("button", { name: /^Delete/ }),
     ).not.toBeInTheDocument()
   })
 
@@ -218,6 +216,6 @@ describe("video game collection access", () => {
       await screen.findByRole("dialog")
 
       await expectNoViolations(document.body)
-    }
+    },
   )
 })

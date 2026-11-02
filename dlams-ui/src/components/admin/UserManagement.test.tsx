@@ -12,7 +12,7 @@ function signInAsAdmin() {
     http.get(`${api}/verify`, () =>
       HttpResponse.json({
         user: { id: "1", username: "admin", role: "admin" },
-      })
+      }),
     ),
     http.get(`${api}/admin/users`, () =>
       HttpResponse.json({
@@ -32,8 +32,8 @@ function signInAsAdmin() {
             created_at: "2026-10-17T12:00:00Z",
           },
         ],
-      })
-    )
+      }),
+    ),
   )
 }
 

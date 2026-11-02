@@ -39,7 +39,10 @@ function rank(entry: SearchEntry<unknown>, query: string, words: string[]) {
   return 2
 }
 
-export function searchEntries<T>(entries: SearchEntry<T>[], query: string): T[] {
+export function searchEntries<T>(
+  entries: SearchEntry<T>[],
+  query: string,
+): T[] {
   const normalizedQuery = normalizeForSearch(query).trim()
   const words = normalizedQuery.split(/\s+/).filter(Boolean) // put every word in an array and filter out ""
   return entries

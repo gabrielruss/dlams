@@ -31,12 +31,9 @@ function SearchResults() {
   const { ownedItems, isPending, isError, error } = useOwnedItems()
   const entries = useMemo(
     () => buildSearchEntries(ownedItems, (item) => item),
-    [ownedItems]
+    [ownedItems],
   )
-  const results = useMemo(
-    () => searchEntries(entries, query),
-    [entries, query]
-  )
+  const results = useMemo(() => searchEntries(entries, query), [entries, query])
 
   return (
     <section className="flex flex-col gap-5 duration-200 animate-in fade-in slide-in-from-top-2 motion-reduce:animate-none">

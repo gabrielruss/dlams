@@ -30,7 +30,7 @@ function useSearchMode() {
         next.delete(ITEM_PARAM)
         return next
       },
-      { replace: query !== null }
+      { replace: query !== null },
     )
   }
 
@@ -41,7 +41,7 @@ function useSearchMode() {
         next.delete(SEARCH_PARAM)
         return next
       },
-      { replace: true }
+      { replace: true },
     )
   }
 

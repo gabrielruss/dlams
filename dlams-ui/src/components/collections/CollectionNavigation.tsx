@@ -153,7 +153,8 @@ function CollectionNavigation() {
                     required: "Collection name is required",
                     maxLength: {
                       value: 100,
-                      message: "Collection name must be 100 characters or fewer",
+                      message:
+                        "Collection name must be 100 characters or fewer",
                     },
                   })}
                   autoFocus

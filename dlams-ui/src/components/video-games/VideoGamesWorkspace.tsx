@@ -23,8 +23,8 @@ function VideoGamesWorkspace({ collection }: VideoGamesWorkspaceProps) {
       {isSandbox(user) && (
         <p className="rounded-md border p-3 text-sm">
           You are currently in a demo session. Once you sign out, or after 30
-          minutes, you won't be able to get back to it, but links you share
-          keep working for 7 days. Enjoy :)
+          minutes, you won't be able to get back to it, but links you share keep
+          working for 7 days. Enjoy :)
         </p>
       )}
       {!canWrite && (

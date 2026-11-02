@@ -15,7 +15,7 @@ export function renderApp(route = "/") {
       <MemoryRouter initialEntries={[route]}>
         <App />
       </MemoryRouter>
-    </QueryClientProvider>
+    </QueryClientProvider>,
   )
 
   return { user, container }

@@ -9,12 +9,12 @@ export const videoGameStatsKeys = {
 export const videoGameStatsApi = {
   list: () =>
     apiRequest<{ stats: VideoGameCollectionStats[] }>(
-      "/collections/video-game-stats"
+      "/collections/video-game-stats",
     ),
 }
 
 export const videoGameCollectionStatsQueryOptions = () =>
-    queryOptions({
-      queryKey: videoGameStatsKeys.all,
-      queryFn: videoGameStatsApi.list,
-    })
+  queryOptions({
+    queryKey: videoGameStatsKeys.all,
+    queryFn: videoGameStatsApi.list,
+  })

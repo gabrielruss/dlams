@@ -9,7 +9,7 @@ export async function expectNoViolations(container: Element) {
   const { violations } = await axe(container)
   const summary = violations.map(
     ({ id, help, nodes }) =>
-      `${id}: ${help} (${nodes.map((node) => node.target.join(" ")).join(", ")})`
+      `${id}: ${help} (${nodes.map((node) => node.target.join(" ")).join(", ")})`,
   )
   expect(summary).toEqual([])
 }

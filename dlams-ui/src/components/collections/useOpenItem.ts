@@ -25,7 +25,7 @@ function useOpenItem(type: ItemType) {
         next.set(ITEM_PARAM, itemParamValue(type, itemId))
         return next
       },
-      { state: { openedFromList: true } }
+      { state: { openedFromList: true } },
     )
   }
 
@@ -40,7 +40,7 @@ function useOpenItem(type: ItemType) {
         next.delete(ITEM_PARAM)
         return next
       },
-      { replace: true }
+      { replace: true },
     )
   }
 

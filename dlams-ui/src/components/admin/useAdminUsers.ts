@@ -23,7 +23,7 @@ function runAction(action: UserAction) {
 function useAdminUsers() {
   const queryClient = useQueryClient()
   const { data, isPending, isError, error } = useQuery(
-    adminUserListQueryOptions()
+    adminUserListQueryOptions(),
   )
   const actionMutation = useMutation({
     mutationFn: runAction,

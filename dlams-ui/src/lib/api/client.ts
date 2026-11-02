@@ -3,10 +3,7 @@ const API_URL = import.meta.env.VITE_API_URL
 export class ApiError extends Error {
   readonly status: number
 
-  constructor(
-    message: string,
-    status: number
-  ) {
+  constructor(message: string, status: number) {
     super(message)
     this.name = "ApiError"
     this.status = status
@@ -15,7 +12,7 @@ export class ApiError extends Error {
 
 export async function apiRequest<T>(
   endpoint: string,
-  options?: RequestInit
+  options?: RequestInit,
 ): Promise<T> {
   const response = await fetch(`${API_URL}${endpoint}`, {
     credentials: "include",

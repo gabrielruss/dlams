@@ -33,8 +33,8 @@ function shareCollection() {
             completed: true,
           },
         ],
-      })
-    )
+      }),
+    ),
   )
 }
 
@@ -45,14 +45,14 @@ describe("the shared collection page", () => {
     renderApp("/s/token-1")
 
     expect(
-      await screen.findByRole("heading", { name: "Retro game shelf" })
+      await screen.findByRole("heading", { name: "Retro game shelf" }),
     ).toBeInTheDocument()
     expect(screen.getByText("Halo 3")).toBeInTheDocument()
     expect(screen.getByText("Xbox 360 — Original White")).toBeInTheDocument()
     expect(screen.getByText(/This view is read-only/)).toBeInTheDocument()
     expect(screen.getByText("Video games")).toBeInTheDocument()
     expect(
-      screen.queryByRole("button", { name: /^(Add|Edit|Delete|Share)/ })
+      screen.queryByRole("button", { name: /^(Add|Edit|Delete|Share)/ }),
     ).not.toBeInTheDocument()
   })
 
@@ -61,15 +61,15 @@ describe("the shared collection page", () => {
       http.get(`${api}/shared/gone`, () =>
         HttpResponse.json(
           { detail: "This link is no longer active." },
-          { status: 404 }
-        )
-      )
+          { status: 404 },
+        ),
+      ),
     )
 
     renderApp("/s/gone")
 
     expect(await screen.findByRole("alert")).toHaveTextContent(
-      "This link is no longer active."
+      "This link is no longer active.",
     )
   })
 

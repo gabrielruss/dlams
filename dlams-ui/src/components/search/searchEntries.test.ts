@@ -42,7 +42,7 @@ describe("searchEntries", () => {
   it("does not search the details", () => {
     const withDetails = buildSearchEntries(
       [{ title: "Halo 3", keywords: ["Xbox 360"], details: ["Loose"] }],
-      ({ title, keywords }) => ({ title, keywords })
+      ({ title, keywords }) => ({ title, keywords }),
     )
     expect(searchEntries(withDetails, "loose")).toEqual([])
   })

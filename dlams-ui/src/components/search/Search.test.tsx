@@ -48,7 +48,7 @@ function signInWithItems(ownedItems: OwnedItem[] = items) {
     http.get(`${api}/verify`, () =>
       HttpResponse.json({
         user: { id: "1", username: "test-user", role: "user" },
-      })
+      }),
     ),
     http.get(`${api}/collections`, () =>
       HttpResponse.json({
@@ -56,22 +56,22 @@ function signInWithItems(ownedItems: OwnedItem[] = items) {
           collection(1, "Retro game shelf"),
           collection(2, "Games to sell"),
         ],
-      })
+      }),
     ),
     http.get(`${api}/collections/video-game-stats`, () =>
-      HttpResponse.json({ stats: [] })
+      HttpResponse.json({ stats: [] }),
     ),
     http.get(`${api}/collections/:id/consoles`, () =>
-      HttpResponse.json({ consoles: [] })
+      HttpResponse.json({ consoles: [] }),
     ),
     http.get(`${api}/collections/:id/games`, () =>
-      HttpResponse.json({ games: [] })
+      HttpResponse.json({ games: [] }),
     ),
     http.get(`${api}/collections/:id/links`, () =>
-      HttpResponse.json({ links: [] })
+      HttpResponse.json({ links: [] }),
     ),
     http.get(`${api}/console-labels`, () => HttpResponse.json({ labels: [] })),
-    http.get(`${api}/items`, () => HttpResponse.json({ items: ownedItems }))
+    http.get(`${api}/items`, () => HttpResponse.json({ items: ownedItems })),
   )
 }
 
@@ -103,11 +103,11 @@ describe("search", () => {
       "Edit Xbox 360 — Original White",
     ])
     expect(
-      screen.getByText("Xbox 360 · CIB · Retro game shelf")
+      screen.getByText("Xbox 360 · CIB · Retro game shelf"),
     ).toBeInTheDocument()
     const sidebar = screen.getByRole("navigation", { name: "Collections" })
     expect(
-      within(sidebar).queryByRole("button", { pressed: true })
+      within(sidebar).queryByRole("button", { pressed: true }),
     ).not.toBeInTheDocument()
   })
 
@@ -132,7 +132,7 @@ describe("search", () => {
     await user.type(searchBox(), "zelda")
 
     expect(
-      await screen.findByText('Nothing matches "zelda".')
+      await screen.findByText('Nothing matches "zelda".'),
     ).toBeInTheDocument()
   })
 
@@ -142,12 +142,12 @@ describe("search", () => {
         ...items[0],
         id: index + 1,
         title: `Game ${String(index + 1).padStart(2, "0")}`,
-      }))
+      })),
     )
     await openSearch()
 
     expect(
-      await screen.findByText("Showing 50 of 60, type to narrow")
+      await screen.findByText("Showing 50 of 60, type to narrow"),
     ).toBeInTheDocument()
     expect(resultTitles()).toHaveLength(50)
   })
@@ -160,12 +160,12 @@ describe("search", () => {
     await user.keyboard("{Escape}")
     expect(searchBox()).toHaveValue("")
     expect(
-      screen.getByRole("heading", { name: "Results in all collections" })
+      screen.getByRole("heading", { name: "Results in all collections" }),
     ).toBeInTheDocument()
 
     await user.keyboard("{Escape}")
     expect(
-      await screen.findByRole("heading", { name: "Retro game shelf" })
+      await screen.findByRole("heading", { name: "Retro game shelf" }),
     ).toBeInTheDocument()
   })
 
@@ -176,7 +176,7 @@ describe("search", () => {
     await user.click(screen.getByRole("button", { name: "Close search" }))
 
     expect(
-      await screen.findByRole("heading", { name: "Retro game shelf" })
+      await screen.findByRole("heading", { name: "Retro game shelf" }),
     ).toBeInTheDocument()
   })
 
@@ -185,13 +185,15 @@ describe("search", () => {
     const { user } = await openSearch()
 
     const sidebar = screen.getByRole("navigation", { name: "Collections" })
-    await user.click(within(sidebar).getByRole("button", { name: /Games to sell/ }))
+    await user.click(
+      within(sidebar).getByRole("button", { name: /Games to sell/ }),
+    )
 
     expect(
-      await screen.findByRole("heading", { name: "Games to sell" })
+      await screen.findByRole("heading", { name: "Games to sell" }),
     ).toBeInTheDocument()
     expect(
-      screen.queryByRole("heading", { name: "Results in all collections" })
+      screen.queryByRole("heading", { name: "Results in all collections" }),
     ).not.toBeInTheDocument()
   })
 
@@ -211,8 +213,8 @@ describe("search", () => {
               completed: true,
             },
           ],
-        })
-      )
+        }),
+      ),
     )
     const { user } = await openSearch()
     await screen.findByText("3 results")
@@ -221,10 +223,10 @@ describe("search", () => {
 
     const drawer = await screen.findByRole("dialog")
     expect(within(drawer).getByLabelText("Game name")).toHaveValue(
-      "Pokémon Red"
+      "Pokémon Red",
     )
     expect(
-      screen.getByRole("heading", { name: "Games to sell", hidden: true })
+      screen.getByRole("heading", { name: "Games to sell", hidden: true }),
     ).toBeInTheDocument()
   })
 
@@ -233,7 +235,9 @@ describe("search", () => {
     renderApp("/?collection=1&q=halo")
 
     expect(
-      await screen.findByRole("heading", { name: "Results in all collections" })
+      await screen.findByRole("heading", {
+        name: "Results in all collections",
+      }),
     ).toBeInTheDocument()
     expect(searchBox()).toHaveValue("halo")
     expect(await screen.findByText("1 result")).toBeInTheDocument()

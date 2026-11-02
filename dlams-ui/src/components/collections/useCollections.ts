@@ -8,11 +8,7 @@ import {
   collectionsApi,
 } from "@/lib/api/collections"
 import { videoGameStatsKeys } from "@/lib/api/videoGameStats"
-import {
-  COLLECTION_PARAM,
-  ITEM_PARAM,
-  SEARCH_PARAM,
-} from "@/lib/urlParams"
+import { COLLECTION_PARAM, ITEM_PARAM, SEARCH_PARAM } from "@/lib/urlParams"
 import { defaultCollectionType } from "@/types/collections"
 
 function useCollections() {
@@ -27,10 +23,10 @@ function useCollections() {
   }, [searchParams])
   const collections = useMemo(
     () => collectionsQuery.data?.collections ?? [],
-    [collectionsQuery.data?.collections]
+    [collectionsQuery.data?.collections],
   )
   const selectedCollection = collections.find(
-    (collection) => collection.id === selectedCollectionId
+    (collection) => collection.id === selectedCollectionId,
   )
 
   useEffect(() => {
@@ -58,7 +54,7 @@ function useCollections() {
         }
         return next
       },
-      { replace: true }
+      { replace: true },
     )
   }, [
     collections,

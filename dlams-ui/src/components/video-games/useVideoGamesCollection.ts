@@ -1,8 +1,6 @@
 import { useQuery } from "@tanstack/react-query"
 
-import {
-  consoleListQueryOptions,
-} from "@/lib/api/consoles"
+import { consoleListQueryOptions } from "@/lib/api/consoles"
 import { gameListQueryOptions } from "@/lib/api/games"
 
 function useVideoGamesCollection(collectionId: number) {

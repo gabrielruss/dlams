@@ -114,23 +114,23 @@ describe("signing in", () => {
   it("is a page with a main landmark and a level 1 heading", async () => {
     server.use(
       http.get(`${api}/verify`, () =>
-        HttpResponse.json({ detail: "Not authenticated" }, { status: 401 })
-      )
+        HttpResponse.json({ detail: "Not authenticated" }, { status: 401 }),
+      ),
     )
 
     renderApp("/")
 
     expect(await screen.findByRole("main")).toBeInTheDocument()
     expect(
-      screen.getByRole("heading", { level: 1, name: "Login" })
+      screen.getByRole("heading", { level: 1, name: "Login" }),
     ).toBeInTheDocument()
   })
 
   it("has no accessibility violations on the login page", async () => {
     server.use(
       http.get(`${api}/verify`, () =>
-        HttpResponse.json({ detail: "Not authenticated" }, { status: 401 })
-      )
+        HttpResponse.json({ detail: "Not authenticated" }, { status: 401 }),
+      ),
     )
 
     const { container } = renderApp("/")

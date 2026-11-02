@@ -7,7 +7,7 @@ function useVideoGameCollectionStats(collectionId: number) {
     ...videoGameCollectionStatsQueryOptions(),
     select: ({ stats }) => {
       return stats.find(
-        (collectionStats) => collectionStats.collection_id === collectionId
+        (collectionStats) => collectionStats.collection_id === collectionId,
       )
     },
   })

@@ -8,16 +8,18 @@ interface VideoGameCollectionStatsProps {
 function VideoGameCollectionStats({
   collection,
 }: VideoGameCollectionStatsProps) {
-  const { data: stats, isPending, isError, error } =
-    useVideoGameCollectionStats(collection.id)
+  const {
+    data: stats,
+    isPending,
+    isError,
+    error,
+  } = useVideoGameCollectionStats(collection.id)
 
   if (!stats) {
     return (
       <span
         className={
-          isError
-            ? "text-xs text-destructive"
-            : "text-xs text-muted-foreground"
+          isError ? "text-xs text-destructive" : "text-xs text-muted-foreground"
         }
         role={isError ? "alert" : undefined}
       >

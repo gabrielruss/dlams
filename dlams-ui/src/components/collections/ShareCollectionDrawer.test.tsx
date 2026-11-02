@@ -29,7 +29,7 @@ function signIn({
 } = {}) {
   server.use(
     http.get(`${api}/verify`, () =>
-      HttpResponse.json({ user: { id: "2", username: "test-user", role } })
+      HttpResponse.json({ user: { id: "2", username: "test-user", role } }),
     ),
     http.get(`${api}/collections`, () =>
       HttpResponse.json({
@@ -42,16 +42,16 @@ function signIn({
             access,
           },
         ],
-      })
+      }),
     ),
     http.get(`${api}/collections/video-game-stats`, () =>
-      HttpResponse.json({ stats: [] })
+      HttpResponse.json({ stats: [] }),
     ),
     http.get(`${api}/collections/1/consoles`, () =>
-      HttpResponse.json({ consoles: [] })
+      HttpResponse.json({ consoles: [] }),
     ),
     http.get(`${api}/collections/1/games`, () =>
-      HttpResponse.json({ games: [] })
+      HttpResponse.json({ games: [] }),
     ),
     http.get(`${api}/console-labels`, () => HttpResponse.json({ labels: [] })),
     http.get(`${api}/collections/1/links`, () => HttpResponse.json({ links })),
@@ -65,21 +65,27 @@ function signIn({
       const index = links.findIndex((item) => item.id === Number(params.linkId))
       links.splice(index, 1)
       return new HttpResponse(null, { status: 204 })
-    })
+    }),
   )
 }
 
 async function openShareDrawer() {
   const rendered = renderApp("/")
   await rendered.user.click(
-    await screen.findByRole("button", { name: "Share", description: /active link/ })
+    await screen.findByRole("button", {
+      name: "Share",
+      description: /active link/,
+    }),
   )
   const drawer = await screen.findByRole("dialog")
   await within(drawer).findByText("For Dana")
   return { ...rendered, drawer }
 }
 
-async function press(element: HTMLElement, user: ReturnType<typeof renderApp>["user"]) {
+async function press(
+  element: HTMLElement,
+  user: ReturnType<typeof renderApp>["user"],
+) {
   element.focus()
   await user.keyboard("{Enter}")
 }
@@ -91,7 +97,7 @@ describe("sharing a collection by link", () => {
 
     await press(
       within(drawer).getByRole("button", { name: "Create read-only link" }),
-      user
+      user,
     )
     within(drawer).getByLabelText("Link name (optional)").focus()
     await user.keyboard("Hiring team{Enter}")
@@ -100,10 +106,10 @@ describe("sharing a collection by link", () => {
 
     await press(
       within(drawer).getByRole("button", { name: "Copy link for Hiring team" }),
-      user
+      user,
     )
     expect(await navigator.clipboard.readText()).toBe(
-      `${window.location.origin}/s/token-11`
+      `${window.location.origin}/s/token-11`,
     )
     const copyButton = within(drawer).getByRole("button", {
       name: "Copy link for Hiring team",
@@ -111,7 +117,7 @@ describe("sharing a collection by link", () => {
     expect(copyButton).toHaveTextContent("Copied")
     expect(within(drawer).getByText("Link copied")).toHaveAttribute(
       "role",
-      "status"
+      "status",
     )
 
     await waitFor(() => expect(copyButton).toHaveTextContent("Copy link"), {
@@ -123,12 +129,12 @@ describe("sharing a collection by link", () => {
     signIn()
     const { user, drawer } = await openShareDrawer()
     vi.spyOn(navigator.clipboard, "writeText").mockRejectedValueOnce(
-      new Error("Clipboard blocked")
+      new Error("Clipboard blocked"),
     )
 
     await press(
       within(drawer).getByRole("button", { name: "Copy link for For Dana" }),
-      user
+      user,
     )
 
     const alert = await within(drawer).findByRole("alert")
@@ -146,7 +152,10 @@ describe("sharing a collection by link", () => {
     expect(within(drawer).getByText("For Dana")).toBeInTheDocument()
 
     await press(within(drawer).getByRole("button", { name: deleteDana }), user)
-    await press(within(drawer).getByRole("button", { name: "Don't Look At My Stuff" }), user)
+    await press(
+      within(drawer).getByRole("button", { name: "Don't Look At My Stuff" }),
+      user,
+    )
 
     await within(drawer).findByText("Unnamed link")
     expect(within(drawer).queryByText("For Dana")).not.toBeInTheDocument()
@@ -154,15 +163,17 @@ describe("sharing a collection by link", () => {
 
   it("stops offering new links at five", async () => {
     signIn({
-      links: [1, 2, 3, 4, 5].map((id) => link(id, id === 1 ? "For Dana" : null)),
+      links: [1, 2, 3, 4, 5].map((id) =>
+        link(id, id === 1 ? "For Dana" : null),
+      ),
     })
     const { drawer } = await openShareDrawer()
 
     expect(
-      within(drawer).getByText(/A collection can have 5 links/)
+      within(drawer).getByText(/A collection can have 5 links/),
     ).toBeInTheDocument()
     expect(
-      within(drawer).queryByRole("button", { name: "Create read-only link" })
+      within(drawer).queryByRole("button", { name: "Create read-only link" }),
     ).not.toBeInTheDocument()
   })
 
@@ -173,11 +184,11 @@ describe("sharing a collection by link", () => {
     expect(screen.getByText("2 active links")).toBeInTheDocument()
     await press(
       within(drawer).getByRole("button", { name: "Delete link for For Dana" }),
-      user
+      user,
     )
     await press(
       within(drawer).getByRole("button", { name: "Don't Look At My Stuff" }),
-      user
+      user,
     )
 
     expect(await screen.findByText("1 active link")).toBeInTheDocument()
@@ -189,7 +200,7 @@ describe("sharing a collection by link", () => {
     renderApp("/")
 
     expect(
-      await screen.findByText("No consoles in this collection yet.")
+      await screen.findByText("No consoles in this collection yet."),
     ).toBeInTheDocument()
     expect(screen.getByRole("button", { name: "Share" })).toBeInTheDocument()
     expect(screen.queryByText(/active link/)).not.toBeInTheDocument()
@@ -201,7 +212,7 @@ describe("sharing a collection by link", () => {
     renderApp("/")
 
     expect(
-      await screen.findByRole("button", { name: "Share" })
+      await screen.findByRole("button", { name: "Share" }),
     ).toBeInTheDocument()
   })
 
@@ -211,10 +222,10 @@ describe("sharing a collection by link", () => {
     renderApp("/")
 
     expect(
-      await screen.findByText("No consoles in this collection yet.")
+      await screen.findByText("No consoles in this collection yet."),
     ).toBeInTheDocument()
     expect(
-      screen.queryByRole("button", { name: "Share" })
+      screen.queryByRole("button", { name: "Share" }),
     ).not.toBeInTheDocument()
   })
 
