@@ -1,66 +1,70 @@
 # DLAMS plan
 
-Last updated: 2026-10-30
+Last updated: 2026-10-31
 
 The current state of the project. For why things are the way they are, see
 [`docs/decisions.md`](./docs/decisions.md). For the full history up to
 2026-10-09, see [`docs/archive/`](./docs/archive/).
 
-## Where we left off (2026-10-30)
+## Where we left off (2026-10-31)
 
 Start here in a new session. This block is rewritten at the end of a session,
 never appended to. History lives in git and `docs/decisions.md`.
 
-- **Status.** The portfolio-ready milestone is complete (2026-10-27). Sandbox
-  demo sessions are deployed and working (owner-reported, 2026-10-30).
-  Ruff is committed (`3a33b67`, "adding ruff and formatting"). **Read-only
-  link sharing (item 8, all three steps) was built on 2026-10-30 on branch
-  `add-share`, uncommitted; the owner was testing it and checking it in at
-  the end of the session.** Run `git status` and `git log` first
-  to see what landed: the owner commits and pushes everything, and a push to
-  `main` deploys.
-- **What was built 2026-10-30, not yet confirmed live:**
-  - **Ruff** (committed): `requirements-dev.txt`, `pyproject.toml`, CI steps,
-    VS Code settings, and a Claude Code hook in `.claude/` that formats each
-    edited `.py` file. Whether CI's Ruff steps passed was not reported.
-  - **Share links:** `collection_links` table (migration `a3d9f61c2b84`),
-    owner routes under `/collections/{id}/links` (at most 5 per collection,
-    sandboxes allowed), and the Share drawer (`ShareCollectionDrawer.tsx`):
-    "Create read-only link" with an optional name, then "Copy link" and
-    "Delete link" per link; the delete confirm button reads "Don't Look At My
-    Stuff". "N active links" shows under the Share button.
-  - **The link page:** public `GET /shared/{token}` (`shared_routes.py`) and
-    `/s/:token` (`pages/SharedCollection.tsx`), routed before the session
-    check; read-only lists, no owner details. Nginx: rate limit (30/min per
-    address) and `noindex` / `no-referrer` headers; `nginx -t` passed only on
-    a copy without the certificate lines.
-  - **Seven-day sandboxes:** kept 7 days for their links; sign-out no longer
-    deletes them; a full demo replaces the oldest sandbox past its 30-minute
-    session, one without links first, else says "busy".
-  - **UI changes along the way:** list rows open the edit drawer and Delete
-    lives in the drawer (`ListRow`, `ConsoleList`, `GameList`); console game
-    counts were removed from the API and UI (a stats area is item 10c).
-- **What is verified.** Run by Claude on 2026-10-30: 29 UI tests, lint, and
-  build in `dlams-ui`; 79 backend tests and Ruff in `dlams-fastapi/.venv`.
-  Not run: migration `a3d9f61c2b84` against PostgreSQL (its SQL was rendered
-  offline), the Nginx config on the Pi, any of the new UI in a real browser
-  (the owner was about to). Owner-reported earlier: the backup restore test
-  passed (2026-10-29), CI passed (2026-10-26).
+- **Status.** The portfolio-ready milestone is complete (2026-10-27).
+  Sandbox demo sessions, read-only link sharing (item 8), and the
+  consistency rules for new code are deployed: commit `54a4126` ("adding
+  share funct"), owner-reported working on 2026-10-31 after a full manual
+  check. Nothing is being built right now. The rest of the 2026-10-31
+  session was planning: search is fully designed (item 8a) and the
+  priority list changed (below). Those doc updates (`DLAMS-PLAN.md`,
+  `docs/architecture.md`, `docs/decisions.md`) were uncommitted at the end
+  of the session. Run `git status` and `git log` first: the owner commits
+  and pushes everything, and a push to `main` deploys (docs included).
+- **What is deployed, in short** (details in item 8 and the architecture
+  doc):
+  - Share links: up to 5 per collection from the Share drawer
+    (`ShareCollectionDrawer.tsx`, `CreateLinkForm.tsx`, `ShareLinkRow.tsx`);
+    the public page `/s/:token` (`pages/SharedCollection.tsx`) and
+    `GET /shared/{token}`; Nginx rate limit and `noindex` / `no-referrer`.
+  - Sandboxes live 7 days for their links; sign-out keeps them.
+  - List rows open the edit drawer; `ListRow` is in
+    `components/collections/` for any item type.
+  - Consistency rules (decision "One way to write each thing"): installed
+    shadcn components only, one form pattern, `Annotated` dependency
+    aliases (`DbSession`, `CurrentUser`, `OwnedCollection`, ...),
+    `select()` only, `extra="forbid"` on request schemas. Rules are in
+    `.github/copilot-instructions.md`; older code is items 6a and 6d.
+- **What is verified.** Run by Claude on 2026-10-31: 29 UI tests, lint, and
+  build; 80 backend tests, `ruff check`, and `ruff format --check`.
+  Owner-reported 2026-10-31: deployed, and a manual check of everything
+  (share links in a private window, the deleted-link message, a sandbox's
+  link after sign-out, the console and game click-through, CI's Ruff
+  steps). Not run: Pylance after the `int | None` count fix in
+  `create_link`. Earlier: backup restore test passed (2026-10-29).
 - **Next, in order:**
-  1. **Confirm the ship.** Ask the owner what landed and whether the deploy
-     ran. On the live site: create a link and open it in a private window;
-     delete it and see "This link is no longer active."; start a demo, share
-     a link, sign out, and check the link still works. Check CI's Ruff steps
-     passed.
-  2. **Search** (item 8a): scope questions to settle with the owner first.
-  3. The manual half of the accessibility audit (item 6), the
-     shadcn-everywhere cleanup (item 6a, needs the styling go-ahead), finding
-     repeated component styling (6b), the styling cleanup (6c), and the
-     backend consistency pass (6d), then
-     items 9a (admin wipe-sandboxes button), 10a-10c (later sharing ideas,
-     color themes, stats area), and 11.
-- **Waiting on the owner:** whether to take the `zod` fix (`npm audit fix`);
-  the search scope questions.
+  1. **Gzip in Nginx** (item 8c): waiting on the owner's go-ahead; best
+     before search, which loads every owned item in one response.
+  2. **Search** (item 8a): designed, ready to build. Read 8a in full first.
+     In short: always every owned collection (signed in); a new endpoint
+     lists every owned item in one type-neutral shape with no query per
+     row; one TypeScript matching function and search field serve both the
+     signed-in search and the share link page (which filters its own
+     lists); a "Search all collections" bar above the collection takes
+     over the page on focus, with `?q=` in the URL; a result opens its
+     collection with its editor open (`?collection=7&item=game-12`).
+  3. **Edit and delete collections** (item 8b).
+  4. Then: the manual accessibility audit (6), shadcn everywhere (6a),
+     repeated styling (6b), styling cleanup (6c), backend consistency
+     (6d), admins delete users (9a, replaces the wipe-sandboxes button),
+     stats area (10c, moved up 2026-10-31), later sharing ideas (10a),
+     color themes (10b), further item types (11), item images (12, added
+     2026-10-31; do the dependency upgrades first), moving items between
+     collections of the same type (13), and a duplicate item finder (14).
+- **Waiting on the owner:** gzip (8c); whether to take the `zod` fix
+  (`npm audit fix`); in 6d, whether to drop the `response_model`s Ruff's
+  FAST001 calls redundant; before 6a, running
+  `npx shadcn@latest add select checkbox`.
 - **Things to remember about the code.**
   - Tests sit beside the feature they cover. `renderApp(route)` in
     `dlams-ui/src/test/renderApp.tsx` renders the real app; register MSW
@@ -69,12 +73,22 @@ never appended to. History lives in git and `docs/decisions.md`.
     any test that opens an owned collection needs a
     `GET /collections/1/links` handler (the Share button loads the links).
     Inside a Vaul drawer, use `element.focus()` and `user.keyboard(...)`
-    instead of clicks: pointer events throw in jsdom.
+    instead of clicks: pointer events throw in jsdom. MSW mocks never return
+    a 422, so they cannot catch a body a schema rejects.
   - Backend tests call route functions directly against SQLite, which does
     not enforce foreign keys; delete child rows explicitly (as
-    `delete_sandbox` does) and test that.
+    `delete_sandbox` does) and test that. Routes take the collection from a
+    dependency, so tests pass the collection in and test access rules on
+    the dependency functions.
+  - `_console_response` and `_game_response` run one label query per row;
+    the search endpoint must not reuse them as they are (fix noted in 6d).
   - Share links are not an access level: `/shared/{token}` looks the token up
-    and returns read-only data. Keep it out of `permissions.py`.
+    and returns read-only data. `OwnedCollection` guards managing links, not
+    reading them.
+  - New code follows the conventions file even inside an unconverted file:
+    shadcn components, the form pattern, `Annotated` aliases, `select()`,
+    `extra="forbid"` on request schemas. The 6a grep (in that item) lists
+    raw form elements; it found 30 on 2026-10-31, all older code.
   - Generated shadcn files need the owner's approval to edit (local edits to
     `components/ui/combobox.tsx` are listed in
     `.github/copilot-instructions.md`). The owner runs the shadcn CLI.
@@ -82,10 +96,11 @@ never appended to. History lives in git and `docs/decisions.md`.
     comments, and never use the owner's name in tests or fixtures (use
     `test-user`, `demo-user`).
   - Styling: ask before any styling change; the owner's direct request is the
-    go-ahead. Destructive final actions use the red outline style
-    (`border border-destructive text-destructive`). `red` is the brand color
-    (logo D, selected-collection bar). A console color theme was tried and
-    reverted (item 10b holds the notes).
+    go-ahead (the search layout in 8a is approved). Destructive final
+    actions are `<Button variant="outline" className="border-destructive
+    text-destructive">`. `red` is the brand color (logo D,
+    selected-collection bar). A console color theme was tried and reverted
+    (item 10b holds the notes).
   - Backend: run `.venv/bin/ruff check .` and `.venv/bin/ruff format --check .`
     from `dlams-fastapi/` along with the tests; CI runs both.
 - **How the owner likes to work:** one decision per message; give a
@@ -93,9 +108,11 @@ never appended to. History lives in git and `docs/decisions.md`.
   UI wording directly, so read the current file before changing text and
   keep their wording; they like to see a change before committing to it and
   will revert freely, so keep changes small and easy to undo; prefer fewer
-  features over messy code. For commands on the Pi, give one command per code
-  block and wait for the output. Do not offer to commit or push. Docs stay
-  trim, facts only.
+  features over messy code, and one consistent pattern over several. They
+  like UX ideas weighed honestly and will push back with their own. They
+  are newer to Python and SQLAlchemy than to JS, so JS comparisons help.
+  For commands on the Pi, give one command per code block and wait for the
+  output. Do not offer to commit or push. Docs stay trim, facts only.
 
 ## How to use this document
 
@@ -186,36 +203,47 @@ workflow on a self-hosted runner (`.github/workflows/deploy.yml`).
   `b8e1d6a42c07` recreated the affected tables, deleting their rows (the
   owner had nothing to keep). Decision in `docs/decisions.md`.
 
-**Built 2026-10-30, shipping at the end of that session**
+**Committed 2026-10-30**
+
+- **Ruff** lints and formats the backend in CI (`3a33b67`).
+
+**Deployed 2026-10-31** (`54a4126`, owner-reported working)
 
 - **Read-only link sharing:** up to 5 named links per collection from a
   Share drawer, a public read-only page at `/s/<token>`, and demo sandboxes
   kept 7 days so their links work. Item 8.
 - **List rows open the editor;** Delete is in the edit drawer.
-- **Ruff** lints and formats the backend in CI.
+- **Consistency rules** for new code (shadcn components, one form pattern,
+  backend dependency aliases and `select()`), with the branch's own code
+  converted. Items 6a and 6d hold the rest.
 
 **Not implemented**
 
 - Sharing with a user by username has an API but no screen (item 10a).
-- Search (no search or filter exists in the UI or API).
-- An admin button to wipe all sandbox accounts.
+- Search (designed 2026-10-31, item 8a; nothing built).
+- Renaming or deleting a collection (item 8b).
+- Deleting a user (admins can only deactivate; item 9a).
 - Item types other than video games.
+- Item images (item 12).
+- Moving items between collections (item 13) and finding duplicates (item 14).
 
 **Verification baseline**
 
-- UI (2026-10-30, run by Claude): `npm test` passes (29 tests: login, the demo
+- UI (2026-10-31, run by Claude): `npm test` passes (29 tests: login, the demo
   session button, the owner and shared access views, the share-link drawer,
   the admin page, and axe
   checks on the login, register, collection,
   admin, and drawer screens), and `npm run lint` and `npm run build` pass. CI (lint, `npm test`, build, backend tests) passed on
   push (owner-reported, 2026-10-26).
 
-- API (2026-10-30, run by Claude in `dlams-fastapi/.venv`): 79 unit tests
+- API (2026-10-31, run by Claude in `dlams-fastapi/.venv`): 80 unit tests
   pass, including 15 for sandbox demo sessions (the copy, the 10-sandbox cap,
   expiry cleanup, the collection and item limits, blocked sharing, the
   template staying untouched, the 7-day lifetime, which sandbox a full demo
   replaces, and sign-out keeping the sandbox), 5 for the admin
-  password reset, 8 for share links, and 3 for the shared-collection route.
+  password reset, 9 for share links (including that every link and grant
+  route declares `get_owned_collection`), and 3 for the shared-collection
+  route. Ruff check and format pass.
 
 - Backup restore (2026-10-29, owner-run, output pasted): the 2026-10-29 03:15
   dump restored into a scratch database with 3 users, 3 collections, 6
@@ -545,27 +573,30 @@ After the milestone. Items 9, 8, and 8a are the first follow-ups (owner
 priority, 2026-10-27 to 2026-10-29), in that order: browser-local demo editing
 is next, then the sharing UI, then search.
 
-8. **Read-only link sharing. Built** (owner, 2026-10-30). Design in
+8. **Read-only link sharing. Done** (built 2026-10-30, deployed
+   2026-10-31 in `54a4126`; owner-reported working). Design in
    `docs/decisions.md`, "Sharing by link, and seven-day demo sandboxes". Each
    step ships on its own:
-   1. **Share links.** Built 2026-10-30, uncommitted. Backend:
+   1. **Share links.** Deployed 2026-10-31. Backend:
       `CollectionLink` model and migration `a3d9f61c2b84` (`collection_links`,
-      cascades from the collection; the SQL was rendered offline for
-      PostgreSQL, not run against it); `GET`, `POST`, `DELETE` under
+      cascades from the collection; applied to production on the
+      2026-10-31 deploy); `GET`, `POST`, `DELETE` under
       `/collections/{id}/links`, owner only, sandboxes included, at most 5;
-      `delete_sandbox` deletes links first; 8 tests in
+      `delete_sandbox` deletes links first; 9 tests in
       `test_collection_links.py`. UI: a Share button on the selected
       collection's heading (owners, sandboxes included) opens
-      `ShareCollectionDrawer`: "Create read-only link" with an optional
-      inline name, then each link with stacked "Copy link" and "Delete link" buttons;
+      `ShareCollectionDrawer` (with `CreateLinkForm` and `ShareLinkRow`):
+      "Create read-only link" with an optional inline name (a zod schema,
+      `schemas/collectionLinks.ts`, at most 50 characters), then each link with stacked "Copy link" and "Delete link" buttons;
       deleting asks first, and the confirm button reads "Don't Look At My
       Stuff"; links are `/s/<token>`, which step 2
-      serves. The URL is shown only if copying fails. At 5 links the button
+      serves. "Copied" shows for 2 seconds and a screen-reader status says
+      "Link copied"; the URL is shown only if copying fails. At 5 links the button
       gives way to a note. Under the Share button, small text reads "2 active
       links" (hidden at 0; it is the button's description for screen
       readers), from the same cached query the drawer uses; 9 tests. Until step 2 ships, a
       copied link opens nothing, so ship steps 1 and 2 together.
-   2. **The link page.** Built 2026-10-30, uncommitted. `GET /shared/{token}`
+   2. **The link page.** Deployed 2026-10-31. `GET /shared/{token}`
       (`shared_routes.py`, public) returns the collection's name, type,
       consoles, and games through the same helpers as the signed-in lists
       (`collection_consoles`, `collection_games`); 3 tests. `/s/:token`
@@ -576,34 +607,109 @@ is next, then the sharing UI, then search.
       and headers added; the config passed `nginx -t` with the certificate
       lines removed, not run on the Pi. Console rows no longer show a game
       count (removed from the API and UI 2026-10-30; see item 10c).
-   3. **Seven-day sandboxes.** Built 2026-10-30, uncommitted.
+   3. **Seven-day sandboxes.** Deployed 2026-10-31.
       `SANDBOX_LIFETIME` is 7 days and `SANDBOX_SESSION` 30 minutes; a full
       demo deletes the oldest sandbox past its session, one without links
       first (`_sandbox_to_replace`), else answers "busy"; `logout` is back to
       only clearing the cookie. The demo notice now says the visitor can't
       get back after signing out or 30 minutes, and links keep working for
       7 days. 15 sandbox tests.
-   **All three steps are built and uncommitted; ship them together**
-   (migration `a3d9f61c2b84` runs on deploy, and the Nginx config changes
-   take effect when the deploy reloads Nginx).
-8a. **Search** (owner wants it "pretty quickly", 2026-10-28; not designed
-   yet). Today there is no search anywhere: the console and game lists show
-   everything in the selected collection, and the API has no search or filter
-   parameter. Questions to settle before building:
-   - Scope: only the selected collection's games and consoles, or across all
-     the user's collections (and shared ones)?
-   - Fields: game name, console label, edition, condition, completed?
-   - Where it runs: a client-side filter over the lists the page already loads
-     (instant, no API change), or a server-side query. Proposal, not yet
-     confirmed with the owner: start with a client-side filter inside the
-     current collection, since the lists are already loaded in full and
-     collections are small; add a server query and cross-collection search
-     only if that stops being enough.
-   - Whether it reads from the URL (a `q` search param), as the selected
-     collection does, so a search survives refresh.
-   Follow the testing approach in `.github/copilot-instructions.md`: integration
-   tests that type a query and assert on what is listed, plus an axe check; the
-   field needs a visible label.
+8a. **Search** (owner wants it "pretty quickly", 2026-10-28; designed
+   2026-10-31, ready to build). Decisions are the owner's, 2026-10-31
+   (`docs/decisions.md`, "Search covers your own collections, and share
+   links"). Nothing exists yet: no search in the UI or API.
+   - **Scope.** Signed in: always every collection the user owns, with no
+     option to limit it to the selected one, and not collections shared
+     with them (an "include shared collections" checkbox is left for later,
+     with item 10a). A share link page searches its one collection.
+   - **Where it runs: in the browser, for both.** A new signed-in endpoint
+     lists every item in the user's owned collections in one type-neutral
+     shape (type, id, collection id and name, title, a detail line; later a
+     thumbnail URL), built without a query per row (`_console_response`
+     and `_game_response` query each row's label; do not reuse them as they
+     are). One TypeScript matching function and one search field component
+     serve both pages; the share link page filters the lists it already
+     loads (no new public endpoint, no rate-limit pressure). Sized for the
+     owner's real numbers (about 400 games and 100 books, roughly 100 KB of
+     JSON uncompressed; gzip, item 8c, cuts that to about 20 KB). Revisit
+     with a server query around 10,000 items or if the request feels slow
+     on a phone. Images stay out of the list except as small thumbnail
+     URLs, loaded lazily (item 12).
+   - **Fields.** Games match on name and console label, consoles on label
+     and edition. Condition, completed, last played, and the collection
+     name show on each result's detail line but are not searched
+     (condition and completed suit filters later). Books, when they come,
+     match on title and author.
+   - **Matching.** Each item's search text is built once when the data
+     loads, lowercased and with accents removed ("pokemon" finds
+     "Pokémon"). Every word of the query must appear, in any order ("halo
+     360" finds "Halo 3 · Xbox 360"). Title matches rank before
+     detail-only matches, titles starting with the query first, then
+     alphabetical. No fuzzy matching or new library. No debounce
+     (`useDeferredValue` if drawing lags). At most 50 results drawn, with a
+     count of the rest. One TanStack query for the item list, invalidated
+     when an item or collection changes.
+   - **Layout (signed in): a search bar that takes over the page.** This is
+     the owner's styling go-ahead for this feature. A full-width bar,
+     "Search all collections", sits at the top of the main area above the
+     collection heading and Share button, separated by a border (on
+     phones, under the top bar). Focusing it opens search mode: a panel
+     slides down from the bar (about 200 ms, `tw-animate-css`; instant with
+     reduced motion) and covers the collection area, headed "Results in all
+     collections" with the result count. The sidebar's red selection bar is
+     hidden while searching. Before typing, the panel lists the first 50
+     items alphabetically across all owned collections ("Showing 50 of N,
+     type to narrow"); typing narrows it. Each result shows its title and a
+     detail line ending in the collection name.
+   - **Opening and closing.** `?q=` in the URL, even empty, means search
+     mode is open (replace history entries while typing), so refresh keeps
+     it and back leaves it. It closes on Escape, a visible Close button,
+     the back button, or picking a collection in the sidebar; never on blur
+     (clicking a result moves focus). Tabbing into the field opens it too.
+     Not a modal: no focus trap, and the sidebar stays usable.
+   - **Clicking a result** opens that item's collection with its edit
+     drawer open, through the URL (for example
+     `?collection=7&item=game-12`), so back returns to the results with
+     `?q=` intact; closing the drawer leaves the user in that collection.
+     New work: the console and game managers open the drawer from the URL
+     once their lists have loaded.
+   - **Share link page:** no takeover. A field labeled "Search this
+     collection" narrows the page's own lists; rows stay unclickable.
+   - **Accessibility.** A labeled `type="search"` input in a search
+     landmark; Escape clears it; the result count is announced in a polite
+     live region; an empty state says nothing matched.
+   - **Tests** (approach in `.github/copilot-instructions.md`): integration
+     tests that type a query and assert on what is listed, on both pages,
+     plus axe checks; backend tests for the endpoint (owned collections
+     only, no other user's items, the type-neutral shape).
+8b. **Edit and delete collections** (owner, 2026-10-31). Today a
+   collection can only be created: the API has no update or delete route
+   and the UI has no control for either. Owner only (`WritableCollection`),
+   sandboxes included for their own. Edit is a rename (the type stays
+   fixed), using the form pattern. Delete confirms first with the
+   red-outline destructive button, and says how many consoles, games, and
+   share links go with it. In the database, consoles, games, grants, and
+   share links cascade from the collection, but console labels belong to
+   the owner and stay: delete the ones no longer used, as
+   `_delete_label_if_unused` does for single items. SQLite in the tests does
+   not enforce foreign keys, so delete child rows explicitly (as
+   `delete_sandbox` does) and test it. After a delete, the sidebar selects
+   the first remaining collection (the existing URL effect does this) and
+   the collection list and stats queries are invalidated. Where the
+   controls sit (the collection heading beside Share, or the sidebar row)
+   is a styling question for the owner.
+8c. **Turn on gzip in Nginx** (found 2026-10-31). Nothing in
+   `dlams-deployment/` enables it, so JSON and the JS bundle (about 647 kB,
+   the large-chunk warning in Known issues) are sent uncompressed. Compress
+   `application/json`, JS, and CSS. A deployment change: needs the owner's
+   go-ahead, `nginx -t`, and a check in the browser's network panel that
+   responses carry `Content-Encoding: gzip`. Best done before search, which
+   loads every owned item in one response.
+   **Written 2026-11-01:** `gzip on` in the `http` block of `nginx.conf` for
+   JSON, JS, CSS, and SVG (HTML is always included), over 1 KB, level 5,
+   with `Vary: Accept-Encoding` and proxied responses included. `nginx -t`
+   passed locally (`nginx:alpine`, certificate lines removed, stub upstream
+   hosts); not yet checked on the Pi or in the browser's network panel.
 9. **Sandbox demo sessions. Done** (owner, 2026-10-29). Built
    2026-10-29, deployed 2026-10-30 (see `docs/decisions.md`, "Demo sessions"). "Try
    the demo" copies the `demo-user` template into a temporary `sandbox`
@@ -611,7 +717,26 @@ is next, then the sharing UI, then search.
    no sharing with users, a 30-minute session, and (since 2026-10-30,
    item 8 step 3) kept 7 days for its share links. Replaces the
    browser-local editing plan.
-9a. **Admin button to wipe all sandbox accounts** (owner, 2026-10-29; later).
+9a. **Admins delete users in the UI** (owner, 2026-10-31; replaces the
+   2026-10-29 idea of a button that wipes all sandbox accounts). Admin only,
+   from "Manage users". Settle first: what deleting does to the user's
+   collections, consoles, games, labels, grants, share links, and the
+   invitations they issued (the open question under "Open questions");
+   whether it covers sandboxes, and whether a bulk delete for them is still
+   wanted; and who can be deleted (likely the deactivate rules: never
+   yourself or another admin). Constraints: console labels and
+   `registration_invitations.created_by_id` are `RESTRICT`, so a plain delete
+   of a user with data or issued invitations fails (decision "Admins can
+   deactivate a user; delete is deferred"); `delete_sandbox` already deletes
+   one user's data in a working order and is a starting point. Backups stay
+   on the Pi and a hard delete cannot be undone, so the UI confirms first
+   with the red-outline destructive button.
+10c. **Stats area** (owner, 2026-10-30; later). A dedicated place on the
+   page for collection statistics, instead of numbers inside the lists.
+   Console game counts were removed from the rows and the API for now. If a
+   stat counts across collections, show the cross-collection part only to
+   the owner: a share link must not hint at collections that were not
+   shared. Design it before building (what to show, where it sits).
 10. **Demo sharing walkthrough. Replaced 2026-10-30** by share links that
    sandboxes can use (item 8).
 10b. **Console color themes** (owner, 2026-10-30; later). Tried and reverted
@@ -622,12 +747,6 @@ is next, then the sharing UI, then search.
    follow. Lessons: secondary buttons are white with a border today, so a
    secondary color needs `bg-secondary` on them; a grey sidebar makes its two
    secondary buttons disappear.
-10c. **Stats area** (owner, 2026-10-30; later). A dedicated place on the
-   page for collection statistics, instead of numbers inside the lists.
-   Console game counts were removed from the rows and the API for now. If a
-   stat counts across collections, show the cross-collection part only to
-   the owner: a share link must not hint at collections that were not
-   shared. Design it before building (what to show, where it sits).
 10a. **Later sharing ideas** (owner, 2026-10-30): a People section in the
    share drawer (share by username on the existing grants API; built and
    removed 2026-10-30; settle first whether "User not found" should also
@@ -641,6 +760,41 @@ is next, then the sharing UI, then search.
     the video-game copying (labels, consoles, games) beside the video-game
     code. Settle the copier's interface with the new type; labels are copied
     per owner, not per collection (owner, 2026-10-29).
+12. **Item images** (owner, 2026-10-31; important, lower priority for now).
+    Photos on consoles and games; the owner considers the app limited
+    without them. Not designed. Questions to settle first:
+    - Storage: files on the Pi's disk or in the database, and backups (the
+      nightly `pg_dump` covers only the database, and backups are not
+      copied off the Pi).
+    - Limits: size and count per item, accepted types (no SVG), and
+      resizing (likely a new dependency such as Pillow; needs approval).
+    - Demo sandboxes are public: whether they can upload at all, and a cap
+      if so.
+    - Share links: how a link page shows images without exposing other
+      files.
+    - Security: uploads make the deferred dependency upgrades urgent. The
+      2026-10-12 audit judged the Starlette advisories unreachable partly
+      because there are no form or file uploads (Known issues); do those
+      upgrades before building this.
+13. **Move items between collections of the same type** (owner,
+    2026-10-31; later). An owner moves a console or game to another of
+    their own collections of the same type. Not designed. Notes: the API
+    must check that the target collection is owned by the same user and is
+    the same type (the conventions forbid trusting a client-supplied
+    cross-collection id), and apply the target's sandbox item limit.
+    Console labels belong to the owner, so they move with no change. An
+    item moved out of a shared collection leaves its share links. Open:
+    one item at a time from its edit drawer (a collection picker; needs the
+    shadcn `select`) or several at once.
+14. **Duplicate item finder** (owner, 2026-10-31; later). Lists items that
+    look like duplicates across the owner's collections, for example the
+    same game name and console label. Not designed. Notes: reuse search's
+    pieces (the endpoint that lists every owned item, and the
+    accent-insensitive normalization), so it can run in the browser. Some
+    duplicates are deliberate (two copies in different condition), so it
+    only points them out, with links to open, move (item 13), or delete
+    each one. Open: what counts as a duplicate per type, and where it
+    lives.
 
 ## Known issues
 
@@ -688,9 +842,10 @@ is next, then the sharing UI, then search.
 - What fields are shared by every item type, and how should type-specific
   metadata be modeled? Compare schema options before choosing an inheritance
   strategy, and choose stable names for categories and item types.
-- Deferred: what should deleting a user do to the collections, consoles, and
-  games they own, and to invitations they issued? Decide before building
-  delete; backups exist only on the Pi, so a hard delete is hard to undo.
+- What should deleting a user do to the collections, consoles, and games
+  they own, and to invitations they issued? Decide before building item 9a
+  (admins delete users, planned 2026-10-31); backups exist only on the Pi,
+  so a hard delete is hard to undo.
 - Should collection owners, not only admins, be able to invite someone with a
   grant on their own collection attached?
 - What features beyond the first game-list workflow are in scope for the

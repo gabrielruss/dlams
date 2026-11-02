@@ -1,6 +1,6 @@
 # DLAMS architecture
 
-Last updated: 2026-10-29
+Last updated: 2026-10-31
 
 How the system is put together right now. For status and next steps see
 [`DLAMS-PLAN.md`](../DLAMS-PLAN.md); for why things are this way see
@@ -134,10 +134,17 @@ Two independent layers:
 
    All sharing is read-only: only the owner ever writes.
 
-   Three FastAPI dependencies implement this. `get_collection_with_access`
-   loads the collection and the user's access; `get_readable_collection` and
-   `get_writable_collection` (owner only) build on it. A user with no access
-   gets 404, not 403, so collection ids are not discoverable. The UI mirrors write access through
+   FastAPI dependencies in `permissions.py` implement this, and routes
+   declare them in their signature through `Annotated` aliases.
+   `get_collection_with_access` (`CollectionWithAccess`) loads the
+   collection and the user's access; `get_readable_collection`
+   (`ReadableCollection`) and `get_writable_collection`
+   (`WritableCollection`, owner only; a grant reader gets 403) build on it.
+   `get_owned_collection` (`OwnedCollection`) is owner only and answers
+   everyone else with 404; the grant and link routes use it. A user with no
+   access gets 404, not 403, so collection ids are not discoverable.
+   `DbSession` and `CurrentUser` are the aliases for the database session and
+   the signed-in user. The UI mirrors write access through
    `lib/permissions.ts` (`canWriteCollection`, `isAdmin`); admin checks go
    through `isAdmin` in the UI and `require_admin` in the API, never a raw
    role string.
@@ -211,12 +218,14 @@ A collection has a `type`, and everything type-specific hangs off it.
 ```
 dlams-ui/src/
   App.tsx, main.tsx          routing, providers
-  pages/                     Home, Login, Register, AdminUsers
+  pages/                     Home, Login, Register, AdminUsers,
+                             SharedCollection (the /s/:token link page)
   components/
     AppSidebar.tsx           collections, invite drawer, admin link, logout
     auth/                    login/register forms, invite drawer, auth hooks
     admin/                   user management table and hook
-    collections/             navigation, workspace dispatch, stats
+    collections/             navigation, workspace dispatch, stats, the Share
+                             drawer, ListRow (the item row any type uses)
     video-games/             console and game managers, workspace, hooks
     ui/                      shadcn/ui primitives (button, drawer, form, ...)
   lib/api/                   fetch client and one module per resource
@@ -268,7 +277,8 @@ styling changes need approval (see the conventions file for the rule).
   container (prefix stripped). Share links: `/api/shared/` (and `/shared/` on
   the API host) are rate-limited to 30 requests a minute per address (burst
   10, then 429); those routes and the `/s/` pages send
-  `X-Robots-Tag: noindex` and `Referrer-Policy: no-referrer`.
+  `X-Robots-Tag: noindex` and `Referrer-Policy: no-referrer`. Responses over
+  1 KB of HTML, JSON, JS, CSS, and SVG are gzip-compressed.
 
 ## Configuration
 

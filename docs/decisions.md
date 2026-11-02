@@ -132,8 +132,8 @@ replaces it is named. Proposals and open questions live in
 ## Accounts and access
 
 ### Sharing by link, and seven-day demo sandboxes — 2026-10-30
-Built 2026-10-30, not deployed: share links, the link page, and seven-day
-sandboxes. Build steps are item 8 in `DLAMS-PLAN.md`.
+Built 2026-10-30, deployed 2026-10-31: share links, the link page, and
+seven-day sandboxes. Build steps are item 8 in `DLAMS-PLAN.md`.
 - **Read-only links only, to start** (owner, same day). Sharing with a user
   by username has an API (grants) but no screen; a People section was built
   and removed before it shipped, to start simple and to avoid the username
@@ -211,7 +211,8 @@ sandboxes. Build steps are item 8 in `DLAMS-PLAN.md`.
   demo credentials in "Demo behavior" (2026-10-02). It is the one exception to
   invite-only registration (2026-10-09): sandbox accounts are created without
   an invitation, and a visitor never chooses the name or role.
-- Later: an admin button to wipe all sandbox accounts.
+- Later: an admin button to wipe all sandbox accounts. **Replaced 2026-10-31** by
+  admin user deletion in the UI (plan item 9a).
 
 ### Admins reset passwords through the API; no screen yet — 2026-10-29
 - `PUT /admin/users/{id}/password` sets a new password (6 to 30 characters,
@@ -304,6 +305,8 @@ sandboxes. Build steps are item 8 in `DLAMS-PLAN.md`.
 - Admin user management deactivates and reactivates accounts. A deactivated
   user cannot log in or use an existing session; their account, collections,
   and grants stay intact. Deleting a user is deferred, not rejected.
+- **Revised 2026-10-31 (owner):** deleting a user from the admin UI is now
+  planned (plan item 9a); its data policy is still to be decided first.
 - Reason: deletion needs a policy for the user's data (see below) and
   production has no backups, so a hard delete would be irreversible.
 - Deactivation needs a new `users` column, a forward migration, and an active
@@ -461,6 +464,69 @@ sandboxes. Build steps are item 8 in `DLAMS-PLAN.md`.
   shared reference catalog.
 
 ## Code and UI conventions
+
+### Search covers your own collections, and share links — 2026-10-31
+- Signed in, search always covers every collection the user owns, with no
+  option to limit it to the selected collection, and not collections shared
+  with them. Each result shows the item, a little information about it, and
+  its collection.
+- A share link page can search its one collection.
+- Not now: shared collections in search, or an "include shared
+  collections" checkbox; reconsider with the sharing-with-users screen
+  (plan item 10a).
+- **Search runs in the browser** for both: the signed-in search loads every
+  owned item once from one endpoint, and the link page filters the lists it
+  already has. One TypeScript matching function serves both. Chosen over a
+  server search (`GET /search?q=`) plus a browser filter on the link page,
+  which would have put the matching rule in two languages, and over a
+  server search for link pages too, which would have pushed against their
+  rate limit. Fits the owner's scale (about 500 items, roughly 100 KB of
+  JSON); revisit around 10,000 items.
+- **Search takes over the page.** The bar sits above the collection, and
+  focusing it slides a results panel over the collection area, with no
+  collection shown as selected. Before typing it lists the first 50 items
+  alphabetically. A result opens its collection with its editor open.
+  Search mode is in the URL (`?q=`), so back and refresh work. Details are
+  in plan item 8a.
+- Reason: the owner's call. Searching across collections finds an item
+  without knowing which one holds it; keeping to owned collections keeps
+  the first version simple. Everything below the bar is scoped to the
+  selected collection, so a search field there would read as "search this
+  collection"; taking over the page makes the global scope unmistakable.
+  Chosen over a plain results swap, a sidebar field (hidden behind the menu
+  on phones), and a Cmd+K dialog (a modal, and a new component).
+
+### One way to write each thing, frontend and backend — 2026-10-31
+- **Installed shadcn components only** in new and changed UI code; no raw
+  `<button>`, `<input>`, `<label>`, `<select>`, or `<textarea>`. Destructive
+  final actions are an outline `Button` with `border-destructive
+  text-destructive` (the `destructive` variant is solid red, which is not
+  the app's style).
+- **One form pattern** for every submitted form, even one field: a zod
+  schema in `src/schemas/`, `useForm` with `zodResolver`, and the shadcn
+  `Form`/`FormField` components. Chosen over `form.register` on raw inputs
+  because it uses the installed components, wires labels, `aria-invalid`, and
+  error messages automatically, and keeps validation in one typed place.
+- **Backend:** dependencies are `Annotated` aliases; collection access is
+  declared in the route signature through the `permissions.py` dependencies
+  (`OwnedCollection` added for grants and links); queries use `select()`,
+  never `db.query()`; request schemas set `extra="forbid"` so an unknown
+  field is a 422, not silently dropped.
+- Reason: the owner found new code copying old patterns (raw buttons beside
+  `Button` in one file, a `useState` form, `db.query()` in new routes) and
+  wants one consistent, current way. Rules are in
+  `.github/copilot-instructions.md`. Older code is converted in plan items
+  6a (UI) and 6d (backend), not as drive-by edits; new code follows the
+  rules even inside an unconverted file.
+
+### Copy buttons confirm briefly — 2026-10-31
+- "Copy link" reads "Copied" for 2 seconds, then resets, and a visually
+  hidden status message announces "Link copied". If copying fails, the URL
+  is shown to copy by hand until the next try.
+- Reason: the common pattern (GitHub, IBM Carbon); a button stuck on
+  "Copied" stops being true and makes copying again unclear. Screen readers
+  do not reliably announce a label change on a focused button, so the
+  announcement is a live region.
 
 ### List rows open the editor; Delete lives in the drawer — 2026-10-30
 - Console and game rows have no buttons. For an owner, the whole row is one
