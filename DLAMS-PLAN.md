@@ -617,7 +617,16 @@ is next, then the sharing UI, then search.
 8a. **Search** (owner wants it "pretty quickly", 2026-10-28; designed
    2026-10-31, ready to build). Decisions are the owner's, 2026-10-31
    (`docs/decisions.md`, "Search covers your own collections, and share
-   links"). Nothing exists yet: no search in the UI or API.
+   links").
+   **Built so far (2026-11-01, uncommitted):** the endpoint, `GET /items`
+   (`item_routes.py`, `video_games_items.py`). Each item has `type`
+   (`console` or `game`), `id`, `collection_id`, `collection_name`,
+   `title`, `keywords` (searched besides the title: a game's console label;
+   a console's label and edition are in its title), and `details` (shown,
+   not searched: condition, "Completed", "Last played <date>"). The detail
+   line is `keywords`, `details`, and the collection name joined with
+   " · ". Sorted by title ignoring case; one query per item type; 7 tests
+   in `test_owned_items.py`. No UI yet.
    - **Scope.** Signed in: always every collection the user owns, with no
      option to limit it to the selected one, and not collections shared
      with them (an "include shared collections" checkbox is left for later,
