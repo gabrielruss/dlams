@@ -3,6 +3,7 @@ import type { QueryClient } from "@tanstack/react-query"
 import { consoleKeys } from "@/lib/api/consoles"
 import { consoleLabelKeys } from "@/lib/api/consoleLabels"
 import { gameKeys } from "@/lib/api/games"
+import { itemKeys } from "@/lib/api/items"
 import { videoGameStatsKeys } from "@/lib/api/videoGameStats"
 
 export async function invalidateVideoGameCollection(
@@ -21,6 +22,9 @@ export async function invalidateVideoGameCollection(
     }),
     queryClient.invalidateQueries({
       queryKey: consoleLabelKeys.all,
+    }),
+    queryClient.invalidateQueries({
+      queryKey: itemKeys.all,
     }),
   ])
 }

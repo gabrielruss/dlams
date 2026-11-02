@@ -93,8 +93,9 @@ never appended to. History lives in git and `docs/decisions.md`.
     `components/ui/combobox.tsx` are listed in
     `.github/copilot-instructions.md`). The owner runs the shadcn CLI.
   - In our own components never use the `cn` helper, do not add code
-    comments, and never use the owner's name in tests or fixtures (use
-    `test-user`, `demo-user`).
+    comments (but never remove or reword the owner's own comments), and
+    never use the owner's name in tests or fixtures (use `test-user`,
+    `demo-user`).
   - Styling: ask before any styling change; the owner's direct request is the
     go-ahead (the search layout in 8a is approved). Destructive final
     actions are `<Button variant="outline" className="border-destructive
@@ -626,7 +627,16 @@ is next, then the sharing UI, then search.
    not searched: condition, "Completed", "Last played <date>"). The detail
    line is `keywords`, `details`, and the collection name joined with
    " · ". Sorted by title ignoring case; one query per item type; 7 tests
-   in `test_owned_items.py`. No UI yet.
+   in `test_owned_items.py`. Owner-checked 2026-11-02 in Postman against
+   the dev stack: items from two owned collections, sorted, in that shape.
+   UI data layer (2026-11-02, uncommitted, not used by any screen yet):
+   `types/items.ts`, `lib/api/items.ts` (`itemKeys`), and in
+   `components/search/` the matcher `searchIndex.ts` (`buildSearchIndex`
+   takes any value plus a function giving its title and keywords, so the
+   share link page can index its consoles and games; `searchIndex` filters
+   and ranks) with 5 tests, and `useOwnedItems` (indexes once through the
+   query's `select`). `invalidateVideoGameCollection` also invalidates
+   `itemKeys.all`; item 8b must do the same on rename and delete.
    - **Scope.** Signed in: always every collection the user owns, with no
      option to limit it to the selected one, and not collections shared
      with them (an "include shared collections" checkbox is left for later,
