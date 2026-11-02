@@ -11,19 +11,17 @@ export const gameKeys = {
 
 export const gamesApi = {
   list: (collectionId: number) =>
-    apiRequest<{ games: GameRecord[] }>(
-      `/collections/${collectionId}/games`
-    ),
+    apiRequest<{ games: GameRecord[] }>(`/collections/${collectionId}/games`),
   create: (collectionId: number, data: GameCreate) =>
     apiRequest<GameRecord>(`/collections/${collectionId}/games`, {
       method: "POST",
       body: JSON.stringify(data),
     }),
   update: (collectionId: number, gameId: number, data: GameCreate) =>
-    apiRequest<GameRecord>(
-      `/collections/${collectionId}/games/${gameId}`,
-      { method: "PUT", body: JSON.stringify(data) }
-    ),
+    apiRequest<GameRecord>(`/collections/${collectionId}/games/${gameId}`, {
+      method: "PUT",
+      body: JSON.stringify(data),
+    }),
   delete: (collectionId: number, gameId: number) =>
     apiRequest<void>(`/collections/${collectionId}/games/${gameId}`, {
       method: "DELETE",
@@ -31,7 +29,7 @@ export const gamesApi = {
 }
 
 export const gameListQueryOptions = (collectionId: number) =>
-    queryOptions({
-      queryKey: gameKeys.list(collectionId),
-      queryFn: () => gamesApi.list(collectionId),
-    })
+  queryOptions({
+    queryKey: gameKeys.list(collectionId),
+    queryFn: () => gamesApi.list(collectionId),
+  })

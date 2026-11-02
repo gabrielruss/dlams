@@ -20,7 +20,7 @@ function RegistrationInviteManager() {
   const invitation = invitationMutation.data
   const invitationUrl = invitation
     ? `${window.location.origin}/register#invite=${encodeURIComponent(
-        invitation.invitation_code
+        invitation.invitation_code,
       )}`
     : ""
 
@@ -38,7 +38,9 @@ function RegistrationInviteManager() {
       setCopyError(null)
     } catch (error) {
       setCopyError(
-        error instanceof Error ? error.message : "Could not copy invitation link"
+        error instanceof Error
+          ? error.message
+          : "Could not copy invitation link",
       )
     }
   }
@@ -100,7 +102,11 @@ function RegistrationInviteManager() {
                 <p className="text-sm text-muted-foreground">
                   Expires {new Date(invitation.expires_at).toLocaleString()}
                 </p>
-                <Button type="button" variant="outline" onClick={copyInvitation}>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={copyInvitation}
+                >
                   {copied ? "Invitation link copied" : "Copy invitation link"}
                 </Button>
                 {copyError && (

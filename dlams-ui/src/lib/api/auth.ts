@@ -1,8 +1,4 @@
-import type {
-  RegisterRequest,
-  RegistrationInvitation,
-  User,
-} from "@/types"
+import type { RegisterRequest, RegistrationInvitation, User } from "@/types"
 import { queryOptions } from "@tanstack/react-query"
 import { ApiError, apiRequest } from "./client"
 

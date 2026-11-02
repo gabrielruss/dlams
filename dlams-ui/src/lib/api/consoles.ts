@@ -12,21 +12,17 @@ export const consoleKeys = {
 export const consolesApi = {
   list: (collectionId: number) =>
     apiRequest<{ consoles: ConsoleRecord[] }>(
-      `/collections/${collectionId}/consoles`
+      `/collections/${collectionId}/consoles`,
     ),
   create: (collectionId: number, data: ConsoleCreate) =>
     apiRequest<ConsoleRecord>(`/collections/${collectionId}/consoles`, {
       method: "POST",
       body: JSON.stringify(data),
     }),
-  update: (
-    collectionId: number,
-    consoleId: number,
-    data: ConsoleCreate
-  ) =>
+  update: (collectionId: number, consoleId: number, data: ConsoleCreate) =>
     apiRequest<ConsoleRecord>(
       `/collections/${collectionId}/consoles/${consoleId}`,
-      { method: "PUT", body: JSON.stringify(data) }
+      { method: "PUT", body: JSON.stringify(data) },
     ),
   delete: (collectionId: number, consoleId: number) =>
     apiRequest<void>(`/collections/${collectionId}/consoles/${consoleId}`, {
@@ -35,7 +31,7 @@ export const consolesApi = {
 }
 
 export const consoleListQueryOptions = (collectionId: number) =>
-    queryOptions({
-      queryKey: consoleKeys.list(collectionId),
-      queryFn: () => consolesApi.list(collectionId),
-    })
+  queryOptions({
+    queryKey: consoleKeys.list(collectionId),
+    queryFn: () => consolesApi.list(collectionId),
+  })

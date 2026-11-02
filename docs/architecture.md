@@ -41,6 +41,7 @@ Versions are the declared ranges from `dlams-ui/package.json` and
 | Styling | Tailwind CSS 4 (`@tailwindcss/vite`), `tw-animate-css`, `tailwind-merge`, `clsx`, `class-variance-authority`, `cn` |
 | Components | shadcn/ui pattern over Radix (`@radix-ui/react-label`, `@radix-ui/react-slot`, and the `radix-ui` umbrella package that newer generated components import) and Base UI (`@base-ui/react`, used by the Combobox), `vaul` (drawers), `lucide-react` (icons) |
 | Lint | ESLint 9 with `typescript-eslint`, `react-hooks`, `react-refresh` (its export rule is off under `src/components/ui/`, where the shadcn CLI writes files) |
+| Format | Prettier 3, pinned (`.prettierrc`: no semicolons; `src/components/ui/` ignored) |
 
 There is no client-side store library: server state is TanStack Query, and
 the selected collection is in the URL.
@@ -83,7 +84,9 @@ and served by `nginx:alpine`, database `postgres:15` (development uses 14).
   `/login`, `/register`, `/admin/users`; it first resolves the current user;
   unauthenticated visitors are redirected to `/login`, non-admins away from
   `/admin/users`.
-  The selected collection is kept in the URL.
+  The selected collection is kept in the URL (`?collection=`), and so is
+  search mode (`?q=`, present even when empty) and the item a search result
+  opens (`?item=game-12`); the names are in `lib/urlParams.ts`.
 
 ## Authentication and sessions
 
@@ -195,10 +198,12 @@ the edge).
 | Video games | `/collections/{id}/consoles` and `/games` (list, create, update, delete) | read: owner or shared; write: owner |
 | Console labels | `GET /console-labels` (the signed-in user's labels) | signed-in |
 | Stats | `GET /collections/video-game-stats` | signed-in; owned and granted collections |
+| Items | `GET /items`: every console and game in the user's own collections, one type-neutral shape (`type`, `id`, `collection_id`, `collection_name`, `title`, searched `keywords`, shown-only `details`), sorted by title; one query per item type | signed-in; owned collections only |
 
 Handlers are grouped by module: `app/auth/` (`routes.py`, `admin_routes.py`,
 `utils.py`, `bootstrap_admin.py`) and `app/collections/` (`routes.py`,
-`video_games_routes.py`, `permissions.py`, schemas). Routers are registered
+`video_games_routes.py`, `item_routes.py` with `video_games_items.py`,
+`permissions.py`, schemas). Routers are registered
 in `app/main.py`.
 
 ## Collection types
@@ -226,6 +231,7 @@ dlams-ui/src/
     admin/                   user management table and hook
     collections/             navigation, workspace dispatch, stats, the Share
                              drawer, ListRow (the item row any type uses)
+    search/                  search bar, results panel, matcher, hooks
     video-games/             console and game managers, workspace, hooks
     ui/                      shadcn/ui primitives (button, drawer, form, ...)
   lib/api/                   fetch client and one module per resource
@@ -270,7 +276,9 @@ styling changes need approval (see the conventions file for the rule).
   (self-hosted, so the Pi polls GitHub for jobs and nothing connects in to
   it). A push to `main` triggers `.github/workflows/deploy.yml`, which runs
   on that runner: `git pull` in the checkout, `docker compose up -d --build
-  api ui nginx`, reload nginx, and list containers. The `db` service is not
+  api ui nginx`, recreate the `nginx` container (it mounts `nginx.conf` as
+  a single file, which a reload would not re-read after `git pull`), and
+  list containers. The `db` service is not
   rebuilt. Images are built on the Pi, so builds are slow and CI does not
   run tests or lint before deploying.
 - **Nginx** routes `/` to the `ui` container and `/api/` to the `api`

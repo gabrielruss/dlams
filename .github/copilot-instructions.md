@@ -63,13 +63,20 @@ Applies across the DLAMS workspace. Project-local conventions take precedence wh
 
 - Frontend build (from `dlams-ui/`): `npm run build`
 - Frontend lint (from `dlams-ui/`): `npm run lint`
+- Frontend format (from `dlams-ui/`): `npm run format:check`, or
+  `npm run format` to apply. Prettier (pinned in `devDependencies`, config
+  in `.prettierrc`, generated `src/components/ui/` ignored) is also what
+  VS Code formats with on save, and a Claude Code hook
+  (`.claude/hooks/prettier-format.sh`) formats each edited UI file.
 - Hybrid host UI (from `dlams-ui/`): `npm run dev:hybrid`
 - Frontend tests (from `dlams-ui/`): `npm test` (Vitest, one run) or
   `npm run test:watch`. Tests sit beside the code as `*.test.tsx`. Use
   `renderApp(route)` from `src/test/renderApp.tsx` (fresh `QueryClient`,
   `MemoryRouter`, and a `userEvent` instance) and register MSW handlers per
   test with `server.use(...)` from `src/test/server.ts`. The API base in tests
-  is `http://localhost/api`, and a request with no handler fails the test.
+  is `http://localhost/api`. A request with no handler fails with a network
+  error and prints an `[MSW] Error`, but the test fails only if its
+  assertions depend on that request; check the output for MSW errors.
 - Backend tests (from `dlams-fastapi/`): `.venv/bin/python -m unittest discover -s tests -v`
 - Backend lint and format (from `dlams-fastapi/`): `.venv/bin/ruff check .` and
   `.venv/bin/ruff format --check .` (drop `--check` to format; `ruff check
@@ -134,7 +141,10 @@ cached copy.
   installed component fits, give the owner the install command and wait.
   Destructive final actions are `<Button variant="outline"
   className="border-destructive text-destructive">`, not the solid
-  `destructive` variant.
+  `destructive` variant. Deleting an item from its edit drawer starts with a
+  red trash-can icon (`variant="ghost" size="icon"`, `text-destructive`,
+  `aria-label` and `title` "Delete <type>") at the top right of the item
+  area, never in the drawer header beside Close (decided 2026-11-02).
 - shadcn/ui components are maintained in the project source; do not expect a
   `shadcn` runtime package. Add or adapt components using the project's
   established shadcn conventions. When a shadcn component is needed, the owner
@@ -142,6 +152,11 @@ cached copy.
   wire it up rather than hand-rolling a parallel primitive.
 - Functional components and hooks. Strict TypeScript: no `any` or unsafe casts; type API data and props explicitly.
 - Prefer derived values over duplicated state. Use effects only to sync with external systems.
+- A ternary chain has at most two `?` (one level of nesting, such as
+  `a ? x : b ? y : z`); decided 2026-11-02. With a third, write it another
+  way: a small function or component with early `if` returns, or a lookup
+  object. ESLint has no rule for this limit (`no-nested-ternary` bans all
+  nesting), so check by eye.
 - Do not add `void` solely to discard a promise unless it provides a concrete
   benefit, such as satisfying a configured lint rule or documenting an
   intentional fire-and-forget boundary.
@@ -206,6 +221,13 @@ cached copy.
   `data`, `isPending`, `isError`, and `error`) instead of retaining a generic
   `query` object when that improves readability. For repeated or reusable
   derived views, prefer a focused feature hook or TanStack Query's `select`.
+- A query hook returns a named object: its data under the name the hook
+  promises (`useOwnedItems` returns `ownedItems`, `useAdminUsers` returns
+  `users`), with lists defaulting to `[]`, plus `isPending`, `isError`, and
+  `error`. Not the raw query result, and not a bare value that drops the
+  loading and error state. If the name is hard to match, the hook is
+  probably doing two jobs: split it rather than stretch the name (decided
+  2026-11-02; older hooks are converted in plan item 6e).
 - Mutations invalidate the affected keys in `onSuccess` (return the promise).
   Await invalidations so the mutation remains pending until affected views
   have refreshed. Changes to sharing or grants must invalidate both the
@@ -305,6 +327,12 @@ For features, refactors, or anything touching architecture:
 5. For user-visible features, give safe local manual test steps with expected results.
 
 Small, isolated edits (typos, one-line fixes) can skip steps 1-3.
+
+Build a feature in layers when it allows, one reviewable step at a time,
+each with its tests passing and the owner able to try it before the next:
+for example the API endpoint, then the UI data layer (API module, query
+hook, pure logic), then the visible UI, then the follow-on behavior. Say
+what the next layer is at the end of each step.
 
 Update `DLAMS-PLAN.md` when status, next steps, or known issues change. Update `docs/architecture.md` when structure changes (components, endpoints, data model, auth or access rules, deployment, major dependencies). Record architectural decisions in `docs/decisions.md` with the date and reason, marking anything they supersede. Do not log routine refactors; git history covers them.
 

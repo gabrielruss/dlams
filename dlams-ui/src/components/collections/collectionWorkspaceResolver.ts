@@ -22,7 +22,7 @@ function isCollectionType(type: string): type is CollectionType {
 }
 
 export function resolveCollectionWorkspace(
-  selectedCollectionType: string
+  selectedCollectionType: string,
 ): CollectionWorkspaceComponent | undefined {
   if (!isCollectionType(selectedCollectionType)) return undefined
   return collectionWorkspaces[selectedCollectionType]

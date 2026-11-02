@@ -1,17 +1,17 @@
 import { useRef } from "react"
 import { Controller } from "react-hook-form"
+import { Trash2 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import {
   Drawer,
   DrawerClose,
   DrawerContent,
+  DrawerFooter,
   DrawerHeader,
   DrawerTitle,
 } from "@/components/ui/drawer"
-import type {
-  ConsoleRecord,
-} from "@/types/videoGames"
+import type { ConsoleRecord } from "@/types/videoGames"
 import { videoGameConditions } from "@/types/videoGames"
 import { isVideoGameCondition } from "./videoGameOptions"
 import ConsoleLabelCombobox from "./ConsoleLabelCombobox"
@@ -33,6 +33,7 @@ function ConsoleManager({
   const {
     form,
     editingId,
+    editingConsole,
     formError,
     deleteError,
     isDeleting,
@@ -43,12 +44,9 @@ function ConsoleManager({
     editConsole,
     startNewConsole,
     deleteConsole,
-  } = useConsoleManager({ collectionId })
+  } = useConsoleManager({ collectionId, consoles })
   const consoleLabelOptions = useConsoleLabels(canWrite)
   const drawerRef = useRef<HTMLDivElement>(null)
-  const editingConsole = consoles.find(
-    (consoleRecord) => consoleRecord.id === editingId
-  )
   const label = form.watch("label")
 
   return (
@@ -88,113 +86,113 @@ function ConsoleManager({
                 </button>
               </DrawerClose>
             </DrawerHeader>
-            <div className="min-h-0 flex-1 overflow-y-auto p-5">
-              <form
-                onSubmit={form.handleSubmit(saveConsole)}
-                className="flex flex-col gap-4"
-              >
-            <div className="flex flex-col gap-1 text-sm">
-              <label htmlFor="console-label">Console label</label>
-              <Controller
-                control={form.control}
-                name="label"
-                rules={{
-                  required: "Console label is required",
-                  maxLength: {
-                    value: 100,
-                    message: "Console label must be 100 characters or fewer",
-                  },
-                }}
-                render={({ field }) => (
-                  <ConsoleLabelCombobox
-                    id="console-label"
-                    options={consoleLabelOptions}
-                    container={drawerRef}
-                    value={field.value}
-                    onChange={field.onChange}
-                    invalid={!!form.formState.errors.label}
-                  />
+            <form
+              onSubmit={form.handleSubmit(saveConsole)}
+              className="flex min-h-0 flex-1 flex-col"
+            >
+              <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto p-5">
+                {editingConsole && (
+                  <div className="flex flex-col items-end gap-2">
+                    <Button
+                      className="text-destructive"
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      aria-label="Delete console"
+                      title="Delete console"
+                      disabled={isDeleting}
+                      onClick={() => deleteConsole(editingConsole)}
+                    >
+                      <Trash2 aria-hidden="true" />
+                    </Button>
+                    {deleteError && (
+                      <p
+                        role="alert"
+                        className="self-stretch text-sm text-destructive"
+                      >
+                        {deleteError}
+                      </p>
+                    )}
+                  </div>
                 )}
-              />
-            </div>
-            {form.formState.errors.label && (
-              <p role="alert" className="text-sm text-destructive">
-                {form.formState.errors.label.message}
-              </p>
-            )}
-            <label className="flex flex-col gap-1 text-sm">
-              Edition / details
-              <input
-                className="h-9 rounded-md border bg-background px-3"
-                {...form.register("edition", {
-                  maxLength: {
-                    value: 100,
-                    message: "Edition must be 100 characters or fewer",
-                  },
-                })}
-                placeholder="Optional"
-              />
-            </label>
-            {form.formState.errors.edition && (
-              <p role="alert" className="text-sm text-destructive">
-                {form.formState.errors.edition.message}
-              </p>
-            )}
-            <label className="flex flex-col gap-1 text-sm">
-              Condition
-              <select
-                className="h-9 rounded-md border bg-background px-3"
-                {...form.register("condition", {
-                  validate: isVideoGameCondition,
-                })}
-              >
-                {videoGameConditions.map((value) => (
-                  <option key={value} value={value}>
-                    {value}
-                  </option>
-                ))}
-              </select>
-            </label>
-            {formError && (
-              <p role="alert" className="text-sm text-destructive">
-                {formError}
-              </p>
-            )}
-            <div className="flex gap-2">
-              <button
-                className="h-9 rounded-md bg-primary px-4 text-primary-foreground disabled:opacity-50"
-                disabled={isSaving || !label?.trim()}
-              >
-                {isSaving ? "Saving..." : "Save console"}
-              </button>
-              <button
-                className="h-9 rounded-md border px-4"
-                type="button"
-                onClick={resetForm}
-              >
-                Cancel
-              </button>
-            </div>
-              </form>
-              {editingConsole && (
-                <div className="mt-6 flex flex-col gap-2 border-t pt-4">
-                  {deleteError && (
-                    <p role="alert" className="text-sm text-destructive">
-                      {deleteError}
-                    </p>
-                  )}
-                  <Button
-                    className="border-destructive text-destructive"
-                    type="button"
-                    variant="outline"
-                    disabled={isDeleting}
-                    onClick={() => deleteConsole(editingConsole)}
-                  >
-                    {isDeleting ? "Deleting..." : "Delete console"}
-                  </Button>
+                <div className="flex flex-col gap-1 text-sm">
+                  <label htmlFor="console-label">Console label</label>
+                  <Controller
+                    control={form.control}
+                    name="label"
+                    rules={{
+                      required: "Console label is required",
+                      maxLength: {
+                        value: 100,
+                        message:
+                          "Console label must be 100 characters or fewer",
+                      },
+                    }}
+                    render={({ field }) => (
+                      <ConsoleLabelCombobox
+                        id="console-label"
+                        options={consoleLabelOptions}
+                        container={drawerRef}
+                        value={field.value}
+                        onChange={field.onChange}
+                        invalid={!!form.formState.errors.label}
+                      />
+                    )}
+                  />
                 </div>
-              )}
-            </div>
+                {form.formState.errors.label && (
+                  <p role="alert" className="text-sm text-destructive">
+                    {form.formState.errors.label.message}
+                  </p>
+                )}
+                <label className="flex flex-col gap-1 text-sm">
+                  Edition / details
+                  <input
+                    className="h-9 rounded-md border bg-background px-3"
+                    {...form.register("edition", {
+                      maxLength: {
+                        value: 100,
+                        message: "Edition must be 100 characters or fewer",
+                      },
+                    })}
+                    placeholder="Optional"
+                  />
+                </label>
+                {form.formState.errors.edition && (
+                  <p role="alert" className="text-sm text-destructive">
+                    {form.formState.errors.edition.message}
+                  </p>
+                )}
+                <label className="flex flex-col gap-1 text-sm">
+                  Condition
+                  <select
+                    className="h-9 rounded-md border bg-background px-3"
+                    {...form.register("condition", {
+                      validate: isVideoGameCondition,
+                    })}
+                  >
+                    {videoGameConditions.map((value) => (
+                      <option key={value} value={value}>
+                        {value}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                {formError && (
+                  <p role="alert" className="text-sm text-destructive">
+                    {formError}
+                  </p>
+                )}
+              </div>
+              <DrawerFooter className="border-t">
+                <Button type="submit" disabled={isSaving || !label?.trim()}>
+                  {isSaving ? "Saving..." : "Save console"}
+                </Button>
+                <Button type="button" variant="outline" onClick={resetForm}>
+                  Cancel
+                </Button>
+              </DrawerFooter>
+            </form>
           </DrawerContent>
         </Drawer>
       )}

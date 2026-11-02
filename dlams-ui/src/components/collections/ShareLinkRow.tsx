@@ -14,7 +14,7 @@ interface ShareLinkRowProps {
 
 function ShareLinkRow({ link, isDeleting, onDelete }: ShareLinkRowProps) {
   const [copyStatus, setCopyStatus] = useState<"idle" | "copied" | "failed">(
-    "idle"
+    "idle",
   )
   const [isConfirming, setIsConfirming] = useState(false)
   const url = shareLinkUrl(link.token)

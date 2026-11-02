@@ -42,9 +42,9 @@ function UserManagement() {
     <section className="flex flex-col gap-4">
       <p className="text-sm text-muted-foreground">
         Deactivated users can no longer log in, and lose access the next time
-        they take an action or refresh. Their collections and data are kept,
-        and you can reactivate them at any time. "Try the demo" copies the
-        template account into a temporary sandbox account for each visitor.
+        they take an action or refresh. Their collections and data are kept, and
+        you can reactivate them at any time. "Try the demo" copies the template
+        account into a temporary sandbox account for each visitor.
       </p>
       {actionError && (
         <p role="alert" className="text-sm text-destructive">

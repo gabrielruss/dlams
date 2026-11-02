@@ -1,10 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 
-import {
-  authApi,
-  authKeys,
-  currentUserQueryOptions,
-} from "@/lib/api/auth"
+import { authApi, authKeys, currentUserQueryOptions } from "@/lib/api/auth"
 
 export function useCurrentUser() {
   return useQuery(currentUserQueryOptions())

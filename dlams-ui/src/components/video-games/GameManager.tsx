@@ -1,11 +1,13 @@
 import { useRef } from "react"
 import { Controller } from "react-hook-form"
+import { Trash2 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import {
   Drawer,
   DrawerClose,
   DrawerContent,
+  DrawerFooter,
   DrawerHeader,
   DrawerTitle,
 } from "@/components/ui/drawer"
@@ -22,14 +24,11 @@ interface GameManagerProps {
   canWrite: boolean
 }
 
-function GameManager({
-  collectionId,
-  games,
-  canWrite,
-}: GameManagerProps) {
+function GameManager({ collectionId, games, canWrite }: GameManagerProps) {
   const {
     form,
     editingId,
+    editingGame,
     formError,
     deleteError,
     isDeleting,
@@ -41,10 +40,9 @@ function GameManager({
     startNewGame,
     deleteGame,
     isVideoGameCondition,
-  } = useGameManager({ collectionId })
+  } = useGameManager({ collectionId, games })
   const consoleLabelOptions = useConsoleLabels(canWrite)
   const drawerRef = useRef<HTMLDivElement>(null)
-  const editingGame = games.find((game) => game.id === editingId)
   const name = form.watch("name")
   const consoleLabel = form.watch("consoleLabel")
 
@@ -85,11 +83,35 @@ function GameManager({
                 </button>
               </DrawerClose>
             </DrawerHeader>
-            <div className="min-h-0 flex-1 overflow-y-auto p-5">
-              <form
-                onSubmit={form.handleSubmit(saveGame)}
-                className="flex flex-col gap-4"
-              >
+            <form
+              onSubmit={form.handleSubmit(saveGame)}
+              className="flex min-h-0 flex-1 flex-col"
+            >
+              <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto p-5">
+                {editingGame && (
+                  <div className="flex flex-col items-end gap-2">
+                    <Button
+                      className="text-destructive"
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      aria-label="Delete game"
+                      title="Delete game"
+                      disabled={isDeleting}
+                      onClick={() => deleteGame(editingGame)}
+                    >
+                      <Trash2 aria-hidden="true" />
+                    </Button>
+                    {deleteError && (
+                      <p
+                        role="alert"
+                        className="self-stretch text-sm text-destructive"
+                      >
+                        {deleteError}
+                      </p>
+                    )}
+                  </div>
+                )}
                 <label className="flex flex-col gap-1 text-sm">
                   Game name
                   <input
@@ -170,48 +192,23 @@ function GameManager({
                     {formError}
                   </p>
                 )}
-                <div className="flex gap-2">
-                  <button
-                    className="h-9 rounded-md bg-primary px-4 text-primary-foreground disabled:opacity-50"
-                    disabled={isSaving || !name?.trim() || !consoleLabel?.trim()}
-                  >
-                    {isSaving ? "Saving..." : "Save game"}
-                  </button>
-                  <button
-                    className="h-9 rounded-md border px-4"
-                    type="button"
-                    onClick={resetForm}
-                  >
-                    Cancel
-                  </button>
-                </div>
-              </form>
-              {editingGame && (
-                <div className="mt-6 flex flex-col gap-2 border-t pt-4">
-                  {deleteError && (
-                    <p role="alert" className="text-sm text-destructive">
-                      {deleteError}
-                    </p>
-                  )}
-                  <Button
-                    className="border-destructive text-destructive"
-                    type="button"
-                    variant="outline"
-                    disabled={isDeleting}
-                    onClick={() => deleteGame(editingGame)}
-                  >
-                    {isDeleting ? "Deleting..." : "Delete game"}
-                  </Button>
-                </div>
-              )}
-            </div>
+              </div>
+              <DrawerFooter className="border-t">
+                <Button
+                  type="submit"
+                  disabled={isSaving || !name?.trim() || !consoleLabel?.trim()}
+                >
+                  {isSaving ? "Saving..." : "Save game"}
+                </Button>
+                <Button type="button" variant="outline" onClick={resetForm}>
+                  Cancel
+                </Button>
+              </DrawerFooter>
+            </form>
           </DrawerContent>
         </Drawer>
       )}
-      <GameList
-        games={games}
-        onSelect={canWrite ? editGame : undefined}
-      />
+      <GameList games={games} onSelect={canWrite ? editGame : undefined} />
     </section>
   )
 }

@@ -1,6 +1,7 @@
 """Request and response schemas for collections and read-only sharing."""
 
 from datetime import datetime
+from enum import Enum
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -55,6 +56,25 @@ class LinkResponse(BaseModel):
 
 class LinkListResponse(BaseModel):
     links: list[LinkResponse]
+
+
+class ItemType(str, Enum):
+    CONSOLE = "console"
+    GAME = "game"
+
+
+class ItemResponse(BaseModel):
+    type: ItemType
+    id: int
+    collection_id: int
+    collection_name: str
+    title: str
+    keywords: list[str]
+    details: list[str]
+
+
+class ItemListResponse(BaseModel):
+    items: list[ItemResponse]
 
 
 class SharedCollectionResponse(BaseModel):

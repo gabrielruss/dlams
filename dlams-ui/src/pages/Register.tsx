@@ -38,7 +38,7 @@ function Register() {
     window.history.replaceState(
       window.history.state,
       "",
-      `${window.location.pathname}${window.location.search}`
+      `${window.location.pathname}${window.location.search}`,
     )
   }, [invitationFromUrl])
 

@@ -43,25 +43,22 @@ never appended to. History lives in git and `docs/decisions.md`.
   steps). Not run: Pylance after the `int | None` count fix in
   `create_link`. Earlier: backup restore test passed (2026-10-29).
 - **Next, in order:**
-  1. **Gzip in Nginx** (item 8c): waiting on the owner's go-ahead; best
-     before search, which loads every owned item in one response.
-  2. **Search** (item 8a): designed, ready to build. Read 8a in full first.
-     In short: always every owned collection (signed in); a new endpoint
-     lists every owned item in one type-neutral shape with no query per
-     row; one TypeScript matching function and search field serve both the
-     signed-in search and the share link page (which filters its own
-     lists); a "Search all collections" bar above the collection takes
-     over the page on focus, with `?q=` in the URL; a result opens its
-     collection with its editor open (`?collection=7&item=game-12`).
+  1. **Deploy picks up `nginx.conf` changes** (Known issues): workflow
+     fixed in source 2026-11-01; confirm on the next deploy.
+  2. **Search** (item 8a): built 2026-11-02 on `add-search`, not yet
+     deployed. Endpoint `GET /items`, the matcher, the signed-in takeover
+     bar with `?q=`, `?item=` opening every edit drawer
+     (`useItemEditor`), and the share link page's field. Check it in the
+     browser, then push; the same deploy confirms item 1.
   3. **Edit and delete collections** (item 8b).
   4. Then: the manual accessibility audit (6), shadcn everywhere (6a),
      repeated styling (6b), styling cleanup (6c), backend consistency
-     (6d), admins delete users (9a, replaces the wipe-sandboxes button),
+     (6d), frontend hook consistency (6e), admins delete users (9a, replaces the wipe-sandboxes button),
      stats area (10c, moved up 2026-10-31), later sharing ideas (10a),
      color themes (10b), further item types (11), item images (12, added
      2026-10-31; do the dependency upgrades first), moving items between
      collections of the same type (13), and a duplicate item finder (14).
-- **Waiting on the owner:** gzip (8c); whether to take the `zod` fix
+- **Waiting on the owner:** whether to take the `zod` fix
   (`npm audit fix`); in 6d, whether to drop the `response_model`s Ruff's
   FAST001 calls redundant; before 6a, running
   `npx shadcn@latest add select checkbox`.
@@ -69,9 +66,12 @@ never appended to. History lives in git and `docs/decisions.md`.
   - Tests sit beside the feature they cover. `renderApp(route)` in
     `dlams-ui/src/test/renderApp.tsx` renders the real app; register MSW
     handlers per test with `server.use(...)`; add an axe check with
-    `expectNoViolations(container)`. An unhandled request fails the test, so
-    any test that opens an owned collection needs a
-    `GET /collections/1/links` handler (the Share button loads the links).
+    `expectNoViolations(container)`. A request with no handler fails with a
+    network error and prints `[MSW] Error: intercepted a request without a
+    matching request handler`; the test itself fails only if what it checks
+    depends on that request, so read the output for MSW errors. Any test
+    that opens an owned collection needs `GET /collections/1/links` (the
+    Share button) and `GET /console-labels` handlers.
     Inside a Vaul drawer, use `element.focus()` and `user.keyboard(...)`
     instead of clicks: pointer events throw in jsdom. MSW mocks never return
     a 422, so they cannot catch a body a schema rejects.
@@ -93,8 +93,9 @@ never appended to. History lives in git and `docs/decisions.md`.
     `components/ui/combobox.tsx` are listed in
     `.github/copilot-instructions.md`). The owner runs the shadcn CLI.
   - In our own components never use the `cn` helper, do not add code
-    comments, and never use the owner's name in tests or fixtures (use
-    `test-user`, `demo-user`).
+    comments (but never remove or reword the owner's own comments), and
+    never use the owner's name in tests or fixtures (use `test-user`,
+    `demo-user`).
   - Styling: ask before any styling change; the owner's direct request is the
     go-ahead (the search layout in 8a is approved). Destructive final
     actions are `<Button variant="outline" className="border-destructive
@@ -107,7 +108,9 @@ never appended to. History lives in git and `docs/decisions.md`.
   recommendation and one question rather than several; the owner often edits
   UI wording directly, so read the current file before changing text and
   keep their wording; they like to see a change before committing to it and
-  will revert freely, so keep changes small and easy to undo; prefer fewer
+  will revert freely, so keep changes small and easy to undo; build features
+  in layers (endpoint, then data layer, then visible UI), one step per
+  review, which the owner said keeps a change from being overwhelming; prefer fewer
   features over messy code, and one consistent pattern over several. They
   like UX ideas weighed honestly and will push back with their own. They
   are newer to Python and SQLAlchemy than to JS, so JS comparisons help.
@@ -480,8 +483,9 @@ In order. Items 1 to 7 are the path to the portfolio milestone.
    also shared (the extraction rule in `.github/copilot-instructions.md`,
    "Frontend"). Propose which to extract into a component and which to leave;
    the owner picks. Seen so far, not yet counted: the red-outline destructive
-   `Button` (Share drawer, Delete console, Delete game), the drawer header
-   with its Close button, and the bordered list section
+   `Button` (Share drawer), the item drawer's trash-can Delete and its
+   pinned Save / Cancel footer (console and game, 2026-11-02), the drawer
+   header with its Close button, and the bordered list section
    (`flex flex-col gap-4 rounded-lg border p-4`).
 6c. **Styling cleanup** (owner, 2026-10-31; after 6a and 6b). A styling
    change, so the owner sets the scope first. Candidates: classes made
@@ -525,6 +529,23 @@ In order. Items 1 to 7 are the path to the portfolio milestone.
      matching `dlams-ui/src/lib/api/` module sends: the UI tests mock the API
      with MSW and will not catch a 422, so an extra field would only fail in
      the real app. Then run both test suites and try each form in a browser.
+6e. **Frontend hook consistency check** (owner, 2026-11-02). Go through
+   every hook in `dlams-ui/src` and check two things. First, a hook named
+   for data returns that data under that name (`useOwnedItems` returns
+   `ownedItems`); a name that is hard to match usually means the hook does
+   two jobs, so split the job rather than stretch the name (search's
+   `useOwnedItems` was fixed this way). Second, query hooks return one
+   shape: a named object with the data plus `isPending`, `isError`, and
+   `error` (the conventions file's "destructure" rule), and the screen
+   using it shows pending and error states. Found 2026-11-02, not
+   converted: `useCurrentUser` and `useVideoGameCollectionStats` return
+   the raw query result (callers use `data`), and `useConsoleLabels`
+   returns a bare `string[]` with no pending or error state, so a failed
+   label load is silent. Re-run the UI tests after each change.
+   Ternary chains (two-`?` limit in `.github/copilot-instructions.md`,
+   2026-11-02): the only one over it, in `CollectionWorkspace.tsx`, was
+   fixed the same day (`CollectionBody` with early returns); nine two-`?`
+   chains are within the limit.
 7. **README and a final check.** Done 2026-10-27 (owner's call). The root
    `README.md` was rewritten as the front door (no screenshots: the live demo
    shows the app and there is nothing to keep current; see
@@ -617,7 +638,79 @@ is next, then the sharing UI, then search.
 8a. **Search** (owner wants it "pretty quickly", 2026-10-28; designed
    2026-10-31, ready to build). Decisions are the owner's, 2026-10-31
    (`docs/decisions.md`, "Search covers your own collections, and share
-   links"). Nothing exists yet: no search in the UI or API.
+   links").
+   **Built so far (2026-11-01, uncommitted):** the endpoint, `GET /items`
+   (`item_routes.py`, `video_games_items.py`). Each item has `type`
+   (`console` or `game`), `id`, `collection_id`, `collection_name`,
+   `title`, `keywords` (searched besides the title: a game's console label;
+   a console's label and edition are in its title), and `details` (shown,
+   not searched: condition, "Completed", "Last played <date>"). The detail
+   line is `keywords`, `details`, and the collection name joined with
+   " · ". Sorted by title ignoring case; one query per item type; 7 tests
+   in `test_owned_items.py`. Owner-checked 2026-11-02 in Postman against
+   the dev stack: items from two owned collections, sorted, in that shape.
+   UI data layer (2026-11-02, uncommitted):
+   `types/items.ts`, `lib/api/items.ts` (`itemKeys`), and in
+   `components/search/` the matcher `searchEntries.ts`
+   (`buildSearchEntries` takes any value plus a function giving its title
+   and keywords, so the share link page can prepare its consoles and
+   games; `searchEntries` filters and ranks) with 5 tests, and
+   `useOwnedItems`, which returns `ownedItems` (`SearchResults` builds the
+   entries with `useMemo`). `invalidateVideoGameCollection` also invalidates
+   `itemKeys.all`; item 8b must do the same on rename and delete.
+   Search bar and results (2026-11-02, uncommitted; owner saw it in the
+   browser and approved the look): `SearchBar` above the page in `pages/Home.tsx`, and
+   `SearchResults` in place of the collection while `?q=` is in the URL
+   (`useSearchMode`; URL names in `lib/urlParams.ts`). Focusing or typing
+   opens it; the first Escape clears the text, the next closes; "Close
+   search" and picking a sidebar collection close it; the sidebar shows no
+   selection while open. Results reuse `ListRow`, at most 50 with a count
+   in a status line. A result sets `?collection=<id>&item=<type>-<id>`
+   (a new history entry); the item's drawer does not open from the URL
+   yet (next step). 10 tests in `Search.test.tsx`, including axe.
+   Item drawers from the URL (2026-11-02, uncommitted, not yet tried in a
+   browser): `?item=` is the one way an existing item's edit drawer opens
+   (`components/collections/useOpenItem.ts`). Search results and row
+   clicks both set it; the console and game hooks take their lists and
+   open the drawer when `item` names one of them, so an unknown or
+   deleted item opens nothing. A row click pushes a history entry marked
+   in its state, and closing that drawer goes back one step; a drawer
+   opened from search or a pasted URL closes by removing `item` (replace),
+   which leaves the user in that collection. The Add drawers stay in local
+   state. 4 new tests (from the URL, unknown item, close, and a search
+   result opening its drawer). Back and forward are not covered by tests
+   (MemoryRouter); check them by hand.
+   The editing logic both managers shared is one hook,
+   `components/collections/useItemEditor.ts` (owner, 2026-11-02, after an
+   AHA review; named for what it owns, which item is being edited, not
+   for the drawer that shows it). The URL stays the single source of
+   truth for that item, so no store is involved: reading `?item=` through
+   `useOpenItem`, the Add state,
+   finding the item, loading the form once per item, and closing. Each
+   manager passes its type, list, form, a `toFormValues` function, and an
+   `onReset` that clears its mutation errors; forms, payloads, API calls,
+   and confirm text stay per type. A new item type adds one
+   `useItemEditor` call. Deliberately not shared yet: the mutation wiring
+   and the drawer markup (header, Close, delete section; see 6b). Revisit
+   both when a third item type arrives (item 11).
+   Share link page search (2026-11-02, uncommitted, not yet tried in a
+   browser): a "Search this collection" field under the read-only note
+   narrows the page's console and game lists in place (query in local
+   state, not the URL; no takeover, rows stay unclickable). Shared
+   pieces: `SearchField` (the labeled search input; Escape is up to the
+   caller) now also renders the signed-in bar, and `useListSearch`
+   filters any list with `searchEntries`, returning it unchanged when the
+   query is blank. Mappings are `consoleSearchable` and `gameSearchable`
+   in `videoGameOptions.ts`. A status line says "N of M items match" or
+   "Nothing matches"; each list takes an `emptyMessage` ("No games
+   match."); sidebar counts stay totals. 3 new tests. With this, search
+   (8a) is built; it ships with the next push. The share page filters in
+   place instead of reusing `SearchResults` (signed-in data, URL state,
+   and click-through would each have needed a switch); the owner may
+   revisit how the logged-out search looks later. The searchable fields
+   per type are written twice, in `video_games_items.py` and in
+   `consoleSearchable` / `gameSearchable`; keep them in step, and expect
+   each new item type (item 11) to add both.
    - **Scope.** Signed in: always every collection the user owns, with no
      option to limit it to the selected one, and not collections shared
      with them (an "include shared collections" checkbox is left for later,
@@ -698,18 +791,14 @@ is next, then the sharing UI, then search.
    the collection list and stats queries are invalidated. Where the
    controls sit (the collection heading beside Share, or the sidebar row)
    is a styling question for the owner.
-8c. **Turn on gzip in Nginx** (found 2026-10-31). Nothing in
-   `dlams-deployment/` enables it, so JSON and the JS bundle (about 647 kB,
-   the large-chunk warning in Known issues) are sent uncompressed. Compress
-   `application/json`, JS, and CSS. A deployment change: needs the owner's
-   go-ahead, `nginx -t`, and a check in the browser's network panel that
-   responses carry `Content-Encoding: gzip`. Best done before search, which
-   loads every owned item in one response.
-   **Written 2026-11-01:** `gzip on` in the `http` block of `nginx.conf` for
-   JSON, JS, CSS, and SVG (HTML is always included), over 1 KB, level 5,
-   with `Vary: Accept-Encoding` and proxied responses included. `nginx -t`
-   passed locally (`nginx:alpine`, certificate lines removed, stub upstream
-   hosts); not yet checked on the Pi or in the browser's network panel.
+8c. **Gzip in Nginx. Done** (deployed 2026-11-01, `e4366a2`). `gzip on` in
+   the `http` block of `nginx.conf` for JSON, JS, CSS, and SVG (HTML is
+   always included), over 1 KB, level 5, with `Vary: Accept-Encoding` and
+   proxied responses included. `nginx -t` passed locally. The deploy did
+   not apply it (see Known issues); after the owner recreated the Nginx
+   container on the Pi, `curl` from the Pi showed the JS bundle served with
+   `Content-Encoding: gzip` and `Vary: Accept-Encoding` (owner-pasted). The
+   same recreate put the 2026-10-31 share-link rate limit and headers live.
 9. **Sandbox demo sessions. Done** (owner, 2026-10-29). Built
    2026-10-29, deployed 2026-10-30 (see `docs/decisions.md`, "Demo sessions"). "Try
    the demo" copies the `demo-user` template into a temporary `sandbox`
@@ -804,6 +893,13 @@ is next, then the sharing UI, then search.
   in a browser. Left as is (admin-only, not on the visitor path). The cheap
   fixes are hiding the Created column below `md` or stacking each user as a
   card.
+- The deploy did not apply `nginx.conf` changes (found 2026-11-01). Compose
+  mounts the single file into the Nginx container; `git pull` replaces the
+  file, so the container kept reading the old one, and `nginx -s reload`
+  reloaded that. Fixed in source 2026-11-01, not yet deployed: `deploy.yml`
+  now runs `docker compose up -d --force-recreate nginx` instead of the
+  reload, so every deploy restarts Nginx (about a second) on the current
+  file. Remove this entry once a deploy has run with it.
 - A push to `main` deploys even if CI fails, because the deploy workflow does
   not wait for CI. Decide whether to gate the deploy on it later.
 - The UI build emits a Vite large-chunk warning (about 647 kB on 2026-10-17,
@@ -829,7 +925,12 @@ is next, then the sharing UI, then search.
   vulnerabilities after the install: `vitest`/`@vitest/mocker` and `tinypool`
   (dev-only; the fix is a downgrade to Vitest 2.0.5) and `zod` (runtime; `npm
   audit fix` resolves it). Upgrades are deferred. Backend tests use `unittest`; Ruff and
-  pytest are not configured.
+  pytest are not configured. **2026-11-02:** the Prettier install's audit
+  summary showed 16 (13 moderate, 1 high, 2 critical); Prettier has no
+  dependencies, so these arrived some other way since 2026-10-26. Not yet
+  read with `npm audit`. The same install warned `EBADENGINE`: the owner's
+  Mac runs Node 23, which `eslint-visitor-keys` does not list as supported
+  (the Docker build uses Node 20).
 - Migration `951a8354c293` uses a PostgreSQL-only `ALTER COLUMN`, so the full
   migration chain cannot be replayed on SQLite.
 - `dlams-fastapi/.env.example` was only used by the deleted legacy

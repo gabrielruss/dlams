@@ -21,9 +21,7 @@ function CollectionStats({ collection }: CollectionStatsProps) {
 
   if (!StatsComponent) {
     return (
-      <span className="text-xs text-muted-foreground">
-        Stats unavailable
-      </span>
+      <span className="text-xs text-muted-foreground">Stats unavailable</span>
     )
   }
 
