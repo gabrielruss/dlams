@@ -232,10 +232,12 @@ dlams-ui/src/
     admin/                   user management table and hook
     collections/             navigation, workspace dispatch, stats, the Share
                              and Edit collection drawers, ListRow (the item
-                             row any type uses), useItemEditor and
-                             useOpenItem (the item drawer logic)
+                             row any type uses), useItemDrawer and
+                             useOpenItem (what's open), ItemActions and
+                             ItemDetailRows
     search/                  search bar, results panel, matcher, hooks
-    video-games/             console and game managers, workspace, hooks
+    video-games/             console and game managers, drawer content,
+                             forms, details, workspace, hooks
     ui/                      shadcn/ui primitives (button, drawer, form, ...)
   lib/api/                   fetch client and one module per resource
   lib/                       queryClient, permissions, utils
@@ -246,10 +248,16 @@ dlams-ui/src/
 Tests (`*.test.tsx`) sit beside the feature they cover.
 
 Forms open in right-side drawers. Every drawer has the same layout: a
-header with the title and Close only; item actions (the red trash-can Delete)
+header with the title and Close only; item actions (Delete, with its trash icon)
 at the top right of the item area; Save and Cancel in a footer pinned to the
-bottom. An existing item's drawer opens through `?item=` (a row click or a
-search result), handled once in `useItemEditor`; a collection's Edit and
+bottom. An existing item's drawer opens read-only, with its details, Edit,
+and Delete, and Edit switches it to the form; Add drawers open straight into
+the form. It opens through `?item=` (a row click or a search result), read by
+`useItemDrawer`. Each item type's drawer content component and hook
+(`GameDrawerContent`, `useGameDrawerContent`, and the console pair) own the
+form, mutations, edit mode, and the shown item. They render inside
+`DrawerContent`, so that state lasts exactly as long as the drawer, closing
+animation included. A collection's Edit and
 Share drawers sit beside its heading. The sidebar lists collections with counts
 and marks the selected one with a red bar. Its header is a fitted
 `D.L.A.M.S.` wordmark (`components/Wordmark.tsx`, built on
@@ -332,5 +340,5 @@ styling changes need approval (see the conventions file for the rule).
 | A server-data hook | `dlams-ui/src/components/<feature>/use*.ts` and `lib/api/` |
 | What a collection type renders | `components/collections/collectionWorkspaceResolver.ts` |
 | Search | `dlams-ui/src/components/search/`, `app/collections/item_routes.py` and `video_games_items.py` |
-| How an item's drawer opens and closes | `components/collections/useItemEditor.ts`, `useOpenItem.ts`, `lib/urlParams.ts` |
+| How an item's drawer opens and closes | `components/collections/useItemDrawer.ts`, `useOpenItem.ts`, `lib/urlParams.ts`; what it shows: `components/video-games/*DrawerContent*` |
 | Dev or deploy wiring | `dlams-deployment/`, root `Makefile`, `.github/workflows/deploy.yml` |

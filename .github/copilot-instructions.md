@@ -141,10 +141,12 @@ cached copy.
   installed component fits, give the owner the install command and wait.
   Destructive final actions are `<Button variant="outline"
   className="border-destructive text-destructive">`, not the solid
-  `destructive` variant. Deleting an item from its edit drawer starts with a
-  red trash-can icon (`variant="ghost" size="icon"`, `text-destructive`,
-  `aria-label` and `title` "Delete <type>") at the top right of the item
-  area, never in the drawer header beside Close (decided 2026-11-02).
+  `destructive` variant. Deleting from a drawer starts at the top right of
+  the item area, never in the drawer header beside Close (decided
+  2026-11-02). An item's view has Edit beside a red-outline trash icon and
+  "Delete" (`aria-label` "Delete <type>"; decided 2026-11-03). The Edit
+  collection drawer has a red trash-can icon alone (`variant="ghost"
+  size="icon"`, `text-destructive`, `aria-label` and `title`).
 - shadcn/ui components are maintained in the project source; do not expect a
   `shadcn` runtime package. Add or adapt components using the project's
   established shadcn conventions. When a shadcn component is needed, the owner

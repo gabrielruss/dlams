@@ -1,8 +1,7 @@
-import { useCallback } from "react"
+import { useState } from "react"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { useForm } from "react-hook-form"
 
-import useItemEditor from "@/components/collections/useItemEditor"
 import { consolesApi } from "@/lib/api/consoles"
 import type {
   ConsoleCreate,
@@ -11,15 +10,22 @@ import type {
 } from "@/types/videoGames"
 import { invalidateVideoGameCollection } from "./invalidateVideoGameCollection"
 
-interface ConsoleFormValues {
+export interface ConsoleFormValues {
   label: string
   edition: string
   condition: VideoGameCondition
 }
 
-interface UseConsoleManagerOptions {
+interface UseConsoleDrawerContentOptions {
   collectionId: number
-  consoles: ConsoleRecord[]
+  openedConsole: ConsoleRecord | undefined
+  onClose: () => void
+}
+
+const emptyConsoleFormValues: ConsoleFormValues = {
+  label: "",
+  edition: "",
+  condition: "Loose",
 }
 
 const consoleFormValues = (
@@ -30,13 +36,19 @@ const consoleFormValues = (
   condition: consoleRecord.condition,
 })
 
-function useConsoleManager({
+function useConsoleDrawerContent({
   collectionId,
-  consoles,
-}: UseConsoleManagerOptions) {
+  openedConsole,
+  onClose,
+}: UseConsoleDrawerContentOptions) {
   const queryClient = useQueryClient()
+  const [shownConsole, setShownConsole] = useState(openedConsole)
+  if (openedConsole && openedConsole !== shownConsole)
+    setShownConsole(openedConsole)
+
+  const [isEditing, setIsEditing] = useState(false)
   const form = useForm<ConsoleFormValues>({
-    defaultValues: { label: "", edition: "", condition: "Loose" },
+    defaultValues: emptyConsoleFormValues,
   })
 
   const saveMutation = useMutation({
@@ -52,21 +64,26 @@ function useConsoleManager({
     onSuccess: () => invalidateVideoGameCollection(queryClient, collectionId),
   })
 
-  const { reset: resetSave } = saveMutation
-  const { reset: resetDelete } = deleteMutation
-  const clearErrors = useCallback(() => {
-    resetSave()
-    resetDelete()
-  }, [resetSave, resetDelete])
+  const clearErrors = () => {
+    saveMutation.reset()
+    deleteMutation.reset()
+  }
 
-  const { editingItem, editingId, isEditorOpen, edit, startNew, close } =
-    useItemEditor({
-      type: "console",
-      items: consoles,
-      form,
-      toFormValues: consoleFormValues,
-      onReset: clearErrors,
-    })
+  const startEditing = () => {
+    if (shownConsole === undefined) return
+    form.reset(consoleFormValues(shownConsole))
+    clearErrors()
+    setIsEditing(true)
+  }
+
+  const leaveForm = () => {
+    if (shownConsole === undefined) {
+      onClose()
+      return
+    }
+    clearErrors()
+    setIsEditing(false)
+  }
 
   const saveConsole = (values: ConsoleFormValues) => {
     const data: ConsoleCreate = {
@@ -74,7 +91,10 @@ function useConsoleManager({
       edition: values.edition.trim() || null,
       condition: values.condition,
     }
-    saveMutation.mutate({ id: editingId, data }, { onSuccess: close })
+    saveMutation.mutate(
+      { id: shownConsole?.id ?? null, data },
+      { onSuccess: leaveForm },
+    )
   }
 
   const deleteConsole = (consoleRecord: ConsoleRecord) => {
@@ -83,24 +103,22 @@ function useConsoleManager({
       : consoleRecord.label
     if (!window.confirm(`Delete ${description}?`)) return
     deleteMutation.reset()
-    deleteMutation.mutate(consoleRecord.id, { onSuccess: close })
+    deleteMutation.mutate(consoleRecord.id, { onSuccess: onClose })
   }
 
   return {
     form,
-    editingId,
-    editingConsole: editingItem,
+    shownConsole,
+    isEditing,
     formError: saveMutation.error?.message ?? null,
     deleteError: deleteMutation.error?.message ?? null,
     isDeleting: deleteMutation.isPending,
-    isDrawerOpen: isEditorOpen,
     isSaving: saveMutation.isPending,
-    resetForm: close,
+    startEditing,
+    leaveForm,
     saveConsole,
-    editConsole: edit,
-    startNewConsole: startNew,
     deleteConsole,
   }
 }
 
-export default useConsoleManager
+export default useConsoleDrawerContent

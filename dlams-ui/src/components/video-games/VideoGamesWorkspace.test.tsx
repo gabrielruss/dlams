@@ -69,7 +69,7 @@ function signInWithCollection(access: CollectionAccess) {
 }
 
 describe("video game collection access", () => {
-  it("lets an owner add, and open a row to edit or delete it", async () => {
+  it("lets an owner add, and open a row to view it", async () => {
     signInWithCollection("owner")
 
     const { user } = renderApp("/")
@@ -83,18 +83,129 @@ describe("video game collection access", () => {
     ).toBeInTheDocument()
     expect(screen.getByRole("button", { name: "Add game" })).toBeInTheDocument()
     expect(
-      screen.getByRole("button", { name: "Edit Xbox 360 — Original White" }),
+      screen.getByRole("button", { name: "View Xbox 360 — Original White" }),
     ).toBeInTheDocument()
     expect(
       screen.queryByRole("button", { name: /^Delete/ }),
     ).not.toBeInTheDocument()
 
-    await user.click(screen.getByRole("button", { name: "Edit Halo 3" }))
+    await user.click(screen.getByRole("button", { name: "View Halo 3" }))
     const drawer = await screen.findByRole("dialog")
-    expect(within(drawer).getByLabelText("Game name")).toHaveValue("Halo 3")
+    expect(
+      within(drawer).getByRole("heading", { name: "Halo 3" }),
+    ).toBeInTheDocument()
+    expect(within(drawer).getByText("Xbox 360")).toBeInTheDocument()
+    expect(within(drawer).getByText("CIB")).toBeInTheDocument()
+    expect(within(drawer).getByText("—")).toBeInTheDocument()
+    expect(within(drawer).getByText("No")).toBeInTheDocument()
+    expect(within(drawer).queryByLabelText("Game name")).not.toBeInTheDocument()
+    expect(
+      within(drawer).queryByRole("button", { name: "Save game" }),
+    ).not.toBeInTheDocument()
     expect(
       within(drawer).getByRole("button", { name: "Delete game" }),
     ).toBeInTheDocument()
+  })
+
+  it("switches to the form with Edit, and Cancel returns to the view", async () => {
+    signInWithCollection("owner")
+
+    const { user } = renderApp("/")
+    await user.click(await screen.findByRole("button", { name: "View Halo 3" }))
+    const drawer = await screen.findByRole("dialog")
+
+    within(drawer).getByRole("button", { name: "Edit" }).focus()
+    await user.keyboard("{Enter}")
+    expect(
+      within(drawer).getByRole("heading", { name: "Edit game" }),
+    ).toBeInTheDocument()
+    const name = within(drawer).getByLabelText("Game name")
+    expect(name).toHaveValue("Halo 3")
+    expect(
+      within(drawer).queryByRole("button", { name: "Delete game" }),
+    ).not.toBeInTheDocument()
+
+    name.focus()
+    await user.clear(name)
+    await user.keyboard("Typed and abandoned")
+    within(drawer).getByRole("button", { name: "Cancel" }).focus()
+    await user.keyboard("{Enter}")
+
+    expect(
+      within(drawer).getByRole("heading", { name: "Halo 3" }),
+    ).toBeInTheDocument()
+    within(drawer).getByRole("button", { name: "Edit" }).focus()
+    await user.keyboard("{Enter}")
+    expect(within(drawer).getByLabelText("Game name")).toHaveValue("Halo 3")
+  })
+
+  it("returns to the view with the new values after saving", async () => {
+    signInWithCollection("owner")
+    const game = {
+      id: 1,
+      name: "Halo 3",
+      condition: "CIB",
+      console_label_id: 1,
+      console_label: "Xbox 360",
+      last_played: null,
+      completed: false,
+    }
+    let savedName = game.name
+    server.use(
+      http.get(`${api}/collections/1/games`, () =>
+        HttpResponse.json({ games: [{ ...game, name: savedName }] }),
+      ),
+      http.put(`${api}/collections/1/games/1`, async ({ request }) => {
+        const body = (await request.json()) as { name: string }
+        savedName = body.name
+        return HttpResponse.json({ ...game, name: savedName })
+      }),
+    )
+
+    const { user } = renderApp("/")
+    await user.click(await screen.findByRole("button", { name: "View Halo 3" }))
+    const drawer = await screen.findByRole("dialog")
+    within(drawer).getByRole("button", { name: "Edit" }).focus()
+    await user.keyboard("{Enter}")
+    const name = within(drawer).getByLabelText("Game name")
+    name.focus()
+    await user.clear(name)
+    await user.keyboard("Halo 3: ODST{Enter}")
+
+    expect(
+      await within(drawer).findByRole("heading", { name: "Halo 3: ODST" }),
+    ).toBeInTheDocument()
+    expect(savedName).toBe("Halo 3: ODST")
+    expect(screen.getByRole("dialog")).toBeInTheDocument()
+    within(drawer).getByRole("button", { name: "Edit" }).focus()
+    await user.keyboard("{Enter}")
+    expect(within(drawer).getByLabelText("Game name")).toHaveValue(
+      "Halo 3: ODST",
+    )
+  })
+
+  it("starts in the view again after closing while editing", async () => {
+    signInWithCollection("owner")
+
+    const { user } = renderApp("/")
+    await user.click(await screen.findByRole("button", { name: "View Halo 3" }))
+    const drawer = await screen.findByRole("dialog")
+    within(drawer).getByRole("button", { name: "Edit" }).focus()
+    await user.keyboard("{Enter}")
+    within(drawer).getByRole("button", { name: "Close drawer" }).focus()
+    await user.keyboard("{Enter}")
+    await waitFor(() =>
+      expect(screen.queryByRole("dialog")).not.toBeInTheDocument(),
+    )
+
+    await user.click(screen.getByRole("button", { name: "View Halo 3" }))
+    const reopened = await screen.findByRole("dialog")
+    expect(
+      within(reopened).getByRole("heading", { name: "Halo 3" }),
+    ).toBeInTheDocument()
+    expect(
+      within(reopened).queryByLabelText("Game name"),
+    ).not.toBeInTheDocument()
   })
 
   it("opens an item's drawer from the URL", async () => {
@@ -104,11 +215,12 @@ describe("video game collection access", () => {
 
     const drawer = await screen.findByRole("dialog")
     expect(
-      within(drawer).getByRole("heading", { name: "Edit console" }),
+      within(drawer).getByRole("heading", { name: "Xbox 360" }),
     ).toBeInTheDocument()
-    expect(within(drawer).getByLabelText("Edition / details")).toHaveValue(
-      "Original White",
-    )
+    expect(within(drawer).getByText("Original White")).toBeInTheDocument()
+    expect(
+      within(drawer).queryByLabelText("Edition / details"),
+    ).not.toBeInTheDocument()
   })
 
   it("opens nothing for an item that is not in the collection", async () => {
@@ -124,7 +236,7 @@ describe("video game collection access", () => {
     signInWithCollection("owner")
 
     const { user } = renderApp("/")
-    await user.click(await screen.findByRole("button", { name: "Edit Halo 3" }))
+    await user.click(await screen.findByRole("button", { name: "View Halo 3" }))
     const drawer = await screen.findByRole("dialog")
     within(drawer).getByRole("button", { name: "Close drawer" }).focus()
     await user.keyboard("{Enter}")
@@ -149,7 +261,7 @@ describe("video game collection access", () => {
     vi.spyOn(window, "confirm").mockReturnValueOnce(true)
 
     const { user } = renderApp("/")
-    await user.click(await screen.findByRole("button", { name: "Edit Halo 3" }))
+    await user.click(await screen.findByRole("button", { name: "View Halo 3" }))
     const drawer = await screen.findByRole("dialog")
     within(drawer).getByRole("button", { name: "Delete game" }).focus()
     await user.keyboard("{Enter}")
@@ -174,6 +286,101 @@ describe("video game collection access", () => {
     expect(
       within(drawer).queryByRole("button", { name: "Delete game" }),
     ).not.toBeInTheDocument()
+    expect(
+      within(drawer).getByRole("heading", { name: "Add game" }),
+    ).toBeInTheDocument()
+    expect(within(drawer).getByLabelText("Game name")).toBeInTheDocument()
+  })
+
+  it("clears a failed save's error after Cancel and Edit", async () => {
+    signInWithCollection("owner")
+    server.use(
+      http.put(`${api}/collections/1/games/1`, () =>
+        HttpResponse.json({ detail: "Could not save" }, { status: 500 }),
+      ),
+    )
+
+    const { user } = renderApp("/")
+    await user.click(await screen.findByRole("button", { name: "View Halo 3" }))
+    const drawer = await screen.findByRole("dialog")
+    within(drawer).getByRole("button", { name: "Edit" }).focus()
+    await user.keyboard("{Enter}")
+    within(drawer).getByLabelText("Game name").focus()
+    await user.keyboard("{Enter}")
+    expect(await within(drawer).findByRole("alert")).toHaveTextContent(
+      "Could not save",
+    )
+
+    within(drawer).getByRole("button", { name: "Cancel" }).focus()
+    await user.keyboard("{Enter}")
+    within(drawer).getByRole("button", { name: "Edit" }).focus()
+    await user.keyboard("{Enter}")
+
+    expect(within(drawer).getByLabelText("Game name")).toBeInTheDocument()
+    expect(within(drawer).queryByRole("alert")).not.toBeInTheDocument()
+  })
+
+  it("switches a console between its view and form, and saves back to the view", async () => {
+    signInWithCollection("owner")
+    const consoleRecord = {
+      id: 1,
+      console_label_id: 1,
+      label: "Xbox 360",
+      edition: "Original White",
+      condition: "CIB",
+    }
+    let savedEdition = consoleRecord.edition
+    server.use(
+      http.get(`${api}/collections/1/consoles`, () =>
+        HttpResponse.json({
+          consoles: [{ ...consoleRecord, edition: savedEdition }],
+        }),
+      ),
+      http.put(`${api}/collections/1/consoles/1`, async ({ request }) => {
+        const body = (await request.json()) as { edition: string }
+        savedEdition = body.edition
+        return HttpResponse.json({ ...consoleRecord, edition: savedEdition })
+      }),
+    )
+
+    const { user } = renderApp("/?collection=1&item=console-1")
+    const drawer = await screen.findByRole("dialog")
+    within(drawer).getByRole("button", { name: "Edit" }).focus()
+    await user.keyboard("{Enter}")
+    expect(
+      within(drawer).getByRole("heading", { name: "Edit console" }),
+    ).toBeInTheDocument()
+    const edition = within(drawer).getByLabelText("Edition / details")
+    expect(edition).toHaveValue("Original White")
+
+    edition.focus()
+    await user.clear(edition)
+    await user.keyboard("Elite{Enter}")
+
+    expect(await within(drawer).findByText("Elite")).toBeInTheDocument()
+    expect(
+      within(drawer).getByRole("heading", { name: "Xbox 360" }),
+    ).toBeInTheDocument()
+    expect(savedEdition).toBe("Elite")
+  })
+
+  it("opens Add empty after an item was opened and edited", async () => {
+    signInWithCollection("owner")
+
+    const { user } = renderApp("/")
+    await user.click(await screen.findByRole("button", { name: "View Halo 3" }))
+    const drawer = await screen.findByRole("dialog")
+    within(drawer).getByRole("button", { name: "Edit" }).focus()
+    await user.keyboard("{Enter}")
+    within(drawer).getByRole("button", { name: "Close drawer" }).focus()
+    await user.keyboard("{Enter}")
+    await waitFor(() =>
+      expect(screen.queryByRole("dialog")).not.toBeInTheDocument(),
+    )
+
+    await user.click(screen.getByRole("button", { name: "Add game" }))
+    const addDrawer = await screen.findByRole("dialog")
+    expect(within(addDrawer).getByLabelText("Game name")).toHaveValue("")
   })
 
   it("shows a shared collection to read without any write controls", async () => {
@@ -189,7 +396,7 @@ describe("video game collection access", () => {
       screen.queryByRole("button", { name: "Add game" }),
     ).not.toBeInTheDocument()
     expect(
-      screen.queryByRole("button", { name: /^Edit/ }),
+      screen.queryByRole("button", { name: /^(View|Edit)/ }),
     ).not.toBeInTheDocument()
     expect(
       screen.queryByRole("button", { name: /^Delete/ }),
@@ -203,6 +410,19 @@ describe("video game collection access", () => {
     await screen.findByText("Halo 3")
 
     await expectNoViolations(container)
+  })
+
+  it("has no accessibility violations viewing and editing an item", async () => {
+    signInWithCollection("owner")
+
+    const { user } = renderApp("/?collection=1&item=game-1")
+    const drawer = await screen.findByRole("dialog")
+    await expectNoViolations(document.body)
+
+    within(drawer).getByRole("button", { name: "Edit" }).focus()
+    await user.keyboard("{Enter}")
+    expect(within(drawer).getByLabelText("Game name")).toBeInTheDocument()
+    await expectNoViolations(document.body)
   })
 
   it.each(["New collection", "Add console", "Add game", "Open menu"])(

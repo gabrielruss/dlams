@@ -566,11 +566,22 @@ seven-day sandboxes. Build steps are item 8 in `DLAMS-PLAN.md`.
   pattern, since a whole collection deserves more than the browser's
   `confirm`). Chosen over a menu on each sidebar row, which needs an
   uninstalled component and is behind the menu button on phones.
-- **Opening an item will show it before editing it** (owner, 2026-11-03;
-  plan item 8d, not built): most visits are to look, not to change. Edit
+- **Opening an item shows it before editing it** (owner, 2026-11-03;
+  plan item 8d): rows are now named "View <item>", and Delete is in the
+  view only, a red-outline button with the trash icon and text (owner: an
+  icon alone looked strange beside the labeled Edit). Most visits are to look, not to change. Edit
   mode is local state, not in the URL: nobody needs a link to an edit
   screen, a refresh loses typed changes anyway, and back closing the
   drawer matches every other drawer. Chosen over `?mode=edit`.
+- **An open drawer's state lives inside the drawer** (owner, 2026-11-03).
+  The form, mutations, edit mode, and shown item are in a component rendered
+  inside `DrawerContent`; a small hook (`useItemDrawer`) says only what is
+  open. The state then holds still through the closing animation and resets
+  by unmounting. Chosen over a wrapper that kept the last rendered content,
+  and over hook state in the always-mounted manager, which needed
+  hand-written reset tracking, effects, and guards. No state machine or
+  reducer: the URL owns which item is open and the query owns its data, so
+  copying them into one would add a second source of truth.
 
 ### Login branding: backdrop text, two fonts, two brand colors — 2026-10-18
 - The login page shows "DON'T LOOK AT MY STUFF" as a faint full-screen
