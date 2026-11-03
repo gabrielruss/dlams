@@ -98,9 +98,9 @@ describe("search", () => {
 
     expect(await screen.findByText("3 results")).toBeInTheDocument()
     expect(resultTitles()).toEqual([
-      "Edit Halo 3",
-      "Edit Pokémon Red",
-      "Edit Xbox 360 — Original White",
+      "View Halo 3",
+      "View Pokémon Red",
+      "View Xbox 360 — Original White",
     ])
     expect(
       screen.getByText("Xbox 360 · CIB · Retro game shelf"),
@@ -118,11 +118,11 @@ describe("search", () => {
 
     await user.type(searchBox(), "pokemon")
     expect(await screen.findByText("1 result")).toBeInTheDocument()
-    expect(resultTitles()).toEqual(["Edit Pokémon Red"])
+    expect(resultTitles()).toEqual(["View Pokémon Red"])
 
     await user.clear(searchBox())
     await user.type(searchBox(), "360 halo")
-    expect(resultTitles()).toEqual(["Edit Halo 3"])
+    expect(resultTitles()).toEqual(["View Halo 3"])
   })
 
   it("says when nothing matches", async () => {
@@ -219,12 +219,12 @@ describe("search", () => {
     const { user } = await openSearch()
     await screen.findByText("3 results")
 
-    await user.click(screen.getByRole("button", { name: "Edit Pokémon Red" }))
+    await user.click(screen.getByRole("button", { name: "View Pokémon Red" }))
 
     const drawer = await screen.findByRole("dialog")
-    expect(within(drawer).getByLabelText("Game name")).toHaveValue(
-      "Pokémon Red",
-    )
+    expect(
+      within(drawer).getByRole("heading", { name: "Pokémon Red" }),
+    ).toBeInTheDocument()
     expect(
       screen.getByRole("heading", { name: "Games to sell", hidden: true }),
     ).toBeInTheDocument()

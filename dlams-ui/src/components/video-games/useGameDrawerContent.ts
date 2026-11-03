@@ -1,18 +1,16 @@
-import { useCallback } from "react"
+import { useState } from "react"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { useForm } from "react-hook-form"
 
-import useItemEditor from "@/components/collections/useItemEditor"
 import { gamesApi } from "@/lib/api/games"
 import type {
   GameCreate,
   GameRecord,
   VideoGameCondition,
 } from "@/types/videoGames"
-import { isVideoGameCondition } from "./videoGameOptions"
 import { invalidateVideoGameCollection } from "./invalidateVideoGameCollection"
 
-interface GameFormValues {
+export interface GameFormValues {
   name: string
   condition: VideoGameCondition
   consoleLabel: string
@@ -20,9 +18,18 @@ interface GameFormValues {
   completed: boolean
 }
 
-interface UseGameManagerOptions {
+interface UseGameDrawerContentOptions {
   collectionId: number
-  games: GameRecord[]
+  openedGame: GameRecord | undefined
+  onClose: () => void
+}
+
+const emptyGameFormValues: GameFormValues = {
+  name: "",
+  condition: "Loose",
+  consoleLabel: "",
+  lastPlayed: "",
+  completed: false,
 }
 
 const gameFormValues = (game: GameRecord): GameFormValues => ({
@@ -33,17 +40,17 @@ const gameFormValues = (game: GameRecord): GameFormValues => ({
   completed: game.completed,
 })
 
-function useGameManager({ collectionId, games }: UseGameManagerOptions) {
+function useGameDrawerContent({
+  collectionId,
+  openedGame,
+  onClose,
+}: UseGameDrawerContentOptions) {
   const queryClient = useQueryClient()
-  const form = useForm<GameFormValues>({
-    defaultValues: {
-      name: "",
-      condition: "Loose",
-      consoleLabel: "",
-      lastPlayed: "",
-      completed: false,
-    },
-  })
+  const [shownGame, setShownGame] = useState(openedGame)
+  if (openedGame && openedGame !== shownGame) setShownGame(openedGame)
+
+  const [isEditing, setIsEditing] = useState(false)
+  const form = useForm<GameFormValues>({ defaultValues: emptyGameFormValues })
 
   const saveMutation = useMutation({
     mutationFn: ({ id, data }: { id: number | null; data: GameCreate }) =>
@@ -57,21 +64,26 @@ function useGameManager({ collectionId, games }: UseGameManagerOptions) {
     onSuccess: () => invalidateVideoGameCollection(queryClient, collectionId),
   })
 
-  const { reset: resetSave } = saveMutation
-  const { reset: resetDelete } = deleteMutation
-  const clearErrors = useCallback(() => {
-    resetSave()
-    resetDelete()
-  }, [resetSave, resetDelete])
+  const clearErrors = () => {
+    saveMutation.reset()
+    deleteMutation.reset()
+  }
 
-  const { openedItem, openedItemId, isEditorOpen, open, startNew, close } =
-    useItemEditor({
-      type: "game",
-      items: games,
-      form,
-      toFormValues: gameFormValues,
-      onReset: clearErrors,
-    })
+  const startEditing = () => {
+    if (shownGame === undefined) return
+    form.reset(gameFormValues(shownGame))
+    clearErrors()
+    setIsEditing(true)
+  }
+
+  const leaveForm = () => {
+    if (shownGame === undefined) {
+      onClose()
+      return
+    }
+    clearErrors()
+    setIsEditing(false)
+  }
 
   const saveGame = (values: GameFormValues) => {
     const data: GameCreate = {
@@ -81,31 +93,31 @@ function useGameManager({ collectionId, games }: UseGameManagerOptions) {
       last_played: values.lastPlayed || null,
       completed: values.completed,
     }
-    saveMutation.mutate({ id: openedItemId, data }, { onSuccess: close })
+    saveMutation.mutate(
+      { id: shownGame?.id ?? null, data },
+      { onSuccess: leaveForm },
+    )
   }
 
   const deleteGame = (game: GameRecord) => {
     if (!window.confirm(`Delete "${game.name}"? This cannot be undone.`)) return
     deleteMutation.reset()
-    deleteMutation.mutate(game.id, { onSuccess: close })
+    deleteMutation.mutate(game.id, { onSuccess: onClose })
   }
 
   return {
     form,
-    openedItemId,
-    openedGame: openedItem,
+    shownGame,
+    isEditing,
     formError: saveMutation.error?.message ?? null,
     deleteError: deleteMutation.error?.message ?? null,
     isDeleting: deleteMutation.isPending,
-    isDrawerOpen: isEditorOpen,
     isSaving: saveMutation.isPending,
-    resetForm: close,
+    startEditing,
+    leaveForm,
     saveGame,
-    openGame: open,
-    startNewGame: startNew,
     deleteGame,
-    isVideoGameCondition,
   }
 }
 
-export default useGameManager
+export default useGameDrawerContent
