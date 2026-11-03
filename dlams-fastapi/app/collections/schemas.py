@@ -14,6 +14,12 @@ class CollectionCreate(BaseModel):
     type: CollectionType = CollectionType.VIDEO_GAME
 
 
+class CollectionUpdate(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    name: str = Field(min_length=1, max_length=100)
+
+
 class CollectionResponse(BaseModel):
     id: int
     owner_id: int

@@ -558,6 +558,19 @@ seven-day sandboxes. Build steps are item 8 in `DLAMS-PLAN.md`.
   the red-outlined Delete at the end of the drawer, which outweighed Save
   and sat beside it; chosen over a trash icon beside Close (mixes drawer
   and item actions) and one beside Cancel in the footer (an easy mis-tap).
+- **Collections use the same drawer** (owner, 2026-11-03). An "Edit"
+  button beside Share on the collection heading opens "Edit collection":
+  the name field, the trash icon, and the pinned footer, as above. Its
+  delete confirms inside the drawer, listing what goes with the
+  collection, with a red-outline "Delete collection" (the share-link
+  pattern, since a whole collection deserves more than the browser's
+  `confirm`). Chosen over a menu on each sidebar row, which needs an
+  uninstalled component and is behind the menu button on phones.
+- **Opening an item will show it before editing it** (owner, 2026-11-03;
+  plan item 8d, not built): most visits are to look, not to change. Edit
+  mode is local state, not in the URL: nobody needs a link to an edit
+  screen, a refresh loses typed changes anyway, and back closing the
+  drawer matches every other drawer. Chosen over `?mode=edit`.
 
 ### Login branding: backdrop text, two fonts, two brand colors — 2026-10-18
 - The login page shows "DON'T LOOK AT MY STUFF" as a faint full-screen

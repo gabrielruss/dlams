@@ -1,66 +1,72 @@
 # DLAMS plan
 
-Last updated: 2026-10-31
+Last updated: 2026-11-03
 
 The current state of the project. For why things are the way they are, see
 [`docs/decisions.md`](./docs/decisions.md). For the full history up to
 2026-10-09, see [`docs/archive/`](./docs/archive/).
 
-## Where we left off (2026-10-31)
+## Where we left off (2026-11-03)
 
 Start here in a new session. This block is rewritten at the end of a session,
 never appended to. History lives in git and `docs/decisions.md`.
 
-- **Status.** The portfolio-ready milestone is complete (2026-10-27).
-  Sandbox demo sessions, read-only link sharing (item 8), and the
-  consistency rules for new code are deployed: commit `54a4126` ("adding
-  share funct"), owner-reported working on 2026-10-31 after a full manual
-  check. Nothing is being built right now. The rest of the 2026-10-31
-  session was planning: search is fully designed (item 8a) and the
-  priority list changed (below). Those doc updates (`DLAMS-PLAN.md`,
-  `docs/architecture.md`, `docs/decisions.md`) were uncommitted at the end
-  of the session. Run `git status` and `git log` first: the owner commits
-  and pushes everything, and a push to `main` deploys (docs included).
-- **What is deployed, in short** (details in item 8 and the architecture
-  doc):
-  - Share links: up to 5 per collection from the Share drawer
-    (`ShareCollectionDrawer.tsx`, `CreateLinkForm.tsx`, `ShareLinkRow.tsx`);
-    the public page `/s/:token` (`pages/SharedCollection.tsx`) and
-    `GET /shared/{token}`; Nginx rate limit and `noindex` / `no-referrer`.
-  - Sandboxes live 7 days for their links; sign-out keeps them.
-  - List rows open the edit drawer; `ListRow` is in
-    `components/collections/` for any item type.
-  - Consistency rules (decision "One way to write each thing"): installed
-    shadcn components only, one form pattern, `Annotated` dependency
-    aliases (`DbSession`, `CurrentUser`, `OwnedCollection`, ...),
-    `select()` only, `extra="forbid"` on request schemas. Rules are in
-    `.github/copilot-instructions.md`; older code is items 6a and 6d.
-- **What is verified.** Run by Claude on 2026-10-31: 29 UI tests, lint, and
-  build; 80 backend tests, `ruff check`, and `ruff format --check`.
-  Owner-reported 2026-10-31: deployed, and a manual check of everything
-  (share links in a private window, the deleted-link message, a sandbox's
-  link after sign-out, the console and game click-through, CI's Ruff
-  steps). Not run: Pylance after the `int | None` count fix in
-  `create_link`. Earlier: backup restore test passed (2026-10-29).
+- **Status.** Search (item 8a) is deployed (PR #12, 2026-11-02). Edit and
+  delete collections (item 8b) is built, owner-checked in the browser, and
+  pushed to branch `edit-delete-collection` (commits `e7afc30`,
+  `586d8a1`), not yet merged to `main`. This end-of-session doc update to
+  `DLAMS-PLAN.md` is uncommitted. Nothing is mid-build. Run `git status`
+  and `git log` first: the owner commits and pushes everything, and a
+  push to `main` deploys (docs included).
+- **What was built this session (2026-11-01 to 11-03),** details in the
+  items named:
+  - Gzip in Nginx (8c). The deploy did not apply `nginx.conf` changes;
+    `deploy.yml` now recreates the Nginx container (Known issues).
+  - Search (8a): `GET /items` (`item_routes.py`,
+    `video_games_items.py`); the matcher `searchEntries.ts`;
+    `useOwnedItems`; the "Search all collections" takeover
+    (`SearchBar`, `SearchResults`, `useSearchMode`, `?q=`); `SearchField`
+    shared with the share page's in-place filter (`useListSearch`).
+  - `?item=` opens every existing item's edit drawer, from a row click or
+    a search result (`useOpenItem`, `lib/urlParams.ts`), and the editing
+    logic both managers share is `useItemEditor` (`components/collections/`).
+  - Item drawer layout: header is drawer-only (title, Close); a red
+    trash-can Delete at the top right of the item area; Save / Cancel in a
+    pinned footer.
+  - Edit and delete collections (8b): `PUT` / `DELETE /collections/{id}`,
+    `useManageCollection`, `EditCollectionDrawer` (same layout), and
+    `DeleteCollectionConfirm` with counts from data already loaded
+    (`describeContents`).
+  - Prettier for the UI (pinned, `format` / `format:check` scripts, a
+    Claude Code hook, one reformat commit).
+- **What is verified.** Run by Claude 2026-11-03 on
+  `edit-delete-collection`: 58 UI tests, lint, build, format check; 94
+  backend tests, Ruff check and format. Owner-checked in the browser:
+  search, the `?item=` drawers, the drawer layout, edit and delete
+  collections. Not yet confirmed: that the deploy workflow now recreates
+  Nginx (check below).
 - **Next, in order:**
-  1. **Deploy picks up `nginx.conf` changes** (Known issues): workflow
-     fixed in source 2026-11-01; confirm on the next deploy.
-  2. **Search** (item 8a): built 2026-11-02 on `add-search`, not yet
-     deployed. Endpoint `GET /items`, the matcher, the signed-in takeover
-     bar with `?q=`, `?item=` opening every edit drawer
-     (`useItemEditor`), and the share link page's field. Check it in the
-     browser, then push; the same deploy confirms item 1.
-  3. **Edit and delete collections** (item 8b).
+  1. **Merge `edit-delete-collection`** (owner). No migration.
+  2. **Confirm the Nginx deploy fix** on that deploy, on the Pi:
+     `docker ps --filter name=dlams-nginx --format '{{.Names}} {{.Status}}'`
+     should show an uptime matching the deploy. Then remove the Known
+     issues entry.
+  3. **View an item before editing it** (item 8d, owner's high priority):
+     designed 2026-11-03, read 8d in full. Build in two layers: first
+     `useItemEditor` gains the view/edit switch (local state, not the
+     URL; Cancel and Save return to the view), then `GameDetails` /
+     `ConsoleDetails` and the drawer switching.
   4. Then: the manual accessibility audit (6), shadcn everywhere (6a),
      repeated styling (6b), styling cleanup (6c), backend consistency
-     (6d), frontend hook consistency (6e), admins delete users (9a, replaces the wipe-sandboxes button),
-     stats area (10c, moved up 2026-10-31), later sharing ideas (10a),
-     color themes (10b), further item types (11), item images (12, added
-     2026-10-31; do the dependency upgrades first), moving items between
-     collections of the same type (13), and a duplicate item finder (14).
+     (6d), frontend hook consistency (6e), admins delete users (9a),
+     stats area (10c), later sharing ideas (10a), color themes (10b),
+     further item types (11; it lists what assumes video games today),
+     item images (12; do the dependency upgrades first), moving items
+     between collections (13), and a duplicate item finder (14).
 - **Waiting on the owner:** whether to take the `zod` fix
-  (`npm audit fix`); in 6d, whether to drop the `response_model`s Ruff's
-  FAST001 calls redundant; before 6a, running
+  (`npm audit fix`; the install on 2026-11-02 reported 16 vulnerabilities,
+  not yet read, see Known issues); in 6d, whether to drop the
+  `response_model`s Ruff's FAST001 calls redundant; before 6a, running
   `npx shadcn@latest add select checkbox`.
 - **Things to remember about the code.**
   - Tests sit beside the feature they cover. `renderApp(route)` in
@@ -68,54 +74,66 @@ never appended to. History lives in git and `docs/decisions.md`.
     handlers per test with `server.use(...)`; add an axe check with
     `expectNoViolations(container)`. A request with no handler fails with a
     network error and prints `[MSW] Error: intercepted a request without a
-    matching request handler`; the test itself fails only if what it checks
+    matching request handler`; the test fails only if what it checks
     depends on that request, so read the output for MSW errors. Any test
     that opens an owned collection needs `GET /collections/1/links` (the
-    Share button) and `GET /console-labels` handlers.
-    Inside a Vaul drawer, use `element.focus()` and `user.keyboard(...)`
-    instead of clicks: pointer events throw in jsdom. MSW mocks never return
-    a 422, so they cannot catch a body a schema rejects.
+    Share button) and `GET /console-labels` handlers. Inside a Vaul
+    drawer, use `element.focus()` and `user.keyboard(...)` instead of
+    clicks (pointer events throw in jsdom); while a drawer is open the
+    page behind it is hidden from the accessibility tree, so query it with
+    `hidden: true`. MemoryRouter cannot test back and forward. MSW mocks
+    never return a 422.
   - Backend tests call route functions directly against SQLite, which does
     not enforce foreign keys; delete child rows explicitly (as
-    `delete_sandbox` does) and test that. Routes take the collection from a
-    dependency, so tests pass the collection in and test access rules on
-    the dependency functions.
-  - `_console_response` and `_game_response` run one label query per row;
-    the search endpoint must not reuse them as they are (fix noted in 6d).
+    `delete_sandbox` and `delete_collection` do) and test that. Routes take
+    the collection from a dependency, so tests pass the collection in and
+    test access rules on the dependency functions.
+  - URL state: `?collection=`, `?q=` (search open, even empty), and
+    `?item=<type>-<id>` (an item's drawer); names and the item format are
+    in `lib/urlParams.ts`. Picking a sidebar collection drops `q` and
+    `item`.
+  - `_console_response` and `_game_response` still run one label query per
+    row (fix in 6d); `/items` does not use them.
   - Share links are not an access level: `/shared/{token}` looks the token up
     and returns read-only data. `OwnedCollection` guards managing links, not
     reading them.
   - New code follows the conventions file even inside an unconverted file:
-    shadcn components, the form pattern, `Annotated` aliases, `select()`,
-    `extra="forbid"` on request schemas. The 6a grep (in that item) lists
-    raw form elements; it found 30 on 2026-10-31, all older code.
+    shadcn components, the form pattern, query hooks returning a named
+    object, at most two `?` in a ternary chain, `Annotated` aliases,
+    `select()`, `extra="forbid"` on request schemas. The 6a grep lists raw
+    form elements left in older code.
   - Generated shadcn files need the owner's approval to edit (local edits to
     `components/ui/combobox.tsx` are listed in
     `.github/copilot-instructions.md`). The owner runs the shadcn CLI.
   - In our own components never use the `cn` helper, do not add code
-    comments (but never remove or reword the owner's own comments), and
-    never use the owner's name in tests or fixtures (use `test-user`,
-    `demo-user`).
+    comments (but never remove or reword the owner's own comments; some
+    are in `searchEntries.ts` and `useItemEditor.ts`), and never use the
+    owner's name in tests or fixtures (use `test-user`, `demo-user`).
   - Styling: ask before any styling change; the owner's direct request is the
-    go-ahead (the search layout in 8a is approved). Destructive final
-    actions are `<Button variant="outline" className="border-destructive
-    text-destructive">`. `red` is the brand color (logo D,
-    selected-collection bar). A console color theme was tried and reverted
-    (item 10b holds the notes).
-  - Backend: run `.venv/bin/ruff check .` and `.venv/bin/ruff format --check .`
-    from `dlams-fastapi/` along with the tests; CI runs both.
+    go-ahead. Destructive final actions are `<Button variant="outline"
+    className="border-destructive text-destructive">`; deleting from a
+    drawer starts with the trash-can icon. `red` is the brand color.
+  - Formatting: Prettier formats the UI (a hook runs it on each edited
+    file); Ruff formats the backend. Run `npm run format:check` and
+    `.venv/bin/ruff check .` / `.venv/bin/ruff format --check .` along with
+    the tests. macOS `sed` has no `\b`; use exact-match edits for renames.
 - **How the owner likes to work:** one decision per message; give a
   recommendation and one question rather than several; the owner often edits
   UI wording directly, so read the current file before changing text and
   keep their wording; they like to see a change before committing to it and
   will revert freely, so keep changes small and easy to undo; build features
   in layers (endpoint, then data layer, then visible UI), one step per
-  review, which the owner said keeps a change from being overwhelming; prefer fewer
-  features over messy code, and one consistent pattern over several. They
-  like UX ideas weighed honestly and will push back with their own. They
-  are newer to Python and SQLAlchemy than to JS, so JS comparisons help.
-  For commands on the Pi, give one command per code block and wait for the
-  output. Do not offer to commit or push. Docs stay trim, facts only.
+  review; prefer fewer features over messy code, and one consistent pattern
+  over several. They want descriptive names that say where a value comes
+  from, and simple helpers over already-loaded data rather than clever
+  generic code; they review closely and will question loops, vague names,
+  and hooks whose names do not match what they return. They apply AHA
+  (avoid hasty abstractions): share what is truly the same now, leave the
+  rest until a third case. They like UX ideas weighed honestly and will
+  push back with their own. They are newer to Python and SQLAlchemy than to
+  JS, so JS comparisons help. For commands on the Pi, give one command per
+  code block and wait for the output. Do not offer to commit or push. Docs
+  stay trim, facts only.
 
 ## How to use this document
 
@@ -220,17 +238,38 @@ workflow on a self-hosted runner (`.github/workflows/deploy.yml`).
   backend dependency aliases and `select()`), with the branch's own code
   converted. Items 6a and 6d hold the rest.
 
+**Deployed 2026-11-01 and 2026-11-02**
+
+- **Gzip in Nginx** (item 8c; applied after a manual container recreate).
+- **Search** (item 8a, PR #12): `GET /items`, the "Search all collections"
+  takeover with `?q=`, `?item=` opening every item's edit drawer
+  (`useItemEditor`), the share page's "Search this collection" field, the
+  pinned Save / Cancel footer and trash-can Delete in item drawers, and
+  Prettier for the UI.
+
+**Built 2026-11-03, pushed to `edit-delete-collection`, not merged**
+
+- **Edit and delete collections** (item 8b): `PUT` and `DELETE
+  /collections/{id}`, an "Edit" button beside Share, and the Edit
+  collection drawer with a counted delete confirm. Owner-checked in the
+  browser.
+
 **Not implemented**
 
 - Sharing with a user by username has an API but no screen (item 10a).
-- Search (designed 2026-10-31, item 8a; nothing built).
-- Renaming or deleting a collection (item 8b).
+- Viewing an item before editing it (item 8d; designed, not built).
 - Deleting a user (admins can only deactivate; item 9a).
 - Item types other than video games.
 - Item images (item 12).
 - Moving items between collections (item 13) and finding duplicates (item 14).
 
 **Verification baseline**
+
+- Latest (2026-11-03, run by Claude on `edit-delete-collection`): UI
+  `npm test` 58 passed (10 files), `npm run lint` clean, `npm run build`
+  passes (the known large-chunk warning), `npm run format:check` clean;
+  API 94 unit tests pass, `ruff check` and `ruff format --check` clean.
+  The entries below are older baselines.
 
 - UI (2026-10-31, run by Claude): `npm test` passes (29 tests: login, the demo
   session button, the owner and shared access views, the share-link drawer,
@@ -706,8 +745,13 @@ is next, then the sharing UI, then search.
    match."); sidebar counts stay totals. 3 new tests. With this, search
    (8a) is built; it ships with the next push. The share page filters in
    place instead of reusing `SearchResults` (signed-in data, URL state,
-   and click-through would each have needed a switch); the owner may
-   revisit how the logged-out search looks later. The searchable fields
+   and click-through would each have needed a switch). A results panel
+   there was considered and dropped (owner, 2026-11-02): a visitor cannot
+   open anything, so a list of results adds nothing over filtering. Revisit
+   if items get a read-only "view more" detail view, since then results
+   would have somewhere to go; the plan then is one display-only
+   `SearchResultsPanel` rendered by both pages, with separate logic in
+   each. The searchable fields
    per type are written twice, in `video_games_items.py` and in
    `consoleSearchable` / `gameSearchable`; keep them in step, and expect
    each new item type (item 11) to add both.
@@ -791,6 +835,69 @@ is next, then the sharing UI, then search.
    the collection list and stats queries are invalidated. Where the
    controls sit (the collection heading beside Share, or the sidebar row)
    is a styling question for the owner.
+   **API built 2026-11-02 (branch `edit-delete-collection`, uncommitted):**
+   `PUT /collections/{id}` renames (`CollectionUpdate`, `name` only,
+   `extra="forbid"`, trimmed, blank is 422) and `DELETE /collections/{id}`
+   deletes the links, grants, games, and consoles explicitly, then the
+   collection, then the owner's labels its items used that nothing else
+   uses now. Both depend on `WritableCollection`. 7 tests in
+   `test_collection_edit_delete.py`.
+   **UI data layer built 2026-11-02 (uncommitted, no screen uses it
+   yet):** `collectionsApi.update` and `.delete`, `CollectionUpdate` in
+   `types/collections.ts`, the rename form's zod schema
+   (`schemas/collections.ts`, `collectionNameSchema`: trimmed, 1 to 100),
+   and `components/collections/useManageCollection.ts` with
+   `renameMutation` (invalidates the collection list and `itemKeys.all`,
+   since search shows collection names) and `deleteMutation` (also stats
+   and console labels). After a delete, `useCollections` selects the first
+   remaining collection once the list refetches; the deleted collection's
+   console, game, and link queries are left to garbage-collect.
+   **Controls built 2026-11-03; owner checked them in the browser the
+   same day ("working perfectly"):** an "Edit" button (pencil) beside Share, owners and
+   sandboxes only, opens `EditCollectionDrawer`, laid out like the item
+   drawers: header with title and Close; the trash icon at the top right
+   of the item area, then the name field (form pattern); a pinned footer
+   with "Save collection" and Cancel. The trash icon swaps the form for
+   `DeleteCollectionConfirm`: "Delete <name>? This also deletes 1
+   console, 2 games, and 1 share link. This can't be undone." with a
+   red-outline "Delete collection" and "Keep collection" (the share-link
+   pattern). Counts come from data the page already has: the sidebar's
+   video-game stats (`useVideoGameCollectionStats`) and the Share
+   button's link list, so opening the confirm sends no request.
+   `describeContents` (`components/collections/describeContents.ts`, 3
+   unit tests) turns counts into "1 console, 2 games, and 1 share link",
+   skipping kinds with none; `itemTypeNames` and `CountNames` in
+   `types/items.ts` hold the singular and plural names. A second
+   collection type adds its own counts here, as the sidebar's stats
+   registry does. After a delete the first remaining collection is
+   selected. 5 tests in `EditCollectionDrawer.test.tsx`
+   (rename, blank name, counted delete, keep, axe).
+8d. **View an item before editing it** (owner, 2026-11-03; high priority,
+   right after 8b). Opening an item (a row click, a search result, or
+   `?item=`) should show its details read-only first, with an Edit action
+   to switch to the form, instead of opening straight into edit mode.
+   Viewing is the common case, and it matters more as items gain fields
+   (and later images, item 12).
+   **Designed 2026-11-03 (owner), not built:**
+   - **View layout:** the drawer title is the item's name (for example
+     "Chrono Trigger"); the header keeps only the title and Close. At the
+     top right of the item area, an "Edit" button (pencil) beside the
+     trash icon. Then the details as label / value rows, read-only, "—"
+     for an empty value (games: Console, Condition, Last played,
+     Completed; consoles: Edition, Condition). No footer in view mode.
+   - **Edit mode:** "Edit" swaps the rows for the form, the title becomes
+     "Edit game" / "Edit console", and the pinned Save / Cancel footer
+     appears. Cancel and a successful save return to the view (showing
+     the new values), not close the drawer.
+   - **Edit mode is local state, not in the URL** (owner: nobody needs a
+     link to an edit screen). Opening an item by any route starts in the
+     view; closing the drawer or opening another item resets to the
+     view; back closes the drawer as it does today.
+   - The Add drawers are unchanged: they open straight into the form.
+   - Still open: whether a read-only "view more" for share link visitors
+     can reuse the view (see 8a's note on a results panel for the share
+     page). Builds on `useItemEditor`, which would own the view/edit
+     state.
 8c. **Gzip in Nginx. Done** (deployed 2026-11-01, `e4366a2`). `gzip on` in
    the `http` block of `nginx.conf` for JSON, JS, CSS, and SVG (HTML is
    always included), over 1 KB, level 5, with `Vary: Accept-Encoding` and
@@ -849,6 +956,14 @@ is next, then the sharing UI, then search.
     the video-game copying (labels, consoles, games) beside the video-game
     code. Settle the copier's interface with the new type; labels are copied
     per owner, not per collection (owner, 2026-10-29).
+    Other places that assume video games today, to revisit together when
+    the new type is built (owner, 2026-11-03: decide then, not before):
+    the delete-collection confirm's counts (`DeleteCollectionConfirm`
+    reads `useVideoGameCollectionStats`; a type-neutral stats endpoint
+    with counts per item type, shared with the stats area 10c, is the
+    likely answer), the searchable fields written in both Python and
+    TypeScript (item 8a), and the per-type parts of `useItemEditor`'s
+    callers (mutations and drawer markup, item 8a).
 12. **Item images** (owner, 2026-10-31; important, lower priority for now).
     Photos on consoles and games; the owner considers the app limited
     without them. Not designed. Questions to settle first:

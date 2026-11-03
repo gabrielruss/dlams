@@ -1,6 +1,7 @@
 import { canWriteCollection } from "@/lib/permissions"
 import type { Collection } from "@/types/collections"
 import { resolveCollectionWorkspace } from "./collectionWorkspaceResolver"
+import EditCollectionDrawer from "./EditCollectionDrawer"
 import ShareCollectionDrawer from "./ShareCollectionDrawer"
 import useCollections from "./useCollections"
 
@@ -30,7 +31,7 @@ function CollectionBody({ isPending, collection }: CollectionBodyProps) {
 function CollectionWorkspace() {
   const { selectedCollection, collectionsQuery } = useCollections()
   const collection = selectedCollection
-  const canShare =
+  const canWrite =
     collection !== undefined && canWriteCollection(collection.access)
 
   return (
@@ -39,7 +40,12 @@ function CollectionWorkspace() {
         <h1 className="text-2xl font-semibold md:text-3xl">
           {collection?.name ?? "Your collections"}
         </h1>
-        {canShare && <ShareCollectionDrawer collection={collection} />}
+        {canWrite && (
+          <div className="flex items-start gap-2">
+            <EditCollectionDrawer collection={collection} />
+            <ShareCollectionDrawer collection={collection} />
+          </div>
+        )}
       </header>
       {collectionsQuery.isError && (
         <p
