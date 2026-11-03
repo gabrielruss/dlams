@@ -12,16 +12,16 @@ Start here in a new session. This block is rewritten at the end of a session,
 never appended to. History lives in git and `docs/decisions.md`.
 
 - **Status.** Search (item 8a) is deployed (PR #12, 2026-11-02). Edit and
-  delete collections (item 8b) is built, owner-checked in the browser, and
-  pushed to branch `edit-delete-collection` (commits `e7afc30`,
-  `586d8a1`), not yet merged to `main`. This end-of-session doc update to
-  `DLAMS-PLAN.md` is uncommitted. Nothing is mid-build. Run `git status`
-  and `git log` first: the owner commits and pushes everything, and a
-  push to `main` deploys (docs included).
+  delete collections (item 8b) is merged and deployed (PR #13,
+  2026-11-03). Item 8d is mid-build on branch `view-before-edit`: the
+  `useItemEditor` layer is done and uncommitted. Run `git status` and `git log` first:
+  the owner commits and pushes everything, and a push to `main` deploys
+  (docs included).
 - **What was built this session (2026-11-01 to 11-03),** details in the
   items named:
   - Gzip in Nginx (8c). The deploy did not apply `nginx.conf` changes;
-    `deploy.yml` now recreates the Nginx container (Known issues).
+    `deploy.yml` now recreates the Nginx container, confirmed on the
+    2026-11-03 deploy.
   - Search (8a): `GET /items` (`item_routes.py`,
     `video_games_items.py`); the matcher `searchEntries.ts`;
     `useOwnedItems`; the "Search all collections" takeover
@@ -43,20 +43,16 @@ never appended to. History lives in git and `docs/decisions.md`.
   `edit-delete-collection`: 58 UI tests, lint, build, format check; 94
   backend tests, Ruff check and format. Owner-checked in the browser:
   search, the `?item=` drawers, the drawer layout, edit and delete
-  collections. Not yet confirmed: that the deploy workflow now recreates
-  Nginx (check below).
+  collections. On the Pi after the PR #13 deploy (owner-pasted):
+  `dlams-nginx` showed `Up 2 minutes`, so the deploy recreates Nginx. Not
+  reported: edit and delete collections on the live site.
 - **Next, in order:**
-  1. **Merge `edit-delete-collection`** (owner). No migration.
-  2. **Confirm the Nginx deploy fix** on that deploy, on the Pi:
-     `docker ps --filter name=dlams-nginx --format '{{.Names}} {{.Status}}'`
-     should show an uptime matching the deploy. Then remove the Known
-     issues entry.
-  3. **View an item before editing it** (item 8d, owner's high priority):
+  1. **View an item before editing it** (item 8d, owner's high priority):
      designed 2026-11-03, read 8d in full. Build in two layers: first
      `useItemEditor` gains the view/edit switch (local state, not the
      URL; Cancel and Save return to the view), then `GameDetails` /
      `ConsoleDetails` and the drawer switching.
-  4. Then: the manual accessibility audit (6), shadcn everywhere (6a),
+  2. Then: the manual accessibility audit (6), shadcn everywhere (6a),
      repeated styling (6b), styling cleanup (6c), backend consistency
      (6d), frontend hook consistency (6e), admins delete users (9a),
      stats area (10c), later sharing ideas (10a), color themes (10b),
@@ -247,12 +243,12 @@ workflow on a self-hosted runner (`.github/workflows/deploy.yml`).
   pinned Save / Cancel footer and trash-can Delete in item drawers, and
   Prettier for the UI.
 
-**Built 2026-11-03, pushed to `edit-delete-collection`, not merged**
+**Deployed 2026-11-03** (PR #13)
 
 - **Edit and delete collections** (item 8b): `PUT` and `DELETE
   /collections/{id}`, an "Edit" button beside Share, and the Edit
   collection drawer with a counted delete confirm. Owner-checked in the
-  browser.
+  browser before merging.
 
 **Not implemented**
 
@@ -878,7 +874,12 @@ is next, then the sharing UI, then search.
    to switch to the form, instead of opening straight into edit mode.
    Viewing is the common case, and it matters more as items gain fields
    (and later images, item 12).
-   **Designed 2026-11-03 (owner), not built:**
+   **Built so far (2026-11-03, uncommitted, on `view-before-edit`):**
+   `useItemEditor` returns `isViewing`, `startEditing` (loads the current
+   item into the form), and `stopEditing`. No screen uses them yet, so
+   nothing visible changed and no test exercises them; the drawer switching
+   and its tests are the next layer.
+   **Designed 2026-11-03 (owner):**
    - **View layout:** the drawer title is the item's name (for example
      "Chrono Trigger"); the header keeps only the title and Close. At the
      top right of the item area, an "Edit" button (pencil) beside the
@@ -902,7 +903,9 @@ is next, then the sharing UI, then search.
    the `http` block of `nginx.conf` for JSON, JS, CSS, and SVG (HTML is
    always included), over 1 KB, level 5, with `Vary: Accept-Encoding` and
    proxied responses included. `nginx -t` passed locally. The deploy did
-   not apply it (see Known issues); after the owner recreated the Nginx
+   not apply it, because the workflow's `nginx -s reload` kept reading the
+   old mounted file (`deploy.yml` now recreates the container; confirmed
+   2026-11-03); after the owner recreated the Nginx
    container on the Pi, `curl` from the Pi showed the JS bundle served with
    `Content-Encoding: gzip` and `Vary: Accept-Encoding` (owner-pasted). The
    same recreate put the 2026-10-31 share-link rate limit and headers live.
@@ -1008,13 +1011,16 @@ is next, then the sharing UI, then search.
   in a browser. Left as is (admin-only, not on the visitor path). The cheap
   fixes are hiding the Created column below `md` or stacking each user as a
   card.
-- The deploy did not apply `nginx.conf` changes (found 2026-11-01). Compose
-  mounts the single file into the Nginx container; `git pull` replaces the
-  file, so the container kept reading the old one, and `nginx -s reload`
-  reloaded that. Fixed in source 2026-11-01, not yet deployed: `deploy.yml`
-  now runs `docker compose up -d --force-recreate nginx` instead of the
-  reload, so every deploy restarts Nginx (about a second) on the current
-  file. Remove this entry once a deploy has run with it.
+- If the counts fail to load, the delete-collection confirm is wrong
+  (found by reading the code 2026-11-03, not reproduced). In
+  `DeleteCollectionConfirm.tsx`, a failed stats request reads as "It's
+  empty." and a failed links request leaves out the share links, and
+  Delete stays enabled. Unlikely, since the sidebar and Share button load
+  the same data.
+- The demo notice in `VideoGamesWorkspace.tsx` now says "All data you add
+  will be reset in 30 minutes." Sandboxes stay 7 days and their share
+  links keep working, and item 8 and `docs/decisions.md` still describe
+  the old notice. Waiting on the owner: keep the wording or not.
 - A push to `main` deploys even if CI fails, because the deploy workflow does
   not wait for CI. Decide whether to gate the deploy on it later.
 - The UI build emits a Vite large-chunk warning (about 647 kB on 2026-10-17,

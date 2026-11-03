@@ -27,22 +27,25 @@ function useItemEditor<
 }: UseItemEditorOptions<Item, Values>) {
   const { openItemId, openItem, closeItem } = useOpenItem(type)
   const [isAdding, setIsAdding] = useState(false)
-  const editingItem = isAdding
+  const [isEditing, setIsEditing] = useState(false)
+  const openedItem = isAdding
     ? undefined
     : items.find((item) => item.id === openItemId)
   const loadedItemId = useRef<number | null>(null)
 
   // if an item id is found in the url params, load it into the form
   useEffect(() => {
-    if (editingItem === undefined) {
+    if (openedItem === undefined) {
       loadedItemId.current = null
+      setIsEditing(false)
       return
     }
-    if (loadedItemId.current === editingItem.id) return // unless it is already loaded
-    loadedItemId.current = editingItem.id
-    form.reset(toFormValues(editingItem))
+    if (loadedItemId.current === openedItem.id) return // unless it is already loaded
+    loadedItemId.current = openedItem.id
+    setIsEditing(false)
+    form.reset(toFormValues(openedItem))
     onReset()
-  }, [editingItem, form, toFormValues, onReset])
+  }, [openedItem, form, toFormValues, onReset])
 
   const close = () => {
     form.reset()
@@ -57,14 +60,29 @@ function useItemEditor<
     setIsAdding(true)
   }
 
-  const edit = (item: Item) => openItem(item.id)
+  const open = (item: Item) => openItem(item.id)
+
+  const startEditing = () => {
+    if (openedItem === undefined) return
+    form.reset(toFormValues(openedItem))
+    onReset()
+    setIsEditing(true)
+  }
+
+  const stopEditing = () => {
+    onReset()
+    setIsEditing(false)
+  }
 
   return {
-    editingItem,
-    editingId: editingItem?.id ?? null,
-    isEditorOpen: isAdding || editingItem !== undefined,
-    edit,
+    openedItem,
+    openedItemId: openedItem?.id ?? null,
+    isEditorOpen: isAdding || openedItem !== undefined,
+    isViewing: openedItem !== undefined && !isEditing,
+    open,
     startNew,
+    startEditing,
+    stopEditing,
     close,
   }
 }

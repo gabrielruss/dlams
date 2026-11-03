@@ -64,7 +64,7 @@ function useGameManager({ collectionId, games }: UseGameManagerOptions) {
     resetDelete()
   }, [resetSave, resetDelete])
 
-  const { editingItem, editingId, isEditorOpen, edit, startNew, close } =
+  const { openedItem, openedItemId, isEditorOpen, open, startNew, close } =
     useItemEditor({
       type: "game",
       items: games,
@@ -81,7 +81,7 @@ function useGameManager({ collectionId, games }: UseGameManagerOptions) {
       last_played: values.lastPlayed || null,
       completed: values.completed,
     }
-    saveMutation.mutate({ id: editingId, data }, { onSuccess: close })
+    saveMutation.mutate({ id: openedItemId, data }, { onSuccess: close })
   }
 
   const deleteGame = (game: GameRecord) => {
@@ -92,8 +92,8 @@ function useGameManager({ collectionId, games }: UseGameManagerOptions) {
 
   return {
     form,
-    editingId,
-    editingGame: editingItem,
+    openedItemId,
+    openedGame: openedItem,
     formError: saveMutation.error?.message ?? null,
     deleteError: deleteMutation.error?.message ?? null,
     isDeleting: deleteMutation.isPending,
@@ -101,7 +101,7 @@ function useGameManager({ collectionId, games }: UseGameManagerOptions) {
     isSaving: saveMutation.isPending,
     resetForm: close,
     saveGame,
-    editGame: edit,
+    openGame: open,
     startNewGame: startNew,
     deleteGame,
     isVideoGameCondition,

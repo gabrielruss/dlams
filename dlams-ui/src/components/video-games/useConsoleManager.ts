@@ -59,7 +59,7 @@ function useConsoleManager({
     resetDelete()
   }, [resetSave, resetDelete])
 
-  const { editingItem, editingId, isEditorOpen, edit, startNew, close } =
+  const { openedItem, openedItemId, isEditorOpen, open, startNew, close } =
     useItemEditor({
       type: "console",
       items: consoles,
@@ -74,7 +74,7 @@ function useConsoleManager({
       edition: values.edition.trim() || null,
       condition: values.condition,
     }
-    saveMutation.mutate({ id: editingId, data }, { onSuccess: close })
+    saveMutation.mutate({ id: openedItemId, data }, { onSuccess: close })
   }
 
   const deleteConsole = (consoleRecord: ConsoleRecord) => {
@@ -88,8 +88,8 @@ function useConsoleManager({
 
   return {
     form,
-    editingId,
-    editingConsole: editingItem,
+    openedItemId,
+    openedConsole: openedItem,
     formError: saveMutation.error?.message ?? null,
     deleteError: deleteMutation.error?.message ?? null,
     isDeleting: deleteMutation.isPending,
@@ -97,7 +97,7 @@ function useConsoleManager({
     isSaving: saveMutation.isPending,
     resetForm: close,
     saveConsole,
-    editConsole: edit,
+    openConsole: open,
     startNewConsole: startNew,
     deleteConsole,
   }

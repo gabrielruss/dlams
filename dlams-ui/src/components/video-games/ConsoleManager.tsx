@@ -32,8 +32,8 @@ function ConsoleManager({
 }: ConsoleManagerProps) {
   const {
     form,
-    editingId,
-    editingConsole,
+    openedItemId,
+    openedConsole,
     formError,
     deleteError,
     isDeleting,
@@ -41,7 +41,7 @@ function ConsoleManager({
     isSaving,
     resetForm,
     saveConsole,
-    editConsole,
+    openConsole,
     startNewConsole,
     deleteConsole,
   } = useConsoleManager({ collectionId, consoles })
@@ -74,7 +74,7 @@ function ConsoleManager({
           <DrawerContent ref={drawerRef}>
             <DrawerHeader className="flex-row items-center justify-between border-b">
               <DrawerTitle className="text-xl">
-                {editingId === null ? "Add console" : "Edit console"}
+                {openedItemId === null ? "Add console" : "Edit console"}
               </DrawerTitle>
               <DrawerClose asChild>
                 <button
@@ -91,7 +91,7 @@ function ConsoleManager({
               className="flex min-h-0 flex-1 flex-col"
             >
               <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto p-5">
-                {editingConsole && (
+                {openedConsole && (
                   <div className="flex flex-col items-end gap-2">
                     <Button
                       className="text-destructive"
@@ -101,7 +101,7 @@ function ConsoleManager({
                       aria-label="Delete console"
                       title="Delete console"
                       disabled={isDeleting}
-                      onClick={() => deleteConsole(editingConsole)}
+                      onClick={() => deleteConsole(openedConsole)}
                     >
                       <Trash2 aria-hidden="true" />
                     </Button>
@@ -199,7 +199,7 @@ function ConsoleManager({
 
       <ConsoleList
         consoles={consoles}
-        onSelect={canWrite ? editConsole : undefined}
+        onSelect={canWrite ? openConsole : undefined}
       />
     </section>
   )

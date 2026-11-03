@@ -27,8 +27,8 @@ interface GameManagerProps {
 function GameManager({ collectionId, games, canWrite }: GameManagerProps) {
   const {
     form,
-    editingId,
-    editingGame,
+    openedItemId,
+    openedGame,
     formError,
     deleteError,
     isDeleting,
@@ -36,7 +36,7 @@ function GameManager({ collectionId, games, canWrite }: GameManagerProps) {
     isSaving,
     resetForm,
     saveGame,
-    editGame,
+    openGame,
     startNewGame,
     deleteGame,
     isVideoGameCondition,
@@ -71,7 +71,7 @@ function GameManager({ collectionId, games, canWrite }: GameManagerProps) {
           <DrawerContent ref={drawerRef}>
             <DrawerHeader className="flex-row items-center justify-between border-b">
               <DrawerTitle className="text-xl">
-                {editingId === null ? "Add game" : "Edit game"}
+                {openedItemId === null ? "Add game" : "Edit game"}
               </DrawerTitle>
               <DrawerClose asChild>
                 <button
@@ -88,7 +88,7 @@ function GameManager({ collectionId, games, canWrite }: GameManagerProps) {
               className="flex min-h-0 flex-1 flex-col"
             >
               <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto p-5">
-                {editingGame && (
+                {openedGame && (
                   <div className="flex flex-col items-end gap-2">
                     <Button
                       className="text-destructive"
@@ -98,7 +98,7 @@ function GameManager({ collectionId, games, canWrite }: GameManagerProps) {
                       aria-label="Delete game"
                       title="Delete game"
                       disabled={isDeleting}
-                      onClick={() => deleteGame(editingGame)}
+                      onClick={() => deleteGame(openedGame)}
                     >
                       <Trash2 aria-hidden="true" />
                     </Button>
@@ -208,7 +208,7 @@ function GameManager({ collectionId, games, canWrite }: GameManagerProps) {
           </DrawerContent>
         </Drawer>
       )}
-      <GameList games={games} onSelect={canWrite ? editGame : undefined} />
+      <GameList games={games} onSelect={canWrite ? openGame : undefined} />
     </section>
   )
 }
