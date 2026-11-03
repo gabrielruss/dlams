@@ -1,6 +1,6 @@
 # DLAMS architecture
 
-Last updated: 2026-10-31
+Last updated: 2026-11-03
 
 How the system is put together right now. For status and next steps see
 [`DLAMS-PLAN.md`](../DLAMS-PLAN.md); for why things are this way see
@@ -231,7 +231,9 @@ dlams-ui/src/
     auth/                    login/register forms, invite drawer, auth hooks
     admin/                   user management table and hook
     collections/             navigation, workspace dispatch, stats, the Share
-                             drawer, ListRow (the item row any type uses)
+                             and Edit collection drawers, ListRow (the item
+                             row any type uses), useItemEditor and
+                             useOpenItem (the item drawer logic)
     search/                  search bar, results panel, matcher, hooks
     video-games/             console and game managers, workspace, hooks
     ui/                      shadcn/ui primitives (button, drawer, form, ...)
@@ -243,7 +245,12 @@ dlams-ui/src/
 
 Tests (`*.test.tsx`) sit beside the feature they cover.
 
-Forms open in right-side drawers; the sidebar lists collections with counts
+Forms open in right-side drawers. Every drawer has the same layout: a
+header with the title and Close only; item actions (the red trash-can Delete)
+at the top right of the item area; Save and Cancel in a footer pinned to the
+bottom. An existing item's drawer opens through `?item=` (a row click or a
+search result), handled once in `useItemEditor`; a collection's Edit and
+Share drawers sit beside its heading. The sidebar lists collections with counts
 and marks the selected one with a red bar. Its header is a fitted
 `D.L.A.M.S.` wordmark (`components/Wordmark.tsx`, built on
 `components/FitText.tsx`). Below the `md` breakpoint the sidebar becomes a top
@@ -303,13 +310,15 @@ styling changes need approval (see the conventions file for the rule).
 ## Testing
 
 - **API:** `unittest` under `dlams-fastapi/tests/`, covering auth,
-  invitations, deactivation, collection permissions and types, and video-game
+  invitations, deactivation, collection permissions and types, editing and
+  deleting collections, share links, the owned-items list, and video-game
   routes. Run with `make test` (needs a local `dlams-fastapi/.venv`).
 - **UI:** Vitest with jsdom, React Testing Library, `user-event`, and MSW
   (`npm test`). The config is the `test` block in `vite.config.ts`; shared
   setup is in `dlams-ui/src/test/` (`setup.ts`, `server.ts`, `renderApp.tsx`).
-  Tests render the real app and fake only the network. `npm run lint` and
-  `npm run build` (which type-checks) are the other checks. Playwright
+  Tests render the real app and fake only the network. `npm run lint`,
+  `npm run build` (which type-checks), and `npm run format:check` (Prettier)
+  are the other checks. Playwright
   end-to-end checks are planned. See the reference in the conventions file
   ("Testing").
 
@@ -322,4 +331,6 @@ styling changes need approval (see the conventions file for the rule).
 | The schema | `app/models/` plus a new file in `alembic/versions/` |
 | A server-data hook | `dlams-ui/src/components/<feature>/use*.ts` and `lib/api/` |
 | What a collection type renders | `components/collections/collectionWorkspaceResolver.ts` |
+| Search | `dlams-ui/src/components/search/`, `app/collections/item_routes.py` and `video_games_items.py` |
+| How an item's drawer opens and closes | `components/collections/useItemEditor.ts`, `useOpenItem.ts`, `lib/urlParams.ts` |
 | Dev or deploy wiring | `dlams-deployment/`, root `Makefile`, `.github/workflows/deploy.yml` |

@@ -567,7 +567,10 @@ seven-day sandboxes. Build steps are item 8 in `DLAMS-PLAN.md`.
   `confirm`). Chosen over a menu on each sidebar row, which needs an
   uninstalled component and is behind the menu button on phones.
 - **Opening an item will show it before editing it** (owner, 2026-11-03;
-  plan item 8d, not built): most visits are to look, not to change.
+  plan item 8d, not built): most visits are to look, not to change. Edit
+  mode is local state, not in the URL: nobody needs a link to an edit
+  screen, a refresh loses typed changes anyway, and back closing the
+  drawer matches every other drawer. Chosen over `?mode=edit`.
 
 ### Login branding: backdrop text, two fonts, two brand colors — 2026-10-18
 - The login page shows "DON'T LOOK AT MY STUFF" as a faint full-screen
