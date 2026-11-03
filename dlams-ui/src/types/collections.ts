@@ -11,6 +11,10 @@ export interface CollectionCreate {
   type: CollectionType
 }
 
+export interface CollectionUpdate {
+  name: string
+}
+
 export interface CollectionLink {
   id: number
   name: string | null

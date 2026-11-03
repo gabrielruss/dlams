@@ -1,0 +1,75 @@
+import { useQuery } from "@tanstack/react-query"
+
+import useVideoGameCollectionStats from "@/components/video-games/useVideoGameCollectionStats"
+import { Button } from "@/components/ui/button"
+import { linkListQueryOptions } from "@/lib/api/collectionLinks"
+import type { Collection } from "@/types/collections"
+import { itemTypeNames, type CountNames } from "@/types/items"
+import { describeContents } from "./describeContents"
+
+const shareLinkNames: CountNames = { one: "share link", many: "share links" }
+
+interface DeleteCollectionConfirmProps {
+  collection: Collection
+  isDeleting: boolean
+  error: Error | null
+  onDelete: () => void
+  onKeep: () => void
+}
+
+function DeleteCollectionConfirm({
+  collection,
+  isDeleting,
+  error,
+  onDelete,
+  onKeep,
+}: DeleteCollectionConfirmProps) {
+  const { data: stats, isPending: statsPending } = useVideoGameCollectionStats(
+    collection.id,
+  )
+  const { data: linkData, isPending: linksPending } = useQuery(
+    linkListQueryOptions(collection.id),
+  )
+  const isCounting = statsPending || linksPending
+
+  const contents = describeContents([
+    { count: stats?.console_count ?? 0, names: itemTypeNames.console },
+    { count: stats?.game_count ?? 0, names: itemTypeNames.game },
+    { count: linkData?.links.length ?? 0, names: shareLinkNames },
+  ])
+
+  return (
+    <div className="flex flex-col gap-3 rounded-md border p-3">
+      <p className="text-sm">
+        Delete {collection.name}?{" "}
+        {isCounting
+          ? "Counting what goes with it..."
+          : contents
+            ? `This also deletes ${contents}.`
+            : "It's empty."}{" "}
+        This can't be undone.
+      </p>
+      {error && (
+        <p role="alert" className="text-sm text-destructive">
+          {error.message}
+        </p>
+      )}
+      <div className="flex flex-col gap-2">
+        <Button
+          className="border-destructive text-destructive"
+          type="button"
+          variant="outline"
+          disabled={isDeleting || isCounting}
+          onClick={onDelete}
+        >
+          {isDeleting ? "Deleting..." : "Delete collection"}
+        </Button>
+        <Button type="button" variant="outline" onClick={onKeep}>
+          Keep collection
+        </Button>
+      </div>
+    </div>
+  )
+}
+
+export default DeleteCollectionConfirm

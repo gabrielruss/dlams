@@ -1,4 +1,6 @@
-export type ItemType = "console" | "game"
+export const itemTypes = ["console", "game"] as const
+
+export type ItemType = (typeof itemTypes)[number]
 
 export interface OwnedItem {
   type: ItemType
@@ -8,4 +10,14 @@ export interface OwnedItem {
   title: string
   keywords: string[]
   details: string[]
+}
+
+export interface CountNames {
+  one: string
+  many: string
+}
+
+export const itemTypeNames: Record<ItemType, CountNames> = {
+  console: { one: "console", many: "consoles" },
+  game: { one: "game", many: "games" },
 }

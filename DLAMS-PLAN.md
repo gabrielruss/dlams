@@ -45,13 +45,13 @@ never appended to. History lives in git and `docs/decisions.md`.
 - **Next, in order:**
   1. **Deploy picks up `nginx.conf` changes** (Known issues): workflow
      fixed in source 2026-11-01; confirm on the next deploy.
-  2. **Search** (item 8a): built 2026-11-02 on `add-search`, not yet
-     deployed. Endpoint `GET /items`, the matcher, the signed-in takeover
-     bar with `?q=`, `?item=` opening every edit drawer
-     (`useItemEditor`), and the share link page's field. Check it in the
-     browser, then push; the same deploy confirms item 1.
-  3. **Edit and delete collections** (item 8b).
-  4. Then: the manual accessibility audit (6), shadcn everywhere (6a),
+  2. **Search** (item 8a): merged to `main` 2026-11-02 (PR #12), so
+     deployed; that deploy is the one to check for item 1.
+  3. **Edit and delete collections** (item 8b): API, data layer, and the
+     Edit collection drawer built 2026-11-03 on `edit-delete-collection`;
+     needs a browser check.
+  4. **View an item before editing it** (item 8d, owner's high priority).
+  5. Then: the manual accessibility audit (6), shadcn everywhere (6a),
      repeated styling (6b), styling cleanup (6c), backend consistency
      (6d), frontend hook consistency (6e), admins delete users (9a, replaces the wipe-sandboxes button),
      stats area (10c, moved up 2026-10-31), later sharing ideas (10a),
@@ -802,10 +802,52 @@ is next, then the sharing UI, then search.
    deletes the links, grants, games, and consoles explicitly, then the
    collection, then the owner's labels its items used that nothing else
    uses now. Both depend on `WritableCollection`. 7 tests in
-   `test_collection_edit_delete.py`. Next layer: the UI data layer
-   (API functions and mutations, invalidating the collection list, stats,
-   `itemKeys.all`, and console labels), then the controls. The UI must
-   also invalidate `itemKeys.all` (search) on rename and delete. **Gzip in Nginx. Done** (deployed 2026-11-01, `e4366a2`). `gzip on` in
+   `test_collection_edit_delete.py`.
+   **UI data layer built 2026-11-02 (uncommitted, no screen uses it
+   yet):** `collectionsApi.update` and `.delete`, `CollectionUpdate` in
+   `types/collections.ts`, the rename form's zod schema
+   (`schemas/collections.ts`, `collectionNameSchema`: trimmed, 1 to 100),
+   and `components/collections/useManageCollection.ts` with
+   `renameMutation` (invalidates the collection list and `itemKeys.all`,
+   since search shows collection names) and `deleteMutation` (also stats
+   and console labels). After a delete, `useCollections` selects the first
+   remaining collection once the list refetches; the deleted collection's
+   console, game, and link queries are left to garbage-collect.
+   **Controls built 2026-11-03 (uncommitted, not yet tried in a
+   browser):** an "Edit" button (pencil) beside Share, owners and
+   sandboxes only, opens `EditCollectionDrawer`, laid out like the item
+   drawers: header with title and Close; the trash icon at the top right
+   of the item area, then the name field (form pattern); a pinned footer
+   with "Save collection" and Cancel. The trash icon swaps the form for
+   `DeleteCollectionConfirm`: "Delete <name>? This also deletes 1
+   console, 2 games, and 1 share link. This can't be undone." with a
+   red-outline "Delete collection" and "Keep collection" (the share-link
+   pattern). Counts come from data the page already has: the sidebar's
+   video-game stats (`useVideoGameCollectionStats`) and the Share
+   button's link list, so opening the confirm sends no request.
+   `describeContents` (`components/collections/describeContents.ts`, 3
+   unit tests) turns counts into "1 console, 2 games, and 1 share link",
+   skipping kinds with none; `itemTypeNames` and `CountNames` in
+   `types/items.ts` hold the singular and plural names. A second
+   collection type adds its own counts here, as the sidebar's stats
+   registry does. After a delete the first remaining collection is
+   selected. 5 tests in `EditCollectionDrawer.test.tsx`
+   (rename, blank name, counted delete, keep, axe).
+8d. **View an item before editing it** (owner, 2026-11-03; high priority,
+   right after 8b). Opening an item (a row click, a search result, or
+   `?item=`) should show its details read-only first, with an Edit action
+   to switch to the form, instead of opening straight into edit mode.
+   Viewing is the common case, and it matters more as items gain fields
+   (and later images, item 12). Not designed yet. To settle: the
+   layout of the view (detail rows, then where Edit sits; likely an
+   "Edit" button in the item area beside the trash icon, keeping the
+   header for drawer controls only), whether edit mode is in the URL
+   (for example `?item=game-12&mode=edit`) so back leaves edit mode,
+   what Cancel does in edit mode (back to the view, not closed), and
+   whether a read-only "view more" for share link visitors can reuse the
+   view (see 8a's note on a results panel for the share page). Builds on
+   `useItemEditor`, which would own the view/edit state.
+8c. **Gzip in Nginx. Done** (deployed 2026-11-01, `e4366a2`). `gzip on` in
    the `http` block of `nginx.conf` for JSON, JS, CSS, and SVG (HTML is
    always included), over 1 KB, level 5, with `Vary: Accept-Encoding` and
    proxied responses included. `nginx -t` passed locally. The deploy did
@@ -863,6 +905,14 @@ is next, then the sharing UI, then search.
     the video-game copying (labels, consoles, games) beside the video-game
     code. Settle the copier's interface with the new type; labels are copied
     per owner, not per collection (owner, 2026-10-29).
+    Other places that assume video games today, to revisit together when
+    the new type is built (owner, 2026-11-03: decide then, not before):
+    the delete-collection confirm's counts (`DeleteCollectionConfirm`
+    reads `useVideoGameCollectionStats`; a type-neutral stats endpoint
+    with counts per item type, shared with the stats area 10c, is the
+    likely answer), the searchable fields written in both Python and
+    TypeScript (item 8a), and the per-type parts of `useItemEditor`'s
+    callers (mutations and drawer markup, item 8a).
 12. **Item images** (owner, 2026-10-31; important, lower priority for now).
     Photos on consoles and games; the owner considers the app limited
     without them. Not designed. Questions to settle first:
