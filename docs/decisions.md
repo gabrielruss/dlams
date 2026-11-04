@@ -583,6 +583,17 @@ seven-day sandboxes. Build steps are item 8 in `DLAMS-PLAN.md`.
   reducer: the URL owns which item is open and the query owns its data, so
   copying them into one would add a second source of truth.
 
+### The UI moves to Base UI by shadcn's migration skill — 2026-11-04
+- shadcn's default and recommendation for new work is Base UI, and Vaul, which
+  our drawer is built on, says it is unmaintained. Radix is not deprecated and
+  shadcn does not require this; it is the owner's choice.
+- Done by the documented route, the `migrate-radix-to-base` skill. Chosen over
+  hand-editing `components.json` to a `base-*` style, which was tried and
+  reverted: the docs say the style "cannot be changed after initialization".
+- Whether to switch style at the end is open: the skill leaves it to the
+  owner, since `new-york` keeps `shadcn add` on Radix versions. Steps are plan
+  item 5a.
+
 ### Login branding: backdrop text, two fonts, two brand colors — 2026-10-18
 - The login page shows "DON'T LOOK AT MY STUFF" as a faint full-screen
   background. DON'T is turned sideways on the left, at the screen's full height

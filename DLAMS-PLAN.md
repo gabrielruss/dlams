@@ -11,13 +11,11 @@ The current state of the project. For why things are the way they are, see
 Start here in a new session. This block is rewritten at the end of a session,
 never appended to. History lives in git and `docs/decisions.md`.
 
-- **Status.** Search (item 8a) is deployed (PR #12, 2026-11-02). Edit and
-  delete collections (item 8b) is merged and deployed (PR #13,
-  2026-11-03). Item 8d is merged and deployed (PR #14; owner-reported working). The
-  delete-collection confirm fix for counts that fail to load is uncommitted
-  on branch `fix-delete-confirm`. Run `git status` and `git log` first:
-  the owner commits and pushes everything, and a push to `main` deploys
-  (docs included).
+- **Status.** Search (8a), edit and delete collections (8b), view before edit
+  (8d), and the delete-collection confirm fix are deployed. The move to Base
+  UI (item 5a) has started on branch `move-to-base-ui`. Run `git status` and
+  `git log` first: the owner commits and pushes everything, and a push to
+  `main` deploys (docs included).
 - **What was built this session (2026-11-01 to 11-03),** details in the
   items named:
   - Gzip in Nginx (8c). The deploy did not apply `nginx.conf` changes;
@@ -49,7 +47,8 @@ never appended to. History lives in git and `docs/decisions.md`.
   `dlams-nginx` showed `Up 2 minutes`, so the deploy recreates Nginx. Not
   reported: edit and delete collections on the live site.
 - **Next, in order:**
-  1. **Merge `fix-delete-confirm`** (owner). No migration.
+  1. **Move to Base UI** (item 5a). The manual accessibility audit (6) waits
+     until after it (owner, 2026-11-04).
   2. Then: the manual accessibility audit (6), shadcn everywhere (6a),
      repeated styling (6b), styling cleanup (6c), backend consistency
      (6d), frontend hook consistency (6e), admins delete users (9a),
@@ -387,6 +386,27 @@ In order. Items 1 to 7 are the path to the portfolio milestone.
    and axe checks. Still optional: a handful of Playwright end-to-end checks
    across owner, shared (read-only), and demo access (needs the owner's
    approval to install packages). Backend tests stay on `unittest`.
+5a. **Move to Base UI** (owner, 2026-11-04; on `move-to-base-ui`, no code
+   changed yet). Follow shadcn's `migrate-radix-to-base` skill
+   (`npx skills add shadcn/ui`; "migrate <component> to base-ui"). What it
+   says for this project:
+   - **Clean git tree, a branch, one commit per component** (the owner
+     commits). `@base-ui/react` sits beside Radix until the last component.
+   - **`new-york` is a legacy style:** "there is no base-new-york", so the
+     skill keeps our classes and swaps the primitives; the look stays. Radix
+     wrappers to move, bottom-up: `button`, `label`, `form`. Base UI's `Form`
+     and `Field` map onto `form`; shadcn's `field` component is not covered.
+   - **Vaul drawer is opt-in:** left alone unless explicitly asked, and we are
+     asking, for the phone keyboard bug (Known issues). Base UI documents
+     keyboard handling for bottom sheets only, so check on a phone. Its setup
+     also needs `isolation: isolate` on the root and `position: relative` on
+     `body`.
+   - **At the end,** `components.json` still reads as Radix, so `shadcn add`
+     delivers Radix versions: "the user decides whether to switch style or
+     add manually". Undecided.
+   A hand edit to `base-vega` plus `add drawer --overwrite` was tried and
+   reverted 2026-11-04: the docs say the style "cannot be changed after
+   initialization", and it would restyle the app.
 6. **Accessibility audit.** Do it after the styling pass and before
    publishing, on the screens a visitor sees (login, sidebar, collection
    workspace, drawers). Run an automated check (axe or Lighthouse), then
@@ -1033,11 +1053,7 @@ is next, then the sharing UI, then search.
   the owner 2026-11-04. `repositionInputs={false}` alone was rejected (Save
   and Cancel sit behind the keyboard). Options if picked up: a small hook
   setting the drawer's `top` and `height` from `window.visualViewport`, or
-  moving to Base UI. For Base UI: `components.json`'s `new-york` makes
-  `shadcn add` install Radix and Vaul versions; the `base-*` styles use Base
-  UI, the base `form` entry is empty (`field` looks like its replacement),
-  and the docs give no way to change an existing project's style. Not
-  decided.
+  the move to Base UI (item 5a), which is checked for this on a phone first.
 - The demo notice in `VideoGamesWorkspace.tsx` now says "All data you add
   will be reset in 30 minutes." Sandboxes stay 7 days and their share
   links keep working, and item 8 and `docs/decisions.md` still describe
