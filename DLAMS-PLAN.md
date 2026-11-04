@@ -13,9 +13,9 @@ never appended to. History lives in git and `docs/decisions.md`.
 
 - **Status.** Search (item 8a) is deployed (PR #12, 2026-11-02). Edit and
   delete collections (item 8b) is merged and deployed (PR #13,
-  2026-11-03). Item 8d is built on branch `view-before-edit`, partly uncommitted, not
-  yet merged; games are owner-checked in the browser, consoles on the same
-  pattern are not yet. Run `git status` and `git log` first:
+  2026-11-03). Item 8d is merged and deployed (PR #14; owner-reported working). The
+  delete-collection confirm fix for counts that fail to load is uncommitted
+  on branch `fix-delete-confirm`. Run `git status` and `git log` first:
   the owner commits and pushes everything, and a push to `main` deploys
   (docs included).
 - **What was built this session (2026-11-01 to 11-03),** details in the
@@ -49,10 +49,8 @@ never appended to. History lives in git and `docs/decisions.md`.
   `dlams-nginx` showed `Up 2 minutes`, so the deploy recreates Nginx. Not
   reported: edit and delete collections on the live site.
 - **Next, in order:**
-  1. **Merge `view-before-edit`** (item 8d; owner, after checking consoles
-     in the browser). No migration.
-  2. **Delete-collection confirm** when counts fail to load (Known issues).
-  3. Then: the manual accessibility audit (6), shadcn everywhere (6a),
+  1. **Merge `fix-delete-confirm`** (owner). No migration.
+  2. Then: the manual accessibility audit (6), shadcn everywhere (6a),
      repeated styling (6b), styling cleanup (6c), backend consistency
      (6d), frontend hook consistency (6e), admins delete users (9a),
      stats area (10c), later sharing ideas (10a), color themes (10b),
@@ -1028,12 +1026,18 @@ is next, then the sharing UI, then search.
   in a browser. Left as is (admin-only, not on the visitor path). The cheap
   fixes are hiding the Created column below `md` or stacking each user as a
   card.
-- If the counts fail to load, the delete-collection confirm is wrong
-  (found by reading the code 2026-11-03, not reproduced). In
-  `DeleteCollectionConfirm.tsx`, a failed stats request reads as "It's
-  empty." and a failed links request leaves out the share links, and
-  Delete stays enabled. Unlikely, since the sidebar and Share button load
-  the same data.
+- On a phone, an item drawer can stay at its keyboard-open height after the
+  keyboard closes (owner-reported 2026-11-04). Likely Vaul's inline height
+  (read from its code, not reproduced); Vaul's README says it is
+  unmaintained. Other drawers with text fields likely share it. Set aside by
+  the owner 2026-11-04. `repositionInputs={false}` alone was rejected (Save
+  and Cancel sit behind the keyboard). Options if picked up: a small hook
+  setting the drawer's `top` and `height` from `window.visualViewport`, or
+  moving to Base UI. For Base UI: `components.json`'s `new-york` makes
+  `shadcn add` install Radix and Vaul versions; the `base-*` styles use Base
+  UI, the base `form` entry is empty (`field` looks like its replacement),
+  and the docs give no way to change an existing project's style. Not
+  decided.
 - The demo notice in `VideoGamesWorkspace.tsx` now says "All data you add
   will be reset in 30 minutes." Sandboxes stay 7 days and their share
   links keep working, and item 8 and `docs/decisions.md` still describe

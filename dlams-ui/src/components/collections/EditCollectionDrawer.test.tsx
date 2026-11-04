@@ -136,6 +136,50 @@ describe("editing a collection", () => {
     ).toBeInTheDocument()
   })
 
+  it.each([
+    ["stats", "collections/video-game-stats"],
+    ["share links", "collections/1/links"],
+  ])("says it could not count when the %s fail to load", async (_, path) => {
+    signIn()
+    server.use(
+      http.get(`${api}/${path}`, () =>
+        HttpResponse.json({ detail: "Could not load" }, { status: 500 }),
+      ),
+    )
+    const { user, drawer } = await openEditDrawer()
+
+    within(drawer).getByRole("button", { name: "Delete collection" }).focus()
+    await user.keyboard("{Enter}")
+
+    expect(
+      await within(drawer).findByText(/We couldn't count what goes with it/),
+    ).toBeInTheDocument()
+    expect(within(drawer).queryByText(/It's empty/)).not.toBeInTheDocument()
+    expect(
+      within(drawer).getByRole("button", { name: "Delete collection" }),
+    ).toBeEnabled()
+  })
+
+  it("says an empty collection is empty", async () => {
+    signIn()
+    server.use(
+      http.get(`${api}/collections/video-game-stats`, () =>
+        HttpResponse.json({
+          stats: [{ collection_id: 1, game_count: 0, console_count: 0 }],
+        }),
+      ),
+      http.get(`${api}/collections/1/links`, () =>
+        HttpResponse.json({ links: [] }),
+      ),
+    )
+    const { user, drawer } = await openEditDrawer()
+
+    within(drawer).getByRole("button", { name: "Delete collection" }).focus()
+    await user.keyboard("{Enter}")
+
+    expect(await within(drawer).findByText(/It's empty\./)).toBeInTheDocument()
+  })
+
   it("keeps the collection when the delete is cancelled", async () => {
     const requests = signIn()
     const { user, drawer } = await openEditDrawer()
