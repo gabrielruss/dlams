@@ -126,6 +126,10 @@
   }
   body {
     @apply bg-background text-foreground;
+    position: relative;
+  }
+  #root {
+    isolation: isolate;
   }
   /* Tailwind v4 no longer sets a pointer cursor on buttons. */
   button:not(:disabled),
