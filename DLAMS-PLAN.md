@@ -401,9 +401,10 @@ In order. Items 1 to 7 are the path to the portfolio milestone.
      rounded open side). Side drawers are `100svh` tall so iOS 26 Safari's
      toolbar does not hide the footer (a logged local edit; revisit with
      item 15). The combobox `container` workaround was removed.
-   - **Left:** remove the `migrate-radix-to-base` skill; decide whether to
-     keep the `shadcn` skill; check the keyboard on a real phone (Known
-     issues).
+   - **Left:** decide whether to keep the `shadcn` skill (installed in
+     `dlams-ui/.agents/skills/`; check that a fresh session loads it); check
+     the keyboard on a real phone (Known issues). The migration skill was
+     removed 2026-11-05 with `npx skills remove migrate-radix-to-base`.
 6. **Accessibility audit.** Do it after the styling pass and before
    publishing, on the screens a visitor sees (login, sidebar, collection
    workspace, drawers). Run an automated check (axe or Lighthouse), then
