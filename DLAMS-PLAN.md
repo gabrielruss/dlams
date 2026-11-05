@@ -387,7 +387,7 @@ In order. Items 1 to 7 are the path to the portfolio milestone.
    across owner, shared (read-only), and demo access (needs the owner's
    approval to install packages). Backend tests stay on `unittest`.
 5a. **Move to Base UI** (owner, 2026-11-04; on `move-to-base-ui`).
-   `button` migrated (`.migration/button.md`); next `label`, `form`, `drawer`. Follow shadcn's `migrate-radix-to-base` skill
+   `button` and `label` migrated (`.migration/`); next `form`, `drawer`. Follow shadcn's `migrate-radix-to-base` skill
    (`npx skills add shadcn/ui`; "migrate <component> to base-ui"). What it
    says for this project:
    - **Clean git tree, a branch, one commit per component** (the owner
