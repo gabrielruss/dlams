@@ -34,6 +34,9 @@ Applies across the DLAMS workspace. Project-local conventions take precedence wh
   - `ComboboxTrigger` has `aria-label="Show options"` (2026-10-26), so the
     dropdown-arrow button has an accessible name. If it is lost, the axe tests
     for the Add console and Add game drawers fail.
+  - `ComboboxInput` uses `render={<ComboboxTrigger />}` on `InputGroupButton`
+    (2026-11-04, the Base UI `Button` has no `asChild`; matches the base
+    registry). If it is lost, `tsc` fails on `asChild`.
 - Re-running the CLI overwrites the generated file (for example it restored
   `buttonVariants` in `button.tsx` and moved it to the `radix-ui` package). The
   `react-refresh/only-export-components` lint rule is off under

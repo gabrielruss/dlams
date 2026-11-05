@@ -386,8 +386,8 @@ In order. Items 1 to 7 are the path to the portfolio milestone.
    and axe checks. Still optional: a handful of Playwright end-to-end checks
    across owner, shared (read-only), and demo access (needs the owner's
    approval to install packages). Backend tests stay on `unittest`.
-5a. **Move to Base UI** (owner, 2026-11-04; on `move-to-base-ui`, no code
-   changed yet). Follow shadcn's `migrate-radix-to-base` skill
+5a. **Move to Base UI** (owner, 2026-11-04; on `move-to-base-ui`).
+   `button` migrated (`.migration/button.md`); next `label`, `form`, `drawer`. Follow shadcn's `migrate-radix-to-base` skill
    (`npx skills add shadcn/ui`; "migrate <component> to base-ui"). What it
    says for this project:
    - **Clean git tree, a branch, one commit per component** (the owner
@@ -518,7 +518,10 @@ In order. Items 1 to 7 are the path to the portfolio milestone.
    - **2 raw `<select>`s** (the condition fields in `ConsoleManager` and
      `GameManager`). No shadcn `select` is installed; the owner would run
      `npx shadcn@latest add select`. The checkbox has no shadcn component
-     installed either (`checkbox`).
+     installed either (`checkbox`). Do the condition fields first: the owner
+     finds them the worst-looking dropdown (2026-11-05). Install after the
+     style decision in 5a, since `shadcn add` delivers Radix versions until
+     then.
    - **10 raw `<label>`s** across the three drawer forms and the invite
      drawer, where `Label` or `FormLabel` should be used. `Form`/`FormField`
      are used on login and register but the drawer forms use

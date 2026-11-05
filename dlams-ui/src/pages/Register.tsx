@@ -3,7 +3,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import { Link } from "react-router-dom"
 
-import { Button } from "@/components/ui/button"
+import { Button, buttonVariants } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import {
   Form,
@@ -66,9 +66,9 @@ function Register() {
           {registerMutation.isSuccess ? (
             <div className="flex flex-col gap-4">
               <p role="status">Account created. You can now log in.</p>
-              <Button asChild>
-                <Link to="/login">Go to login</Link>
-              </Button>
+              <Link className={buttonVariants()} to="/login">
+                Go to login
+              </Link>
             </div>
           ) : (
             <Form {...form}>

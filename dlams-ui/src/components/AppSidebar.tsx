@@ -3,7 +3,7 @@ import { LogOut, Menu, Users } from "lucide-react"
 import { Link, NavLink, useLocation } from "react-router-dom"
 
 import Wordmark from "@/components/Wordmark"
-import { Button } from "@/components/ui/button"
+import { Button, buttonVariants } from "@/components/ui/button"
 import { Drawer, DrawerContent, DrawerTitle } from "@/components/ui/drawer"
 import RegistrationInviteManager from "@/components/auth/RegistrationInviteManager"
 import { useCurrentUser, useLogout } from "@/components/auth/useAuthQueries"
@@ -32,16 +32,16 @@ function AppSidebar({ children }: AppSidebarProps) {
         {isAdmin(user) && (
           <>
             <RegistrationInviteManager />
-            <Button
-              asChild
-              className="w-full justify-start aria-[current=page]:bg-accent"
-              variant="ghost"
+            <NavLink
+              className={buttonVariants({
+                variant: "ghost",
+                className: "w-full justify-start aria-[current=page]:bg-accent",
+              })}
+              to="/admin/users"
             >
-              <NavLink to="/admin/users">
-                <Users aria-hidden="true" />
-                Manage users
-              </NavLink>
-            </Button>
+              <Users aria-hidden="true" />
+              Manage users
+            </NavLink>
           </>
         )}
         {logoutMutation.error && (
