@@ -401,12 +401,10 @@ In order. Items 1 to 7 are the path to the portfolio milestone.
      keyboard handling for bottom sheets only, so check on a phone. Its setup
      also needs `isolation: isolate` on the root and `position: relative` on
      `body`.
-   - **At the end,** `components.json` still reads as Radix, so `shadcn add`
-     delivers Radix versions: "the user decides whether to switch style or
-     add manually". Undecided.
-   A hand edit to `base-vega` plus `add drawer --overwrite` was tried and
-   reverted 2026-11-04: the docs say the style "cannot be changed after
-   initialization", and it would restyle the app.
+   - **Style:** switched to `base-nova` 2026-11-05 (`docs/decisions.md`), so
+     `shadcn add` delivers Base versions (`add separator --diff` confirmed).
+   - **`form`:** shadcn has no base `form`; convert to `field` per its React
+     Hook Form guide, then delete `form.tsx`.
 6. **Accessibility audit.** Do it after the styling pass and before
    publishing, on the screens a visitor sees (login, sidebar, collection
    workspace, drawers). Run an automated check (axe or Lighthouse), then
@@ -519,9 +517,7 @@ In order. Items 1 to 7 are the path to the portfolio milestone.
      `GameManager`). No shadcn `select` is installed; the owner would run
      `npx shadcn@latest add select`. The checkbox has no shadcn component
      installed either (`checkbox`). Do the condition fields first: the owner
-     finds them the worst-looking dropdown (2026-11-05). Install after the
-     style decision in 5a, since `shadcn add` delivers Radix versions until
-     then.
+     finds them the worst-looking dropdown (2026-11-05).
    - **10 raw `<label>`s** across the three drawer forms and the invite
      drawer, where `Label` or `FormLabel` should be used. `Form`/`FormField`
      are used on login and register but the drawer forms use

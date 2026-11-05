@@ -18,9 +18,10 @@ Applies across the DLAMS workspace. Project-local conventions take precedence wh
   Router, and TanStack Query v5 for server state. There is no client-state
   store library (Zustand was removed 2026-10-14 because nothing used it).
 - The UI already has local shadcn-style components under
-  `dlams-ui/src/components/ui/`; shadcn/ui is component source, not a runtime
-  dependency in `package.json`. Reuse these components and follow shadcn
-  conventions rather than introducing a competing component system.
+  `dlams-ui/src/components/ui/`; shadcn/ui is component source. The `shadcn`
+  package in `package.json` supplies `shadcn/tailwind.css`, not components.
+  Reuse these components and follow shadcn conventions rather than introducing
+  a competing component system.
 - Local edits to generated files. Re-apply these after reinstalling a
   component (run `npx shadcn@latest add <component> --diff` first to see what
   would change). All are in `components/ui/combobox.tsx`:
@@ -150,8 +151,8 @@ cached copy.
   "Delete" (`aria-label` "Delete <type>"; decided 2026-11-03). The Edit
   collection drawer has a red trash-can icon alone (`variant="ghost"
   size="icon"`, `text-destructive`, `aria-label` and `title`).
-- shadcn/ui components are maintained in the project source; do not expect a
-  `shadcn` runtime package. Add or adapt components using the project's
+- shadcn/ui components are maintained in the project source. Add or adapt
+  components using the project's
   established shadcn conventions. When a shadcn component is needed, the owner
   adds it with the shadcn CLI (see above); review its generated source and
   wire it up rather than hand-rolling a parallel primitive.

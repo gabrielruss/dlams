@@ -465,6 +465,19 @@ seven-day sandboxes. Build steps are item 8 in `DLAMS-PLAN.md`.
 
 ## Code and UI conventions
 
+### shadcn style is `base-nova`, with our own theme kept — 2026-11-05
+- The project was on `new-york`, which has no Base UI version, so `shadcn add`
+  kept delivering Radix components during the move to Base UI. The owner chose
+  to fix that now rather than at the end of the migration, and to stay on
+  shadcn rather than change component libraries.
+- Done with `npx shadcn@latest init --base base --preset nova --force
+  --no-reinstall`, which leaves existing components alone.
+- That command also replaces the theme tokens and font. Those were restored;
+  kept are the style, `@import "shadcn/tailwind.css"` and the `shadcn` package
+  (Base components use its variants), and `lib/utils.ts` re-exporting `cn`.
+  Re-running `init` or `apply` will replace the theme again.
+- New components may look like `base-nova` until their classes are adjusted.
+
 ### Search covers your own collections, and share links — 2026-10-31
 - Signed in, search always covers every collection the user owns, with no
   option to limit it to the selected collection, and not collections shared
