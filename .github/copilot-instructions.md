@@ -24,7 +24,13 @@ Applies across the DLAMS workspace. Project-local conventions take precedence wh
   a competing component system.
 - Local edits to generated files. Re-apply these after reinstalling a
   component (run `npx shadcn@latest add <component> --diff` first to see what
-  would change). All are in `components/ui/combobox.tsx`:
+  would change). In `components/ui/drawer.tsx`:
+  - Side drawers set `data-[swipe-axis=x]:[--drawer-content-height:100svh]`
+    (2026-11-05), so on iOS 26 Safari the drawer ends above the floating
+    toolbar instead of behind it (it measured `lvh` 739, `svh` 699). If it is
+    lost, the pinned Save / Cancel footer is cut off on iPhones; tests do not
+    catch it. Re-evaluate with plan item 15 (phone-friendly drawers).
+  In `components/ui/combobox.tsx`:
   - `ComboboxContent` accepts a `container` prop forwarded to the portal, so a
     combobox inside a drawer can render its popup within the drawer (otherwise
     clicking an option counts as an outside click and closes the drawer). The

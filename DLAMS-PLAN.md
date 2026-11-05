@@ -1037,6 +1037,13 @@ is next, then the sharing UI, then search.
     only points them out, with links to open, move (item 13), or delete
     each one. Open: what counts as a duplicate per type, and where it
     lives.
+15. **Phone-friendly drawers** (owner, 2026-11-05; later). The owner found
+    the shadcn and Base UI demo drawers easier to use on a phone than ours.
+    shadcn's docs open them from the bottom on phones and from the side on
+    larger screens (`swipeDirection={isMobile ? "down" : "right"}`), with an
+    optional swipe handle. A styling change; the owner sets the scope.
+    Re-evaluate then the side-drawer `100svh` height in `drawer.tsx` (a
+    local edit, 2026-11-05, for iOS 26 Safari's toolbar hiding the footer).
 
 ## Known issues
 
