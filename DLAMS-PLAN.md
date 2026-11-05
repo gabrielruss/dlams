@@ -387,7 +387,8 @@ In order. Items 1 to 7 are the path to the portfolio milestone.
    across owner, shared (read-only), and demo access (needs the owner's
    approval to install packages). Backend tests stay on `unittest`.
 5a. **Move to Base UI** (owner, 2026-11-04; on `move-to-base-ui`).
-   `button` and `label` migrated (`.migration/`); next `form`, `drawer`. Follow shadcn's `migrate-radix-to-base` skill
+   `button`, `label`, `input`, and `form` migrated (`.migration/`); next
+   `drawer`. Follow shadcn's `migrate-radix-to-base` skill
    (`npx skills add shadcn/ui`; "migrate <component> to base-ui"). What it
    says for this project:
    - **Clean git tree, a branch, one commit per component** (the owner
@@ -400,11 +401,11 @@ In order. Items 1 to 7 are the path to the portfolio milestone.
      asking, for the phone keyboard bug (Known issues). Base UI documents
      keyboard handling for bottom sheets only, so check on a phone. Its setup
      also needs `isolation: isolate` on the root and `position: relative` on
-     `body`.
+     `body` (added 2026-11-05).
    - **Style:** switched to `base-nova` 2026-11-05 (`docs/decisions.md`), so
      `shadcn add` delivers Base versions (`add separator --diff` confirmed).
-   - **`form`:** shadcn has no base `form`; convert to `field` per its React
-     Hook Form guide, then delete `form.tsx`.
+   - **`form`:** shadcn has no base `form`; the 8 fields use `field` per its
+     React Hook Form guide, and `form.tsx` is deleted (2026-11-05).
 6. **Accessibility audit.** Do it after the styling pass and before
    publishing, on the screens a visitor sees (login, sidebar, collection
    workspace, drawers). Run an automated check (axe or Lighthouse), then
@@ -497,7 +498,7 @@ In order. Items 1 to 7 are the path to the portfolio milestone.
    Delete buttons, `ListRow` as `Button variant="ghost"`). Converting the older
    ones is a styling change, so it needs the owner's go-ahead and scope first.
    Installed in `components/ui/`: `button`, `card`, `combobox`, `drawer`,
-   `form`, `input-group`, `input`, `label`, `table`, `textarea`.
+   `field`, `input-group`, `input`, `label`, `separator`, `table`, `textarea`.
    **Consistency check** (run it for this item and before each push that
    touches the UI; it should print nothing once 6a is done), from
    `dlams-ui/`:
@@ -519,11 +520,11 @@ In order. Items 1 to 7 are the path to the portfolio milestone.
      installed either (`checkbox`). Do the condition fields first: the owner
      finds them the worst-looking dropdown (2026-11-05).
    - **10 raw `<label>`s** across the three drawer forms and the invite
-     drawer, where `Label` or `FormLabel` should be used. `Form`/`FormField`
-     are used on login and register but the drawer forms use
-     `react-hook-form` `register` directly. Convert them to the form pattern
-     in `.github/copilot-instructions.md` ("Frontend", decided 2026-10-31):
-     a zod schema plus `Form`/`FormField`.
+     drawer, where `FieldLabel` should be used. `Field` is used on login,
+     register, and the share and edit-collection drawers, but the item
+     drawer forms use `react-hook-form` `register` directly. Convert them to
+     the form pattern in `.github/copilot-instructions.md` ("Frontend"): a
+     zod schema plus `Controller` and `Field`.
    - `textarea` is installed but unused. `input-group` is only used inside
      the generated `combobox`.
    Doing this also gives these controls the shadcn focus ring, which the

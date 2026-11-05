@@ -178,11 +178,14 @@ cached copy.
      API, and `type <Name>FormValues = z.infer<typeof schema>`.
   2. `useForm<Values>({ resolver: zodResolver(schema), defaultValues })`,
      in the feature hook when there is one, otherwise in the component.
-  3. `<Form {...form}>` around `<form onSubmit={form.handleSubmit(...)}>`;
-     each field is `FormField` > `FormItem` > `FormLabel`, `FormControl`
-     (around `Input`, `Textarea`, a select, a checkbox, or the combobox), and
-     `FormMessage`. No raw `<label>` or `useId` wiring: `FormItem` connects
-     the label, `aria-invalid`, and the error message.
+  3. `<form onSubmit={form.handleSubmit(...)}>`; each field follows shadcn's
+     React Hook Form guide (https://ui.shadcn.com/docs/forms/react-hook-form):
+     `Controller` > `Field data-invalid={fieldState.invalid}` > `FieldLabel
+     htmlFor`, the control (`Input`, `Textarea`, a select, a checkbox, or the
+     combobox) with a matching `id` and `aria-invalid={fieldState.invalid}`,
+     then `{fieldState.invalid && <FieldError errors={[fieldState.error]} />}`.
+     Ids are `<form>-<field>` (`login-username`), unique on the page. No raw
+     `<label>`.
   4. A mutation's error shows in a `<p role="alert">` below the fields.
   5. Submit is a default `Button`, disabled and relabeled ("Creating...")
      while pending; cancel is `variant="outline"`.

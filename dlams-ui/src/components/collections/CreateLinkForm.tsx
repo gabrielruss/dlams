@@ -1,16 +1,9 @@
 import { useState } from "react"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { useForm } from "react-hook-form"
+import { Controller, useForm } from "react-hook-form"
 
 import { Button } from "@/components/ui/button"
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form"
+import { Field, FieldError, FieldLabel } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import { MAX_LINKS_PER_COLLECTION } from "@/lib/api/collectionLinks"
 import {
@@ -66,43 +59,41 @@ function CreateLinkForm({
   }
 
   return (
-    <Form {...form}>
-      <form
-        onSubmit={form.handleSubmit(createLink)}
-        className="flex flex-col gap-2"
-      >
-        <FormField
-          control={form.control}
-          name="name"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Link name (optional)</FormLabel>
-              <FormControl>
-                <Input
-                  placeholder="For example, Ashley"
-                  autoComplete="off"
-                  autoFocus
-                  {...field}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <div className="flex gap-2">
-          <Button type="submit" disabled={createMutation.isPending}>
-            {createMutation.isPending ? "Creating link..." : "Create link"}
-          </Button>
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => setIsNaming(false)}
-          >
-            Cancel
-          </Button>
-        </div>
-      </form>
-    </Form>
+    <form
+      onSubmit={form.handleSubmit(createLink)}
+      className="flex flex-col gap-2"
+    >
+      <Controller
+        control={form.control}
+        name="name"
+        render={({ field, fieldState }) => (
+          <Field data-invalid={fieldState.invalid}>
+            <FieldLabel htmlFor="link-name">Link name (optional)</FieldLabel>
+            <Input
+              placeholder="For example, Ashley"
+              autoComplete="off"
+              autoFocus
+              {...field}
+              id="link-name"
+              aria-invalid={fieldState.invalid}
+            />
+            {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+          </Field>
+        )}
+      />
+      <div className="flex gap-2">
+        <Button type="submit" disabled={createMutation.isPending}>
+          {createMutation.isPending ? "Creating link..." : "Create link"}
+        </Button>
+        <Button
+          type="button"
+          variant="outline"
+          onClick={() => setIsNaming(false)}
+        >
+          Cancel
+        </Button>
+      </div>
+    </form>
   )
 }
 

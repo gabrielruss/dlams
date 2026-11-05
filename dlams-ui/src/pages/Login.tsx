@@ -1,17 +1,10 @@
-import { useForm } from "react-hook-form"
+import { Controller, useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { loginSchema, type LoginFormValues } from "@/schemas/auth"
 import { Link, useNavigate } from "react-router-dom"
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form"
+import { Field, FieldError, FieldLabel } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { useLogin, useStartDemoSession } from "@/components/auth/useAuthQueries"
@@ -59,70 +52,76 @@ function Login() {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <Form {...form}>
-            <form
-              onSubmit={form.handleSubmit(onFormSubmit)}
-              className="flex flex-col gap-4"
-            >
-              <FormField
-                control={form.control}
-                name="username"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Username</FormLabel>
-                    <FormControl>
-                      <Input type="text" autoComplete="username" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="password"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Password</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="password"
-                        autoComplete="current-password"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              {error && (
-                <div role="alert" className="text-sm text-destructive">
-                  {error.message}
-                </div>
+          <form
+            onSubmit={form.handleSubmit(onFormSubmit)}
+            className="flex flex-col gap-4"
+          >
+            <Controller
+              control={form.control}
+              name="username"
+              render={({ field, fieldState }) => (
+                <Field data-invalid={fieldState.invalid}>
+                  <FieldLabel htmlFor="login-username">Username</FieldLabel>
+                  <Input
+                    type="text"
+                    autoComplete="username"
+                    {...field}
+                    id="login-username"
+                    aria-invalid={fieldState.invalid}
+                  />
+                  {fieldState.invalid && (
+                    <FieldError errors={[fieldState.error]} />
+                  )}
+                </Field>
               )}
-              <Button
-                type="submit"
-                className="w-full hover:bg-slate-700 hover:cursor-pointer"
-                disabled={isBusy}
-              >
-                {isBusy ? "Logging in..." : "Login"}
-              </Button>
-              <Button
-                type="button"
-                variant="outline"
-                className="w-full hover:cursor-pointer"
-                disabled={isBusy}
-                onClick={onDemoClick}
-              >
-                Try the demo
-              </Button>
-              <p className="text-center text-sm">
-                Have an invitation?{" "}
-                <Link className="underline" to="/register">
-                  Create an account
-                </Link>
-              </p>
-            </form>
-          </Form>
+            />
+            <Controller
+              control={form.control}
+              name="password"
+              render={({ field, fieldState }) => (
+                <Field data-invalid={fieldState.invalid}>
+                  <FieldLabel htmlFor="login-password">Password</FieldLabel>
+                  <Input
+                    type="password"
+                    autoComplete="current-password"
+                    {...field}
+                    id="login-password"
+                    aria-invalid={fieldState.invalid}
+                  />
+                  {fieldState.invalid && (
+                    <FieldError errors={[fieldState.error]} />
+                  )}
+                </Field>
+              )}
+            />
+            {error && (
+              <div role="alert" className="text-sm text-destructive">
+                {error.message}
+              </div>
+            )}
+            <Button
+              type="submit"
+              className="w-full hover:bg-slate-700 hover:cursor-pointer"
+              disabled={isBusy}
+            >
+              {isBusy ? "Logging in..." : "Login"}
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full hover:cursor-pointer"
+              disabled={isBusy}
+              onClick={onDemoClick}
+            >
+              Try the demo
+            </Button>
+            <p className="text-center text-sm">
+              Have an invitation?{" "}
+              <Link className="underline" to="/register">
+                Create an account
+              </Link>
+            </p>
+          </form>
         </CardContent>
       </Card>
     </main>
