@@ -699,6 +699,9 @@ seven-day sandboxes. Build steps are item 8 in `DLAMS-PLAN.md`.
   plan's accessibility item.
 
 ### Combobox popups render inside their drawer through a `container` prop — 2026-10-17
+- **Superseded 2026-11-05:** with the drawer on Base UI, picking an option
+  no longer closes it (owner-checked on desktop and in the iOS Simulator), so
+  the `container` prop and the drawer ref wiring were removed.
 - A combobox popup renders in a portal outside the drawer, so a click on an
   option can count as an outside click and close the drawer. `ComboboxContent`
   in the generated `combobox.tsx` accepts a `container` prop for the portal,

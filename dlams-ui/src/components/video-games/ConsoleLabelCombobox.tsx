@@ -1,4 +1,4 @@
-import { useState, type RefObject } from "react"
+import { useState } from "react"
 
 import {
   Combobox,
@@ -14,7 +14,6 @@ interface ConsoleLabelComboboxProps {
   options: string[]
   value: string
   onChange: (value: string) => void
-  container: RefObject<HTMLElement | null>
   invalid?: boolean
 }
 
@@ -23,7 +22,6 @@ function ConsoleLabelCombobox({
   options,
   value,
   onChange,
-  container,
   invalid,
 }: ConsoleLabelComboboxProps) {
   const [query, setQuery] = useState(value)
@@ -48,7 +46,7 @@ function ConsoleLabelCombobox({
         maxLength={100}
         aria-invalid={invalid}
       />
-      <ComboboxContent container={container}>
+      <ComboboxContent>
         <ComboboxEmpty>Type to add a console</ComboboxEmpty>
         <ComboboxList>
           {(item: string) => (

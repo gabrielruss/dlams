@@ -8,13 +8,14 @@
 - 7 drawers (`AppSidebar`, `RegistrationInviteManager`, `CollectionNavigation`, `ShareCollectionDrawer`, `EditCollectionDrawer`, `ConsoleManager`, `GameManager`): Vaul's `direction` became `swipeDirection`.
 - 6 Close buttons: `DrawerClose asChild` with a child became `DrawerClose render={...}`, as in shadcn's Base drawer docs.
 - Headers with `border-b` gained `pb-4`, footers with `border-t` gained `pt-4`: the new header has no bottom padding and the footer no top padding.
+- `components/ui/combobox.tsx`: its `container` edit, a Vaul workaround, was removed with the drawer ref wiring in the console and game drawers, after the owner checked that picking an option no longer closes the drawer.
+- `drawer.tsx`: side drawers set `--drawer-content-height` to `100svh` (logged local edit) so iOS 26 Safari's toolbar does not hide the footer.
 
 Leftover scan clean: `grep -rn "vaul" src` finds nothing.
 
 ## Left alone
 
-- `components/ui/combobox.tsx`'s `container` edit (a Vaul workaround): still used; test without it separately.
-- `vaul` in `package.json`: unused now, for the owner to uninstall.
+- Nothing related.
 
 ## Behavior changes
 

@@ -1,4 +1,3 @@
-import type { RefObject } from "react"
 import { Controller, type UseFormReturn } from "react-hook-form"
 
 import { Button } from "@/components/ui/button"
@@ -11,7 +10,6 @@ import { isVideoGameCondition } from "./videoGameOptions"
 interface GameFormProps {
   form: UseFormReturn<GameFormValues>
   consoleLabelOptions: string[]
-  popupContainer: RefObject<HTMLElement | null>
   isSaving: boolean
   formError: string | null
   onSave: (values: GameFormValues) => void
@@ -21,7 +19,6 @@ interface GameFormProps {
 function GameForm({
   form,
   consoleLabelOptions,
-  popupContainer,
   isSaving,
   formError,
   onSave,
@@ -71,7 +68,6 @@ function GameForm({
               <ConsoleLabelCombobox
                 id="game-console"
                 options={consoleLabelOptions}
-                container={popupContainer}
                 value={field.value}
                 onChange={field.onChange}
                 invalid={!!form.formState.errors.consoleLabel}

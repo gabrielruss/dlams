@@ -1,5 +1,3 @@
-import type { RefObject } from "react"
-
 import ItemActions from "@/components/collections/ItemActions"
 import { DrawerClose, DrawerHeader, DrawerTitle } from "@/components/ui/drawer"
 import type { GameRecord } from "@/types/videoGames"
@@ -11,7 +9,6 @@ interface GameDrawerContentProps {
   collectionId: number
   openedGame: GameRecord | undefined
   consoleLabelOptions: string[]
-  popupContainer: RefObject<HTMLElement | null>
   onClose: () => void
 }
 
@@ -19,7 +16,6 @@ function GameDrawerContent({
   collectionId,
   openedGame,
   consoleLabelOptions,
-  popupContainer,
   onClose,
 }: GameDrawerContentProps) {
   const {
@@ -70,7 +66,6 @@ function GameDrawerContent({
         <GameForm
           form={form}
           consoleLabelOptions={consoleLabelOptions}
-          popupContainer={popupContainer}
           isSaving={isSaving}
           formError={formError}
           onSave={saveGame}

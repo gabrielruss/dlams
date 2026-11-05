@@ -1,5 +1,3 @@
-import { useRef } from "react"
-
 import useItemDrawer from "@/components/collections/useItemDrawer"
 import { Drawer, DrawerContent } from "@/components/ui/drawer"
 import type { GameRecord } from "@/types/videoGames"
@@ -22,7 +20,6 @@ function GameManager({ collectionId, games, canWrite }: GameManagerProps) {
     close,
   } = useItemDrawer({ type: "game", items: games })
   const consoleLabelOptions = useConsoleLabels(canWrite)
-  const drawerRef = useRef<HTMLDivElement>(null)
 
   return (
     <section className="flex flex-col gap-4 rounded-lg border p-4">
@@ -46,12 +43,11 @@ function GameManager({ collectionId, games, canWrite }: GameManagerProps) {
             if (!open) close()
           }}
         >
-          <DrawerContent ref={drawerRef}>
+          <DrawerContent>
             <GameDrawerContent
               collectionId={collectionId}
               openedGame={openedGame}
               consoleLabelOptions={consoleLabelOptions}
-              popupContainer={drawerRef}
               onClose={close}
             />
           </DrawerContent>

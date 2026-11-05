@@ -31,11 +31,6 @@ Applies across the DLAMS workspace. Project-local conventions take precedence wh
     lost, the pinned Save / Cancel footer is cut off on iPhones; tests do not
     catch it. Re-evaluate with plan item 15 (phone-friendly drawers).
   In `components/ui/combobox.tsx`:
-  - `ComboboxContent` accepts a `container` prop forwarded to the portal, so a
-    combobox inside a drawer can render its popup within the drawer (otherwise
-    clicking an option counts as an outside click and closes the drawer). The
-    drawer managers pass a ref on their `DrawerContent` through
-    `ConsoleLabelCombobox`. If it is lost, `tsc` fails on the `container` prop.
   - The unused `children` in `ComboboxChipsInput` was removed (2026-10-18) so
     lint passes; a reinstall brings that lint error back.
   - `ComboboxTrigger` has `aria-label="Show options"` (2026-10-26), so the

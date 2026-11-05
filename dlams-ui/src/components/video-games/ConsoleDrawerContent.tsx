@@ -1,5 +1,3 @@
-import type { RefObject } from "react"
-
 import ItemActions from "@/components/collections/ItemActions"
 import { DrawerClose, DrawerHeader, DrawerTitle } from "@/components/ui/drawer"
 import type { ConsoleRecord } from "@/types/videoGames"
@@ -11,7 +9,6 @@ interface ConsoleDrawerContentProps {
   collectionId: number
   openedConsole: ConsoleRecord | undefined
   consoleLabelOptions: string[]
-  popupContainer: RefObject<HTMLElement | null>
   onClose: () => void
 }
 
@@ -19,7 +16,6 @@ function ConsoleDrawerContent({
   collectionId,
   openedConsole,
   consoleLabelOptions,
-  popupContainer,
   onClose,
 }: ConsoleDrawerContentProps) {
   const {
@@ -71,7 +67,6 @@ function ConsoleDrawerContent({
         <ConsoleForm
           form={form}
           consoleLabelOptions={consoleLabelOptions}
-          popupContainer={popupContainer}
           isSaving={isSaving}
           formError={formError}
           onSave={saveConsole}
