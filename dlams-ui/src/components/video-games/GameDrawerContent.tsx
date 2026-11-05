@@ -39,18 +39,20 @@ function GameDrawerContent({
 
   return (
     <>
-      <DrawerHeader className="flex-row items-center justify-between border-b">
+      <DrawerHeader className="flex-row items-center justify-between border-b pb-4">
         <DrawerTitle className="text-xl">
           {viewedGame?.name ?? (shownGame ? "Edit game" : "Add game")}
         </DrawerTitle>
-        <DrawerClose asChild>
-          <button
-            className="rounded-md border px-3 py-2 text-sm md:py-1"
-            type="button"
-            aria-label="Close drawer"
-          >
-            Close
-          </button>
+        <DrawerClose
+          render={
+            <button
+              className="rounded-md border px-3 py-2 text-sm md:py-1"
+              type="button"
+              aria-label="Close drawer"
+            />
+          }
+        >
+          Close
         </DrawerClose>
       </DrawerHeader>
       {viewedGame ? (

@@ -48,23 +48,25 @@ function EditCollectionDrawer({ collection }: EditCollectionDrawerProps) {
   }
 
   return (
-    <Drawer open={isOpen} direction="right" onOpenChange={setIsOpen}>
+    <Drawer open={isOpen} swipeDirection="right" onOpenChange={setIsOpen}>
       <Button type="button" variant="outline" onClick={open}>
         <Pencil aria-hidden="true" />
         Edit
       </Button>
       <DrawerContent>
-        <DrawerHeader className="flex-row items-center justify-between border-b">
+        <DrawerHeader className="flex-row items-center justify-between border-b pb-4">
           <DrawerTitle className="text-xl">Edit collection</DrawerTitle>
-          <DrawerClose asChild>
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              aria-label="Close drawer"
-            >
-              Close
-            </Button>
+          <DrawerClose
+            render={
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                aria-label="Close drawer"
+              />
+            }
+          >
+            Close
           </DrawerClose>
         </DrawerHeader>
         <form
@@ -124,7 +126,7 @@ function EditCollectionDrawer({ collection }: EditCollectionDrawerProps) {
             )}
           </div>
           {!isConfirmingDelete && (
-            <DrawerFooter className="border-t">
+            <DrawerFooter className="border-t pt-4">
               <Button type="submit" disabled={renameMutation.isPending}>
                 {renameMutation.isPending ? "Saving..." : "Save collection"}
               </Button>

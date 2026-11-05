@@ -45,7 +45,7 @@ function ConsoleManager({
       {canWrite && (
         <Drawer
           open={isDrawerOpen}
-          direction="right"
+          swipeDirection="right"
           onOpenChange={(open: boolean) => {
             if (!open) close()
           }}

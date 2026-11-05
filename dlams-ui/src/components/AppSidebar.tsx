@@ -86,7 +86,7 @@ function AppSidebar({ children }: AppSidebarProps) {
 
       <Drawer
         open={isMenuOpen}
-        direction="left"
+        swipeDirection="left"
         onOpenChange={(open: boolean) =>
           setMenuLocationKey(open ? location.key : null)
         }

@@ -117,7 +117,7 @@ function GameForm({
           </p>
         )}
       </div>
-      <DrawerFooter className="border-t">
+      <DrawerFooter className="border-t pt-4">
         <Button
           type="submit"
           disabled={isSaving || !name?.trim() || !consoleLabel?.trim()}
