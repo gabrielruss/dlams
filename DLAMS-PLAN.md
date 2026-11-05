@@ -11,13 +11,11 @@ The current state of the project. For why things are the way they are, see
 Start here in a new session. This block is rewritten at the end of a session,
 never appended to. History lives in git and `docs/decisions.md`.
 
-- **Status.** Search (item 8a) is deployed (PR #12, 2026-11-02). Edit and
-  delete collections (item 8b) is merged and deployed (PR #13,
-  2026-11-03). Item 8d is merged and deployed (PR #14; owner-reported working). The
-  delete-collection confirm fix for counts that fail to load is uncommitted
-  on branch `fix-delete-confirm`. Run `git status` and `git log` first:
-  the owner commits and pushes everything, and a push to `main` deploys
-  (docs included).
+- **Status.** Search (8a), edit and delete collections (8b), view before edit
+  (8d), and the delete-collection confirm fix are deployed. The move to Base
+  UI (item 5a) has started on branch `move-to-base-ui`. Run `git status` and
+  `git log` first: the owner commits and pushes everything, and a push to
+  `main` deploys (docs included).
 - **What was built this session (2026-11-01 to 11-03),** details in the
   items named:
   - Gzip in Nginx (8c). The deploy did not apply `nginx.conf` changes;
@@ -49,7 +47,8 @@ never appended to. History lives in git and `docs/decisions.md`.
   `dlams-nginx` showed `Up 2 minutes`, so the deploy recreates Nginx. Not
   reported: edit and delete collections on the live site.
 - **Next, in order:**
-  1. **Merge `fix-delete-confirm`** (owner). No migration.
+  1. **Merge `move-to-base-ui`** (item 5a, done 2026-11-05). The manual
+     accessibility audit (6) waited for it (owner, 2026-11-04).
   2. Then: the manual accessibility audit (6), shadcn everywhere (6a),
      repeated styling (6b), styling cleanup (6c), backend consistency
      (6d), frontend hook consistency (6e), admins delete users (9a),
@@ -71,9 +70,10 @@ never appended to. History lives in git and `docs/decisions.md`.
     matching request handler`; the test fails only if what it checks
     depends on that request, so read the output for MSW errors. Any test
     that opens an owned collection needs `GET /collections/1/links` (the
-    Share button) and `GET /console-labels` handlers. Inside a Vaul
-    drawer, use `element.focus()` and `user.keyboard(...)` instead of
-    clicks (pointer events throw in jsdom); while a drawer is open the
+    Share button) and `GET /console-labels` handlers. Inside a drawer,
+    the tests use `element.focus()` and `user.keyboard(...)` instead of
+    clicks (pointer events threw in jsdom under Vaul; not rechecked since
+    the move to Base UI); while a drawer is open the
     page behind it is hidden from the accessibility tree, so query it with
     `hidden: true`. MemoryRouter cannot test back and forward. MSW mocks
     never return a 422.
@@ -97,7 +97,7 @@ never appended to. History lives in git and `docs/decisions.md`.
     `select()`, `extra="forbid"` on request schemas. The 6a grep lists raw
     form elements left in older code.
   - Generated shadcn files need the owner's approval to edit (local edits to
-    `components/ui/combobox.tsx` are listed in
+    `components/ui/drawer.tsx` and `combobox.tsx` are listed in
     `.github/copilot-instructions.md`). The owner runs the shadcn CLI.
   - In our own components never use the `cn` helper, do not add code
     comments (but never remove or reword the owner's own comments; some
@@ -387,6 +387,24 @@ In order. Items 1 to 7 are the path to the portfolio milestone.
    and axe checks. Still optional: a handful of Playwright end-to-end checks
    across owner, shared (read-only), and demo access (needs the owner's
    approval to install packages). Backend tests stay on `unittest`.
+5a. **Move to Base UI. Done 2026-11-05** on `move-to-base-ui` (not yet
+   merged), with shadcn's `migrate-radix-to-base` skill, one commit per
+   component, and a report per component in `dlams-ui/.migration/`.
+   - **Style** switched to `base-nova` (`docs/decisions.md`), so `shadcn
+     add` delivers Base versions; our theme and font were kept.
+   - **Migrated:** `button`, `label`, `input` (classes kept); `separator`,
+     `field`, and `drawer` reinstalled from `base-nova`; `form` replaced by
+     `field` per shadcn's React Hook Form guide. Radix and Vaul are
+     uninstalled. Base UI's root setup (`isolation: isolate` on `#root`,
+     `position: relative` on `body`) is in `index.css`.
+   - **Drawers** take the `base-nova` look (lighter blurred backdrop,
+     rounded open side). Side drawers are `100svh` tall so iOS 26 Safari's
+     toolbar does not hide the footer (a logged local edit; revisit with
+     item 15). The combobox `container` workaround was removed.
+   - **Left:** decide whether to keep the `shadcn` skill (installed in
+     `dlams-ui/.agents/skills/`; check that a fresh session loads it); check
+     the keyboard on a real phone (Known issues). The migration skill was
+     removed 2026-11-05 with `npx skills remove migrate-radix-to-base`.
 6. **Accessibility audit.** Do it after the styling pass and before
    publishing, on the screens a visitor sees (login, sidebar, collection
    workspace, drawers). Run an automated check (axe or Lighthouse), then
@@ -479,7 +497,7 @@ In order. Items 1 to 7 are the path to the portfolio milestone.
    Delete buttons, `ListRow` as `Button variant="ghost"`). Converting the older
    ones is a styling change, so it needs the owner's go-ahead and scope first.
    Installed in `components/ui/`: `button`, `card`, `combobox`, `drawer`,
-   `form`, `input-group`, `input`, `label`, `table`, `textarea`.
+   `field`, `input-group`, `input`, `label`, `separator`, `table`, `textarea`.
    **Consistency check** (run it for this item and before each push that
    touches the UI; it should print nothing once 6a is done), from
    `dlams-ui/`:
@@ -498,13 +516,14 @@ In order. Items 1 to 7 are the path to the portfolio milestone.
    - **2 raw `<select>`s** (the condition fields in `ConsoleManager` and
      `GameManager`). No shadcn `select` is installed; the owner would run
      `npx shadcn@latest add select`. The checkbox has no shadcn component
-     installed either (`checkbox`).
+     installed either (`checkbox`). Do the condition fields first: the owner
+     finds them the worst-looking dropdown (2026-11-05).
    - **10 raw `<label>`s** across the three drawer forms and the invite
-     drawer, where `Label` or `FormLabel` should be used. `Form`/`FormField`
-     are used on login and register but the drawer forms use
-     `react-hook-form` `register` directly. Convert them to the form pattern
-     in `.github/copilot-instructions.md` ("Frontend", decided 2026-10-31):
-     a zod schema plus `Form`/`FormField`.
+     drawer, where `FieldLabel` should be used. `Field` is used on login,
+     register, and the share and edit-collection drawers, but the item
+     drawer forms use `react-hook-form` `register` directly. Convert them to
+     the form pattern in `.github/copilot-instructions.md` ("Frontend"): a
+     zod schema plus `Controller` and `Field`.
    - `textarea` is installed but unused. `input-group` is only used inside
      the generated `combobox`.
    Doing this also gives these controls the shadcn focus ring, which the
@@ -880,7 +899,7 @@ is next, then the sharing UI, then search.
    type has a drawer content component and hook (`GameDrawerContent`,
    `useGameDrawerContent`, and the console pair) rendered inside
    `DrawerContent`. They own the form, the mutations, edit mode, and the
-   shown item. Radix keeps that content mounted through the closing
+   shown item. The drawer keeps that content mounted through the closing
    animation and unmounts it after, so it holds still while the drawer
    slides shut and starts fresh on the next open, with no reset code; this
    replaced a wrapper and then hook state tried the same day to stop a
@@ -1017,6 +1036,13 @@ is next, then the sharing UI, then search.
     only points them out, with links to open, move (item 13), or delete
     each one. Open: what counts as a duplicate per type, and where it
     lives.
+15. **Phone-friendly drawers** (owner, 2026-11-05; later). The owner found
+    the shadcn and Base UI demo drawers easier to use on a phone than ours.
+    shadcn's docs open them from the bottom on phones and from the side on
+    larger screens (`swipeDirection={isMobile ? "down" : "right"}`), with an
+    optional swipe handle. A styling change; the owner sets the scope.
+    Re-evaluate then the side-drawer `100svh` height in `drawer.tsx` (a
+    local edit, 2026-11-05, for iOS 26 Safari's toolbar hiding the footer).
 
 ## Known issues
 
@@ -1026,18 +1052,18 @@ is next, then the sharing UI, then search.
   in a browser. Left as is (admin-only, not on the visitor path). The cheap
   fixes are hiding the Created column below `md` or stacking each user as a
   card.
-- On a phone, an item drawer can stay at its keyboard-open height after the
-  keyboard closes (owner-reported 2026-11-04). Likely Vaul's inline height
-  (read from its code, not reproduced); Vaul's README says it is
-  unmaintained. Other drawers with text fields likely share it. Set aside by
-  the owner 2026-11-04. `repositionInputs={false}` alone was rejected (Save
-  and Cancel sit behind the keyboard). Options if picked up: a small hook
-  setting the drawer's `top` and `height` from `window.visualViewport`, or
-  moving to Base UI. For Base UI: `components.json`'s `new-york` makes
-  `shadcn add` install Radix and Vaul versions; the `base-*` styles use Base
-  UI, the base `form` entry is empty (`field` looks like its replacement),
-  and the docs give no way to change an existing project's style. Not
-  decided.
+- On a phone, an item drawer could stay at its keyboard-open height after
+  the keyboard closed (owner-reported 2026-11-04, under Vaul). With the Base
+  UI drawer the keyboard no longer resizes it, so it cannot stay small
+  (owner-checked in the iOS Simulator, 2026-11-05). Not yet checked on a
+  real phone. While the keyboard is open, the pinned Save / Cancel sit
+  behind it.
+- On iPhones, tapping a field in the console and game drawer forms zooms
+  the page in, and it stays zoomed (seen in the iOS Simulator, 2026-11-05).
+  iOS zooms on inputs whose text is under 16px; these are raw inputs with
+  `text-sm`. A game's Edit focuses its name field, so it zooms at once.
+  shadcn's `Input` uses `text-base md:text-sm`, so converting these forms
+  (item 6a) should fix it.
 - The demo notice in `VideoGamesWorkspace.tsx` now says "All data you add
   will be reset in 30 minutes." Sandboxes stay 7 days and their share
   links keep working, and item 8 and `docs/decisions.md` still describe

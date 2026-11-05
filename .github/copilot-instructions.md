@@ -18,22 +18,27 @@ Applies across the DLAMS workspace. Project-local conventions take precedence wh
   Router, and TanStack Query v5 for server state. There is no client-state
   store library (Zustand was removed 2026-10-14 because nothing used it).
 - The UI already has local shadcn-style components under
-  `dlams-ui/src/components/ui/`; shadcn/ui is component source, not a runtime
-  dependency in `package.json`. Reuse these components and follow shadcn
-  conventions rather than introducing a competing component system.
+  `dlams-ui/src/components/ui/`; shadcn/ui is component source. The `shadcn`
+  package in `package.json` supplies `shadcn/tailwind.css`, not components.
+  Reuse these components and follow shadcn conventions rather than introducing
+  a competing component system.
 - Local edits to generated files. Re-apply these after reinstalling a
   component (run `npx shadcn@latest add <component> --diff` first to see what
-  would change). All are in `components/ui/combobox.tsx`:
-  - `ComboboxContent` accepts a `container` prop forwarded to the portal, so a
-    combobox inside a drawer can render its popup within the drawer (otherwise
-    clicking an option counts as an outside click and closes the drawer). The
-    drawer managers pass a ref on their `DrawerContent` through
-    `ConsoleLabelCombobox`. If it is lost, `tsc` fails on the `container` prop.
+  would change). In `components/ui/drawer.tsx`:
+  - Side drawers set `data-[swipe-axis=x]:[--drawer-content-height:100svh]`
+    (2026-11-05), so on iOS 26 Safari the drawer ends above the floating
+    toolbar instead of behind it (it measured `lvh` 739, `svh` 699). If it is
+    lost, the pinned Save / Cancel footer is cut off on iPhones; tests do not
+    catch it. Re-evaluate with plan item 15 (phone-friendly drawers).
+  In `components/ui/combobox.tsx`:
   - The unused `children` in `ComboboxChipsInput` was removed (2026-10-18) so
     lint passes; a reinstall brings that lint error back.
   - `ComboboxTrigger` has `aria-label="Show options"` (2026-10-26), so the
     dropdown-arrow button has an accessible name. If it is lost, the axe tests
     for the Add console and Add game drawers fail.
+  - `ComboboxInput` uses `render={<ComboboxTrigger />}` on `InputGroupButton`
+    (2026-11-04, the Base UI `Button` has no `asChild`; matches the base
+    registry). If it is lost, `tsc` fails on `asChild`.
 - Re-running the CLI overwrites the generated file (for example it restored
   `buttonVariants` in `button.tsx` and moved it to the `radix-ui` package). The
   `react-refresh/only-export-components` lint rule is off under
@@ -147,8 +152,8 @@ cached copy.
   "Delete" (`aria-label` "Delete <type>"; decided 2026-11-03). The Edit
   collection drawer has a red trash-can icon alone (`variant="ghost"
   size="icon"`, `text-destructive`, `aria-label` and `title`).
-- shadcn/ui components are maintained in the project source; do not expect a
-  `shadcn` runtime package. Add or adapt components using the project's
+- shadcn/ui components are maintained in the project source. Add or adapt
+  components using the project's
   established shadcn conventions. When a shadcn component is needed, the owner
   adds it with the shadcn CLI (see above); review its generated source and
   wire it up rather than hand-rolling a parallel primitive.
@@ -174,11 +179,14 @@ cached copy.
      API, and `type <Name>FormValues = z.infer<typeof schema>`.
   2. `useForm<Values>({ resolver: zodResolver(schema), defaultValues })`,
      in the feature hook when there is one, otherwise in the component.
-  3. `<Form {...form}>` around `<form onSubmit={form.handleSubmit(...)}>`;
-     each field is `FormField` > `FormItem` > `FormLabel`, `FormControl`
-     (around `Input`, `Textarea`, a select, a checkbox, or the combobox), and
-     `FormMessage`. No raw `<label>` or `useId` wiring: `FormItem` connects
-     the label, `aria-invalid`, and the error message.
+  3. `<form onSubmit={form.handleSubmit(...)}>`; each field follows shadcn's
+     React Hook Form guide (https://ui.shadcn.com/docs/forms/react-hook-form):
+     `Controller` > `Field data-invalid={fieldState.invalid}` > `FieldLabel
+     htmlFor`, the control (`Input`, `Textarea`, a select, a checkbox, or the
+     combobox) with a matching `id` and `aria-invalid={fieldState.invalid}`,
+     then `{fieldState.invalid && <FieldError errors={[fieldState.error]} />}`.
+     Ids are `<form>-<field>` (`login-username`), unique on the page. No raw
+     `<label>`.
   4. A mutation's error shows in a `<p role="alert">` below the fields.
   5. Submit is a default `Button`, disabled and relabeled ("Creating...")
      while pending; cancel is `variant="outline"`.

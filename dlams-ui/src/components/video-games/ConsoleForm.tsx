@@ -1,4 +1,3 @@
-import type { RefObject } from "react"
 import { Controller, type UseFormReturn } from "react-hook-form"
 
 import { Button } from "@/components/ui/button"
@@ -11,7 +10,6 @@ import { isVideoGameCondition } from "./videoGameOptions"
 interface ConsoleFormProps {
   form: UseFormReturn<ConsoleFormValues>
   consoleLabelOptions: string[]
-  popupContainer: RefObject<HTMLElement | null>
   isSaving: boolean
   formError: string | null
   onSave: (values: ConsoleFormValues) => void
@@ -21,7 +19,6 @@ interface ConsoleFormProps {
 function ConsoleForm({
   form,
   consoleLabelOptions,
-  popupContainer,
   isSaving,
   formError,
   onSave,
@@ -51,7 +48,6 @@ function ConsoleForm({
               <ConsoleLabelCombobox
                 id="console-label"
                 options={consoleLabelOptions}
-                container={popupContainer}
                 value={field.value}
                 onChange={field.onChange}
                 invalid={!!form.formState.errors.label}
@@ -103,7 +99,7 @@ function ConsoleForm({
           </p>
         )}
       </div>
-      <DrawerFooter className="border-t">
+      <DrawerFooter className="border-t pt-4">
         <Button type="submit" disabled={isSaving || !label?.trim()}>
           {isSaving ? "Saving..." : "Save console"}
         </Button>

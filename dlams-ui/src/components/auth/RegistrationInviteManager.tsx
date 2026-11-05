@@ -56,18 +56,20 @@ function RegistrationInviteManager() {
         <UserPlus aria-hidden="true" />
         Invite someone
       </Button>
-      <Drawer open={isOpen} direction="right" onOpenChange={setIsOpen}>
+      <Drawer open={isOpen} swipeDirection="right" onOpenChange={setIsOpen}>
         <DrawerContent>
-          <DrawerHeader className="flex-row items-center justify-between border-b">
+          <DrawerHeader className="flex-row items-center justify-between border-b pb-4">
             <DrawerTitle className="text-xl">Invite someone</DrawerTitle>
-            <DrawerClose asChild>
-              <button
-                className="rounded-md border px-3 py-2 text-sm md:py-1"
-                type="button"
-                aria-label="Close drawer"
-              >
-                Close
-              </button>
+            <DrawerClose
+              render={
+                <button
+                  className="rounded-md border px-3 py-2 text-sm md:py-1"
+                  type="button"
+                  aria-label="Close drawer"
+                />
+              }
+            >
+              Close
             </DrawerClose>
           </DrawerHeader>
           <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto p-5">

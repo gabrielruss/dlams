@@ -1,5 +1,3 @@
-import type { RefObject } from "react"
-
 import ItemActions from "@/components/collections/ItemActions"
 import { DrawerClose, DrawerHeader, DrawerTitle } from "@/components/ui/drawer"
 import type { ConsoleRecord } from "@/types/videoGames"
@@ -11,7 +9,6 @@ interface ConsoleDrawerContentProps {
   collectionId: number
   openedConsole: ConsoleRecord | undefined
   consoleLabelOptions: string[]
-  popupContainer: RefObject<HTMLElement | null>
   onClose: () => void
 }
 
@@ -19,7 +16,6 @@ function ConsoleDrawerContent({
   collectionId,
   openedConsole,
   consoleLabelOptions,
-  popupContainer,
   onClose,
 }: ConsoleDrawerContentProps) {
   const {
@@ -39,19 +35,21 @@ function ConsoleDrawerContent({
 
   return (
     <>
-      <DrawerHeader className="flex-row items-center justify-between border-b">
+      <DrawerHeader className="flex-row items-center justify-between border-b pb-4">
         <DrawerTitle className="text-xl">
           {viewedConsole?.label ??
             (shownConsole ? "Edit console" : "Add console")}
         </DrawerTitle>
-        <DrawerClose asChild>
-          <button
-            className="rounded-md border px-3 py-2 text-sm md:py-1"
-            type="button"
-            aria-label="Close drawer"
-          >
-            Close
-          </button>
+        <DrawerClose
+          render={
+            <button
+              className="rounded-md border px-3 py-2 text-sm md:py-1"
+              type="button"
+              aria-label="Close drawer"
+            />
+          }
+        >
+          Close
         </DrawerClose>
       </DrawerHeader>
       {viewedConsole ? (
@@ -69,7 +67,6 @@ function ConsoleDrawerContent({
         <ConsoleForm
           form={form}
           consoleLabelOptions={consoleLabelOptions}
-          popupContainer={popupContainer}
           isSaving={isSaving}
           formError={formError}
           onSave={saveConsole}

@@ -465,6 +465,19 @@ seven-day sandboxes. Build steps are item 8 in `DLAMS-PLAN.md`.
 
 ## Code and UI conventions
 
+### shadcn style is `base-nova`, with our own theme kept — 2026-11-05
+- The project was on `new-york`, which has no Base UI version, so `shadcn add`
+  kept delivering Radix components during the move to Base UI. The owner chose
+  to fix that now rather than at the end of the migration, and to stay on
+  shadcn rather than change component libraries.
+- Done with `npx shadcn@latest init --base base --preset nova --force
+  --no-reinstall`, which leaves existing components alone.
+- That command also replaces the theme tokens and font. Those were restored;
+  kept are the style, `@import "shadcn/tailwind.css"` and the `shadcn` package
+  (Base components use its variants), and `lib/utils.ts` re-exporting `cn`.
+  Re-running `init` or `apply` will replace the theme again.
+- New components may look like `base-nova` until their classes are adjusted.
+
 ### Search covers your own collections, and share links — 2026-10-31
 - Signed in, search always covers every collection the user owns, with no
   option to limit it to the selected collection, and not collections shared
@@ -583,6 +596,17 @@ seven-day sandboxes. Build steps are item 8 in `DLAMS-PLAN.md`.
   reducer: the URL owns which item is open and the query owns its data, so
   copying them into one would add a second source of truth.
 
+### The UI moves to Base UI by shadcn's migration skill — 2026-11-04
+- shadcn's default and recommendation for new work is Base UI, and Vaul, which
+  our drawer is built on, says it is unmaintained. Radix is not deprecated and
+  shadcn does not require this; it is the owner's choice.
+- Done by the documented route, the `migrate-radix-to-base` skill. Chosen over
+  hand-editing `components.json` to a `base-*` style, which was tried and
+  reverted: the docs say the style "cannot be changed after initialization".
+- Whether to switch style at the end is open: the skill leaves it to the
+  owner, since `new-york` keeps `shadcn add` on Radix versions. Steps are plan
+  item 5a.
+
 ### Login branding: backdrop text, two fonts, two brand colors — 2026-10-18
 - The login page shows "DON'T LOOK AT MY STUFF" as a faint full-screen
   background. DON'T is turned sideways on the left, at the screen's full height
@@ -675,6 +699,9 @@ seven-day sandboxes. Build steps are item 8 in `DLAMS-PLAN.md`.
   plan's accessibility item.
 
 ### Combobox popups render inside their drawer through a `container` prop — 2026-10-17
+- **Superseded 2026-11-05:** with the drawer on Base UI, picking an option
+  no longer closes it (owner-checked on desktop and in the iOS Simulator), so
+  the `container` prop and the drawer ref wiring were removed.
 - A combobox popup renders in a portal outside the drawer, so a click on an
   option can count as an outside click and close the drawer. `ComboboxContent`
   in the generated `combobox.tsx` accepts a `container` prop for the portal,
