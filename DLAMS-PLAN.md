@@ -1,66 +1,73 @@
 # DLAMS plan
 
-Last updated: 2026-11-03
+Last updated: 2026-11-05
 
 The current state of the project. For why things are the way they are, see
 [`docs/decisions.md`](./docs/decisions.md). For the full history up to
 2026-10-09, see [`docs/archive/`](./docs/archive/).
 
-## Where we left off (2026-11-03)
+## Where we left off (2026-11-05)
 
 Start here in a new session. This block is rewritten at the end of a session,
 never appended to. History lives in git and `docs/decisions.md`.
 
-- **Status.** Search (8a), edit and delete collections (8b), view before edit
-  (8d), and the delete-collection confirm fix are deployed. The move to Base
-  UI (item 5a) has started on branch `move-to-base-ui`. Run `git status` and
-  `git log` first: the owner commits and pushes everything, and a push to
-  `main` deploys (docs included).
-- **What was built this session (2026-11-01 to 11-03),** details in the
-  items named:
-  - Gzip in Nginx (8c). The deploy did not apply `nginx.conf` changes;
-    `deploy.yml` now recreates the Nginx container, confirmed on the
-    2026-11-03 deploy.
-  - Search (8a): `GET /items` (`item_routes.py`,
-    `video_games_items.py`); the matcher `searchEntries.ts`;
-    `useOwnedItems`; the "Search all collections" takeover
-    (`SearchBar`, `SearchResults`, `useSearchMode`, `?q=`); `SearchField`
-    shared with the share page's in-place filter (`useListSearch`).
-  - `?item=` opens every existing item's edit drawer, from a row click or
-    a search result (`useOpenItem`, `lib/urlParams.ts`), and `useItemDrawer`
-    (`components/collections/`) says what is open; each type's drawer content
-    component and hook own the rest (item 8d).
-  - Item drawer layout: header is drawer-only (title, Close); a red
-    trash-can Delete at the top right of the item area; Save / Cancel in a
-    pinned footer.
-  - Edit and delete collections (8b): `PUT` / `DELETE /collections/{id}`,
-    `useManageCollection`, `EditCollectionDrawer` (same layout), and
-    `DeleteCollectionConfirm` with counts from data already loaded
-    (`describeContents`).
-  - Prettier for the UI (pinned, `format` / `format:check` scripts, a
-    Claude Code hook, one reformat commit).
-- **What is verified.** Run by Claude 2026-11-03 on
-  `edit-delete-collection`: 58 UI tests, lint, build, format check; 94
-  backend tests, Ruff check and format. Owner-checked in the browser:
-  search, the `?item=` drawers, the drawer layout, edit and delete
-  collections. On the Pi after the PR #13 deploy (owner-pasted):
-  `dlams-nginx` showed `Up 2 minutes`, so the deploy recreates Nginx. Not
-  reported: edit and delete collections on the live site.
+- **Status.** Everything through item 8d and the delete-collection confirm
+  fix is deployed. The move to Base UI (item 5a) is finished and merged to
+  `main` (PR #16, 2026-11-05); the deploy result was not reported. Run
+  `git status` and `git log` first: the owner commits and pushes
+  everything, and a push to `main` deploys (docs included).
+- **What was done this session (2026-11-04 to 11-05),** details in item 5a,
+  the `.migration/` reports in `dlams-ui/`, and `docs/decisions.md`:
+  - The shadcn style moved from the legacy `new-york` to `base-nova` with
+    `init --base base --preset nova --force --no-reinstall`; the CLI's new
+    theme and font were reverted, so the look is unchanged. `shadcn add`
+    now delivers Base UI components.
+  - Migrated to Base UI: `button`, `label`, `input`, `separator`, `field`,
+    `drawer`. `form.tsx` is gone; the 8 form fields follow shadcn's React
+    Hook Form guide (`Controller` + `Field`), and the conventions file's
+    form pattern says so. Radix, Vaul, `clsx`, and `tailwind-merge` are
+    uninstalled.
+  - Drawers have the `base-nova` look; headers / footers with borders got
+    `pb-4` / `pt-4`. Side drawers are `100svh` tall (a logged local edit in
+    `drawer.tsx`) because iOS 26 Safari's toolbar hid the pinned footer,
+    measured in the iOS Simulator; this also affected the live Vaul site.
+    The combobox `container` workaround was removed.
+  - Plan items added: 15 (phone-friendly drawers, opening from the bottom
+    on phones) and 16 (next bug-fix batch). The condition dropdown is first
+    in 6a's raw `<select>` conversion.
+- **What is verified.** Run by Claude 2026-11-05 on `move-to-base-ui`: 71
+  UI tests, typecheck, lint, format check, build. Backend not touched or
+  run this session. Owner-checked in the browser: "Manage users", the input
+  checks in `.migration/input.md`, the drawers, the combobox inside a
+  drawer, and no closing flicker. The form and label checklists were not
+  reported item by item. In the iOS Simulator (iPhone 16e, iOS
+  26.3): drawer footers visible, and the keyboard no longer resizes the
+  drawer. Not checked: a real phone.
 - **Next, in order:**
-  1. **Merge `move-to-base-ui`** (item 5a, done 2026-11-05). The manual
-     accessibility audit (6) waited for it (owner, 2026-11-04).
-  2. Then: the manual accessibility audit (6), shadcn everywhere (6a),
-     repeated styling (6b), styling cleanup (6c), backend consistency
-     (6d), frontend hook consistency (6e), admins delete users (9a),
-     stats area (10c), later sharing ideas (10a), color themes (10b),
-     further item types (11; it lists what assumes video games today),
-     item images (12; do the dependency upgrades first), moving items
-     between collections (13), and a duplicate item finder (14).
-- **Waiting on the owner:** whether to take the `zod` fix
-  (`npm audit fix`; the install on 2026-11-02 reported 16 vulnerabilities,
-  not yet read, see Known issues); in 6d, whether to drop the
-  `response_model`s Ruff's FAST001 calls redundant; before 6a, running
-  `npx shadcn@latest add select checkbox`.
+  1. **Check the live site** after the PR #16 deploy: the drawers and the
+     keyboard on a real phone.
+  2. Check that a fresh session loads the `shadcn` skill
+     (`dlams-ui/.agents/skills/shadcn`); decide whether to keep it.
+  3. The bug-fix batch (16) or the manual accessibility audit (6), the
+     owner's pick. Item 16 needs two answers first: the date format
+     (`11/05/2026` or `Nov 5, 2026`) and the console placeholder (shorter
+     text or shrink to fit).
+  4. Then: shadcn everywhere (6a), repeated styling (6b), styling cleanup
+     (6c), backend consistency (6d), frontend hook consistency (6e), admins
+     delete users (9a), stats area (10c), later sharing ideas (10a), color
+     themes (10b), further item types (11), item images (12), moving items
+     between collections (13), duplicate finder (14), phone-friendly
+     drawers (15).
+- **Waiting on the owner:** in 6d, whether to drop the `response_model`s
+  Ruff's FAST001 calls redundant; before 6a, running `npx shadcn@latest add
+  select checkbox` (now delivers Base UI versions); the `npm audit` items
+  (Known issues).
+- **Testing on an iPhone without deploying:** Xcode's Simulator (`open -a
+  Simulator`) reaches the Mac's `localhost`. Turn off I/O → Keyboard →
+  Connect Hardware Keyboard to get the on-screen keyboard. Mac Safari's
+  Develop menu inspects the Simulator's page (console for measurements).
+  Tapping a drawer form field zooms the page (Known issues); hold Option
+  and drag to pinch back out.
 - **Things to remember about the code.**
   - Tests sit beside the feature they cover. `renderApp(route)` in
     `dlams-ui/src/test/renderApp.tsx` renders the real app; register MSW
@@ -248,10 +255,14 @@ workflow on a self-hosted runner (`.github/workflows/deploy.yml`).
   collection drawer with a counted delete confirm. Owner-checked in the
   browser before merging.
 
+**Merged 2026-11-05** (PR #16; deploy not yet reported)
+
+- **Base UI** (item 5a): shadcn style `base-nova`; every `components/ui`
+  wrapper on Base UI or plain HTML; Radix and Vaul removed.
+
 **Not implemented**
 
 - Sharing with a user by username has an API but no screen (item 10a).
-- Viewing an item before editing it (item 8d; built on `view-before-edit`, not merged).
 - Deleting a user (admins can only deactivate; item 9a).
 - Item types other than video games.
 - Item images (item 12).
@@ -259,7 +270,10 @@ workflow on a self-hosted runner (`.github/workflows/deploy.yml`).
 
 **Verification baseline**
 
-- Latest (2026-11-03, run by Claude on `view-before-edit`): UI `npm test`
+- Latest (2026-11-05, run by Claude on `move-to-base-ui`): UI `npm test`
+  71 passed (11 files), typecheck, lint, build (the large-chunk warning),
+  and format check clean; backend not run. Before that (2026-11-03, on
+  `view-before-edit`): UI `npm test`
   68 passed (11 files), lint, build, and format check clean. On `edit-delete-collection` the same day: UI
   `npm test` 58 passed (10 files), `npm run lint` clean, `npm run build`
   passes (the known large-chunk warning), `npm run format:check` clean;
@@ -387,8 +401,7 @@ In order. Items 1 to 7 are the path to the portfolio milestone.
    and axe checks. Still optional: a handful of Playwright end-to-end checks
    across owner, shared (read-only), and demo access (needs the owner's
    approval to install packages). Backend tests stay on `unittest`.
-5a. **Move to Base UI. Done 2026-11-05** on `move-to-base-ui` (not yet
-   merged), with shadcn's `migrate-radix-to-base` skill, one commit per
+5a. **Move to Base UI. Done 2026-11-05**, merged in PR #16, with shadcn's `migrate-radix-to-base` skill, one commit per
    component, and a report per component in `dlams-ui/.migration/`.
    - **Style** switched to `base-nova` (`docs/decisions.md`), so `shadcn
      add` delivers Base versions; our theme and font were kept.
@@ -1043,8 +1056,42 @@ is next, then the sharing UI, then search.
     optional swipe handle. A styling change; the owner sets the scope.
     Re-evaluate then the side-drawer `100svh` height in `drawer.tsx` (a
     local edit, 2026-11-05, for iOS 26 Safari's toolbar hiding the footer).
+16. **Next bug-fix batch** (owner, 2026-11-05). Not investigated yet.
+    - **Console combobox `Add "name"`:** sometimes picking the Add row closes
+      the list without setting the new console. Intermittent; not yet
+      reproduced. `ConsoleLabelCombobox.tsx` adds the typed name to the item
+      list only while it has no exact match.
+    - **Last played: no future dates.** API done 2026-11-06:
+      `LastPlayedDate` in `video_games_schemas.py` refuses a date after
+      today in UTC (the server's zone, never behind a US user's today)
+      with a 422, on `GameCreate` and `GameUpdate`; 1 test. Form done the
+      same day: `GameForm.tsx` sets `max` to the browser's local today
+      (`todayAsIsoDate`) so the picker stops there, and a `validate` rule
+      shows "Last played can't be in the future" under the field; the form
+      is `noValidate` so the browser's own bubble does not replace that
+      message; 1 test.
+    - **Console placeholder on phones. Done 2026-11-06, not yet checked on
+      a phone:** "Select or add a console" did not fit at 16px. The text is
+      kept; every placeholder is now 14px at every width (a `::placeholder`
+      rule in `index.css`, `docs/decisions.md`); typed text stays 16px on
+      phones. Calculated to fit from about a 360px-wide screen.
+    - **Last played shown as `MM-DD-YYYY`. Done 2026-11-06** (owner's
+      format, `11-05-2026`). Date helpers are named for their format:
+      `isoDateToMonthDayYear` and `todayAsIsoDate` in
+      `dlams-ui/src/lib/dates.ts` (used by `GameDetails.tsx`,
+      `GameList.tsx`, `GameForm.tsx`), and `date_to_month_day_year` in
+      `dlams-fastapi/app/dates.py` (the search detail line in
+      `video_games_items.py`). Forms and the API still use `YYYY-MM-DD`.
+    - Related, already in Known issues: iPhone auto-zoom on the drawer form
+      fields.
 
 ## Known issues
+
+- A 422 from the API shows as "[object Object]" if the UI ever displays
+  it: `lib/api/client.ts` reads `detail` as a string, but FastAPI's
+  validation errors send a list (found reading the code, 2026-11-06). The
+  forms validate first, so it shows only when the UI and API rules
+  differ.
 
 - On a phone, the admin users table scrolls sideways inside its bordered box,
   and the Make template and Deactivate buttons are in the last column, so an admin
@@ -1095,8 +1142,14 @@ is next, then the sharing UI, then search.
   audit fix` resolves it). Upgrades are deferred. Backend tests use `unittest`; Ruff and
   pytest are not configured. **2026-11-02:** the Prettier install's audit
   summary showed 16 (13 moderate, 1 high, 2 critical); Prettier has no
-  dependencies, so these arrived some other way since 2026-10-26. Not yet
-  read with `npm audit`. The same install warned `EBADENGINE`: the owner's
+  dependencies, so these arrived some other way since 2026-10-26.
+  **2026-11-05, read with `npm audit`:** 15 (2 low, 11 moderate, 2
+  critical). Critical: `vitest` and `tinypool` (test tooling). Low or
+  moderate: `shadcn` and its dependencies `@shadcn/registry`, `deepmerge`,
+  `ts-morph`, `@ts-morph/common` (added 2026-11-05; the app imports only
+  its CSS), and `typescript-eslint` / `minimatch` (lint tooling). `zod` is
+  no longer listed. Do not run `npm audit fix --force`: it proposes
+  `vitest@2.0.5` and `shadcn@1.0.0`, both downgrades. The same install warned `EBADENGINE`: the owner's
   Mac runs Node 23, which `eslint-visitor-keys` does not list as supported
   (the Docker build uses Node 20).
 - Migration `951a8354c293` uses a PostgreSQL-only `ALTER COLUMN`, so the full

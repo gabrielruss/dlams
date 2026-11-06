@@ -5,6 +5,7 @@ import { DrawerFooter } from "@/components/ui/drawer"
 import { videoGameConditions } from "@/types/videoGames"
 import ConsoleLabelCombobox from "./ConsoleLabelCombobox"
 import type { GameFormValues } from "./useGameDrawerContent"
+import { todayAsIsoDate } from "@/lib/dates"
 import { isVideoGameCondition } from "./videoGameOptions"
 
 interface GameFormProps {
@@ -26,9 +27,11 @@ function GameForm({
 }: GameFormProps) {
   const name = form.watch("name")
   const consoleLabel = form.watch("consoleLabel")
+  const today = todayAsIsoDate()
 
   return (
     <form
+      noValidate
       onSubmit={form.handleSubmit(onSave)}
       className="flex min-h-0 flex-1 flex-col"
     >
@@ -100,9 +103,20 @@ function GameForm({
           <input
             className="h-9 rounded-md border bg-background px-3"
             type="date"
-            {...form.register("lastPlayed")}
+            max={today}
+            {...form.register("lastPlayed", {
+              validate: (value) =>
+                !value ||
+                value <= today ||
+                "Last played can't be in the future",
+            })}
           />
         </label>
+        {form.formState.errors.lastPlayed && (
+          <p role="alert" className="text-sm text-destructive">
+            {form.formState.errors.lastPlayed.message}
+          </p>
+        )}
         <label className="flex items-center gap-2 text-sm">
           <input type="checkbox" {...form.register("completed")} />
           Completed

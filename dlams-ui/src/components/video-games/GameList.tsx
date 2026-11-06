@@ -1,5 +1,6 @@
 import type { GameRecord } from "@/types/videoGames"
 import ListRow from "@/components/collections/ListRow"
+import { isoDateToMonthDayYear } from "@/lib/dates"
 
 interface GameListProps {
   games: GameRecord[]
@@ -26,7 +27,9 @@ function GameList({ games, emptyMessage, onSelect }: GameListProps) {
           >
             {game.console_label} · {game.condition}
             {game.completed ? " · Completed" : ""}
-            {game.last_played ? ` · Last played ${game.last_played}` : ""}
+            {game.last_played
+              ? ` · Last played ${isoDateToMonthDayYear(game.last_played)}`
+              : ""}
           </ListRow>
         </li>
       ))}

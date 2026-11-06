@@ -465,6 +465,16 @@ seven-day sandboxes. Build steps are item 8 in `DLAMS-PLAN.md`.
 
 ## Code and UI conventions
 
+### Every placeholder is 14px — 2026-11-06
+- One `::placeholder { font-size: var(--text-sm); }` rule in the base layer
+  of `index.css`, at every width. Typed text keeps the `Input` size (16px on
+  phones, so iOS does not zoom; 14px from `md`).
+- Reason: "Select or add a console" did not fit the phone drawer at 16px,
+  and the owner wanted the full text and one size for every placeholder.
+  Chosen over a class on the console combobox alone (sizes would differ)
+  and over editing the generated `input.tsx` and `textarea.tsx` (a
+  reinstall would undo it).
+
 ### shadcn style is `base-nova`, with our own theme kept — 2026-11-05
 - The project was on `new-york`, which has no Base UI version, so `shadcn add`
   kept delivering Radix components during the move to Base UI. The owner chose

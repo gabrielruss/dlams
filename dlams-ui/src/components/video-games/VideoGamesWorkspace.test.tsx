@@ -184,6 +184,33 @@ describe("video game collection access", () => {
     )
   })
 
+  it("refuses a last played date in the future", async () => {
+    signInWithCollection("owner")
+    let saved = false
+    server.use(
+      http.put(`${api}/collections/1/games/1`, () => {
+        saved = true
+        return HttpResponse.json({})
+      }),
+    )
+
+    const { user } = renderApp("/?collection=1&item=game-1")
+    const drawer = await screen.findByRole("dialog")
+    within(drawer).getByRole("button", { name: "Edit" }).focus()
+    await user.keyboard("{Enter}")
+    const lastPlayed = within(drawer).getByLabelText("Last played")
+    lastPlayed.focus()
+    await user.type(lastPlayed, "2999-01-01")
+    expect(lastPlayed).toHaveValue("2999-01-01")
+    within(drawer).getByRole("button", { name: "Save game" }).focus()
+    await user.keyboard("{Enter}")
+
+    expect(
+      await within(drawer).findByText("Last played can't be in the future"),
+    ).toBeInTheDocument()
+    expect(saved).toBe(false)
+  })
+
   it("starts in the view again after closing while editing", async () => {
     signInWithCollection("owner")
 
@@ -221,6 +248,35 @@ describe("video game collection access", () => {
     expect(
       within(drawer).queryByLabelText("Edition / details"),
     ).not.toBeInTheDocument()
+  })
+
+  it("shows the last played date as month-day-year", async () => {
+    signInWithCollection("owner")
+    server.use(
+      http.get(`${api}/collections/1/games`, () =>
+        HttpResponse.json({
+          games: [
+            {
+              id: 1,
+              name: "Halo 3",
+              condition: "CIB",
+              console_label_id: 1,
+              console_label: "Xbox 360",
+              last_played: "2026-11-05",
+              completed: false,
+            },
+          ],
+        }),
+      ),
+    )
+
+    renderApp("/?collection=1&item=game-1")
+
+    const drawer = await screen.findByRole("dialog")
+    expect(within(drawer).getByText("11-05-2026")).toBeInTheDocument()
+    expect(
+      screen.getByText(/Last played 11-05-2026/, { ignore: "[role=dialog] *" }),
+    ).toBeInTheDocument()
   })
 
   it("opens nothing for an item that is not in the collection", async () => {

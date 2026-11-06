@@ -131,6 +131,9 @@
   #root {
     isolation: isolate;
   }
+  ::placeholder {
+    font-size: var(--text-sm);
+  }
   /* Tailwind v4 no longer sets a pointer cursor on buttons. */
   button:not(:disabled),
   [role="button"]:not(:disabled) {

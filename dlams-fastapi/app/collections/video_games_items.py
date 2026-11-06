@@ -4,6 +4,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.collections.schemas import ItemResponse, ItemType
+from app.dates import date_to_month_day_year
 from app.models import Collection, Console, ConsoleLabel, Game
 
 
@@ -16,7 +17,7 @@ def _game_details(game: Game) -> list[str]:
     if game.completed:
         details.append("Completed")
     if game.last_played:
-        details.append(f"Last played {game.last_played.isoformat()}")
+        details.append(f"Last played {date_to_month_day_year(game.last_played)}")
     return details
 
 

@@ -121,7 +121,7 @@ class OwnedItemsTests(unittest.TestCase):
                 collection_name="Shelf",
                 title="Halo 3",
                 keywords=["Xbox 360"],
-                details=["Loose", "Completed", "Last played 2026-10-01"],
+                details=["Loose", "Completed", "Last played 10-01-2026"],
             ),
         )
 
