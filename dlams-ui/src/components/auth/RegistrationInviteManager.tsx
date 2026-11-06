@@ -10,6 +10,7 @@ import {
   DrawerHeader,
   DrawerTitle,
 } from "@/components/ui/drawer"
+import { Field, FieldLabel } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 
 function RegistrationInviteManager() {
@@ -62,9 +63,9 @@ function RegistrationInviteManager() {
             <DrawerTitle className="text-xl">Invite someone</DrawerTitle>
             <DrawerClose
               render={
-                <button
-                  className="rounded-md border px-3 py-2 text-sm md:py-1"
+                <Button
                   type="button"
+                  variant="outline"
                   aria-label="Close drawer"
                 />
               }
@@ -93,14 +94,17 @@ function RegistrationInviteManager() {
             )}
             {invitation && (
               <>
-                <label className="flex flex-col gap-2 text-sm">
-                  Invitation link (copy and share)
+                <Field>
+                  <FieldLabel htmlFor="invitation-link">
+                    Invitation link (copy and share)
+                  </FieldLabel>
                   <Input
+                    id="invitation-link"
                     readOnly
                     value={invitationUrl}
                     onFocus={(event) => event.currentTarget.select()}
                   />
-                </label>
+                </Field>
                 <p className="text-sm text-muted-foreground">
                   Expires {new Date(invitation.expires_at).toLocaleString()}
                 </p>

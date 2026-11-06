@@ -1,17 +1,9 @@
-import { useState } from "react"
-import { useForm } from "react-hook-form"
 import { Plus } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
-import {
-  Drawer,
-  DrawerClose,
-  DrawerContent,
-  DrawerHeader,
-  DrawerTitle,
-} from "@/components/ui/drawer"
 import useSearchMode from "@/components/search/useSearchMode"
 import CollectionStats from "./CollectionStats"
+import CreateCollectionDrawer from "./CreateCollectionDrawer"
 import useCollections from "./useCollections"
 
 function CollectionNavigation() {
@@ -20,35 +12,8 @@ function CollectionNavigation() {
     selectedCollectionId,
     setSelectedCollectionId,
     collectionsQuery,
-    createCollectionMutation,
   } = useCollections()
   const { isOpen: isSearching } = useSearchMode()
-  const [isCreateDrawerOpen, setIsCreateDrawerOpen] = useState(false)
-  const form = useForm<{ name: string }>({ defaultValues: { name: "" } })
-  const newCollectionName = form.watch("name")
-
-  const closeCreateDrawer = () => {
-    setIsCreateDrawerOpen(false)
-    form.reset()
-    createCollectionMutation.reset()
-  }
-
-  const openCreateDrawer = () => {
-    createCollectionMutation.reset()
-    setIsCreateDrawerOpen(true)
-  }
-
-  const handleCreateCollection = ({ name }: { name: string }) => {
-    const trimmedName = name.trim()
-    if (!trimmedName) return
-
-    createCollectionMutation.mutate(trimmedName, {
-      onSuccess: () => {
-        form.reset()
-        setIsCreateDrawerOpen(false)
-      },
-    })
-  }
 
   return (
     <nav
@@ -57,16 +22,20 @@ function CollectionNavigation() {
     >
       <div className="flex shrink-0 items-center justify-between py-2 pl-3 pr-3">
         <h2 className="text-sm font-semibold">Collections</h2>
-        <Button
-          variant="outline"
-          size="icon"
-          type="button"
-          aria-label="New collection"
-          title="New collection"
-          onClick={openCreateDrawer}
-        >
-          <Plus aria-hidden="true" />
-        </Button>
+        <CreateCollectionDrawer
+          renderTrigger={(open) => (
+            <Button
+              variant="outline"
+              size="icon"
+              type="button"
+              aria-label="New collection"
+              title="New collection"
+              onClick={open}
+            >
+              <Plus aria-hidden="true" />
+            </Button>
+          )}
+        />
       </div>
 
       {collectionsQuery.isError && (
@@ -80,12 +49,9 @@ function CollectionNavigation() {
           Loading collections...
         </p>
       ) : collections.length === 0 ? (
-        <div className="flex flex-col gap-3 px-3 py-2">
-          <p className="text-sm text-muted-foreground">No collections yet.</p>
-          <Button variant="outline" type="button" onClick={openCreateDrawer}>
-            Create your first collection
-          </Button>
-        </div>
+        <p className="px-3 py-2 text-sm text-muted-foreground">
+          No collections yet.
+        </p>
       ) : (
         <ul className="min-h-0 flex-1 overflow-y-auto pl-3">
           {collections.map((collection) => {
@@ -93,14 +59,15 @@ function CollectionNavigation() {
               !isSearching && collection.id === selectedCollectionId
             return (
               <li key={collection.id} className="border-b last:border-b-0">
-                <button
+                <Button
                   type="button"
+                  variant="ghost"
                   aria-pressed={selected}
                   aria-current={selected ? "true" : undefined}
                   onClick={() => setSelectedCollectionId(collection.id)}
-                  className={`flex w-full flex-col gap-2 border-r-4 py-3 pr-3 text-left transition-colors ${
+                  className={`h-auto w-full flex-col items-stretch justify-start gap-2 rounded-none border-r-4 py-3 pr-3 pl-0 text-left text-base font-normal whitespace-normal transition-colors hover:bg-transparent ${
                     selected
-                      ? "border-red text-sidebar-primary"
+                      ? "border-red text-sidebar-primary hover:text-sidebar-primary"
                       : "border-transparent text-sidebar-foreground hover:text-sidebar-primary"
                   }`}
                 >
@@ -113,81 +80,12 @@ function CollectionNavigation() {
                     </span>
                   </span>
                   <CollectionStats collection={collection} />
-                </button>
+                </Button>
               </li>
             )
           })}
         </ul>
       )}
-
-      <Drawer
-        open={isCreateDrawerOpen}
-        swipeDirection="right"
-        onOpenChange={(open: boolean) => {
-          if (!open) closeCreateDrawer()
-        }}
-      >
-        <DrawerContent>
-          <DrawerHeader className="flex-row items-center justify-between border-b pb-4">
-            <DrawerTitle className="text-xl">Create collection</DrawerTitle>
-            <DrawerClose
-              render={
-                <button
-                  className="rounded-md border px-3 py-2 text-sm md:py-1"
-                  type="button"
-                  aria-label="Close drawer"
-                />
-              }
-            >
-              Close
-            </DrawerClose>
-          </DrawerHeader>
-          <div className="min-h-0 flex-1 overflow-y-auto p-5">
-            <form
-              onSubmit={form.handleSubmit(handleCreateCollection)}
-              className="flex flex-col gap-4"
-            >
-              <label className="flex flex-col gap-1 text-sm">
-                Collection name
-                <input
-                  className="h-9 rounded-md border bg-background px-3"
-                  {...form.register("name", {
-                    required: "Collection name is required",
-                    maxLength: {
-                      value: 100,
-                      message:
-                        "Collection name must be 100 characters or fewer",
-                    },
-                  })}
-                  autoFocus
-                />
-              </label>
-              {form.formState.errors.name && (
-                <p role="alert" className="text-sm text-destructive">
-                  {form.formState.errors.name.message}
-                </p>
-              )}
-              {createCollectionMutation.error && (
-                <p role="alert" className="text-sm text-destructive">
-                  {createCollectionMutation.error.message}
-                </p>
-              )}
-              <button
-                className="h-9 rounded-md bg-primary px-4 text-primary-foreground disabled:opacity-50"
-                type="submit"
-                disabled={
-                  createCollectionMutation.isPending ||
-                  !newCollectionName.trim()
-                }
-              >
-                {createCollectionMutation.isPending
-                  ? "Creating..."
-                  : "Create collection"}
-              </button>
-            </form>
-          </div>
-        </DrawerContent>
-      </Drawer>
     </nav>
   )
 }

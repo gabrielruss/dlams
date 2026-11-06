@@ -465,6 +465,16 @@ seven-day sandboxes. Build steps are item 8 in `DLAMS-PLAN.md`.
 
 ## Code and UI conventions
 
+### Each collection type gets its own package, nested under collections — 2026-11-06
+- Backend: `app/collections/video_games/`, and later `app/collections/books/`
+  and so on, instead of `video_games_*.py` files beside the shared
+  collection code. Nested rather than top-level (`app/video_games/`) because
+  a type is a kind of collection, and the path should show it (owner).
+- Models stay in `app/models/`, where Alembic and `Base` find every table.
+- The UI does the same: a type's API modules and types sit in its feature
+  folder, not in the shared `lib/api/` and `types/`.
+- Not built yet: plan item 6d.
+
 ### Every placeholder is 14px — 2026-11-06
 - One `::placeholder { font-size: var(--text-sm); }` rule in the base layer
   of `index.css`, at every width. Typed text keeps the `Input` size (16px on

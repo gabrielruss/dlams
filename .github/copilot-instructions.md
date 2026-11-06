@@ -141,12 +141,18 @@ cached copy.
   and TanStack Query v5 for server state.
 - New and changed code must use the installed components in
   `src/components/ui/` (`Button`, `Input`, `Label`, `Textarea`, ...), never a
-  raw `<button>`, `<input>`, `<label>`, `<select>`, or `<textarea>`. Older
-  raw elements are not a pattern to copy (plan item 6a replaces them). If no
-  installed component fits, give the owner the install command and wait.
+  raw `<button>`, `<input>`, `<label>`, `<select>`, or `<textarea>` (none
+  are left outside `components/ui/` since 2026-11-06; the 6a consistency
+  check in the plan should print nothing). If no installed component fits,
+  give the owner the install command and wait.
   Destructive final actions are `<Button variant="outline"
   className="border-destructive text-destructive">`, not the solid
-  `destructive` variant. Deleting from a drawer starts at the top right of
+  `destructive` variant; the button that starts a delete (before its
+  confirm) uses the same red outline (2026-11-06). Every Close, of a
+  drawer or the search panel, is `variant="outline"` at the default size
+  (36px, like every other button; no button uses `size="sm"`); a main
+  action is the default `Button`, with no extra hover or cursor classes
+  (`index.css` sets the pointer cursor). Deleting from a drawer starts at the top right of
   the item area, never in the drawer header beside Close (decided
   2026-11-02). An item's view has Edit beside a red-outline trash icon and
   "Delete" (`aria-label` "Delete <type>"; decided 2026-11-03). The Edit
@@ -172,9 +178,7 @@ cached copy.
   rendered structure. Keep hooks feature-scoped and avoid extracting trivial
   one-off presentation state without a readability benefit.
 - Every submitted form, even a one-field one, uses one pattern (decided
-  2026-10-31; `Login.tsx` and the Share drawer's link-name form follow it;
-  the create-collection, console, and game forms move to it with plan
-  item 6a):
+  2026-10-31; every form follows it since 2026-11-06):
   1. A zod schema in `src/schemas/<feature>.ts` with limits matching the
      API, and `type <Name>FormValues = z.infer<typeof schema>`.
   2. `useForm<Values>({ resolver: zodResolver(schema), defaultValues })`,
@@ -193,7 +197,8 @@ cached copy.
   Standalone controls that are not submitted (a search field, a selector)
   stay a plain `Input` without a form.
 - Dates go through `src/lib/dates.ts` (backend: `app/dates.py`), one
-  function per format, named for it (`isoDateToMonthDayYear`). Dates are
+  function per format, named for it (`isoDateToMonthDayYear`), built on
+  `date-fns` rather than hand-made parsing or padding. Dates are
   shown as `MM-DD-YYYY` (decided 2026-11-06); the API and forms use
   `YYYY-MM-DD`.
 - Keep pages structural. `Home` and other route pages compose feature components and must not own collection fetching, selection, or item CRUD.
@@ -212,6 +217,12 @@ cached copy.
 - Put create/edit forms in right-side drawers rather than embedding them in
   collection or item lists. Keep list views and page context visible behind
   the drawer.
+- A drawer is its own component that holds its open state and form and
+  renders its trigger (`EditCollectionDrawer`, `ShareCollectionDrawer`), or
+  takes it through a `renderTrigger` prop when the trigger differs by place
+  (`CreateCollectionDrawer`). It does not live inside the screen that shows
+  the trigger (decided 2026-11-06). Item drawers, which open from `?item=`,
+  keep their content component and hook instead.
 - UI permission gating is UX only; the API enforces authorization.
 
 ### Server state with TanStack Query

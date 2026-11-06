@@ -1,11 +1,13 @@
+import { format, isAfter, parseISO, startOfToday } from "date-fns"
+
 export function isoDateToMonthDayYear(isoDate: string) {
-  const [year, month, day] = isoDate.split("-")
-  return `${month}-${day}-${year}`
+  return format(parseISO(isoDate), "MM-dd-yyyy")
 }
 
-export function todayAsIsoDate() {
-  const now = new Date()
-  const month = String(now.getMonth() + 1).padStart(2, "0")
-  const day = String(now.getDate()).padStart(2, "0")
-  return `${now.getFullYear()}-${month}-${day}`
+export function localDateToIsoDate(date: Date) {
+  return format(date, "yyyy-MM-dd")
+}
+
+export function isAfterToday(isoDate: string) {
+  return isAfter(parseISO(isoDate), startOfToday())
 }

@@ -1,4 +1,5 @@
 import ItemActions from "@/components/collections/ItemActions"
+import { Button } from "@/components/ui/button"
 import { DrawerClose, DrawerHeader, DrawerTitle } from "@/components/ui/drawer"
 import type { GameRecord } from "@/types/videoGames"
 import GameDetails from "./GameDetails"
@@ -41,11 +42,7 @@ function GameDrawerContent({
         </DrawerTitle>
         <DrawerClose
           render={
-            <button
-              className="rounded-md border px-3 py-2 text-sm md:py-1"
-              type="button"
-              aria-label="Close drawer"
-            />
+            <Button type="button" variant="outline" aria-label="Close drawer" />
           }
         >
           Close

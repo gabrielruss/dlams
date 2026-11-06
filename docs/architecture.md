@@ -1,6 +1,6 @@
 # DLAMS architecture
 
-Last updated: 2026-11-03
+Last updated: 2026-11-06
 
 How the system is put together right now. For status and next steps see
 [`DLAMS-PLAN.md`](../DLAMS-PLAN.md); for why things are this way see
@@ -38,7 +38,8 @@ Versions are the declared ranges from `dlams-ui/package.json` and
 | Routing | `react-router-dom` 7 |
 | Server state | `@tanstack/react-query` 5 |
 | Forms and validation | `react-hook-form`, `@hookform/resolvers`, `zod` 4 |
-| Styling | Tailwind CSS 4 (`@tailwindcss/vite`), `tw-animate-css`, `tailwind-merge`, `clsx`, `class-variance-authority`, `cn` |
+| Styling | Tailwind CSS 4 (`@tailwindcss/vite`), `tw-animate-css`, `class-variance-authority`, `cn` |
+| Dates | `date-fns` (formatting and comparison, through `lib/dates.ts`), `react-day-picker` (the shadcn `Calendar`) |
 | Components | shadcn/ui, style `base-nova`, over Base UI (`@base-ui/react`); `shadcn` supplies `shadcn/tailwind.css`; `cn` merges classes; `lucide-react` (icons) |
 | Lint | ESLint 9 with `typescript-eslint`, `react-hooks`, `react-refresh` (its export rule is off under `src/components/ui/`, where the shadcn CLI writes files) |
 | Format | Prettier 3, pinned (`.prettierrc`: no semicolons; `src/components/ui/` ignored) |
@@ -230,17 +231,18 @@ dlams-ui/src/
     AppSidebar.tsx           collections, invite drawer, admin link, logout
     auth/                    login/register forms, invite drawer, auth hooks
     admin/                   user management table and hook
-    collections/             navigation, workspace dispatch, stats, the Share
-                             and Edit collection drawers, ListRow (the item
+    collections/             navigation, workspace dispatch, stats, the Create,
+                             Share, and Edit collection drawers, ListRow (the item
                              row any type uses), useItemDrawer and
                              useOpenItem (what's open), ItemActions and
                              ItemDetailRows
     search/                  search bar, results panel, matcher, hooks
     video-games/             console and game managers, drawer content,
                              forms, details, workspace, hooks
-    ui/                      shadcn/ui primitives (button, drawer, form, ...)
+    ui/                      shadcn/ui primitives (button, calendar, drawer,
+                             field, popover, select, ...)
   lib/api/                   fetch client and one module per resource
-  lib/                       queryClient, permissions, utils
+  lib/                       queryClient, permissions, dates, utils
   schemas/, types/           zod schemas and shared TypeScript types
   test/                      test setup, MSW server, renderApp, axe helper
 ```

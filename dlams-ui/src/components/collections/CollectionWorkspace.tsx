@@ -1,6 +1,8 @@
+import { Button } from "@/components/ui/button"
 import { canWriteCollection } from "@/lib/permissions"
 import type { Collection } from "@/types/collections"
 import { resolveCollectionWorkspace } from "./collectionWorkspaceResolver"
+import CreateCollectionDrawer from "./CreateCollectionDrawer"
 import EditCollectionDrawer from "./EditCollectionDrawer"
 import ShareCollectionDrawer from "./ShareCollectionDrawer"
 import useCollections from "./useCollections"
@@ -13,7 +15,18 @@ interface CollectionBodyProps {
 function CollectionBody({ isPending, collection }: CollectionBodyProps) {
   if (isPending) return <p>Loading collections...</p>
   if (!collection) {
-    return <p>Create a collection to start tracking consoles and games.</p>
+    return (
+      <div className="flex flex-col items-start gap-3">
+        <p>Create a collection to start tracking consoles and games.</p>
+        <CreateCollectionDrawer
+          renderTrigger={(open) => (
+            <Button type="button" onClick={open}>
+              Create collection
+            </Button>
+          )}
+        />
+      </div>
+    )
   }
 
   const SelectedWorkspace = resolveCollectionWorkspace(collection.type)

@@ -1,6 +1,7 @@
 import { Route, Routes, Navigate } from "react-router-dom"
 import { AdminUsers, Register, Login, Home, SharedCollection } from "./pages"
 import { useCurrentUser } from "./components/auth/useAuthQueries"
+import { Button } from "./components/ui/button"
 import { isAdmin } from "./lib/permissions"
 
 function App() {
@@ -23,13 +24,14 @@ function SessionRoutes() {
         <p role="alert" className="text-destructive">
           Could not verify your session: {currentUserQuery.error.message}
         </p>
-        <button
-          className="mt-3 rounded-md border px-3 py-2"
+        <Button
+          className="mt-3"
           type="button"
+          variant="outline"
           onClick={() => currentUserQuery.refetch()}
         >
           Retry
-        </button>
+        </Button>
       </main>
     )
   }

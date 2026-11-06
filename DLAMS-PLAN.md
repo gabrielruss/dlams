@@ -1,73 +1,73 @@
 # DLAMS plan
 
-Last updated: 2026-11-05
+Last updated: 2026-11-06
 
 The current state of the project. For why things are the way they are, see
 [`docs/decisions.md`](./docs/decisions.md). For the full history up to
 2026-10-09, see [`docs/archive/`](./docs/archive/).
 
-## Where we left off (2026-11-05)
+## Where we left off (2026-11-06)
 
 Start here in a new session. This block is rewritten at the end of a session,
 never appended to. History lives in git and `docs/decisions.md`.
 
-- **Status.** Everything through item 8d and the delete-collection confirm
-  fix is deployed. The move to Base UI (item 5a) is finished and merged to
-  `main` (PR #16, 2026-11-05); the deploy result was not reported. Run
+- **Status.** PR #16 (Base UI, 5a) is deployed; the owner checked the
+  drawers and keyboard on the live site ("resolved well enough"). Branch
+  `bug-fix-batch` is committed (`9c0889b`), not merged. Branch
+  `shadcn-everywhere` (from it) holds item 6a: committed through
+  `2ad9826` ("button consistency pass 1"); the 36px Close and admin
+  buttons and the docs are still uncommitted. Neither branch is merged. Run
   `git status` and `git log` first: the owner commits and pushes
   everything, and a push to `main` deploys (docs included).
-- **What was done this session (2026-11-04 to 11-05),** details in item 5a,
-  the `.migration/` reports in `dlams-ui/`, and `docs/decisions.md`:
-  - The shadcn style moved from the legacy `new-york` to `base-nova` with
-    `init --base base --preset nova --force --no-reinstall`; the CLI's new
-    theme and font were reverted, so the look is unchanged. `shadcn add`
-    now delivers Base UI components.
-  - Migrated to Base UI: `button`, `label`, `input`, `separator`, `field`,
-    `drawer`. `form.tsx` is gone; the 8 form fields follow shadcn's React
-    Hook Form guide (`Controller` + `Field`), and the conventions file's
-    form pattern says so. Radix, Vaul, `clsx`, and `tailwind-merge` are
-    uninstalled.
-  - Drawers have the `base-nova` look; headers / footers with borders got
-    `pb-4` / `pt-4`. Side drawers are `100svh` tall (a logged local edit in
-    `drawer.tsx`) because iOS 26 Safari's toolbar hid the pinned footer,
-    measured in the iOS Simulator; this also affected the live Vaul site.
-    The combobox `container` workaround was removed.
-  - Plan items added: 15 (phone-friendly drawers, opening from the bottom
-    on phones) and 16 (next bug-fix batch). The condition dropdown is first
-    in 6a's raw `<select>` conversion.
-- **What is verified.** Run by Claude 2026-11-05 on `move-to-base-ui`: 71
-  UI tests, typecheck, lint, format check, build. Backend not touched or
-  run this session. Owner-checked in the browser: "Manage users", the input
-  checks in `.migration/input.md`, the drawers, the combobox inside a
-  drawer, and no closing flicker. The form and label checklists were not
-  reported item by item. In the iOS Simulator (iPhone 16e, iOS
-  26.3): drawer footers visible, and the keyboard no longer resizes the
-  drawer. Not checked: a real phone.
+- **What was done this session (2026-11-06):**
+  - Bug-fix batch (16): last played shown as `MM-DD-YYYY`; every
+    placeholder 14px (`::placeholder` in `index.css`); no future last
+    played dates (API `LastPlayedDate`, form); date helpers in
+    `lib/dates.ts` on `date-fns` and `app/dates.py`. The combobox
+    `Add "name"` bug was skipped (may be gone since Base UI).
+  - 6a in code: no raw form element is left (the consistency check
+    prints nothing); every form uses zod + `Controller` + `Field`. The
+    owner installed `select`, `checkbox`, `calendar`, `popover` (adds
+    `react-day-picker` 10 and `date-fns` 4). New: `ConditionSelect`,
+    `LastPlayedPicker` (shadcn date picker, future days disabled),
+    `schemas/games.ts`, `schemas/consoles.ts`.
+  - Buttons made consistent: every button is 36px (default or `icon`; no
+    `sm`), every Close is `outline`, a delete starts red-outlined, main
+    actions are the default `Button` with no extra classes. Rules are in
+    the conventions file.
+  - Decided, not built: one package per collection type nested under
+    `collections` (`app/collections/video_games/`), logged in 6d and
+    `docs/decisions.md`.
+- **What is verified.** Run by Claude on `shadcn-everywhere`: 77 UI tests
+  (12 files), typecheck, lint, format check, build; 95 backend tests and
+  Ruff on `bug-fix-batch`. Owner-checked in the browser: the game form,
+  the date picker, the Condition select's position and size. **Not yet
+  checked in a browser:** the console form, the sidebar rows (red bar,
+  hover, focus ring), creating a collection with an empty name, the
+  invite drawer, the Login hover, Delete link, the 36px Close and admin
+  buttons; and in the Simulator, that drawer fields no longer zoom.
 - **Next, in order:**
-  1. **Check the live site** after the PR #16 deploy: the drawers and the
-     keyboard on a real phone.
-  2. Check that a fresh session loads the `shadcn` skill
-     (`dlams-ui/.agents/skills/shadcn`); decide whether to keep it.
-  3. The bug-fix batch (16) or the manual accessibility audit (6), the
-     owner's pick. Item 16 needs two answers first: the date format
-     (`11/05/2026` or `Nov 5, 2026`) and the console placeholder (shorter
-     text or shrink to fit).
-  4. Then: shadcn everywhere (6a), repeated styling (6b), styling cleanup
-     (6c), backend consistency (6d), frontend hook consistency (6e), admins
-     delete users (9a), stats area (10c), later sharing ideas (10a), color
-     themes (10b), further item types (11), item images (12), moving items
-     between collections (13), duplicate finder (14), phone-friendly
-     drawers (15).
+  1. The owner's browser and Simulator pass on `shadcn-everywhere`, then
+     commit.
+  2. The manual accessibility audit (6), now that the controls are final.
+  3. Then: repeated styling (6b), styling cleanup (6c), backend
+     consistency and the package move (6d), frontend hook consistency
+     (6e), the "[object Object]" 422 message (Known issues), admins delete
+     users (9a), stats area (10c), later sharing ideas (10a), color themes
+     (10b), further item types (11), item images (12), moving items (13),
+     duplicate finder (14), phone-friendly drawers (15).
 - **Waiting on the owner:** in 6d, whether to drop the `response_model`s
-  Ruff's FAST001 calls redundant; before 6a, running `npx shadcn@latest add
-  select checkbox` (now delivers Base UI versions); the `npm audit` items
-  (Known issues).
+  Ruff's FAST001 calls redundant; the `npm audit` items (Known issues).
+- **The `shadcn` skill** (`dlams-ui/.claude/skills/shadcn`, a link into
+  `.agents/skills/`) loads once a session opens a file under `dlams-ui/`,
+  not at startup. Its `rules/forms.md` and `rules/base-vs-radix.md` were
+  used this session.
 - **Testing on an iPhone without deploying:** Xcode's Simulator (`open -a
   Simulator`) reaches the Mac's `localhost`. Turn off I/O → Keyboard →
   Connect Hardware Keyboard to get the on-screen keyboard. Mac Safari's
   Develop menu inspects the Simulator's page (console for measurements).
-  Tapping a drawer form field zooms the page (Known issues); hold Option
-  and drag to pinch back out.
+  If a drawer field still zooms the page, hold Option and drag to pinch
+  back out.
 - **Things to remember about the code.**
   - Tests sit beside the feature they cover. `renderApp(route)` in
     `dlams-ui/src/test/renderApp.tsx` renders the real app; register MSW
@@ -509,8 +509,9 @@ In order. Items 1 to 7 are the path to the portfolio milestone.
    `add-share` branch's new elements were converted (Share drawer, the drawer
    Delete buttons, `ListRow` as `Button variant="ghost"`). Converting the older
    ones is a styling change, so it needs the owner's go-ahead and scope first.
-   Installed in `components/ui/`: `button`, `card`, `combobox`, `drawer`,
-   `field`, `input-group`, `input`, `label`, `separator`, `table`, `textarea`.
+   Installed in `components/ui/`: `button`, `calendar`, `card`,
+   `checkbox`, `combobox`, `drawer`, `field`, `input-group`, `input`,
+   `label`, `popover`, `select`, `separator`, `table`, `textarea`.
    **Consistency check** (run it for this item and before each push that
    touches the UI; it should print nothing once 6a is done), from
    `dlams-ui/`:
@@ -539,6 +540,52 @@ In order. Items 1 to 7 are the path to the portfolio milestone.
      zod schema plus `Controller` and `Field`.
    - `textarea` is installed but unused. `input-group` is only used inside
      the generated `combobox`.
+   **Started 2026-11-06 on `shadcn-everywhere`, one form at a time.** The
+   owner installed `select` and `checkbox` (Base UI versions). Game form
+   done (not yet checked in a browser): `schemas/games.ts`
+   (`gameFormSchema`, the future-date rule included) with `zodResolver`
+   in `useGameDrawerContent`; `GameForm.tsx` uses `Input`, `Select`
+   (Base UI `items`), `Checkbox`, and `Field` throughout. Save is no
+   longer disabled while name or console is empty; it shows the field
+   errors instead, like the other forms. 1 new test (condition and
+   completed reach the API). Condition opens below the field
+   (`alignItemWithTrigger={false}`; Base UI's default puts the selected
+   option over the field). Last played is the shadcn date picker
+   (`npx shadcn@latest add calendar popover`, owner-run; added
+   `react-day-picker` 10 and `date-fns` 4; `button.tsx` not overwritten):
+   `LastPlayedPicker.tsx`, a `Popover` with `Calendar` that disables days
+   after today, shows `MM-DD-YYYY`, and has "Clear date"; the value stays
+   a `YYYY-MM-DD` string (`parseISO`, and `localDateToIsoDate` in
+   `lib/dates.ts`). `lib/dates.ts` is built on `date-fns` (owner: use it
+   rather than hand-made date code); the zod rule uses its
+   `isAfterToday`. Replaces the browser's date input, whose `max`
+   looked clickable in Safari. 2 tests with the clock fixed. The game
+   drawer's Close and Add game (default `Button`) are
+   converted, so no game file has a raw element left. Add console
+   (default `Button`) too, to match.
+   **Code done 2026-11-06; the consistency check below prints nothing.
+   Not yet checked in a browser:** the console form (`schemas/consoles.ts`,
+   `Input`, the shared `ConditionSelect.tsx` that both item forms use,
+   so the 6b `SelectTrigger` note is resolved there), every Close (drawers
+   and search) as `Button variant="outline"` at the default 36px (owner,
+   2026-11-06: same size as the other buttons and a bigger tap target;
+   `sm` had shrunk the phone Close from the mobile pass's ~36px), the
+   button consistency fixes (Delete link red-outlined, "Create your first
+   collection" default, Login's own hover classes removed; then removed:
+   with no collections, the sidebar says only "No collections yet." and
+   the main area shows "Create collection" under its sentence, through
+   `CreateCollectionDrawer`, which owns the drawer and takes its trigger,
+   so the sidebar keeps its "+"; the long label overflowed the sidebar
+   and the sidebar is hidden behind the menu on phones), the sidebar's
+   collection row
+   (a ghost `Button` with its layout classes kept, like `ListRow`), the
+   create-collection form (`collectionNameSchema`, shared with rename;
+   2 new tests in `CollectionNavigation.test.tsx`), the invite drawer's
+   link (`Field` and `FieldLabel`), and the session Retry. Save and
+   Create stay enabled when a required field is empty and show its
+   error instead. `isVideoGameCondition` was removed (zod checks the
+   condition). Only `textarea` of the installed components is unused (no
+   multi-line field).
    Doing this also gives these controls the shadcn focus ring, which the
    keyboard check in item 6 flags as missing on the raw buttons. Re-run the
    tests afterward; the axe checks and the `Edit`/`Delete` name tests cover
@@ -552,7 +599,14 @@ In order. Items 1 to 7 are the path to the portfolio milestone.
    `Button` (Share drawer), the item drawer's trash-can Delete and its
    pinned Save / Cancel footer (console and game, 2026-11-02), the drawer
    header with its Close button, and the bordered list section
-   (`flex flex-col gap-4 rounded-lg border p-4`).
+   (`flex flex-col gap-4 rounded-lg border p-4`). Added 2026-11-06: the
+   `SelectTrigger` classes that make the generated `base-nova` select
+   match our fields (`w-full rounded-md pl-3 text-base
+   data-[size=default]:h-9 md:text-sm`). Resolved 2026-11-06: both item
+   forms use `ConditionSelect.tsx`, which holds them once; extract a
+   general `FormSelectTrigger` only if a non-condition select appears. Likewise `border-input` on the
+   outline `Button` used as the date picker's trigger
+   (`LastPlayedPicker.tsx`), if another button-as-field appears.
 6c. **Styling cleanup** (owner, 2026-10-31; after 6a and 6b). A styling
    change, so the owner sets the scope first. Candidates: classes made
    redundant by the shadcn components (overrides that repeat a variant's own
@@ -567,6 +621,18 @@ In order. Items 1 to 7 are the path to the portfolio milestone.
    `get_owned_collection` exist, and `collections/routes.py` (collections,
    grants, links), `shared_routes.py`, and `permissions.py` follow them.
    Still to do:
+   - **One package per collection type** (owner, 2026-11-06;
+     `docs/decisions.md`): move `video_games_routes.py`,
+     `video_games_schemas.py`, and `video_games_items.py` into
+     `app/collections/video_games/` (`routes.py`, `schemas.py`,
+     `items.py`) with `git mv`, and fix the imports in `main.py`,
+     `collections/schemas.py`, `shared_routes.py`, `item_routes.py`, and
+     the tests. Moves only, as their own step; do the console and game
+     split below inside the new package. Models stay in `app/models/`
+     (Alembic and `Base` find tables there). The sandbox copier moves with
+     item 11. UI as a separate step: `lib/api/consoles.ts`, `games.ts`,
+     `consoleLabels.ts`, `videoGameStats.ts`, and `types/videoGames.ts`
+     into the video-game feature folder.
    - `video_games_routes.py`: 15 `db.query()` calls, `Depends(...)` defaults,
      and split it into console and game modules. The list helpers and
      routes (`collection_consoles`, `collection_games`, `list_consoles`,
@@ -1059,17 +1125,16 @@ is next, then the sharing UI, then search.
 16. **Next bug-fix batch** (owner, 2026-11-05). Not investigated yet.
     - **Console combobox `Add "name"`:** sometimes picking the Add row closes
       the list without setting the new console. Intermittent; not yet
-      reproduced. `ConsoleLabelCombobox.tsx` adds the typed name to the item
+      reproduced. Skipped 2026-11-06 (owner): it was seen before the move
+      to Base UI and may be gone; reopen if it shows up again. `ConsoleLabelCombobox.tsx` adds the typed name to the item
       list only while it has no exact match.
     - **Last played: no future dates.** API done 2026-11-06:
       `LastPlayedDate` in `video_games_schemas.py` refuses a date after
       today in UTC (the server's zone, never behind a US user's today)
       with a 422, on `GameCreate` and `GameUpdate`; 1 test. Form done the
-      same day: `GameForm.tsx` sets `max` to the browser's local today
-      (`todayAsIsoDate`) so the picker stops there, and a `validate` rule
-      shows "Last played can't be in the future" under the field; the form
-      is `noValidate` so the browser's own bubble does not replace that
-      message; 1 test.
+      same day; replaced the same day in 6a by the shadcn date picker,
+      which disables days after today, and a zod rule in
+      `schemas/games.ts`.
     - **Console placeholder on phones. Done 2026-11-06, not yet checked on
       a phone:** "Select or add a console" did not fit at 16px. The text is
       kept; every placeholder is now 14px at every width (a `::placeholder`
@@ -1077,9 +1142,8 @@ is next, then the sharing UI, then search.
       phones. Calculated to fit from about a 360px-wide screen.
     - **Last played shown as `MM-DD-YYYY`. Done 2026-11-06** (owner's
       format, `11-05-2026`). Date helpers are named for their format:
-      `isoDateToMonthDayYear` and `todayAsIsoDate` in
-      `dlams-ui/src/lib/dates.ts` (used by `GameDetails.tsx`,
-      `GameList.tsx`, `GameForm.tsx`), and `date_to_month_day_year` in
+      `isoDateToMonthDayYear` in `dlams-ui/src/lib/dates.ts` (used by
+      `GameDetails.tsx`, `GameList.tsx`, and the date picker), and `date_to_month_day_year` in
       `dlams-fastapi/app/dates.py` (the search detail line in
       `video_games_items.py`). Forms and the API still use `YYYY-MM-DD`.
     - Related, already in Known issues: iPhone auto-zoom on the drawer form
@@ -1110,14 +1174,16 @@ is next, then the sharing UI, then search.
   iOS zooms on inputs whose text is under 16px; these are raw inputs with
   `text-sm`. A game's Edit focuses its name field, so it zooms at once.
   shadcn's `Input` uses `text-base md:text-sm`, so converting these forms
-  (item 6a) should fix it.
+  (item 6a) should fix it. Converted 2026-11-06; not yet checked on an
+  iPhone or in the Simulator.
 - The demo notice in `VideoGamesWorkspace.tsx` now says "All data you add
   will be reset in 30 minutes." Sandboxes stay 7 days and their share
   links keep working, and item 8 and `docs/decisions.md` still describe
   the old notice. Waiting on the owner: keep the wording or not.
 - A push to `main` deploys even if CI fails, because the deploy workflow does
   not wait for CI. Decide whether to gate the deploy on it later.
-- The UI build emits a Vite large-chunk warning (about 647 kB on 2026-10-17,
+- The UI build emits a Vite large-chunk warning (about 799 kB, 256 kB
+  gzipped, on 2026-11-06 after the date picker; about 647 kB on 2026-10-17,
   over the 500 kB limit) since the Combobox added `@base-ui/react` (2026-10-16).
   It was clear after the earlier dependency cleanup. Code-splitting would fix
   it; not urgent.

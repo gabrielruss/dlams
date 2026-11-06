@@ -99,17 +99,13 @@ function Login() {
                 {error.message}
               </div>
             )}
-            <Button
-              type="submit"
-              className="w-full hover:bg-slate-700 hover:cursor-pointer"
-              disabled={isBusy}
-            >
+            <Button type="submit" className="w-full" disabled={isBusy}>
               {isBusy ? "Logging in..." : "Login"}
             </Button>
             <Button
               type="button"
               variant="outline"
-              className="w-full hover:cursor-pointer"
+              className="w-full"
               disabled={isBusy}
               onClick={onDemoClick}
             >

@@ -1,12 +1,14 @@
 import { Controller, type UseFormReturn } from "react-hook-form"
 
 import { Button } from "@/components/ui/button"
+import { Checkbox } from "@/components/ui/checkbox"
 import { DrawerFooter } from "@/components/ui/drawer"
-import { videoGameConditions } from "@/types/videoGames"
+import { Field, FieldError, FieldLabel } from "@/components/ui/field"
+import { Input } from "@/components/ui/input"
+import type { GameFormValues } from "@/schemas/games"
+import ConditionSelect from "./ConditionSelect"
 import ConsoleLabelCombobox from "./ConsoleLabelCombobox"
-import type { GameFormValues } from "./useGameDrawerContent"
-import { todayAsIsoDate } from "@/lib/dates"
-import { isVideoGameCondition } from "./videoGameOptions"
+import LastPlayedPicker from "./LastPlayedPicker"
 
 interface GameFormProps {
   form: UseFormReturn<GameFormValues>
@@ -25,102 +27,98 @@ function GameForm({
   onSave,
   onCancel,
 }: GameFormProps) {
-  const name = form.watch("name")
-  const consoleLabel = form.watch("consoleLabel")
-  const today = todayAsIsoDate()
-
   return (
     <form
-      noValidate
       onSubmit={form.handleSubmit(onSave)}
       className="flex min-h-0 flex-1 flex-col"
     >
       <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto p-5">
-        <label className="flex flex-col gap-1 text-sm">
-          Game name
-          <input
-            className="h-9 rounded-md border bg-background px-3"
-            {...form.register("name", {
-              required: "Game name is required",
-              maxLength: {
-                value: 200,
-                message: "Game name must be 200 characters or fewer",
-              },
-            })}
-            autoFocus
-          />
-        </label>
-        {form.formState.errors.name && (
-          <p role="alert" className="text-sm text-destructive">
-            {form.formState.errors.name.message}
-          </p>
-        )}
-        <div className="flex flex-col gap-1 text-sm">
-          <label htmlFor="game-console">Console</label>
-          <Controller
-            control={form.control}
-            name="consoleLabel"
-            rules={{
-              required: "Console is required",
-              maxLength: {
-                value: 100,
-                message: "Console must be 100 characters or fewer",
-              },
-            }}
-            render={({ field }) => (
+        <Controller
+          control={form.control}
+          name="name"
+          render={({ field, fieldState }) => (
+            <Field data-invalid={fieldState.invalid}>
+              <FieldLabel htmlFor="game-name">Game name</FieldLabel>
+              <Input
+                autoComplete="off"
+                autoFocus
+                {...field}
+                id="game-name"
+                aria-invalid={fieldState.invalid}
+              />
+              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+            </Field>
+          )}
+        />
+        <Controller
+          control={form.control}
+          name="consoleLabel"
+          render={({ field, fieldState }) => (
+            <Field data-invalid={fieldState.invalid}>
+              <FieldLabel htmlFor="game-console">Console</FieldLabel>
               <ConsoleLabelCombobox
                 id="game-console"
                 options={consoleLabelOptions}
                 value={field.value}
                 onChange={field.onChange}
-                invalid={!!form.formState.errors.consoleLabel}
+                invalid={fieldState.invalid}
               />
-            )}
-          />
-        </div>
-        {form.formState.errors.consoleLabel && (
-          <p role="alert" className="text-sm text-destructive">
-            {form.formState.errors.consoleLabel.message}
-          </p>
-        )}
-        <label className="flex flex-col gap-1 text-sm">
-          Condition
-          <select
-            className="h-9 rounded-md border bg-background px-3"
-            {...form.register("condition", {
-              validate: isVideoGameCondition,
-            })}
-          >
-            {videoGameConditions.map((value) => (
-              <option key={value} value={value}>
-                {value}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label className="flex flex-col gap-1 text-sm">
-          Last played
-          <input
-            className="h-9 rounded-md border bg-background px-3"
-            type="date"
-            max={today}
-            {...form.register("lastPlayed", {
-              validate: (value) =>
-                !value ||
-                value <= today ||
-                "Last played can't be in the future",
-            })}
-          />
-        </label>
-        {form.formState.errors.lastPlayed && (
-          <p role="alert" className="text-sm text-destructive">
-            {form.formState.errors.lastPlayed.message}
-          </p>
-        )}
-        <label className="flex items-center gap-2 text-sm">
-          <input type="checkbox" {...form.register("completed")} />
-          Completed
-        </label>
+              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+            </Field>
+          )}
+        />
+        <Controller
+          control={form.control}
+          name="condition"
+          render={({ field, fieldState }) => (
+            <Field data-invalid={fieldState.invalid}>
+              <FieldLabel htmlFor="game-condition">Condition</FieldLabel>
+              <ConditionSelect
+                id="game-condition"
+                name={field.name}
+                value={field.value}
+                onChange={field.onChange}
+                invalid={fieldState.invalid}
+              />
+              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+            </Field>
+          )}
+        />
+        <Controller
+          control={form.control}
+          name="lastPlayed"
+          render={({ field, fieldState }) => (
+            <Field data-invalid={fieldState.invalid}>
+              <FieldLabel id="game-last-played-label">Last played</FieldLabel>
+              <LastPlayedPicker
+                id="game-last-played"
+                labelId="game-last-played-label"
+                value={field.value}
+                onChange={field.onChange}
+                invalid={fieldState.invalid}
+              />
+              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+            </Field>
+          )}
+        />
+        <Controller
+          control={form.control}
+          name="completed"
+          render={({ field, fieldState }) => (
+            <Field orientation="horizontal" data-invalid={fieldState.invalid}>
+              <Checkbox
+                id="game-completed"
+                name={field.name}
+                checked={field.value}
+                onCheckedChange={field.onChange}
+                aria-invalid={fieldState.invalid}
+              />
+              <FieldLabel htmlFor="game-completed" className="font-normal">
+                Completed
+              </FieldLabel>
+            </Field>
+          )}
+        />
         {formError && (
           <p role="alert" className="text-sm text-destructive">
             {formError}
@@ -128,10 +126,7 @@ function GameForm({
         )}
       </div>
       <DrawerFooter className="border-t pt-4">
-        <Button
-          type="submit"
-          disabled={isSaving || !name?.trim() || !consoleLabel?.trim()}
-        >
+        <Button type="submit" disabled={isSaving}>
           {isSaving ? "Saving..." : "Save game"}
         </Button>
         <Button type="button" variant="outline" onClick={onCancel}>
