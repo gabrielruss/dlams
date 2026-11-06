@@ -217,6 +217,12 @@ cached copy.
 - Put create/edit forms in right-side drawers rather than embedding them in
   collection or item lists. Keep list views and page context visible behind
   the drawer.
+- A drawer is its own component that holds its open state and form and
+  renders its trigger (`EditCollectionDrawer`, `ShareCollectionDrawer`), or
+  takes it through a `renderTrigger` prop when the trigger differs by place
+  (`CreateCollectionDrawer`). It does not live inside the screen that shows
+  the trigger (decided 2026-11-06). Item drawers, which open from `?item=`,
+  keep their content component and hook instead.
 - UI permission gating is UX only; the API enforces authorization.
 
 ### Server state with TanStack Query
