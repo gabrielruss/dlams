@@ -1,5 +1,6 @@
 import os
 import unittest
+from datetime import UTC, datetime, timedelta
 
 os.environ.setdefault("DATABASE_URL", "sqlite:///:memory:")
 os.environ.setdefault("SECRET_KEY", "test-only-secret")
@@ -136,6 +137,27 @@ class VideoGamesRouteTests(unittest.TestCase):
         with self.assertRaises(HTTPException) as raised:
             self.add_game("   ")
         self.assertEqual(raised.exception.status_code, 422)
+
+    def test_last_played_cannot_be_in_the_future(self) -> None:
+        today = datetime.now(UTC).date()
+        for schema in (GameCreate, GameUpdate):
+            with self.subTest(schema=schema.__name__):
+                with self.assertRaises(ValidationError):
+                    schema(
+                        name="Game",
+                        condition=VideoGameCondition.LOOSE,
+                        console_label="Xbox 360",
+                        last_played=today + timedelta(days=1),
+                        completed=False,
+                    )
+                game = schema(
+                    name="Game",
+                    condition=VideoGameCondition.LOOSE,
+                    console_label="Xbox 360",
+                    last_played=today,
+                    completed=False,
+                )
+                self.assertEqual(game.last_played, today)
 
     def test_labels_are_reused_across_the_owners_collections(self) -> None:
         other = Collection(owner_id=self.collection.owner_id, name="Other")
