@@ -11,13 +11,9 @@ The current state of the project. For why things are the way they are, see
 Start here in a new session. This block is rewritten at the end of a session,
 never appended to. History lives in git and `docs/decisions.md`.
 
-- **Status.** PR #16 (Base UI, 5a) is deployed; the owner checked the
-  drawers and keyboard on the live site ("resolved well enough"). Branch
-  `bug-fix-batch` is committed (`9c0889b`), not merged. Branch
-  `shadcn-everywhere` (from it) holds item 6a: committed through
-  `2ad9826` ("button consistency pass 1"); the 36px Close and admin
-  buttons and the docs are still uncommitted. Neither branch is merged. Run
-  `git status` and `git log` first: the owner commits and pushes
+- **Status.** PR #18 (`shadcn-everywhere`: the bug-fix batch and 6a) is
+  merged to `main` and deployed; the owner checked it ("looks great").
+  Run `git status` and `git log` first: the owner commits and pushes
   everything, and a push to `main` deploys (docs included).
 - **What was done this session (2026-11-06):**
   - Bug-fix batch (16): last played shown as `MM-DD-YYYY`; every
@@ -46,16 +42,8 @@ never appended to. History lives in git and `docs/decisions.md`.
   hover, focus ring), creating a collection with an empty name, the
   invite drawer, the Login hover, Delete link, the 36px Close and admin
   buttons; and in the Simulator, that drawer fields no longer zoom.
-- **Next, in order:**
-  1. The owner's browser and Simulator pass on `shadcn-everywhere`, then
-     commit.
-  2. The manual accessibility audit (6), now that the controls are final.
-  3. Then: repeated styling (6b), styling cleanup (6c), backend
-     consistency and the package move (6d), frontend hook consistency
-     (6e), the "[object Object]" 422 message (Known issues), admins delete
-     users (9a), stats area (10c), later sharing ideas (10a), color themes
-     (10b), further item types (11), item images (12), moving items (13),
-     duplicate finder (14), phone-friendly drawers (15).
+- **Next:** the "Checkpoint: interview 1" list below; no new features
+  until it is done.
 - **Waiting on the owner:** in 6d, whether to drop the `response_model`s
   Ruff's FAST001 calls redundant; the `npm audit` items (Known issues).
 - **The `shadcn` skill** (`dlams-ui/.claude/skills/shadcn`, a link into
@@ -353,6 +341,25 @@ Explicitly not required for this milestone: the sharing UI,
 browser-local demo editing, the demo sharing walkthrough, further item types,
 user deletion, off-device backups, and the deferred API dependency upgrades.
 
+## Checkpoint: interview 1
+
+Set 2026-11-06 (owner). Due Tuesday 2026-11-10, 4 PM. No new features
+until this is done: the codebase should be clean enough to walk a hiring
+manager through. The role is frontend only, so the backend waits. Items in
+this order; everything else under "Next up" waits.
+
+1. Accessibility audit (6): the automated checks on the 6a controls, then
+   the owner's keyboard, VoiceOver, 200% zoom, and phone-menu pass, and the
+   `--ring` decision.
+2. Repeated styling (6b), then styling cleanup (6c).
+3. Frontend hook consistency (6e).
+4. Known issues that show in a walkthrough: the "[object Object]" 422
+   message, the large-chunk build warning, deploy not gated on CI, the
+   orphaned `dlams-fastapi/.env.example`.
+
+Paused until after the checkpoint: backend consistency (6d), 9a, 10a, 10b,
+10c, 11 to 15, and new bug-fix batches unless a bug shows in the demo.
+
 ## Next up
 
 In order. Items 1 to 7 are the path to the portfolio milestone.
@@ -503,6 +510,21 @@ In order. Items 1 to 7 are the path to the portfolio milestone.
    console", "Add game", and the row Edit and Delete) have no custom focus
    style, so check their focus outline in the keyboard pass.
    Still to check by hand: contrast, keyboard, drawers, 200% zoom, phone menu.
+
+   **Automated pass on the 6a controls (2026-11-06, `interview-1-cleanup`).**
+   New axe checks: the open calendar, the open Condition and Console lists,
+   the empty state, and the create drawer opened from it (82 tests pass).
+   - Fixed: the calendar popup was a dialog with no name (axe
+     `aria-dialog-name`); `LastPlayedPicker` now labels it with the "Last
+     played" label.
+   - Skipped on purpose: both open lists fail `region` ("content should be
+     in landmarks") because Base UI portals them to `body`, outside the
+     drawer. It is a best-practice rule, not WCAG, and the lists are reached
+     through their field. Those two checks pass `["region"]` to
+     `expectNoViolations`.
+   - Contrast, calculated from the light tokens: selected day 17.05:1, today
+     16.28:1, "Pick a date" and outside days 5.50:1. Disabled future days are
+     2.08:1, which WCAG 1.4.3 allows for disabled controls.
 6a. **Use the shadcn components everywhere (before go-live).** Scanned
    2026-10-27; rescanned 2026-10-31. New code must already use them (owner,
    2026-10-31; rule in `.github/copilot-instructions.md`, "Frontend"), and the

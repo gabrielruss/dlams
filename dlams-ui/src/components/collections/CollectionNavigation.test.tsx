@@ -2,6 +2,7 @@ import { screen, waitFor, within } from "@testing-library/react"
 import { http, HttpResponse } from "msw"
 import { describe, expect, it } from "vitest"
 
+import { expectNoViolations } from "@/test/axe"
 import { renderApp } from "@/test/renderApp"
 import { server } from "@/test/server"
 
@@ -75,6 +76,16 @@ describe("creating a collection", () => {
     expect(
       within(drawer).getByRole("heading", { name: "Create collection" }),
     ).toBeInTheDocument()
+    await expectNoViolations(document.body)
+  })
+
+  it("has no accessibility violations with no collections", async () => {
+    signInWithNoCollections()
+
+    const { container } = renderApp("/")
+    await screen.findByText("No collections yet.")
+
+    await expectNoViolations(container)
   })
 
   it("asks for a name instead of sending a blank one", async () => {

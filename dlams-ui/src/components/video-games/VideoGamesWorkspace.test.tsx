@@ -261,6 +261,14 @@ describe("video game collection access", () => {
       expect(dayButton(calendar, new Date(2026, 10, 6))).toBeEnabled()
     })
 
+    it("has no accessibility violations with the calendar open", async () => {
+      signInWithCollection("owner")
+
+      await openPicker()
+
+      await expectNoViolations(document.body)
+    })
+
     it("saves a picked day as the last played date", async () => {
       signInWithCollection("owner")
       let savedBody: unknown = null
@@ -555,6 +563,44 @@ describe("video game collection access", () => {
     await user.keyboard("{Enter}")
     expect(within(drawer).getByLabelText("Game name")).toBeInTheDocument()
     await expectNoViolations(document.body)
+  })
+
+  it("has no accessibility violations with the Condition list open", async () => {
+    signInWithCollection("owner")
+
+    const { user } = renderApp("/?collection=1&item=game-1")
+    const drawer = await screen.findByRole("dialog")
+    within(drawer).getByRole("button", { name: "Edit" }).focus()
+    await user.keyboard("{Enter}")
+    within(drawer).getByLabelText("Condition").focus()
+    await user.keyboard("{Enter}")
+    await screen.findByRole("option", { name: "New", hidden: true })
+
+    await expectNoViolations(document.body, ["region"])
+  })
+
+  it("has no accessibility violations with the Console list open", async () => {
+    signInWithCollection("owner")
+    server.use(
+      http.get(`${api}/console-labels`, () =>
+        HttpResponse.json({
+          labels: [
+            { id: 1, name: "Xbox 360" },
+            { id: 2, name: "PlayStation 2" },
+          ],
+        }),
+      ),
+    )
+
+    const { user } = renderApp("/?collection=1&item=game-1")
+    const drawer = await screen.findByRole("dialog")
+    within(drawer).getByRole("button", { name: "Edit" }).focus()
+    await user.keyboard("{Enter}")
+    within(drawer).getByLabelText("Console").focus()
+    await user.keyboard("{ArrowDown}")
+    await screen.findByRole("option", { name: "Xbox 360", hidden: true })
+
+    await expectNoViolations(document.body, ["region"])
   })
 
   it.each(["New collection", "Add console", "Add game", "Open menu"])(
