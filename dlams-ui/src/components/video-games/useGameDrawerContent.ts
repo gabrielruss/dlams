@@ -1,22 +1,12 @@
 import { useState } from "react"
+import { zodResolver } from "@hookform/resolvers/zod"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { useForm } from "react-hook-form"
 
 import { gamesApi } from "@/lib/api/games"
-import type {
-  GameCreate,
-  GameRecord,
-  VideoGameCondition,
-} from "@/types/videoGames"
+import { gameFormSchema, type GameFormValues } from "@/schemas/games"
+import type { GameCreate, GameRecord } from "@/types/videoGames"
 import { invalidateVideoGameCollection } from "./invalidateVideoGameCollection"
-
-export interface GameFormValues {
-  name: string
-  condition: VideoGameCondition
-  consoleLabel: string
-  lastPlayed: string
-  completed: boolean
-}
 
 interface UseGameDrawerContentOptions {
   collectionId: number
@@ -50,7 +40,10 @@ function useGameDrawerContent({
   if (openedGame && openedGame !== shownGame) setShownGame(openedGame)
 
   const [isEditing, setIsEditing] = useState(false)
-  const form = useForm<GameFormValues>({ defaultValues: emptyGameFormValues })
+  const form = useForm<GameFormValues>({
+    resolver: zodResolver(gameFormSchema),
+    defaultValues: emptyGameFormValues,
+  })
 
   const saveMutation = useMutation({
     mutationFn: ({ id, data }: { id: number | null; data: GameCreate }) =>
@@ -87,9 +80,9 @@ function useGameDrawerContent({
 
   const saveGame = (values: GameFormValues) => {
     const data: GameCreate = {
-      name: values.name.trim(),
+      name: values.name,
       condition: values.condition,
-      console_label: values.consoleLabel.trim(),
+      console_label: values.consoleLabel,
       last_played: values.lastPlayed || null,
       completed: values.completed,
     }

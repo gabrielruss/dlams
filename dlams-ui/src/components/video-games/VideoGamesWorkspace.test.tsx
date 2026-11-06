@@ -1,6 +1,6 @@
 import { screen, waitFor, within } from "@testing-library/react"
 import { http, HttpResponse } from "msw"
-import { describe, expect, it, vi } from "vitest"
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import { expectNoViolations } from "@/test/axe"
 import { server } from "@/test/server"
 import { renderApp } from "@/test/renderApp"
@@ -184,12 +184,12 @@ describe("video game collection access", () => {
     )
   })
 
-  it("refuses a last played date in the future", async () => {
+  it("saves a game's condition and completed choices", async () => {
     signInWithCollection("owner")
-    let saved = false
+    let savedBody: unknown = null
     server.use(
-      http.put(`${api}/collections/1/games/1`, () => {
-        saved = true
+      http.put(`${api}/collections/1/games/1`, async ({ request }) => {
+        savedBody = await request.json()
         return HttpResponse.json({})
       }),
     )
@@ -198,17 +198,93 @@ describe("video game collection access", () => {
     const drawer = await screen.findByRole("dialog")
     within(drawer).getByRole("button", { name: "Edit" }).focus()
     await user.keyboard("{Enter}")
-    const lastPlayed = within(drawer).getByLabelText("Last played")
-    lastPlayed.focus()
-    await user.type(lastPlayed, "2999-01-01")
-    expect(lastPlayed).toHaveValue("2999-01-01")
+    within(drawer).getByLabelText("Condition").focus()
+    await user.keyboard("{Enter}")
+    const newOption = await screen.findByRole("option", {
+      name: "New",
+      hidden: true,
+    })
+    newOption.focus()
+    await user.keyboard("{Enter}")
+    within(drawer).getByRole("checkbox", { name: "Completed" }).focus()
+    await user.keyboard(" ")
     within(drawer).getByRole("button", { name: "Save game" }).focus()
     await user.keyboard("{Enter}")
 
-    expect(
-      await within(drawer).findByText("Last played can't be in the future"),
-    ).toBeInTheDocument()
-    expect(saved).toBe(false)
+    await waitFor(() =>
+      expect(savedBody).toEqual({
+        name: "Halo 3",
+        condition: "New",
+        console_label: "Xbox 360",
+        last_played: null,
+        completed: true,
+      }),
+    )
+  })
+
+  describe("the last played picker", () => {
+    beforeEach(() => {
+      vi.useFakeTimers({ toFake: ["Date"] })
+      vi.setSystemTime(new Date(2026, 10, 6, 12))
+    })
+    afterEach(() => {
+      vi.useRealTimers()
+    })
+
+    const openPicker = async () => {
+      const { user } = renderApp("/?collection=1&item=game-1")
+      const drawer = await screen.findByRole("dialog")
+      within(drawer).getByRole("button", { name: "Edit" }).focus()
+      await user.keyboard("{Enter}")
+      within(drawer)
+        .getByRole("button", { name: /Last played/ })
+        .focus()
+      await user.keyboard("{Enter}")
+      const calendar = await screen.findByRole("grid", { hidden: true })
+      return { user, drawer, calendar }
+    }
+
+    const dayButton = (calendar: HTMLElement, date: Date) => {
+      const button = calendar.querySelector<HTMLButtonElement>(
+        `[data-day="${date.toLocaleDateString()}"]`,
+      )
+      if (!button) throw new Error(`No day button for ${date.toDateString()}`)
+      return button
+    }
+
+    it("refuses days after today", async () => {
+      signInWithCollection("owner")
+
+      const { calendar } = await openPicker()
+
+      expect(dayButton(calendar, new Date(2026, 10, 7))).toBeDisabled()
+      expect(dayButton(calendar, new Date(2026, 10, 6))).toBeEnabled()
+    })
+
+    it("saves a picked day as the last played date", async () => {
+      signInWithCollection("owner")
+      let savedBody: unknown = null
+      server.use(
+        http.put(`${api}/collections/1/games/1`, async ({ request }) => {
+          savedBody = await request.json()
+          return HttpResponse.json({})
+        }),
+      )
+
+      const { user, drawer, calendar } = await openPicker()
+      dayButton(calendar, new Date(2026, 10, 5)).focus()
+      await user.keyboard("{Enter}")
+
+      expect(
+        within(drawer).getByRole("button", { name: "Last played 11-05-2026" }),
+      ).toBeInTheDocument()
+      within(drawer).getByRole("button", { name: "Save game" }).focus()
+      await user.keyboard("{Enter}")
+
+      await waitFor(() =>
+        expect(savedBody).toMatchObject({ last_played: "2026-11-05" }),
+      )
+    })
   })
 
   it("starts in the view again after closing while editing", async () => {

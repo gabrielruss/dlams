@@ -509,8 +509,9 @@ In order. Items 1 to 7 are the path to the portfolio milestone.
    `add-share` branch's new elements were converted (Share drawer, the drawer
    Delete buttons, `ListRow` as `Button variant="ghost"`). Converting the older
    ones is a styling change, so it needs the owner's go-ahead and scope first.
-   Installed in `components/ui/`: `button`, `card`, `combobox`, `drawer`,
-   `field`, `input-group`, `input`, `label`, `separator`, `table`, `textarea`.
+   Installed in `components/ui/`: `button`, `calendar`, `card`,
+   `checkbox`, `combobox`, `drawer`, `field`, `input-group`, `input`,
+   `label`, `popover`, `select`, `separator`, `table`, `textarea`.
    **Consistency check** (run it for this item and before each push that
    touches the UI; it should print nothing once 6a is done), from
    `dlams-ui/`:
@@ -539,6 +540,31 @@ In order. Items 1 to 7 are the path to the portfolio milestone.
      zod schema plus `Controller` and `Field`.
    - `textarea` is installed but unused. `input-group` is only used inside
      the generated `combobox`.
+   **Started 2026-11-06 on `shadcn-everywhere`, one form at a time.** The
+   owner installed `select` and `checkbox` (Base UI versions). Game form
+   done (not yet checked in a browser): `schemas/games.ts`
+   (`gameFormSchema`, the future-date rule included) with `zodResolver`
+   in `useGameDrawerContent`; `GameForm.tsx` uses `Input`, `Select`
+   (Base UI `items`), `Checkbox`, and `Field` throughout. Save is no
+   longer disabled while name or console is empty; it shows the field
+   errors instead, like the other forms. 1 new test (condition and
+   completed reach the API). Condition opens below the field
+   (`alignItemWithTrigger={false}`; Base UI's default puts the selected
+   option over the field). Last played is the shadcn date picker
+   (`npx shadcn@latest add calendar popover`, owner-run; added
+   `react-day-picker` 10 and `date-fns` 4; `button.tsx` not overwritten):
+   `LastPlayedPicker.tsx`, a `Popover` with `Calendar` that disables days
+   after today, shows `MM-DD-YYYY`, and has "Clear date"; the value stays
+   a `YYYY-MM-DD` string (`parseISO`, and `localDateToIsoDate` in
+   `lib/dates.ts`). `lib/dates.ts` is built on `date-fns` (owner: use it
+   rather than hand-made date code); the zod rule uses its
+   `isAfterToday`. Replaces the browser's date input, whose `max`
+   looked clickable in Safari. 2 tests with the clock fixed. The game
+   drawer's Close (`Button variant="outline" size="sm"`, as in the Share
+   and Edit collection drawers) and Add game (default `Button`) are
+   converted, so no game file has a raw element left. Add console
+   (default `Button`) too, to match. Next: the console form and the
+   console drawer's Close.
    Doing this also gives these controls the shadcn focus ring, which the
    keyboard check in item 6 flags as missing on the raw buttons. Re-run the
    tests afterward; the axe checks and the `Edit`/`Delete` name tests cover
@@ -552,7 +578,14 @@ In order. Items 1 to 7 are the path to the portfolio milestone.
    `Button` (Share drawer), the item drawer's trash-can Delete and its
    pinned Save / Cancel footer (console and game, 2026-11-02), the drawer
    header with its Close button, and the bordered list section
-   (`flex flex-col gap-4 rounded-lg border p-4`).
+   (`flex flex-col gap-4 rounded-lg border p-4`). Added 2026-11-06: the
+   `SelectTrigger` classes that make the generated `base-nova` select
+   match our fields (`w-full rounded-md pl-3 text-base
+   data-[size=default]:h-9 md:text-sm`, in `GameForm.tsx`); the console
+   form's condition will be the second use, so extract it then (likely a
+   `FormSelectTrigger` of our own). Likewise `border-input` on the
+   outline `Button` used as the date picker's trigger
+   (`LastPlayedPicker.tsx`), if another button-as-field appears.
 6c. **Styling cleanup** (owner, 2026-10-31; after 6a and 6b). A styling
    change, so the owner sets the scope first. Candidates: classes made
    redundant by the shadcn components (overrides that repeat a variant's own
@@ -567,6 +600,18 @@ In order. Items 1 to 7 are the path to the portfolio milestone.
    `get_owned_collection` exist, and `collections/routes.py` (collections,
    grants, links), `shared_routes.py`, and `permissions.py` follow them.
    Still to do:
+   - **One package per collection type** (owner, 2026-11-06;
+     `docs/decisions.md`): move `video_games_routes.py`,
+     `video_games_schemas.py`, and `video_games_items.py` into
+     `app/collections/video_games/` (`routes.py`, `schemas.py`,
+     `items.py`) with `git mv`, and fix the imports in `main.py`,
+     `collections/schemas.py`, `shared_routes.py`, `item_routes.py`, and
+     the tests. Moves only, as their own step; do the console and game
+     split below inside the new package. Models stay in `app/models/`
+     (Alembic and `Base` find tables there). The sandbox copier moves with
+     item 11. UI as a separate step: `lib/api/consoles.ts`, `games.ts`,
+     `consoleLabels.ts`, `videoGameStats.ts`, and `types/videoGames.ts`
+     into the video-game feature folder.
    - `video_games_routes.py`: 15 `db.query()` calls, `Depends(...)` defaults,
      and split it into console and game modules. The list helpers and
      routes (`collection_consoles`, `collection_games`, `list_consoles`,
@@ -1059,17 +1104,16 @@ is next, then the sharing UI, then search.
 16. **Next bug-fix batch** (owner, 2026-11-05). Not investigated yet.
     - **Console combobox `Add "name"`:** sometimes picking the Add row closes
       the list without setting the new console. Intermittent; not yet
-      reproduced. `ConsoleLabelCombobox.tsx` adds the typed name to the item
+      reproduced. Skipped 2026-11-06 (owner): it was seen before the move
+      to Base UI and may be gone; reopen if it shows up again. `ConsoleLabelCombobox.tsx` adds the typed name to the item
       list only while it has no exact match.
     - **Last played: no future dates.** API done 2026-11-06:
       `LastPlayedDate` in `video_games_schemas.py` refuses a date after
       today in UTC (the server's zone, never behind a US user's today)
       with a 422, on `GameCreate` and `GameUpdate`; 1 test. Form done the
-      same day: `GameForm.tsx` sets `max` to the browser's local today
-      (`todayAsIsoDate`) so the picker stops there, and a `validate` rule
-      shows "Last played can't be in the future" under the field; the form
-      is `noValidate` so the browser's own bubble does not replace that
-      message; 1 test.
+      same day; replaced the same day in 6a by the shadcn date picker,
+      which disables days after today, and a zod rule in
+      `schemas/games.ts`.
     - **Console placeholder on phones. Done 2026-11-06, not yet checked on
       a phone:** "Select or add a console" did not fit at 16px. The text is
       kept; every placeholder is now 14px at every width (a `::placeholder`
@@ -1077,9 +1121,8 @@ is next, then the sharing UI, then search.
       phones. Calculated to fit from about a 360px-wide screen.
     - **Last played shown as `MM-DD-YYYY`. Done 2026-11-06** (owner's
       format, `11-05-2026`). Date helpers are named for their format:
-      `isoDateToMonthDayYear` and `todayAsIsoDate` in
-      `dlams-ui/src/lib/dates.ts` (used by `GameDetails.tsx`,
-      `GameList.tsx`, `GameForm.tsx`), and `date_to_month_day_year` in
+      `isoDateToMonthDayYear` in `dlams-ui/src/lib/dates.ts` (used by
+      `GameDetails.tsx`, `GameList.tsx`, and the date picker), and `date_to_month_day_year` in
       `dlams-fastapi/app/dates.py` (the search detail line in
       `video_games_items.py`). Forms and the API still use `YYYY-MM-DD`.
     - Related, already in Known issues: iPhone auto-zoom on the drawer form
@@ -1117,7 +1160,8 @@ is next, then the sharing UI, then search.
   the old notice. Waiting on the owner: keep the wording or not.
 - A push to `main` deploys even if CI fails, because the deploy workflow does
   not wait for CI. Decide whether to gate the deploy on it later.
-- The UI build emits a Vite large-chunk warning (about 647 kB on 2026-10-17,
+- The UI build emits a Vite large-chunk warning (about 799 kB, 256 kB
+  gzipped, on 2026-11-06 after the date picker; about 647 kB on 2026-10-17,
   over the 500 kB limit) since the Combobox added `@base-ui/react` (2026-10-16).
   It was clear after the earlier dependency cleanup. Code-splitting would fix
   it; not urgent.

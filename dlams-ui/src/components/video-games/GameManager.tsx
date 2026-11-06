@@ -1,4 +1,5 @@
 import useItemDrawer from "@/components/collections/useItemDrawer"
+import { Button } from "@/components/ui/button"
 import { Drawer, DrawerContent } from "@/components/ui/drawer"
 import type { GameRecord } from "@/types/videoGames"
 import GameDrawerContent from "./GameDrawerContent"
@@ -26,13 +27,9 @@ function GameManager({ collectionId, games, canWrite }: GameManagerProps) {
       <header className="flex items-center justify-between gap-3">
         <h2 className="text-xl font-semibold">Games</h2>
         {canWrite && (
-          <button
-            className="h-9 rounded-md bg-primary px-4 text-primary-foreground"
-            type="button"
-            onClick={startAdding}
-          >
+          <Button type="button" onClick={startAdding}>
             Add game
-          </button>
+          </Button>
         )}
       </header>
       {canWrite && (

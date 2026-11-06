@@ -193,7 +193,8 @@ cached copy.
   Standalone controls that are not submitted (a search field, a selector)
   stay a plain `Input` without a form.
 - Dates go through `src/lib/dates.ts` (backend: `app/dates.py`), one
-  function per format, named for it (`isoDateToMonthDayYear`). Dates are
+  function per format, named for it (`isoDateToMonthDayYear`), built on
+  `date-fns` rather than hand-made parsing or padding. Dates are
   shown as `MM-DD-YYYY` (decided 2026-11-06); the API and forms use
   `YYYY-MM-DD`.
 - Keep pages structural. `Home` and other route pages compose feature components and must not own collection fetching, selection, or item CRUD.
