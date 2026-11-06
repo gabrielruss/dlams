@@ -147,7 +147,12 @@ cached copy.
   give the owner the install command and wait.
   Destructive final actions are `<Button variant="outline"
   className="border-destructive text-destructive">`, not the solid
-  `destructive` variant. Deleting from a drawer starts at the top right of
+  `destructive` variant; the button that starts a delete (before its
+  confirm) uses the same red outline (2026-11-06). Every Close, of a
+  drawer or the search panel, is `variant="outline"` at the default size
+  (36px, like every other button; no button uses `size="sm"`); a main
+  action is the default `Button`, with no extra hover or cursor classes
+  (`index.css` sets the pointer cursor). Deleting from a drawer starts at the top right of
   the item area, never in the drawer header beside Close (decided
   2026-11-02). An item's view has Edit beside a red-outline trash icon and
   "Delete" (`aria-label` "Delete <type>"; decided 2026-11-03). The Edit

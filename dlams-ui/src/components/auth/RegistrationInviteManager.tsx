@@ -66,7 +66,6 @@ function RegistrationInviteManager() {
                 <Button
                   type="button"
                   variant="outline"
-                  size="sm"
                   aria-label="Close drawer"
                 />
               }

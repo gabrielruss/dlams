@@ -1,24 +1,9 @@
-import { useState } from "react"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { Controller, useForm } from "react-hook-form"
 import { Plus } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
-import {
-  Drawer,
-  DrawerClose,
-  DrawerContent,
-  DrawerHeader,
-  DrawerTitle,
-} from "@/components/ui/drawer"
-import { Field, FieldError, FieldLabel } from "@/components/ui/field"
-import { Input } from "@/components/ui/input"
 import useSearchMode from "@/components/search/useSearchMode"
-import {
-  collectionNameSchema,
-  type CollectionNameFormValues,
-} from "@/schemas/collections"
 import CollectionStats from "./CollectionStats"
+import CreateCollectionDrawer from "./CreateCollectionDrawer"
 import useCollections from "./useCollections"
 
 function CollectionNavigation() {
@@ -27,34 +12,8 @@ function CollectionNavigation() {
     selectedCollectionId,
     setSelectedCollectionId,
     collectionsQuery,
-    createCollectionMutation,
   } = useCollections()
   const { isOpen: isSearching } = useSearchMode()
-  const [isCreateDrawerOpen, setIsCreateDrawerOpen] = useState(false)
-  const form = useForm<CollectionNameFormValues>({
-    resolver: zodResolver(collectionNameSchema),
-    defaultValues: { name: "" },
-  })
-
-  const closeCreateDrawer = () => {
-    setIsCreateDrawerOpen(false)
-    form.reset()
-    createCollectionMutation.reset()
-  }
-
-  const openCreateDrawer = () => {
-    createCollectionMutation.reset()
-    setIsCreateDrawerOpen(true)
-  }
-
-  const handleCreateCollection = ({ name }: CollectionNameFormValues) => {
-    createCollectionMutation.mutate(name, {
-      onSuccess: () => {
-        form.reset()
-        setIsCreateDrawerOpen(false)
-      },
-    })
-  }
 
   return (
     <nav
@@ -63,16 +22,20 @@ function CollectionNavigation() {
     >
       <div className="flex shrink-0 items-center justify-between py-2 pl-3 pr-3">
         <h2 className="text-sm font-semibold">Collections</h2>
-        <Button
-          variant="outline"
-          size="icon"
-          type="button"
-          aria-label="New collection"
-          title="New collection"
-          onClick={openCreateDrawer}
-        >
-          <Plus aria-hidden="true" />
-        </Button>
+        <CreateCollectionDrawer
+          renderTrigger={(open) => (
+            <Button
+              variant="outline"
+              size="icon"
+              type="button"
+              aria-label="New collection"
+              title="New collection"
+              onClick={open}
+            >
+              <Plus aria-hidden="true" />
+            </Button>
+          )}
+        />
       </div>
 
       {collectionsQuery.isError && (
@@ -86,12 +49,9 @@ function CollectionNavigation() {
           Loading collections...
         </p>
       ) : collections.length === 0 ? (
-        <div className="flex flex-col gap-3 px-3 py-2">
-          <p className="text-sm text-muted-foreground">No collections yet.</p>
-          <Button variant="outline" type="button" onClick={openCreateDrawer}>
-            Create your first collection
-          </Button>
-        </div>
+        <p className="px-3 py-2 text-sm text-muted-foreground">
+          No collections yet.
+        </p>
       ) : (
         <ul className="min-h-0 flex-1 overflow-y-auto pl-3">
           {collections.map((collection) => {
@@ -126,73 +86,6 @@ function CollectionNavigation() {
           })}
         </ul>
       )}
-
-      <Drawer
-        open={isCreateDrawerOpen}
-        swipeDirection="right"
-        onOpenChange={(open: boolean) => {
-          if (!open) closeCreateDrawer()
-        }}
-      >
-        <DrawerContent>
-          <DrawerHeader className="flex-row items-center justify-between border-b pb-4">
-            <DrawerTitle className="text-xl">Create collection</DrawerTitle>
-            <DrawerClose
-              render={
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  aria-label="Close drawer"
-                />
-              }
-            >
-              Close
-            </DrawerClose>
-          </DrawerHeader>
-          <div className="min-h-0 flex-1 overflow-y-auto p-5">
-            <form
-              onSubmit={form.handleSubmit(handleCreateCollection)}
-              className="flex flex-col gap-4"
-            >
-              <Controller
-                control={form.control}
-                name="name"
-                render={({ field, fieldState }) => (
-                  <Field data-invalid={fieldState.invalid}>
-                    <FieldLabel htmlFor="create-collection-name">
-                      Collection name
-                    </FieldLabel>
-                    <Input
-                      autoComplete="off"
-                      autoFocus
-                      {...field}
-                      id="create-collection-name"
-                      aria-invalid={fieldState.invalid}
-                    />
-                    {fieldState.invalid && (
-                      <FieldError errors={[fieldState.error]} />
-                    )}
-                  </Field>
-                )}
-              />
-              {createCollectionMutation.error && (
-                <p role="alert" className="text-sm text-destructive">
-                  {createCollectionMutation.error.message}
-                </p>
-              )}
-              <Button
-                type="submit"
-                disabled={createCollectionMutation.isPending}
-              >
-                {createCollectionMutation.isPending
-                  ? "Creating..."
-                  : "Create collection"}
-              </Button>
-            </form>
-          </div>
-        </DrawerContent>
-      </Drawer>
     </nav>
   )
 }

@@ -1,73 +1,73 @@
 # DLAMS plan
 
-Last updated: 2026-11-05
+Last updated: 2026-11-06
 
 The current state of the project. For why things are the way they are, see
 [`docs/decisions.md`](./docs/decisions.md). For the full history up to
 2026-10-09, see [`docs/archive/`](./docs/archive/).
 
-## Where we left off (2026-11-05)
+## Where we left off (2026-11-06)
 
 Start here in a new session. This block is rewritten at the end of a session,
 never appended to. History lives in git and `docs/decisions.md`.
 
-- **Status.** Everything through item 8d and the delete-collection confirm
-  fix is deployed. The move to Base UI (item 5a) is finished and merged to
-  `main` (PR #16, 2026-11-05); the deploy result was not reported. Run
+- **Status.** PR #16 (Base UI, 5a) is deployed; the owner checked the
+  drawers and keyboard on the live site ("resolved well enough"). Branch
+  `bug-fix-batch` is committed (`9c0889b`), not merged. Branch
+  `shadcn-everywhere` (from it) holds item 6a: committed through
+  `2ad9826` ("button consistency pass 1"); the 36px Close and admin
+  buttons and the docs are still uncommitted. Neither branch is merged. Run
   `git status` and `git log` first: the owner commits and pushes
   everything, and a push to `main` deploys (docs included).
-- **What was done this session (2026-11-04 to 11-05),** details in item 5a,
-  the `.migration/` reports in `dlams-ui/`, and `docs/decisions.md`:
-  - The shadcn style moved from the legacy `new-york` to `base-nova` with
-    `init --base base --preset nova --force --no-reinstall`; the CLI's new
-    theme and font were reverted, so the look is unchanged. `shadcn add`
-    now delivers Base UI components.
-  - Migrated to Base UI: `button`, `label`, `input`, `separator`, `field`,
-    `drawer`. `form.tsx` is gone; the 8 form fields follow shadcn's React
-    Hook Form guide (`Controller` + `Field`), and the conventions file's
-    form pattern says so. Radix, Vaul, `clsx`, and `tailwind-merge` are
-    uninstalled.
-  - Drawers have the `base-nova` look; headers / footers with borders got
-    `pb-4` / `pt-4`. Side drawers are `100svh` tall (a logged local edit in
-    `drawer.tsx`) because iOS 26 Safari's toolbar hid the pinned footer,
-    measured in the iOS Simulator; this also affected the live Vaul site.
-    The combobox `container` workaround was removed.
-  - Plan items added: 15 (phone-friendly drawers, opening from the bottom
-    on phones) and 16 (next bug-fix batch). The condition dropdown is first
-    in 6a's raw `<select>` conversion.
-- **What is verified.** Run by Claude 2026-11-05 on `move-to-base-ui`: 71
-  UI tests, typecheck, lint, format check, build. Backend not touched or
-  run this session. Owner-checked in the browser: "Manage users", the input
-  checks in `.migration/input.md`, the drawers, the combobox inside a
-  drawer, and no closing flicker. The form and label checklists were not
-  reported item by item. In the iOS Simulator (iPhone 16e, iOS
-  26.3): drawer footers visible, and the keyboard no longer resizes the
-  drawer. Not checked: a real phone.
+- **What was done this session (2026-11-06):**
+  - Bug-fix batch (16): last played shown as `MM-DD-YYYY`; every
+    placeholder 14px (`::placeholder` in `index.css`); no future last
+    played dates (API `LastPlayedDate`, form); date helpers in
+    `lib/dates.ts` on `date-fns` and `app/dates.py`. The combobox
+    `Add "name"` bug was skipped (may be gone since Base UI).
+  - 6a in code: no raw form element is left (the consistency check
+    prints nothing); every form uses zod + `Controller` + `Field`. The
+    owner installed `select`, `checkbox`, `calendar`, `popover` (adds
+    `react-day-picker` 10 and `date-fns` 4). New: `ConditionSelect`,
+    `LastPlayedPicker` (shadcn date picker, future days disabled),
+    `schemas/games.ts`, `schemas/consoles.ts`.
+  - Buttons made consistent: every button is 36px (default or `icon`; no
+    `sm`), every Close is `outline`, a delete starts red-outlined, main
+    actions are the default `Button` with no extra classes. Rules are in
+    the conventions file.
+  - Decided, not built: one package per collection type nested under
+    `collections` (`app/collections/video_games/`), logged in 6d and
+    `docs/decisions.md`.
+- **What is verified.** Run by Claude on `shadcn-everywhere`: 77 UI tests
+  (12 files), typecheck, lint, format check, build; 95 backend tests and
+  Ruff on `bug-fix-batch`. Owner-checked in the browser: the game form,
+  the date picker, the Condition select's position and size. **Not yet
+  checked in a browser:** the console form, the sidebar rows (red bar,
+  hover, focus ring), creating a collection with an empty name, the
+  invite drawer, the Login hover, Delete link, the 36px Close and admin
+  buttons; and in the Simulator, that drawer fields no longer zoom.
 - **Next, in order:**
-  1. **Check the live site** after the PR #16 deploy: the drawers and the
-     keyboard on a real phone.
-  2. Check that a fresh session loads the `shadcn` skill
-     (`dlams-ui/.agents/skills/shadcn`); decide whether to keep it.
-  3. The bug-fix batch (16) or the manual accessibility audit (6), the
-     owner's pick. Item 16 needs two answers first: the date format
-     (`11/05/2026` or `Nov 5, 2026`) and the console placeholder (shorter
-     text or shrink to fit).
-  4. Then: shadcn everywhere (6a), repeated styling (6b), styling cleanup
-     (6c), backend consistency (6d), frontend hook consistency (6e), admins
-     delete users (9a), stats area (10c), later sharing ideas (10a), color
-     themes (10b), further item types (11), item images (12), moving items
-     between collections (13), duplicate finder (14), phone-friendly
-     drawers (15).
+  1. The owner's browser and Simulator pass on `shadcn-everywhere`, then
+     commit.
+  2. The manual accessibility audit (6), now that the controls are final.
+  3. Then: repeated styling (6b), styling cleanup (6c), backend
+     consistency and the package move (6d), frontend hook consistency
+     (6e), the "[object Object]" 422 message (Known issues), admins delete
+     users (9a), stats area (10c), later sharing ideas (10a), color themes
+     (10b), further item types (11), item images (12), moving items (13),
+     duplicate finder (14), phone-friendly drawers (15).
 - **Waiting on the owner:** in 6d, whether to drop the `response_model`s
-  Ruff's FAST001 calls redundant; before 6a, running `npx shadcn@latest add
-  select checkbox` (now delivers Base UI versions); the `npm audit` items
-  (Known issues).
+  Ruff's FAST001 calls redundant; the `npm audit` items (Known issues).
+- **The `shadcn` skill** (`dlams-ui/.claude/skills/shadcn`, a link into
+  `.agents/skills/`) loads once a session opens a file under `dlams-ui/`,
+  not at startup. Its `rules/forms.md` and `rules/base-vs-radix.md` were
+  used this session.
 - **Testing on an iPhone without deploying:** Xcode's Simulator (`open -a
   Simulator`) reaches the Mac's `localhost`. Turn off I/O → Keyboard →
   Connect Hardware Keyboard to get the on-screen keyboard. Mac Safari's
   Develop menu inspects the Simulator's page (console for measurements).
-  Tapping a drawer form field zooms the page (Known issues); hold Option
-  and drag to pinch back out.
+  If a drawer field still zooms the page, hold Option and drag to pinch
+  back out.
 - **Things to remember about the code.**
   - Tests sit beside the feature they cover. `renderApp(route)` in
     `dlams-ui/src/test/renderApp.tsx` renders the real app; register MSW
@@ -560,15 +560,24 @@ In order. Items 1 to 7 are the path to the portfolio milestone.
    rather than hand-made date code); the zod rule uses its
    `isAfterToday`. Replaces the browser's date input, whose `max`
    looked clickable in Safari. 2 tests with the clock fixed. The game
-   drawer's Close (`Button variant="outline" size="sm"`, as in the Share
-   and Edit collection drawers) and Add game (default `Button`) are
+   drawer's Close and Add game (default `Button`) are
    converted, so no game file has a raw element left. Add console
    (default `Button`) too, to match.
    **Code done 2026-11-06; the consistency check below prints nothing.
    Not yet checked in a browser:** the console form (`schemas/consoles.ts`,
    `Input`, the shared `ConditionSelect.tsx` that both item forms use,
-   so the 6b `SelectTrigger` note is resolved there), every drawer Close
-   (`Button variant="outline" size="sm"`), the sidebar's collection row
+   so the 6b `SelectTrigger` note is resolved there), every Close (drawers
+   and search) as `Button variant="outline"` at the default 36px (owner,
+   2026-11-06: same size as the other buttons and a bigger tap target;
+   `sm` had shrunk the phone Close from the mobile pass's ~36px), the
+   button consistency fixes (Delete link red-outlined, "Create your first
+   collection" default, Login's own hover classes removed; then removed:
+   with no collections, the sidebar says only "No collections yet." and
+   the main area shows "Create collection" under its sentence, through
+   `CreateCollectionDrawer`, which owns the drawer and takes its trigger,
+   so the sidebar keeps its "+"; the long label overflowed the sidebar
+   and the sidebar is hidden behind the menu on phones), the sidebar's
+   collection row
    (a ghost `Button` with its layout classes kept, like `ListRow`), the
    create-collection form (`collectionNameSchema`, shared with rename;
    2 new tests in `CollectionNavigation.test.tsx`), the invite drawer's

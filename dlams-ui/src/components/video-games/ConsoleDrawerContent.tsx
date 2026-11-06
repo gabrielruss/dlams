@@ -43,12 +43,7 @@ function ConsoleDrawerContent({
         </DrawerTitle>
         <DrawerClose
           render={
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              aria-label="Close drawer"
-            />
+            <Button type="button" variant="outline" aria-label="Close drawer" />
           }
         >
           Close

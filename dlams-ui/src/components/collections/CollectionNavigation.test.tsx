@@ -62,6 +62,21 @@ describe("creating a collection", () => {
     )
   })
 
+  it("opens from the empty collection area as well as the sidebar", async () => {
+    signInWithNoCollections()
+
+    const { user } = renderApp("/")
+    expect(await screen.findByText("No collections yet.")).toBeInTheDocument()
+    const main = screen.getByRole("main")
+    within(main).getByRole("button", { name: "Create collection" }).focus()
+    await user.keyboard("{Enter}")
+
+    const drawer = await screen.findByRole("dialog")
+    expect(
+      within(drawer).getByRole("heading", { name: "Create collection" }),
+    ).toBeInTheDocument()
+  })
+
   it("asks for a name instead of sending a blank one", async () => {
     const requests = signInWithNoCollections()
 

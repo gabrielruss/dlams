@@ -109,7 +109,6 @@ function UserManagement() {
                           <Button
                             type="button"
                             variant="outline"
-                            size="sm"
                             disabled={isPendingAction}
                             aria-label={`Make ${user.username} a ${
                               isTemplateAccount ? "regular" : "template"
@@ -132,7 +131,6 @@ function UserManagement() {
                         <Button
                           type="button"
                           variant="outline"
-                          size="sm"
                           disabled={isPendingAction}
                           aria-label={`${
                             user.is_active ? "Deactivate" : "Reactivate"
