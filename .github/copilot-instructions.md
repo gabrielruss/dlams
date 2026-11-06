@@ -141,9 +141,10 @@ cached copy.
   and TanStack Query v5 for server state.
 - New and changed code must use the installed components in
   `src/components/ui/` (`Button`, `Input`, `Label`, `Textarea`, ...), never a
-  raw `<button>`, `<input>`, `<label>`, `<select>`, or `<textarea>`. Older
-  raw elements are not a pattern to copy (plan item 6a replaces them). If no
-  installed component fits, give the owner the install command and wait.
+  raw `<button>`, `<input>`, `<label>`, `<select>`, or `<textarea>` (none
+  are left outside `components/ui/` since 2026-11-06; the 6a consistency
+  check in the plan should print nothing). If no installed component fits,
+  give the owner the install command and wait.
   Destructive final actions are `<Button variant="outline"
   className="border-destructive text-destructive">`, not the solid
   `destructive` variant. Deleting from a drawer starts at the top right of
@@ -172,9 +173,7 @@ cached copy.
   rendered structure. Keep hooks feature-scoped and avoid extracting trivial
   one-off presentation state without a readability benefit.
 - Every submitted form, even a one-field one, uses one pattern (decided
-  2026-10-31; `Login.tsx` and the Share drawer's link-name form follow it;
-  the create-collection, console, and game forms move to it with plan
-  item 6a):
+  2026-10-31; every form follows it since 2026-11-06):
   1. A zod schema in `src/schemas/<feature>.ts` with limits matching the
      API, and `type <Name>FormValues = z.infer<typeof schema>`.
   2. `useForm<Values>({ resolver: zodResolver(schema), defaultValues })`,

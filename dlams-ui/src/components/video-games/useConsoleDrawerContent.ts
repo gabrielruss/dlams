@@ -1,20 +1,12 @@
 import { useState } from "react"
+import { zodResolver } from "@hookform/resolvers/zod"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { useForm } from "react-hook-form"
 
 import { consolesApi } from "@/lib/api/consoles"
-import type {
-  ConsoleCreate,
-  ConsoleRecord,
-  VideoGameCondition,
-} from "@/types/videoGames"
+import { consoleFormSchema, type ConsoleFormValues } from "@/schemas/consoles"
+import type { ConsoleCreate, ConsoleRecord } from "@/types/videoGames"
 import { invalidateVideoGameCollection } from "./invalidateVideoGameCollection"
-
-export interface ConsoleFormValues {
-  label: string
-  edition: string
-  condition: VideoGameCondition
-}
 
 interface UseConsoleDrawerContentOptions {
   collectionId: number
@@ -48,6 +40,7 @@ function useConsoleDrawerContent({
 
   const [isEditing, setIsEditing] = useState(false)
   const form = useForm<ConsoleFormValues>({
+    resolver: zodResolver(consoleFormSchema),
     defaultValues: emptyConsoleFormValues,
   })
 
@@ -87,8 +80,8 @@ function useConsoleDrawerContent({
 
   const saveConsole = (values: ConsoleFormValues) => {
     const data: ConsoleCreate = {
-      label: values.label.trim(),
-      edition: values.edition.trim() || null,
+      label: values.label,
+      edition: values.edition || null,
       condition: values.condition,
     }
     saveMutation.mutate(

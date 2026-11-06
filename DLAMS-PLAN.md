@@ -563,8 +563,20 @@ In order. Items 1 to 7 are the path to the portfolio milestone.
    drawer's Close (`Button variant="outline" size="sm"`, as in the Share
    and Edit collection drawers) and Add game (default `Button`) are
    converted, so no game file has a raw element left. Add console
-   (default `Button`) too, to match. Next: the console form and the
-   console drawer's Close.
+   (default `Button`) too, to match.
+   **Code done 2026-11-06; the consistency check below prints nothing.
+   Not yet checked in a browser:** the console form (`schemas/consoles.ts`,
+   `Input`, the shared `ConditionSelect.tsx` that both item forms use,
+   so the 6b `SelectTrigger` note is resolved there), every drawer Close
+   (`Button variant="outline" size="sm"`), the sidebar's collection row
+   (a ghost `Button` with its layout classes kept, like `ListRow`), the
+   create-collection form (`collectionNameSchema`, shared with rename;
+   2 new tests in `CollectionNavigation.test.tsx`), the invite drawer's
+   link (`Field` and `FieldLabel`), and the session Retry. Save and
+   Create stay enabled when a required field is empty and show its
+   error instead. `isVideoGameCondition` was removed (zod checks the
+   condition). Only `textarea` of the installed components is unused (no
+   multi-line field).
    Doing this also gives these controls the shadcn focus ring, which the
    keyboard check in item 6 flags as missing on the raw buttons. Re-run the
    tests afterward; the axe checks and the `Edit`/`Delete` name tests cover
@@ -581,9 +593,9 @@ In order. Items 1 to 7 are the path to the portfolio milestone.
    (`flex flex-col gap-4 rounded-lg border p-4`). Added 2026-11-06: the
    `SelectTrigger` classes that make the generated `base-nova` select
    match our fields (`w-full rounded-md pl-3 text-base
-   data-[size=default]:h-9 md:text-sm`, in `GameForm.tsx`); the console
-   form's condition will be the second use, so extract it then (likely a
-   `FormSelectTrigger` of our own). Likewise `border-input` on the
+   data-[size=default]:h-9 md:text-sm`). Resolved 2026-11-06: both item
+   forms use `ConditionSelect.tsx`, which holds them once; extract a
+   general `FormSelectTrigger` only if a non-condition select appears. Likewise `border-input` on the
    outline `Button` used as the date picker's trigger
    (`LastPlayedPicker.tsx`), if another button-as-field appears.
 6c. **Styling cleanup** (owner, 2026-10-31; after 6a and 6b). A styling
@@ -1153,7 +1165,8 @@ is next, then the sharing UI, then search.
   iOS zooms on inputs whose text is under 16px; these are raw inputs with
   `text-sm`. A game's Edit focuses its name field, so it zooms at once.
   shadcn's `Input` uses `text-base md:text-sm`, so converting these forms
-  (item 6a) should fix it.
+  (item 6a) should fix it. Converted 2026-11-06; not yet checked on an
+  iPhone or in the Simulator.
 - The demo notice in `VideoGamesWorkspace.tsx` now says "All data you add
   will be reset in 30 minutes." Sandboxes stay 7 days and their share
   links keep working, and item 8 and `docs/decisions.md` still describe

@@ -1,15 +1,4 @@
-import {
-  type ConsoleRecord,
-  type GameRecord,
-  videoGameConditions,
-  type VideoGameCondition,
-} from "@/types/videoGames"
-
-export function isVideoGameCondition(
-  value: string,
-): value is VideoGameCondition {
-  return videoGameConditions.some((condition) => condition === value)
-}
+import type { ConsoleRecord, GameRecord } from "@/types/videoGames"
 
 export function consoleName(consoleRecord: ConsoleRecord) {
   return consoleRecord.edition
