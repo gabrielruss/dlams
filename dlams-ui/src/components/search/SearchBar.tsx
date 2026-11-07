@@ -2,7 +2,7 @@ import SearchField from "./SearchField"
 import useSearchMode from "./useSearchMode"
 
 function SearchBar() {
-  const { query, open, setQuery, close } = useSearchMode()
+  const { query, setQuery, close } = useSearchMode()
 
   return (
     <div role="search" className="border-b">
@@ -10,7 +10,6 @@ function SearchBar() {
         <SearchField
           label="Search all collections"
           value={query}
-          onFocus={open}
           onChange={setQuery}
           onEscape={() => (query ? setQuery("") : close())}
         />

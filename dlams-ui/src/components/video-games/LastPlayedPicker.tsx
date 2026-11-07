@@ -53,7 +53,11 @@ function LastPlayedPicker({
         <CalendarIcon aria-hidden="true" />
         {value ? isoDateToMonthDayYear(value) : "Pick a date"}
       </PopoverTrigger>
-      <PopoverContent className="w-(--anchor-width) p-0">
+      <PopoverContent
+        aria-labelledby={labelId}
+        initialFocus={false}
+        className="w-(--anchor-width) p-0"
+      >
         <Calendar
           classNames={{ root: "w-full" }}
           mode="single"

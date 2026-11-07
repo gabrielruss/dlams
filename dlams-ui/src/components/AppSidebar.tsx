@@ -1,8 +1,8 @@
 import { useState, type ReactNode } from "react"
 import { LogOut, Menu, Users } from "lucide-react"
-import { Link, NavLink, useLocation } from "react-router-dom"
+import { NavLink, useLocation } from "react-router-dom"
 
-import Wordmark from "@/components/Wordmark"
+import HomeLink from "@/components/HomeLink"
 import { Button, buttonVariants } from "@/components/ui/button"
 import { Drawer, DrawerContent, DrawerTitle } from "@/components/ui/drawer"
 import RegistrationInviteManager from "@/components/auth/RegistrationInviteManager"
@@ -71,17 +71,15 @@ function AppSidebar({ children }: AppSidebarProps) {
           size="icon"
           type="button"
           aria-label="Open menu"
+          aria-expanded={isMenuOpen}
           onClick={() => setMenuLocationKey(location.key)}
         >
           <Menu aria-hidden="true" />
         </Button>
-        <Link
+        <HomeLink
           className="relative block h-9 w-40"
-          to="/"
-          aria-label="DLAMS home"
-        >
-          <Wordmark className="absolute inset-0" />
-        </Link>
+          wordmarkClassName="absolute inset-0"
+        />
       </header>
 
       <Drawer
@@ -101,13 +99,10 @@ function AppSidebar({ children }: AppSidebarProps) {
         aria-label="Application sidebar"
         className="sticky top-0 hidden h-screen w-56 shrink-0 flex-col overflow-hidden border-r bg-sidebar text-sidebar-foreground sm:w-64 md:flex"
       >
-        <Link
+        <HomeLink
           className="relative block h-[4.75rem] shrink-0 border-b"
-          to="/"
-          aria-label="DLAMS home"
-        >
-          <Wordmark className="absolute inset-x-4 inset-y-0" />
-        </Link>
+          wordmarkClassName="absolute inset-x-4 inset-y-0"
+        />
 
         {menu}
       </aside>

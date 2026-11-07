@@ -1,3 +1,4 @@
+import type { RefObject } from "react"
 import { Controller, type UseFormReturn } from "react-hook-form"
 
 import { Button } from "@/components/ui/button"
@@ -14,6 +15,8 @@ interface GameFormProps {
   form: UseFormReturn<GameFormValues>
   consoleLabelOptions: string[]
   isSaving: boolean
+  focusNameOnMount: boolean
+  nameInputRef: RefObject<HTMLInputElement | null>
   formError: string | null
   onSave: (values: GameFormValues) => void
   onCancel: () => void
@@ -23,6 +26,8 @@ function GameForm({
   form,
   consoleLabelOptions,
   isSaving,
+  focusNameOnMount,
+  nameInputRef,
   formError,
   onSave,
   onCancel,
@@ -36,13 +41,17 @@ function GameForm({
         <Controller
           control={form.control}
           name="name"
-          render={({ field, fieldState }) => (
+          render={({ field: { ref, ...field }, fieldState }) => (
             <Field data-invalid={fieldState.invalid}>
               <FieldLabel htmlFor="game-name">Game name</FieldLabel>
               <Input
                 autoComplete="off"
-                autoFocus
+                autoFocus={focusNameOnMount}
                 {...field}
+                ref={(element) => {
+                  ref(element)
+                  nameInputRef.current = element
+                }}
                 id="game-name"
                 aria-invalid={fieldState.invalid}
               />

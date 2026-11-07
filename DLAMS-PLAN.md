@@ -11,13 +11,9 @@ The current state of the project. For why things are the way they are, see
 Start here in a new session. This block is rewritten at the end of a session,
 never appended to. History lives in git and `docs/decisions.md`.
 
-- **Status.** PR #16 (Base UI, 5a) is deployed; the owner checked the
-  drawers and keyboard on the live site ("resolved well enough"). Branch
-  `bug-fix-batch` is committed (`9c0889b`), not merged. Branch
-  `shadcn-everywhere` (from it) holds item 6a: committed through
-  `2ad9826` ("button consistency pass 1"); the 36px Close and admin
-  buttons and the docs are still uncommitted. Neither branch is merged. Run
-  `git status` and `git log` first: the owner commits and pushes
+- **Status.** PR #18 (`shadcn-everywhere`: the bug-fix batch and 6a) is
+  merged to `main` and deployed; the owner checked it ("looks great").
+  Run `git status` and `git log` first: the owner commits and pushes
   everything, and a push to `main` deploys (docs included).
 - **What was done this session (2026-11-06):**
   - Bug-fix batch (16): last played shown as `MM-DD-YYYY`; every
@@ -46,16 +42,8 @@ never appended to. History lives in git and `docs/decisions.md`.
   hover, focus ring), creating a collection with an empty name, the
   invite drawer, the Login hover, Delete link, the 36px Close and admin
   buttons; and in the Simulator, that drawer fields no longer zoom.
-- **Next, in order:**
-  1. The owner's browser and Simulator pass on `shadcn-everywhere`, then
-     commit.
-  2. The manual accessibility audit (6), now that the controls are final.
-  3. Then: repeated styling (6b), styling cleanup (6c), backend
-     consistency and the package move (6d), frontend hook consistency
-     (6e), the "[object Object]" 422 message (Known issues), admins delete
-     users (9a), stats area (10c), later sharing ideas (10a), color themes
-     (10b), further item types (11), item images (12), moving items (13),
-     duplicate finder (14), phone-friendly drawers (15).
+- **Next:** the "Checkpoint: interview 1" list below; no new features
+  until it is done.
 - **Waiting on the owner:** in 6d, whether to drop the `response_model`s
   Ruff's FAST001 calls redundant; the `npm audit` items (Known issues).
 - **The `shadcn` skill** (`dlams-ui/.claude/skills/shadcn`, a link into
@@ -353,6 +341,29 @@ Explicitly not required for this milestone: the sharing UI,
 browser-local demo editing, the demo sharing walkthrough, further item types,
 user deletion, off-device backups, and the deferred API dependency upgrades.
 
+## Checkpoint: interview 1
+
+Set 2026-11-06 (owner). Due Tuesday 2026-11-10, 4 PM. No new features
+until this is done: the codebase should be clean enough to walk a hiring
+manager through. The role is frontend only, so the backend waits. Items in
+this order; everything else under "Next up" waits.
+
+1. Accessibility audit (6): the automated checks on the 6a controls, then
+   the owner's keyboard, VoiceOver, 200% zoom, and phone-menu pass, and the
+   `--ring` decision.
+2. Repeated styling (6b), then styling cleanup (6c).
+3. Frontend hook consistency (6e), then move each feature's hooks into a
+   `hooks/` folder inside it (`components/collections/hooks/`); the shared
+   `useFitOnResize` goes to `src/hooks/`. Moves only, with `git mv`, as
+   their own step (owner, 2026-11-06).
+4. Known issues that show in a walkthrough: the "[object Object]" 422
+   message, the large-chunk build warning, deploy not gated on CI, the
+   orphaned `dlams-fastapi/.env.example`.
+
+Paused until after the checkpoint: backend consistency (6d), the calendar
+cut off at 200% zoom (item 6, finding 4), 9a, 10a, 10b, 10c, 11 to 15, and
+new bug-fix batches unless a bug shows in the demo.
+
 ## Next up
 
 In order. Items 1 to 7 are the path to the portfolio milestone.
@@ -503,6 +514,66 @@ In order. Items 1 to 7 are the path to the portfolio milestone.
    console", "Add game", and the row Edit and Delete) have no custom focus
    style, so check their focus outline in the keyboard pass.
    Still to check by hand: contrast, keyboard, drawers, 200% zoom, phone menu.
+
+   **Automated pass on the 6a controls (2026-11-06, `interview-1-cleanup`).**
+   New axe checks: the open calendar, the open Condition and Console lists,
+   the empty state, and the create drawer opened from it (82 tests pass).
+   - Fixed: the calendar popup was a dialog with no name (axe
+     `aria-dialog-name`); `LastPlayedPicker` now labels it with the "Last
+     played" label.
+   - Skipped on purpose: both open lists fail `region` ("content should be
+     in landmarks") because Base UI portals them to `body`, outside the
+     drawer. It is a best-practice rule, not WCAG, and the lists are reached
+     through their field. Those two checks pass `["region"]` to
+     `expectNoViolations`.
+   - Contrast, calculated from the light tokens: selected day 17.05:1, today
+     16.28:1, "Pick a date" and outside days 5.50:1. Disabled future days are
+     2.08:1, which WCAG 1.4.3 allows for disabled controls.
+
+   **Browser pass with Playwright (2026-11-06, WebKit and Firefox, local
+   app; scripts kept out of the repo).** Keyboard, axe with contrast on,
+   200% zoom (640x400), and phone width (375). Not covered: VoiceOver and
+   the Simulator.
+   - Passes: Tab order; focus stays inside every drawer; Esc closes only the
+     open list or calendar; Edit, Share, Add console, and row drawers return
+     focus on close; an empty Save shows the error and focuses the field; no
+     sideways scroll at 200% or 375px; Save stays reachable at 200%; the
+     phone menu takes focus, returns it on Esc, and closes on a pick.
+   - Findings, not fixed yet:
+     1. **Fixed 2026-11-07** (owner's choice). Tabbing into search opened it
+        and hid Edit, Share, Add console, and Add game. Search now opens on
+        typing only (`onFocus` and `open` removed); a test covers it.
+     2. **Fixed 2026-11-06.** Add game and New collection dropped focus to
+        `body` on close: `autoFocus` focused the field before Base UI noted
+        the trigger. Both drawers now pass the name input's ref to
+        `initialFocus` (merged with react-hook-form's `field.ref`);
+        `GameForm` keeps `autoFocus` only for Edit on an existing game
+        (`focusNameOnMount`).
+     3. **Fixed 2026-11-07** with 8: the picker's popover has
+        `initialFocus={false}` and react-day-picker's `autoFocus` focuses the
+        selected day, else today.
+     4. At 200% on a short window the calendar opens upward and its top
+        (month controls, first week) is cut off. Deferred until after
+        interview 1 (owner, 2026-11-07: niche).
+     5. **Fixed 2026-11-06.** WCAG 2.5.3 (label in name): the logo links
+        are named "D.L.A.M.S. home"; `ListRow` has no `aria-label`, a
+        visually hidden "View" comes before the visible text ("View NES
+        Loose"), and tests match row names by prefix.
+     6. **Fixed 2026-11-06.** "Open menu" has `aria-expanded`.
+     7. The Select's highlighted option is only a faint background (about
+        1.1:1), no outline. Styling, owner's call.
+     8. **Fixed 2026-11-07.** Arrow keys did not move between days: the
+        generated `CalendarDayButton` never attached its focus `ref`. Now a
+        logged local edit (`ref={ref}`); tests cover opening on today and the
+        arrow keys. Owner-checked in a browser 2026-11-07.
+   - Not ours, or false positives: the login backdrop letters fail contrast
+     but are decorative and `aria-hidden`; Base UI's focus-guard spans fail
+     `aria-command-name`; react-day-picker day buttons fail label-in-name
+     ("6" vs "Friday, November 6th, 2026"); Playwright's Firefox crashes
+     running axe on the open game form (no crash without axe).
+   - `--ring`: the focused field shows a lighter blue-grey border plus the
+     3px glow. Skipped for now (owner, 2026-11-07): too subtle to notice,
+     and the glow made focus clear in the keyboard pass.
 6a. **Use the shadcn components everywhere (before go-live).** Scanned
    2026-10-27; rescanned 2026-10-31. New code must already use them (owner,
    2026-10-31; rule in `.github/copilot-instructions.md`, "Frontend"), and the

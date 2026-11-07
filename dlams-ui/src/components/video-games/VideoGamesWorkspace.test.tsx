@@ -83,13 +83,13 @@ describe("video game collection access", () => {
     ).toBeInTheDocument()
     expect(screen.getByRole("button", { name: "Add game" })).toBeInTheDocument()
     expect(
-      screen.getByRole("button", { name: "View Xbox 360 — Original White" }),
+      screen.getByRole("button", { name: /^View Xbox 360 — Original White/ }),
     ).toBeInTheDocument()
     expect(
       screen.queryByRole("button", { name: /^Delete/ }),
     ).not.toBeInTheDocument()
 
-    await user.click(screen.getByRole("button", { name: "View Halo 3" }))
+    await user.click(screen.getByRole("button", { name: /^View Halo 3/ }))
     const drawer = await screen.findByRole("dialog")
     expect(
       within(drawer).getByRole("heading", { name: "Halo 3" }),
@@ -111,7 +111,9 @@ describe("video game collection access", () => {
     signInWithCollection("owner")
 
     const { user } = renderApp("/")
-    await user.click(await screen.findByRole("button", { name: "View Halo 3" }))
+    await user.click(
+      await screen.findByRole("button", { name: /^View Halo 3/ }),
+    )
     const drawer = await screen.findByRole("dialog")
 
     within(drawer).getByRole("button", { name: "Edit" }).focus()
@@ -163,7 +165,9 @@ describe("video game collection access", () => {
     )
 
     const { user } = renderApp("/")
-    await user.click(await screen.findByRole("button", { name: "View Halo 3" }))
+    await user.click(
+      await screen.findByRole("button", { name: /^View Halo 3/ }),
+    )
     const drawer = await screen.findByRole("dialog")
     within(drawer).getByRole("button", { name: "Edit" }).focus()
     await user.keyboard("{Enter}")
@@ -261,6 +265,37 @@ describe("video game collection access", () => {
       expect(dayButton(calendar, new Date(2026, 10, 6))).toBeEnabled()
     })
 
+    it("opens on today's date when none is set", async () => {
+      signInWithCollection("owner")
+
+      const { calendar } = await openPicker()
+
+      await waitFor(() =>
+        expect(dayButton(calendar, new Date(2026, 10, 6))).toHaveFocus(),
+      )
+    })
+
+    it("moves between days with the arrow keys", async () => {
+      signInWithCollection("owner")
+
+      const { user, calendar } = await openPicker()
+      await waitFor(() =>
+        expect(dayButton(calendar, new Date(2026, 10, 6))).toHaveFocus(),
+      )
+      await user.keyboard("{ArrowLeft}")
+      expect(dayButton(calendar, new Date(2026, 10, 5))).toHaveFocus()
+      await user.keyboard("{ArrowUp}")
+      expect(dayButton(calendar, new Date(2026, 9, 29))).toHaveFocus()
+    })
+
+    it("has no accessibility violations with the calendar open", async () => {
+      signInWithCollection("owner")
+
+      await openPicker()
+
+      await expectNoViolations(document.body)
+    })
+
     it("saves a picked day as the last played date", async () => {
       signInWithCollection("owner")
       let savedBody: unknown = null
@@ -291,7 +326,9 @@ describe("video game collection access", () => {
     signInWithCollection("owner")
 
     const { user } = renderApp("/")
-    await user.click(await screen.findByRole("button", { name: "View Halo 3" }))
+    await user.click(
+      await screen.findByRole("button", { name: /^View Halo 3/ }),
+    )
     const drawer = await screen.findByRole("dialog")
     within(drawer).getByRole("button", { name: "Edit" }).focus()
     await user.keyboard("{Enter}")
@@ -301,7 +338,7 @@ describe("video game collection access", () => {
       expect(screen.queryByRole("dialog")).not.toBeInTheDocument(),
     )
 
-    await user.click(screen.getByRole("button", { name: "View Halo 3" }))
+    await user.click(screen.getByRole("button", { name: /^View Halo 3/ }))
     const reopened = await screen.findByRole("dialog")
     expect(
       within(reopened).getByRole("heading", { name: "Halo 3" }),
@@ -368,7 +405,9 @@ describe("video game collection access", () => {
     signInWithCollection("owner")
 
     const { user } = renderApp("/")
-    await user.click(await screen.findByRole("button", { name: "View Halo 3" }))
+    await user.click(
+      await screen.findByRole("button", { name: /^View Halo 3/ }),
+    )
     const drawer = await screen.findByRole("dialog")
     within(drawer).getByRole("button", { name: "Close drawer" }).focus()
     await user.keyboard("{Enter}")
@@ -393,7 +432,9 @@ describe("video game collection access", () => {
     vi.spyOn(window, "confirm").mockReturnValueOnce(true)
 
     const { user } = renderApp("/")
-    await user.click(await screen.findByRole("button", { name: "View Halo 3" }))
+    await user.click(
+      await screen.findByRole("button", { name: /^View Halo 3/ }),
+    )
     const drawer = await screen.findByRole("dialog")
     within(drawer).getByRole("button", { name: "Delete game" }).focus()
     await user.keyboard("{Enter}")
@@ -433,7 +474,9 @@ describe("video game collection access", () => {
     )
 
     const { user } = renderApp("/")
-    await user.click(await screen.findByRole("button", { name: "View Halo 3" }))
+    await user.click(
+      await screen.findByRole("button", { name: /^View Halo 3/ }),
+    )
     const drawer = await screen.findByRole("dialog")
     within(drawer).getByRole("button", { name: "Edit" }).focus()
     await user.keyboard("{Enter}")
@@ -500,7 +543,9 @@ describe("video game collection access", () => {
     signInWithCollection("owner")
 
     const { user } = renderApp("/")
-    await user.click(await screen.findByRole("button", { name: "View Halo 3" }))
+    await user.click(
+      await screen.findByRole("button", { name: /^View Halo 3/ }),
+    )
     const drawer = await screen.findByRole("dialog")
     within(drawer).getByRole("button", { name: "Edit" }).focus()
     await user.keyboard("{Enter}")
@@ -535,6 +580,20 @@ describe("video game collection access", () => {
     ).not.toBeInTheDocument()
   })
 
+  it("returns focus to Add game after closing its drawer", async () => {
+    signInWithCollection("owner")
+
+    const { user } = renderApp("/")
+    const addGame = await screen.findByRole("button", { name: "Add game" })
+    addGame.focus()
+    await user.keyboard("{Enter}")
+    const drawer = await screen.findByRole("dialog")
+    expect(within(drawer).getByLabelText("Game name")).toHaveFocus()
+    await user.keyboard("{Escape}")
+
+    await waitFor(() => expect(addGame).toHaveFocus())
+  })
+
   it("has no accessibility violations on the collection view", async () => {
     signInWithCollection("owner")
 
@@ -555,6 +614,44 @@ describe("video game collection access", () => {
     await user.keyboard("{Enter}")
     expect(within(drawer).getByLabelText("Game name")).toBeInTheDocument()
     await expectNoViolations(document.body)
+  })
+
+  it("has no accessibility violations with the Condition list open", async () => {
+    signInWithCollection("owner")
+
+    const { user } = renderApp("/?collection=1&item=game-1")
+    const drawer = await screen.findByRole("dialog")
+    within(drawer).getByRole("button", { name: "Edit" }).focus()
+    await user.keyboard("{Enter}")
+    within(drawer).getByLabelText("Condition").focus()
+    await user.keyboard("{Enter}")
+    await screen.findByRole("option", { name: "New", hidden: true })
+
+    await expectNoViolations(document.body, ["region"])
+  })
+
+  it("has no accessibility violations with the Console list open", async () => {
+    signInWithCollection("owner")
+    server.use(
+      http.get(`${api}/console-labels`, () =>
+        HttpResponse.json({
+          labels: [
+            { id: 1, name: "Xbox 360" },
+            { id: 2, name: "PlayStation 2" },
+          ],
+        }),
+      ),
+    )
+
+    const { user } = renderApp("/?collection=1&item=game-1")
+    const drawer = await screen.findByRole("dialog")
+    within(drawer).getByRole("button", { name: "Edit" }).focus()
+    await user.keyboard("{Enter}")
+    within(drawer).getByLabelText("Console").focus()
+    await user.keyboard("{ArrowDown}")
+    await screen.findByRole("option", { name: "Xbox 360", hidden: true })
+
+    await expectNoViolations(document.body, ["region"])
   })
 
   it.each(["New collection", "Add console", "Add game", "Open menu"])(

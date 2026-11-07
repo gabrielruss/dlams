@@ -1,8 +1,8 @@
 import { useState } from "react"
 import { useQuery } from "@tanstack/react-query"
-import { Link, useParams } from "react-router-dom"
+import { useParams } from "react-router-dom"
 
-import Wordmark from "@/components/Wordmark"
+import HomeLink from "@/components/HomeLink"
 import SearchField from "@/components/search/SearchField"
 import useListSearch from "@/components/search/useListSearch"
 import ConsoleList from "@/components/video-games/ConsoleList"
@@ -42,25 +42,19 @@ function SharedCollection() {
       <meta name="robots" content="noindex" />
       <meta name="referrer" content="no-referrer" />
       <header className="flex h-14 shrink-0 items-center border-b bg-sidebar px-4 md:hidden">
-        <Link
+        <HomeLink
           className="relative block h-9 w-40"
-          to="/"
-          aria-label="DLAMS home"
-        >
-          <Wordmark className="absolute inset-0" />
-        </Link>
+          wordmarkClassName="absolute inset-0"
+        />
       </header>
       <aside
         aria-label="Shared collection"
         className="sticky top-0 hidden h-screen w-56 shrink-0 flex-col overflow-hidden border-r bg-sidebar text-sidebar-foreground sm:w-64 md:flex"
       >
-        <Link
+        <HomeLink
           className="relative block h-[4.75rem] shrink-0 border-b"
-          to="/"
-          aria-label="DLAMS home"
-        >
-          <Wordmark className="absolute inset-x-4 inset-y-0" />
-        </Link>
+          wordmarkClassName="absolute inset-x-4 inset-y-0"
+        />
         {data && (
           <div className="flex flex-col gap-1 p-4">
             <p className="font-medium">{data.name}</p>

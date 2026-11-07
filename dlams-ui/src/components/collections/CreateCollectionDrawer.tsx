@@ -1,4 +1,4 @@
-import { type ReactNode, useState } from "react"
+import { type ReactNode, useRef, useState } from "react"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Controller, useForm } from "react-hook-form"
 
@@ -27,6 +27,7 @@ function CreateCollectionDrawer({
 }: CreateCollectionDrawerProps) {
   const { createCollectionMutation } = useCollections()
   const [isOpen, setIsOpen] = useState(false)
+  const nameInputRef = useRef<HTMLInputElement>(null)
   const form = useForm<CollectionNameFormValues>({
     resolver: zodResolver(collectionNameSchema),
     defaultValues: { name: "" },
@@ -62,7 +63,7 @@ function CreateCollectionDrawer({
           if (!nextOpen) close()
         }}
       >
-        <DrawerContent>
+        <DrawerContent initialFocus={nameInputRef}>
           <DrawerHeader className="flex-row items-center justify-between border-b pb-4">
             <DrawerTitle className="text-xl">Create collection</DrawerTitle>
             <DrawerClose
@@ -85,15 +86,18 @@ function CreateCollectionDrawer({
               <Controller
                 control={form.control}
                 name="name"
-                render={({ field, fieldState }) => (
+                render={({ field: { ref, ...field }, fieldState }) => (
                   <Field data-invalid={fieldState.invalid}>
                     <FieldLabel htmlFor="create-collection-name">
                       Collection name
                     </FieldLabel>
                     <Input
                       autoComplete="off"
-                      autoFocus
                       {...field}
+                      ref={(element) => {
+                        ref(element)
+                        nameInputRef.current = element
+                      }}
                       id="create-collection-name"
                       aria-invalid={fieldState.invalid}
                     />

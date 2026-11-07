@@ -39,6 +39,12 @@ Applies across the DLAMS workspace. Project-local conventions take precedence wh
   - `ComboboxInput` uses `render={<ComboboxTrigger />}` on `InputGroupButton`
     (2026-11-04, the Base UI `Button` has no `asChild`; matches the base
     registry). If it is lost, `tsc` fails on `asChild`.
+  In `components/ui/calendar.tsx`:
+  - `CalendarDayButton` passes its `ref` to `Button` (2026-11-07). The
+    generated file makes the ref to focus the active day but never attaches
+    it (react-day-picker's own `DayButton` does). If it is lost, arrow keys
+    stop moving between days and the calendar no longer opens on today; the
+    last played picker tests fail.
 - Re-running the CLI overwrites the generated file (for example it restored
   `buttonVariants` in `button.tsx` and moved it to the `radix-ui` package). The
   `react-refresh/only-export-components` lint rule is off under

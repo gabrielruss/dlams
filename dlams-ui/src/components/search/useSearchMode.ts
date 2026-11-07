@@ -12,16 +12,6 @@ function useSearchMode() {
   const [searchParams, setSearchParams] = useSearchParams()
   const query = searchParams.get(SEARCH_PARAM)
 
-  const open = () => {
-    if (query !== null) return
-    setSearchParams((current) => {
-      const next = new URLSearchParams(current)
-      next.set(SEARCH_PARAM, "")
-      next.delete(ITEM_PARAM)
-      return next
-    })
-  }
-
   const setQuery = (value: string) => {
     setSearchParams(
       (current) => {
@@ -55,7 +45,6 @@ function useSearchMode() {
   return {
     isOpen: query !== null,
     query: query ?? "",
-    open,
     setQuery,
     close,
     openItem,

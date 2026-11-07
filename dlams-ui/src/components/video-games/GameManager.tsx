@@ -1,3 +1,5 @@
+import { useRef } from "react"
+
 import useItemDrawer from "@/components/collections/useItemDrawer"
 import { Button } from "@/components/ui/button"
 import { Drawer, DrawerContent } from "@/components/ui/drawer"
@@ -21,6 +23,7 @@ function GameManager({ collectionId, games, canWrite }: GameManagerProps) {
     close,
   } = useItemDrawer({ type: "game", items: games })
   const consoleLabelOptions = useConsoleLabels(canWrite)
+  const gameNameInputRef = useRef<HTMLInputElement>(null)
 
   return (
     <section className="flex flex-col gap-4 rounded-lg border p-4">
@@ -40,11 +43,12 @@ function GameManager({ collectionId, games, canWrite }: GameManagerProps) {
             if (!open) close()
           }}
         >
-          <DrawerContent>
+          <DrawerContent initialFocus={gameNameInputRef}>
             <GameDrawerContent
               collectionId={collectionId}
               openedGame={openedGame}
               consoleLabelOptions={consoleLabelOptions}
+              nameInputRef={gameNameInputRef}
               onClose={close}
             />
           </DrawerContent>
