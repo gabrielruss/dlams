@@ -24,9 +24,9 @@ function ListRow({ title, children, onSelect }: ListRowProps) {
       className="-mx-2 h-auto w-[calc(100%+1rem)] justify-between gap-3 px-2 py-3 text-left text-base font-normal whitespace-normal"
       type="button"
       variant="ghost"
-      aria-label={`View ${title}`}
       onClick={onSelect}
     >
+      <span className="sr-only">View </span>
       {text}
       <ChevronRight aria-hidden="true" className="text-muted-foreground" />
     </Button>

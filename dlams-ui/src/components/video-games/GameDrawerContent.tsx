@@ -1,3 +1,5 @@
+import type { RefObject } from "react"
+
 import ItemActions from "@/components/collections/ItemActions"
 import { Button } from "@/components/ui/button"
 import { DrawerClose, DrawerHeader, DrawerTitle } from "@/components/ui/drawer"
@@ -10,6 +12,7 @@ interface GameDrawerContentProps {
   collectionId: number
   openedGame: GameRecord | undefined
   consoleLabelOptions: string[]
+  nameInputRef: RefObject<HTMLInputElement | null>
   onClose: () => void
 }
 
@@ -17,6 +20,7 @@ function GameDrawerContent({
   collectionId,
   openedGame,
   consoleLabelOptions,
+  nameInputRef,
   onClose,
 }: GameDrawerContentProps) {
   const {
@@ -64,6 +68,8 @@ function GameDrawerContent({
           form={form}
           consoleLabelOptions={consoleLabelOptions}
           isSaving={isSaving}
+          focusNameOnMount={shownGame !== undefined}
+          nameInputRef={nameInputRef}
           formError={formError}
           onSave={saveGame}
           onCancel={leaveForm}

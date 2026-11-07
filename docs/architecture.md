@@ -262,8 +262,8 @@ form, mutations, edit mode, and the shown item. They render inside
 animation included. A collection's Edit and
 Share drawers sit beside its heading. The sidebar lists collections with counts
 and marks the selected one with a red bar. Its header is a fitted
-`D.L.A.M.S.` wordmark (`components/Wordmark.tsx`, built on
-`components/FitText.tsx`). Below the `md` breakpoint the sidebar becomes a top
+`D.L.A.M.S.` wordmark linking home (`components/HomeLink.tsx`, around
+`components/Wordmark.tsx`, built on `components/FitText.tsx`). Below the `md` breakpoint the sidebar becomes a top
 bar with a menu button that opens the same contents in a left drawer
 (`components/AppSidebar.tsx`). The login page draws a decorative "DON'T LOOK
 AT MY STUFF" logo (`components/BrandLogo.tsx`): behind the card on wide screens

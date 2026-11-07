@@ -88,6 +88,22 @@ describe("creating a collection", () => {
     await expectNoViolations(container)
   })
 
+  it("returns focus to New collection after closing the drawer", async () => {
+    signInWithNoCollections()
+
+    const { user, drawer } = await openCreateDrawer()
+    await waitFor(() =>
+      expect(within(drawer).getByLabelText("Collection name")).toHaveFocus(),
+    )
+    await user.keyboard("{Escape}")
+
+    await waitFor(() =>
+      expect(
+        screen.getByRole("button", { name: "New collection" }),
+      ).toHaveFocus(),
+    )
+  })
+
   it("asks for a name instead of sending a blank one", async () => {
     const requests = signInWithNoCollections()
 

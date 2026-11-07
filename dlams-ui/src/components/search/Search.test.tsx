@@ -81,26 +81,45 @@ const searchBox = () =>
 const resultTitles = () =>
   within(screen.getByRole("list", { name: "Search results" }))
     .getAllByRole("button")
-    .map((button) => button.getAttribute("aria-label"))
+    .map((button) => button.querySelector("p")?.textContent)
 
 async function openSearch(route = "/?collection=1") {
   const { user, container } = renderApp(route)
   await screen.findByRole("heading", { name: "Retro game shelf" })
-  await user.click(searchBox())
+  await user.type(searchBox(), "a")
+  await user.clear(searchBox())
   await screen.findByRole("heading", { name: "Results in all collections" })
   return { user, container }
 }
 
 describe("search", () => {
+  it("stays closed when the field is only focused, and opens on typing", async () => {
+    signInWithItems()
+    const { user } = renderApp("/?collection=1")
+    await screen.findByRole("heading", { name: "Retro game shelf" })
+
+    searchBox().focus()
+    expect(
+      screen.getByRole("heading", { name: "Retro game shelf" }),
+    ).toBeInTheDocument()
+
+    await user.keyboard("h")
+    expect(
+      await screen.findByRole("heading", {
+        name: "Results in all collections",
+      }),
+    ).toBeInTheDocument()
+  })
+
   it("lists every owned item alphabetically when opened, with no collection selected", async () => {
     signInWithItems()
     await openSearch()
 
     expect(await screen.findByText("3 results")).toBeInTheDocument()
     expect(resultTitles()).toEqual([
-      "View Halo 3",
-      "View Pokémon Red",
-      "View Xbox 360 — Original White",
+      "Halo 3",
+      "Pokémon Red",
+      "Xbox 360 — Original White",
     ])
     expect(
       screen.getByText("Xbox 360 · CIB · Retro game shelf"),
@@ -118,11 +137,11 @@ describe("search", () => {
 
     await user.type(searchBox(), "pokemon")
     expect(await screen.findByText("1 result")).toBeInTheDocument()
-    expect(resultTitles()).toEqual(["View Pokémon Red"])
+    expect(resultTitles()).toEqual(["Pokémon Red"])
 
     await user.clear(searchBox())
     await user.type(searchBox(), "360 halo")
-    expect(resultTitles()).toEqual(["View Halo 3"])
+    expect(resultTitles()).toEqual(["Halo 3"])
   })
 
   it("says when nothing matches", async () => {
@@ -219,7 +238,7 @@ describe("search", () => {
     const { user } = await openSearch()
     await screen.findByText("3 results")
 
-    await user.click(screen.getByRole("button", { name: "View Pokémon Red" }))
+    await user.click(screen.getByRole("button", { name: /^View Pokémon Red/ }))
 
     const drawer = await screen.findByRole("dialog")
     expect(

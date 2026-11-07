@@ -7,16 +7,9 @@ interface SearchFieldProps {
   value: string
   onChange: (value: string) => void
   onEscape: () => void
-  onFocus?: () => void
 }
 
-function SearchField({
-  label,
-  value,
-  onChange,
-  onEscape,
-  onFocus,
-}: SearchFieldProps) {
+function SearchField({ label, value, onChange, onEscape }: SearchFieldProps) {
   const handleKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
     if (event.key !== "Escape") return
     event.preventDefault()
@@ -29,7 +22,6 @@ function SearchField({
       aria-label={label}
       placeholder={label}
       value={value}
-      onFocus={onFocus}
       onChange={(event) => onChange(event.target.value)}
       onKeyDown={handleKeyDown}
     />

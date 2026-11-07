@@ -55,6 +55,7 @@ function LastPlayedPicker({
       </PopoverTrigger>
       <PopoverContent
         aria-labelledby={labelId}
+        initialFocus={false}
         className="w-(--anchor-width) p-0"
       >
         <Calendar
