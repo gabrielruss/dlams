@@ -17,7 +17,7 @@ import {
 import type { Collection } from "@/types/collections"
 import CreateLinkForm from "./CreateLinkForm"
 import ShareLinkRow from "./ShareLinkRow"
-import useCollectionLinks from "./useCollectionLinks"
+import useCollectionLinks from "./hooks/useCollectionLinks"
 
 interface ShareCollectionDrawerProps {
   collection: Collection

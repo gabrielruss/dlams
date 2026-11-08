@@ -1,4 +1,4 @@
-import { useCurrentUser } from "@/components/auth/useAuthQueries"
+import { useCurrentUser } from "@/components/auth/hooks/useAuthQueries"
 import { Button } from "@/components/ui/button"
 import { isAdmin, isTemplate } from "@/lib/permissions"
 import {
@@ -10,7 +10,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import useAdminUsers from "./useAdminUsers"
+import useAdminUsers from "./hooks/useAdminUsers"
 
 function UserManagement() {
   const { currentUser } = useCurrentUser()

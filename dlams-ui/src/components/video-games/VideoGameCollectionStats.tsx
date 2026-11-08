@@ -1,5 +1,5 @@
 import type { Collection } from "@/types/collections"
-import useVideoGameCollectionStats from "./useVideoGameCollectionStats"
+import useVideoGameCollectionStats from "./hooks/useVideoGameCollectionStats"
 
 interface VideoGameCollectionStatsProps {
   collection: Collection

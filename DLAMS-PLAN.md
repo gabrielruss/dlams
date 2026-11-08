@@ -11,11 +11,11 @@ The current state of the project. For why things are the way they are, see
 Start here in a new session. This block is rewritten at the end of a session,
 never appended to. History lives in git and `docs/decisions.md`.
 
-- **Status.** PR #19 (`interview-1-cleanup`, the accessibility audit) is
-  merged and deployed. Branch `hook-consistency` (from `main`) holds
-  checkpoint step 3 (6e and the hooks folders). Run `git status` and `git
-  log` first: the owner commits and pushes everything, and a push to `main`
-  deploys (docs included).
+- **Status.** On `main`: PR #19 (accessibility audit) and PR #20 (calendar
+  dropdown focus ring). Branch `hook-consistency` holds checkpoint step 3:
+  the hook shapes (`f8bc31b`, pushed) and the hooks folder move (in the
+  working tree). Run `git status` and `git log` first: the owner commits
+  and pushes everything, and a push to `main` deploys (docs included).
 - **What was done (2026-11-06 to 11-07):**
   - New "Checkpoint: interview 1" (due Tuesday 2026-11-10, 4 PM): no new
     features, frontend cleanup only; backend (6d) waits.
@@ -345,11 +345,12 @@ this order; everything else under "Next up" waits.
    the owner's keyboard, VoiceOver, 200% zoom, and phone-menu pass, and the
    `--ring` decision.
 2. Repeated styling (6b), then styling cleanup (6c).
-3. Frontend hook consistency (6e; hooks converted 2026-11-07 on
-   `hook-consistency`), then move each feature's hooks into a
-   `hooks/` folder inside it (`components/collections/hooks/`); the shared
-   `useFitOnResize` goes to `src/hooks/`. Moves only, with `git mv`, as
-   their own step (owner, 2026-11-06).
+3. **Done 2026-11-08 on `hook-consistency`.** Frontend hook consistency
+   (6e): every query hook returns the standard shape (first commit,
+   `f8bc31b`); then each feature's hooks moved into its `hooks/` folder and
+   `useFitOnResize` to `src/hooks/` (second commit, moves and imports only).
+   Left as is (owner): `useCollections` does three jobs; `useItemDrawer`
+   keeps its UI name because it is accurate.
 4. Route paths in one place (owner, 2026-11-08; own branch): the five app
    paths are typed as strings 19 times (`App.tsx`, pages, `AppSidebar`,
    `HomeLink`), and the share and invite links build URLs by hand. Add

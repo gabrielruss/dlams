@@ -5,7 +5,7 @@ import { resolveCollectionWorkspace } from "./collectionWorkspaceResolver"
 import CreateCollectionDrawer from "./CreateCollectionDrawer"
 import EditCollectionDrawer from "./EditCollectionDrawer"
 import ShareCollectionDrawer from "./ShareCollectionDrawer"
-import useCollections from "./useCollections"
+import useCollections from "./hooks/useCollections"
 
 interface CollectionBodyProps {
   isPending: boolean

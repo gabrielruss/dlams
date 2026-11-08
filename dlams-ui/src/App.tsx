@@ -1,6 +1,6 @@
 import { Route, Routes, Navigate } from "react-router-dom"
 import { AdminUsers, Register, Login, Home, SharedCollection } from "./pages"
-import { useCurrentUser } from "./components/auth/useAuthQueries"
+import { useCurrentUser } from "./components/auth/hooks/useAuthQueries"
 import { Button } from "./components/ui/button"
 import { isAdmin } from "./lib/permissions"
 

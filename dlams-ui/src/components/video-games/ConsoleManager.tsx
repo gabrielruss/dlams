@@ -1,10 +1,10 @@
-import useItemDrawer from "@/components/collections/useItemDrawer"
+import useItemDrawer from "@/components/collections/hooks/useItemDrawer"
 import { Button } from "@/components/ui/button"
 import { Drawer, DrawerContent } from "@/components/ui/drawer"
 import type { ConsoleRecord } from "@/types/videoGames"
 import ConsoleDrawerContent from "./ConsoleDrawerContent"
 import ConsoleList from "./ConsoleList"
-import useConsoleLabels from "./useConsoleLabels"
+import useConsoleLabels from "./hooks/useConsoleLabels"
 
 interface ConsoleManagerProps {
   collectionId: number

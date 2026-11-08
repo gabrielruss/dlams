@@ -1,10 +1,10 @@
 import { Plus } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
-import useSearchMode from "@/components/search/useSearchMode"
+import useSearchMode from "@/components/search/hooks/useSearchMode"
 import CollectionStats from "./CollectionStats"
 import CreateCollectionDrawer from "./CreateCollectionDrawer"
-import useCollections from "./useCollections"
+import useCollections from "./hooks/useCollections"
 
 function CollectionNavigation() {
   const {

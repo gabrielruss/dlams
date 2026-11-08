@@ -1,12 +1,12 @@
 import { useRef } from "react"
 
-import useItemDrawer from "@/components/collections/useItemDrawer"
+import useItemDrawer from "@/components/collections/hooks/useItemDrawer"
 import { Button } from "@/components/ui/button"
 import { Drawer, DrawerContent } from "@/components/ui/drawer"
 import type { GameRecord } from "@/types/videoGames"
 import GameDrawerContent from "./GameDrawerContent"
 import GameList from "./GameList"
-import useConsoleLabels from "./useConsoleLabels"
+import useConsoleLabels from "./hooks/useConsoleLabels"
 
 interface GameManagerProps {
   collectionId: number

@@ -1,9 +1,9 @@
 import type { Collection } from "@/types/collections"
-import { useCurrentUser } from "@/components/auth/useAuthQueries"
+import { useCurrentUser } from "@/components/auth/hooks/useAuthQueries"
 import { canWriteCollection, isSandbox } from "@/lib/permissions"
 import ConsoleManager from "./ConsoleManager"
 import GameManager from "./GameManager"
-import useVideoGamesCollection from "./useVideoGamesCollection"
+import useVideoGamesCollection from "./hooks/useVideoGamesCollection"
 
 interface VideoGamesWorkspaceProps {
   collection: Collection

@@ -210,7 +210,10 @@ cached copy.
 - Keep pages structural. `Home` and other route pages compose feature components and must not own collection fetching, selection, or item CRUD.
 - Organize by feature/domain. Keep related components, hooks, API functions,
   and types easy to locate, but do not force unrelated responsibilities into
-  one file or folder. Share code only when it is genuinely shared.
+  one file or folder. Share code only when it is genuinely shared. A
+  feature's hooks live in its `hooks/` folder
+  (`components/collections/hooks/`); hooks shared across features live in
+  `src/hooks/` (decided 2026-11-06).
 - When repeated component styles emerge across several instances, extract
   them into a reusable component when the behavior and semantics are also
   shared. Avoid premature abstraction for one-off or merely similar styling.

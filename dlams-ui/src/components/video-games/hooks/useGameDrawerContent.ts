@@ -6,7 +6,7 @@ import { useForm } from "react-hook-form"
 import { gamesApi } from "@/lib/api/games"
 import { gameFormSchema, type GameFormValues } from "@/schemas/games"
 import type { GameCreate, GameRecord } from "@/types/videoGames"
-import { invalidateVideoGameCollection } from "./invalidateVideoGameCollection"
+import { invalidateVideoGameCollection } from "../invalidateVideoGameCollection"
 
 interface UseGameDrawerContentOptions {
   collectionId: number

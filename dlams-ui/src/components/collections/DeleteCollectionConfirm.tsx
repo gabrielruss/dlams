@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query"
 
-import useVideoGameCollectionStats from "@/components/video-games/useVideoGameCollectionStats"
+import useVideoGameCollectionStats from "@/components/video-games/hooks/useVideoGameCollectionStats"
 import { Button } from "@/components/ui/button"
 import { linkListQueryOptions } from "@/lib/api/collectionLinks"
 import type { Collection } from "@/types/collections"

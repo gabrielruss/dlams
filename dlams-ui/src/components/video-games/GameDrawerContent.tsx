@@ -6,7 +6,7 @@ import { DrawerClose, DrawerHeader, DrawerTitle } from "@/components/ui/drawer"
 import type { GameRecord } from "@/types/videoGames"
 import GameDetails from "./GameDetails"
 import GameForm from "./GameForm"
-import useGameDrawerContent from "./useGameDrawerContent"
+import useGameDrawerContent from "./hooks/useGameDrawerContent"
 
 interface GameDrawerContentProps {
   collectionId: number

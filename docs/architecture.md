@@ -227,15 +227,16 @@ dlams-ui/src/
   App.tsx, main.tsx          routing, providers
   pages/                     Home, Login, Register, AdminUsers,
                              SharedCollection (the /s/:token link page)
+  hooks/                     shared hooks (useFitOnResize)
   components/
     AppSidebar.tsx           collections, invite drawer, admin link, logout
     auth/                    login/register forms, invite drawer, auth hooks
     admin/                   user management table and hook
     collections/             navigation, workspace dispatch, stats, the Create,
                              Share, and Edit collection drawers, ListRow (the item
-                             row any type uses), useItemDrawer and
-                             useOpenItem (what's open), ItemActions and
-                             ItemDetailRows
+                             row any type uses), ItemActions and ItemDetailRows;
+                             hooks/ has useItemDrawer and useOpenItem (what's
+                             open)
     search/                  search bar, results panel, matcher, hooks
     video-games/             console and game managers, drawer content,
                              forms, details, workspace, hooks
@@ -247,7 +248,8 @@ dlams-ui/src/
   test/                      test setup, MSW server, renderApp, axe helper
 ```
 
-Tests (`*.test.tsx`) sit beside the feature they cover.
+Each feature keeps its hooks in a `hooks/` folder inside it. Tests
+(`*.test.tsx`) sit beside the code they cover.
 
 Forms open in right-side drawers. Every drawer has the same layout: a
 header with the title and Close only; item actions (Delete, with its trash icon)
@@ -268,7 +270,7 @@ bar with a menu button that opens the same contents in a left drawer
 (`components/AppSidebar.tsx`). The login page draws a decorative "DON'T LOOK
 AT MY STUFF" logo (`components/BrandLogo.tsx`): behind the card on wide screens
 and above it on phones. Both fitted components share the
-`components/useFitOnResize.ts` hook; the
+`hooks/useFitOnResize.ts` hook; the
 app font is Fira Code and brand colors `teal` and `red` are theme tokens in
 `index.css` (`red` marks the selected collection and the logo D; `teal` is
 unused). The access badge on each sidebar row is a black pill with white text.
@@ -342,5 +344,5 @@ styling changes need approval (see the conventions file for the rule).
 | A server-data hook | `dlams-ui/src/components/<feature>/use*.ts` and `lib/api/` |
 | What a collection type renders | `components/collections/collectionWorkspaceResolver.ts` |
 | Search | `dlams-ui/src/components/search/`, `app/collections/item_routes.py` and `video_games_items.py` |
-| How an item's drawer opens and closes | `components/collections/useItemDrawer.ts`, `useOpenItem.ts`, `lib/urlParams.ts`; what it shows: `components/video-games/*DrawerContent*` |
+| How an item's drawer opens and closes | `components/collections/hooks/useItemDrawer.ts`, `useOpenItem.ts`, `lib/urlParams.ts`; what it shows: `components/video-games/*DrawerContent*` |
 | Dev or deploy wiring | `dlams-deployment/`, root `Makefile`, `.github/workflows/deploy.yml` |

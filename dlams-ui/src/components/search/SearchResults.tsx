@@ -4,8 +4,8 @@ import ListRow from "@/components/collections/ListRow"
 import { Button } from "@/components/ui/button"
 import type { OwnedItem } from "@/types/items"
 import { buildSearchEntries, searchEntries } from "./searchEntries"
-import useOwnedItems from "./useOwnedItems"
-import useSearchMode from "./useSearchMode"
+import useOwnedItems from "./hooks/useOwnedItems"
+import useSearchMode from "./hooks/useSearchMode"
 
 const MAX_RESULTS = 50
 

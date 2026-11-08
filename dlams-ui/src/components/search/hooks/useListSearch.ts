@@ -4,7 +4,7 @@ import {
   buildSearchEntries,
   searchEntries,
   type Searchable,
-} from "./searchEntries"
+} from "../searchEntries"
 
 function useListSearch<T>(
   items: T[],

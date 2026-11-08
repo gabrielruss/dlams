@@ -20,7 +20,7 @@ import {
 } from "@/schemas/collections"
 import type { Collection } from "@/types/collections"
 import DeleteCollectionConfirm from "./DeleteCollectionConfirm"
-import useManageCollection from "./useManageCollection"
+import useManageCollection from "./hooks/useManageCollection"
 
 interface EditCollectionDrawerProps {
   collection: Collection
