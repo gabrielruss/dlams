@@ -288,6 +288,26 @@ describe("video game collection access", () => {
       expect(dayButton(calendar, new Date(2026, 9, 29))).toHaveFocus()
     })
 
+    it("reaches the year and month dropdowns with the keyboard", async () => {
+      signInWithCollection("owner")
+
+      const { user, calendar } = await openPicker()
+      await waitFor(() =>
+        expect(dayButton(calendar, new Date(2026, 10, 6))).toHaveFocus(),
+      )
+      await user.tab({ shift: true })
+      expect(
+        screen.getByRole("combobox", { name: "Choose the Year", hidden: true }),
+      ).toHaveFocus()
+      await user.tab({ shift: true })
+      expect(
+        screen.getByRole("combobox", {
+          name: "Choose the Month",
+          hidden: true,
+        }),
+      ).toHaveFocus()
+    })
+
     it("has no accessibility violations with the calendar open", async () => {
       signInWithCollection("owner")
 
@@ -588,7 +608,9 @@ describe("video game collection access", () => {
     addGame.focus()
     await user.keyboard("{Enter}")
     const drawer = await screen.findByRole("dialog")
-    expect(within(drawer).getByLabelText("Game name")).toHaveFocus()
+    await waitFor(() =>
+      expect(within(drawer).getByLabelText("Game name")).toHaveFocus(),
+    )
     await user.keyboard("{Escape}")
 
     await waitFor(() => expect(addGame).toHaveFocus())
