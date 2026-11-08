@@ -44,7 +44,11 @@ Applies across the DLAMS workspace. Project-local conventions take precedence wh
     generated file makes the ref to focus the active day but never attaches
     it (react-day-picker's own `DayButton` does). If it is lost, arrow keys
     stop moving between days and the calendar no longer opens on today; the
-    last played picker tests fail.
+    last played picker tests fail. shadcn's `bases/radix` calendar has it.
+  - `dropdown_root` adds `has-focus:ring-[3px] has-focus:ring-ring/50`
+    (2026-11-08, from shadcn's `new-york-v4` calendar). The month and year
+    controls are transparent native `<select>`s, so without it their focus
+    is invisible. Tests do not catch a lost ring; check by tabbing.
 - Re-running the CLI overwrites the generated file (for example it restored
   `buttonVariants` in `button.tsx` and moved it to the `radix-ui` package). The
   `react-refresh/only-export-components` lint rule is off under

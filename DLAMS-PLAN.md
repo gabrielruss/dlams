@@ -566,6 +566,12 @@ In order. Items 1 to 7 are the path to the portfolio milestone.
         generated `CalendarDayButton` never attached its focus `ref`. Now a
         logged local edit (`ref={ref}`); tests cover opening on today and the
         arrow keys. Owner-checked in a browser 2026-11-07.
+     9. **Missed by the audit, found by the owner 2026-11-08; fixed.** The
+        calendar's month and year dropdowns took focus but showed no ring
+        (transparent native `<select>`s over the label), so they looked
+        unreachable. The Playwright pass never tabbed inside the open
+        calendar. Ring added in `calendar.tsx` (logged local edit); a test
+        covers reaching them with Shift+Tab. Not yet checked in a browser.
    - Not ours, or false positives: the login backdrop letters fail contrast
      but are decorative and `aria-hidden`; Base UI's focus-guard spans fail
      `aria-command-name`; react-day-picker day buttons fail label-in-name
