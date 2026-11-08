@@ -3,6 +3,7 @@ import { Link } from "react-router-dom"
 
 import AppSidebar from "@/components/AppSidebar"
 import UserManagement from "@/components/admin/UserManagement"
+import { routes } from "@/lib/routes"
 
 function AdminUsers() {
   return (
@@ -12,7 +13,7 @@ function AdminUsers() {
         <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 p-4 md:p-6">
           <Link
             className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"
-            to="/"
+            to={routes.home}
           >
             <ArrowLeft aria-hidden="true" className="size-4" />
             Back to collections

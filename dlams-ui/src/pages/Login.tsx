@@ -12,6 +12,7 @@ import {
   useStartDemoSession,
 } from "@/components/auth/hooks/useAuthQueries"
 import BrandLogo from "@/components/BrandLogo"
+import { routes } from "@/lib/routes"
 
 function Login() {
   const navigate = useNavigate()
@@ -28,7 +29,7 @@ function Login() {
 
   const onFormSubmit = (data: LoginFormValues) => {
     demoSessionMutation.reset()
-    loginMutation.mutate(data, { onSuccess: () => navigate("/") })
+    loginMutation.mutate(data, { onSuccess: () => navigate(routes.home) })
   }
 
   const isBusy =
@@ -39,7 +40,9 @@ function Login() {
 
   const onDemoClick = () => {
     loginMutation.reset()
-    demoSessionMutation.mutate(undefined, { onSuccess: () => navigate("/") })
+    demoSessionMutation.mutate(undefined, {
+      onSuccess: () => navigate(routes.home),
+    })
   }
 
   return (
@@ -116,7 +119,7 @@ function Login() {
             </Button>
             <p className="text-center text-sm">
               Have an invitation?{" "}
-              <Link className="underline" to="/register">
+              <Link className="underline" to={routes.register}>
                 Create an account
               </Link>
             </p>

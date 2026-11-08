@@ -1,6 +1,7 @@
 import { apiRequest } from "./client"
 import { queryOptions } from "@tanstack/react-query"
 import type { CollectionLink } from "@/types/collections"
+import { sharedCollectionPath } from "@/lib/routes"
 
 export const MAX_LINKS_PER_COLLECTION = 5
 
@@ -32,4 +33,4 @@ export const linkListQueryOptions = (collectionId: number) =>
   })
 
 export const shareLinkUrl = (token: string) =>
-  `${window.location.origin}/s/${token}`
+  `${window.location.origin}${sharedCollectionPath(token)}`

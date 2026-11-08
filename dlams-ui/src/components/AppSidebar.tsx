@@ -11,6 +11,7 @@ import {
   useLogout,
 } from "@/components/auth/hooks/useAuthQueries"
 import { isAdmin } from "@/lib/permissions"
+import { routes } from "@/lib/routes"
 
 interface AppSidebarProps {
   children?: ReactNode
@@ -40,7 +41,7 @@ function AppSidebar({ children }: AppSidebarProps) {
                 variant: "ghost",
                 className: "w-full justify-start aria-[current=page]:bg-accent",
               })}
-              to="/admin/users"
+              to={routes.adminUsers}
             >
               <Users aria-hidden="true" />
               Manage users
