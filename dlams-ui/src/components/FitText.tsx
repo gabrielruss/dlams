@@ -1,6 +1,6 @@
 import { useCallback, useRef, type ReactNode } from "react"
 
-import { MEASURE_SIZE, useFitOnResize } from "./useFitOnResize"
+import { MEASURE_SIZE, useFitOnResize } from "../hooks/useFitOnResize"
 
 interface FitTextProps {
   className?: string

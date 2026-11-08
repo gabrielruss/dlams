@@ -214,7 +214,10 @@ cached copy.
 - Keep pages structural. `Home` and other route pages compose feature components and must not own collection fetching, selection, or item CRUD.
 - Organize by feature/domain. Keep related components, hooks, API functions,
   and types easy to locate, but do not force unrelated responsibilities into
-  one file or folder. Share code only when it is genuinely shared.
+  one file or folder. Share code only when it is genuinely shared. A
+  feature's hooks live in its `hooks/` folder
+  (`components/collections/hooks/`); hooks shared across features live in
+  `src/hooks/` (decided 2026-11-06).
 - When repeated component styles emerge across several instances, extract
   them into a reusable component when the behavior and semantics are also
   shared. Avoid premature abstraction for one-off or merely similar styling.
@@ -262,7 +265,9 @@ cached copy.
   `error`. Not the raw query result, and not a bare value that drops the
   loading and error state. If the name is hard to match, the hook is
   probably doing two jobs: split it rather than stretch the name (decided
-  2026-11-02; older hooks are converted in plan item 6e).
+  2026-11-02; every query hook follows it since 2026-11-07). The returned
+  object loses TanStack's type narrowing, so guard `error.message` with
+  `error &&`, not `isError &&`.
 - Mutations invalidate the affected keys in `onSuccess` (return the promise).
   Await invalidations so the mutation remains pending until affected views
   have refreshed. Changes to sharing or grants must invalidate both the

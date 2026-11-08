@@ -1,6 +1,6 @@
 import { Route, Routes, Navigate } from "react-router-dom"
 import { AdminUsers, Register, Login, Home, SharedCollection } from "./pages"
-import { useCurrentUser } from "./components/auth/useAuthQueries"
+import { useCurrentUser } from "./components/auth/hooks/useAuthQueries"
 import { Button } from "./components/ui/button"
 import { isAdmin } from "./lib/permissions"
 
@@ -14,21 +14,20 @@ function App() {
 }
 
 function SessionRoutes() {
-  const currentUserQuery = useCurrentUser()
-  const user = currentUserQuery.data
+  const { currentUser, isPending, error, refetch } = useCurrentUser()
 
-  if (currentUserQuery.isPending) return <p>Checking session...</p>
-  if (currentUserQuery.isError) {
+  if (isPending) return <p>Checking session...</p>
+  if (error) {
     return (
       <main className="p-6">
         <p role="alert" className="text-destructive">
-          Could not verify your session: {currentUserQuery.error.message}
+          Could not verify your session: {error.message}
         </p>
         <Button
           className="mt-3"
           type="button"
           variant="outline"
-          onClick={() => currentUserQuery.refetch()}
+          onClick={() => refetch()}
         >
           Retry
         </Button>
@@ -40,14 +39,14 @@ function SessionRoutes() {
     <Routes>
       <Route
         path="/"
-        element={user ? <Home /> : <Navigate to="/login" replace />}
+        element={currentUser ? <Home /> : <Navigate to="/login" replace />}
       />
       <Route
         path="/admin/users"
         element={
-          !user ? (
+          !currentUser ? (
             <Navigate to="/login" replace />
-          ) : isAdmin(user) ? (
+          ) : isAdmin(currentUser) ? (
             <AdminUsers />
           ) : (
             <Navigate to="/" replace />
@@ -56,11 +55,11 @@ function SessionRoutes() {
       />
       <Route
         path="/login"
-        element={user ? <Navigate to="/" replace /> : <Login />}
+        element={currentUser ? <Navigate to="/" replace /> : <Login />}
       />
       <Route
         path="/register"
-        element={user ? <Navigate to="/" replace /> : <Register />}
+        element={currentUser ? <Navigate to="/" replace /> : <Register />}
       />
     </Routes>
   )

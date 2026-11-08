@@ -11,6 +11,7 @@ function useVideoGamesCollection(collectionId: number) {
     consoles: consolesQuery.data?.consoles ?? [],
     games: gamesQuery.data?.games ?? [],
     isPending: consolesQuery.isPending || gamesQuery.isPending,
+    isError: consolesQuery.isError || gamesQuery.isError,
     error: consolesQuery.error ?? gamesQuery.error,
   }
 }

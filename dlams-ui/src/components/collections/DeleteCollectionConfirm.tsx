@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query"
 
-import useVideoGameCollectionStats from "@/components/video-games/useVideoGameCollectionStats"
+import useVideoGameCollectionStats from "@/components/video-games/hooks/useVideoGameCollectionStats"
 import { Button } from "@/components/ui/button"
 import { linkListQueryOptions } from "@/lib/api/collectionLinks"
 import type { Collection } from "@/types/collections"
@@ -36,18 +36,20 @@ function DeleteCollectionConfirm({
   onDelete,
   onKeep,
 }: DeleteCollectionConfirmProps) {
-  const { data: stats, isPending: statsPending } = useVideoGameCollectionStats(
-    collection.id,
-  )
+  const { collectionStats, isPending: statsPending } =
+    useVideoGameCollectionStats(collection.id)
   const { data: linkData, isPending: linksPending } = useQuery(
     linkListQueryOptions(collection.id),
   )
   const isCounting = statsPending || linksPending
-  const countsLoaded = stats !== undefined && linkData !== undefined
+  const countsLoaded = collectionStats !== undefined && linkData !== undefined
 
   const contents = describeContents([
-    { count: stats?.console_count ?? 0, names: itemTypeNames.console },
-    { count: stats?.game_count ?? 0, names: itemTypeNames.game },
+    {
+      count: collectionStats?.console_count ?? 0,
+      names: itemTypeNames.console,
+    },
+    { count: collectionStats?.game_count ?? 0, names: itemTypeNames.game },
     { count: linkData?.links.length ?? 0, names: shareLinkNames },
   ])
 

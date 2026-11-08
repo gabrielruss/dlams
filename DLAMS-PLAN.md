@@ -6,42 +6,35 @@ The current state of the project. For why things are the way they are, see
 [`docs/decisions.md`](./docs/decisions.md). For the full history up to
 2026-10-09, see [`docs/archive/`](./docs/archive/).
 
-## Where we left off (2026-11-06)
+## Where we left off (2026-11-07)
 
 Start here in a new session. This block is rewritten at the end of a session,
 never appended to. History lives in git and `docs/decisions.md`.
 
-- **Status.** PR #18 (`shadcn-everywhere`: the bug-fix batch and 6a) is
-  merged to `main` and deployed; the owner checked it ("looks great").
-  Run `git status` and `git log` first: the owner commits and pushes
-  everything, and a push to `main` deploys (docs included).
-- **What was done this session (2026-11-06):**
-  - Bug-fix batch (16): last played shown as `MM-DD-YYYY`; every
-    placeholder 14px (`::placeholder` in `index.css`); no future last
-    played dates (API `LastPlayedDate`, form); date helpers in
-    `lib/dates.ts` on `date-fns` and `app/dates.py`. The combobox
-    `Add "name"` bug was skipped (may be gone since Base UI).
-  - 6a in code: no raw form element is left (the consistency check
-    prints nothing); every form uses zod + `Controller` + `Field`. The
-    owner installed `select`, `checkbox`, `calendar`, `popover` (adds
-    `react-day-picker` 10 and `date-fns` 4). New: `ConditionSelect`,
-    `LastPlayedPicker` (shadcn date picker, future days disabled),
-    `schemas/games.ts`, `schemas/consoles.ts`.
-  - Buttons made consistent: every button is 36px (default or `icon`; no
-    `sm`), every Close is `outline`, a delete starts red-outlined, main
-    actions are the default `Button` with no extra classes. Rules are in
-    the conventions file.
-  - Decided, not built: one package per collection type nested under
-    `collections` (`app/collections/video_games/`), logged in 6d and
-    `docs/decisions.md`.
-- **What is verified.** Run by Claude on `shadcn-everywhere`: 77 UI tests
-  (12 files), typecheck, lint, format check, build; 95 backend tests and
-  Ruff on `bug-fix-batch`. Owner-checked in the browser: the game form,
-  the date picker, the Condition select's position and size. **Not yet
-  checked in a browser:** the console form, the sidebar rows (red bar,
-  hover, focus ring), creating a collection with an empty name, the
-  invite drawer, the Login hover, Delete link, the 36px Close and admin
-  buttons; and in the Simulator, that drawer fields no longer zoom.
+- **Status.** On `main`: PR #19 (accessibility audit) and PR #20 (calendar
+  dropdown focus ring). Branch `hook-consistency` holds checkpoint step 3:
+  the hook shapes (`f8bc31b`, pushed) and the hooks folder move (in the
+  working tree). Run `git status` and `git log` first: the owner commits
+  and pushes everything, and a push to `main` deploys (docs included).
+- **What was done (2026-11-06 to 11-07):**
+  - New "Checkpoint: interview 1" (due Tuesday 2026-11-10, 4 PM): no new
+    features, frontend cleanup only; backend (6d) waits.
+  - New favicon (`public/favicon.svg`, `favicon-32.png`).
+  - Accessibility: axe checks for the 6a controls; a Playwright pass in
+    WebKit and Firefox (scripts kept out of the repo); fixed focus return
+    for Add game and New collection (Base UI `initialFocus` with refs),
+    the calendar (logged `ref={ref}` edit in `components/ui/calendar.tsx`;
+    it opens on today and arrow keys work), label-in-name (`HomeLink`,
+    `ListRow`), `aria-expanded` on Open menu, and search opening on typing
+    instead of on focus. Findings and owner decisions are under item 6.
+- **What is verified.** Run by Claude on `interview-1-cleanup`: 87 UI
+  tests, typecheck, lint, format check, build. Owner-checked in a browser:
+  keyboard use, the calendar. Not checked: VoiceOver and the Simulator
+  (owner's pass), and an empty Save still focusing the name field after
+  the ref change.
+- **Local test data:** the local account `delete-me` has two collections,
+  one console, and one game added by the Playwright pass. Demo sandboxes
+  are capped at 10 locally; reuse one session when scripting.
 - **Next:** the "Checkpoint: interview 1" list below; no new features
   until it is done.
 - **Waiting on the owner:** in 6d, whether to drop the `response_model`s
@@ -352,11 +345,19 @@ this order; everything else under "Next up" waits.
    the owner's keyboard, VoiceOver, 200% zoom, and phone-menu pass, and the
    `--ring` decision.
 2. Repeated styling (6b), then styling cleanup (6c).
-3. Frontend hook consistency (6e), then move each feature's hooks into a
-   `hooks/` folder inside it (`components/collections/hooks/`); the shared
-   `useFitOnResize` goes to `src/hooks/`. Moves only, with `git mv`, as
-   their own step (owner, 2026-11-06).
-4. Known issues that show in a walkthrough: the "[object Object]" 422
+3. **Done 2026-11-08 on `hook-consistency`.** Frontend hook consistency
+   (6e): every query hook returns the standard shape (first commit,
+   `f8bc31b`); then each feature's hooks moved into its `hooks/` folder and
+   `useFitOnResize` to `src/hooks/` (second commit, moves and imports only).
+   Left as is (owner): `useCollections` does three jobs; `useItemDrawer`
+   keeps its UI name because it is accurate.
+4. Route paths in one place (owner, 2026-11-08; own branch): the five app
+   paths are typed as strings 19 times (`App.tsx`, pages, `AppSidebar`,
+   `HomeLink`), and the share and invite links build URLs by hand. Add
+   `lib/routes.ts` with an `as const` object (`routes.login`, ...) and
+   `sharedCollectionPath(token)`, like `lib/urlParams.ts`. Not an `enum`:
+   `erasableSyntaxOnly` forbids them.
+5. Known issues that show in a walkthrough: the "[object Object]" 422
    message, the large-chunk build warning, deploy not gated on CI, the
    orphaned `dlams-fastapi/.env.example`.
 
@@ -561,7 +562,7 @@ In order. Items 1 to 7 are the path to the portfolio milestone.
         Loose"), and tests match row names by prefix.
      6. **Fixed 2026-11-06.** "Open menu" has `aria-expanded`.
      7. The Select's highlighted option is only a faint background (about
-        1.1:1), no outline. Styling, owner's call.
+        1.1:1), no outline. Skipped for now (owner, 2026-11-07).
      8. **Fixed 2026-11-07.** Arrow keys did not move between days: the
         generated `CalendarDayButton` never attached its focus `ref`. Now a
         logged local edit (`ref={ref}`); tests cover opening on today and the

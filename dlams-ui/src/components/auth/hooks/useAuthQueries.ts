@@ -3,7 +3,11 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { authApi, authKeys, currentUserQueryOptions } from "@/lib/api/auth"
 
 export function useCurrentUser() {
-  return useQuery(currentUserQueryOptions())
+  const { data, isPending, isError, error, refetch } = useQuery(
+    currentUserQueryOptions(),
+  )
+
+  return { currentUser: data ?? null, isPending, isError, error, refetch }
 }
 
 export function useLogin() {

@@ -1,5 +1,5 @@
 import SearchField from "./SearchField"
-import useSearchMode from "./useSearchMode"
+import useSearchMode from "./hooks/useSearchMode"
 
 function SearchBar() {
   const { query, setQuery, close } = useSearchMode()

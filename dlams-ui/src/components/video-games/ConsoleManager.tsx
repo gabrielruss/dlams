@@ -1,10 +1,10 @@
-import useItemDrawer from "@/components/collections/useItemDrawer"
+import useItemDrawer from "@/components/collections/hooks/useItemDrawer"
 import { Button } from "@/components/ui/button"
 import { Drawer, DrawerContent } from "@/components/ui/drawer"
 import type { ConsoleRecord } from "@/types/videoGames"
 import ConsoleDrawerContent from "./ConsoleDrawerContent"
 import ConsoleList from "./ConsoleList"
-import useConsoleLabels from "./useConsoleLabels"
+import useConsoleLabels from "./hooks/useConsoleLabels"
 
 interface ConsoleManagerProps {
   collectionId: number
@@ -24,7 +24,7 @@ function ConsoleManager({
     startAdding,
     close,
   } = useItemDrawer({ type: "console", items: consoles })
-  const consoleLabelOptions = useConsoleLabels(canWrite)
+  const { consoleLabels } = useConsoleLabels(canWrite)
 
   return (
     <section className="flex flex-col gap-4 rounded-lg border p-4">
@@ -48,7 +48,7 @@ function ConsoleManager({
             <ConsoleDrawerContent
               collectionId={collectionId}
               openedConsole={openedConsole}
-              consoleLabelOptions={consoleLabelOptions}
+              consoleLabelOptions={consoleLabels}
               onClose={close}
             />
           </DrawerContent>

@@ -7,7 +7,10 @@ import { Link, useNavigate } from "react-router-dom"
 import { Field, FieldError, FieldLabel } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { useLogin, useStartDemoSession } from "@/components/auth/useAuthQueries"
+import {
+  useLogin,
+  useStartDemoSession,
+} from "@/components/auth/hooks/useAuthQueries"
 import BrandLogo from "@/components/BrandLogo"
 
 function Login() {

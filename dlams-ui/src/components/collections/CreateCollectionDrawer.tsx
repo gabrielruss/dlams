@@ -16,7 +16,7 @@ import {
   collectionNameSchema,
   type CollectionNameFormValues,
 } from "@/schemas/collections"
-import useCollections from "./useCollections"
+import useCollections from "./hooks/useCollections"
 
 interface CreateCollectionDrawerProps {
   renderTrigger: (open: () => void) => ReactNode

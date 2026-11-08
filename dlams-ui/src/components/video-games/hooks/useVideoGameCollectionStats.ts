@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query"
 import { videoGameCollectionStatsQueryOptions } from "@/lib/api/videoGameStats"
 
 function useVideoGameCollectionStats(collectionId: number) {
-  return useQuery({
+  const { data, isPending, isError, error } = useQuery({
     ...videoGameCollectionStatsQueryOptions(),
     select: ({ stats }) => {
       return stats.find(
@@ -11,6 +11,8 @@ function useVideoGameCollectionStats(collectionId: number) {
       )
     },
   })
+
+  return { collectionStats: data, isPending, isError, error }
 }
 
 export default useVideoGameCollectionStats

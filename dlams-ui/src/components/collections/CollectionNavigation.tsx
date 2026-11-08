@@ -1,17 +1,18 @@
 import { Plus } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
-import useSearchMode from "@/components/search/useSearchMode"
+import useSearchMode from "@/components/search/hooks/useSearchMode"
 import CollectionStats from "./CollectionStats"
 import CreateCollectionDrawer from "./CreateCollectionDrawer"
-import useCollections from "./useCollections"
+import useCollections from "./hooks/useCollections"
 
 function CollectionNavigation() {
   const {
     collections,
     selectedCollectionId,
     setSelectedCollectionId,
-    collectionsQuery,
+    isPending,
+    error,
   } = useCollections()
   const { isOpen: isSearching } = useSearchMode()
 
@@ -38,13 +39,13 @@ function CollectionNavigation() {
         />
       </div>
 
-      {collectionsQuery.isError && (
+      {error && (
         <p role="alert" className="px-3 pb-2 text-xs text-destructive">
-          {collectionsQuery.error.message}
+          {error.message}
         </p>
       )}
 
-      {collectionsQuery.isPending ? (
+      {isPending ? (
         <p className="px-3 py-2 text-sm text-muted-foreground">
           Loading collections...
         </p>

@@ -5,7 +5,7 @@ import { resolveCollectionWorkspace } from "./collectionWorkspaceResolver"
 import CreateCollectionDrawer from "./CreateCollectionDrawer"
 import EditCollectionDrawer from "./EditCollectionDrawer"
 import ShareCollectionDrawer from "./ShareCollectionDrawer"
-import useCollections from "./useCollections"
+import useCollections from "./hooks/useCollections"
 
 interface CollectionBodyProps {
   isPending: boolean
@@ -42,7 +42,7 @@ function CollectionBody({ isPending, collection }: CollectionBodyProps) {
 }
 
 function CollectionWorkspace() {
-  const { selectedCollection, collectionsQuery } = useCollections()
+  const { selectedCollection, isPending, error } = useCollections()
   const collection = selectedCollection
   const canWrite =
     collection !== undefined && canWriteCollection(collection.access)
@@ -60,18 +60,15 @@ function CollectionWorkspace() {
           </div>
         )}
       </header>
-      {collectionsQuery.isError && (
+      {error && (
         <p
           role="alert"
           className="rounded-md border border-destructive p-3 text-sm"
         >
-          {collectionsQuery.error.message}
+          {error.message}
         </p>
       )}
-      <CollectionBody
-        isPending={collectionsQuery.isPending}
-        collection={collection}
-      />
+      <CollectionBody isPending={isPending} collection={collection} />
     </section>
   )
 }

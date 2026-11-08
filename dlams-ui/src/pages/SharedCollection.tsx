@@ -4,7 +4,7 @@ import { useParams } from "react-router-dom"
 
 import HomeLink from "@/components/HomeLink"
 import SearchField from "@/components/search/SearchField"
-import useListSearch from "@/components/search/useListSearch"
+import useListSearch from "@/components/search/hooks/useListSearch"
 import ConsoleList from "@/components/video-games/ConsoleList"
 import GameList from "@/components/video-games/GameList"
 import {

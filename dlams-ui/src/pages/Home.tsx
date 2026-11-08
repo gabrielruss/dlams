@@ -3,7 +3,7 @@ import AppSidebar from "@/components/AppSidebar"
 import CollectionNavigation from "@/components/collections/CollectionNavigation"
 import SearchBar from "@/components/search/SearchBar"
 import SearchResults from "@/components/search/SearchResults"
-import useSearchMode from "@/components/search/useSearchMode"
+import useSearchMode from "@/components/search/hooks/useSearchMode"
 
 function Home() {
   const { isOpen: isSearching } = useSearchMode()

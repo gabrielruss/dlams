@@ -4,7 +4,7 @@ import { DrawerClose, DrawerHeader, DrawerTitle } from "@/components/ui/drawer"
 import type { ConsoleRecord } from "@/types/videoGames"
 import ConsoleDetails from "./ConsoleDetails"
 import ConsoleForm from "./ConsoleForm"
-import useConsoleDrawerContent from "./useConsoleDrawerContent"
+import useConsoleDrawerContent from "./hooks/useConsoleDrawerContent"
 
 interface ConsoleDrawerContentProps {
   collectionId: number

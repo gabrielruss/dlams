@@ -10,7 +10,7 @@ import {
   linkNameSchema,
   type LinkNameFormValues,
 } from "@/schemas/collectionLinks"
-import type useCollectionLinks from "./useCollectionLinks"
+import type useCollectionLinks from "./hooks/useCollectionLinks"
 
 interface CreateLinkFormProps {
   createMutation: ReturnType<typeof useCollectionLinks>["createMutation"]

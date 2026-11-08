@@ -6,7 +6,7 @@ import { useForm } from "react-hook-form"
 import { consolesApi } from "@/lib/api/consoles"
 import { consoleFormSchema, type ConsoleFormValues } from "@/schemas/consoles"
 import type { ConsoleCreate, ConsoleRecord } from "@/types/videoGames"
-import { invalidateVideoGameCollection } from "./invalidateVideoGameCollection"
+import { invalidateVideoGameCollection } from "../invalidateVideoGameCollection"
 
 interface UseConsoleDrawerContentOptions {
   collectionId: number

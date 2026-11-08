@@ -1,6 +1,6 @@
 import { useCallback, useRef } from "react"
 
-import { MEASURE_SIZE, useFitOnResize } from "./useFitOnResize"
+import { MEASURE_SIZE, useFitOnResize } from "../hooks/useFitOnResize"
 
 const SIDE_WORD = "DON'T"
 const LINES = ["LOOK", "AT MY", "STUFF"]

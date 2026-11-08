@@ -1,12 +1,12 @@
 import { useRef } from "react"
 
-import useItemDrawer from "@/components/collections/useItemDrawer"
+import useItemDrawer from "@/components/collections/hooks/useItemDrawer"
 import { Button } from "@/components/ui/button"
 import { Drawer, DrawerContent } from "@/components/ui/drawer"
 import type { GameRecord } from "@/types/videoGames"
 import GameDrawerContent from "./GameDrawerContent"
 import GameList from "./GameList"
-import useConsoleLabels from "./useConsoleLabels"
+import useConsoleLabels from "./hooks/useConsoleLabels"
 
 interface GameManagerProps {
   collectionId: number
@@ -22,7 +22,7 @@ function GameManager({ collectionId, games, canWrite }: GameManagerProps) {
     startAdding,
     close,
   } = useItemDrawer({ type: "game", items: games })
-  const consoleLabelOptions = useConsoleLabels(canWrite)
+  const { consoleLabels } = useConsoleLabels(canWrite)
   const gameNameInputRef = useRef<HTMLInputElement>(null)
 
   return (
@@ -47,7 +47,7 @@ function GameManager({ collectionId, games, canWrite }: GameManagerProps) {
             <GameDrawerContent
               collectionId={collectionId}
               openedGame={openedGame}
-              consoleLabelOptions={consoleLabelOptions}
+              consoleLabelOptions={consoleLabels}
               nameInputRef={gameNameInputRef}
               onClose={close}
             />

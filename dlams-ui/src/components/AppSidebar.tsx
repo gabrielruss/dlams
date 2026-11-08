@@ -6,7 +6,10 @@ import HomeLink from "@/components/HomeLink"
 import { Button, buttonVariants } from "@/components/ui/button"
 import { Drawer, DrawerContent, DrawerTitle } from "@/components/ui/drawer"
 import RegistrationInviteManager from "@/components/auth/RegistrationInviteManager"
-import { useCurrentUser, useLogout } from "@/components/auth/useAuthQueries"
+import {
+  useCurrentUser,
+  useLogout,
+} from "@/components/auth/hooks/useAuthQueries"
 import { isAdmin } from "@/lib/permissions"
 
 interface AppSidebarProps {
@@ -14,7 +17,7 @@ interface AppSidebarProps {
 }
 
 function AppSidebar({ children }: AppSidebarProps) {
-  const { data: user } = useCurrentUser()
+  const { currentUser } = useCurrentUser()
   const logoutMutation = useLogout()
 
   const location = useLocation()
@@ -27,9 +30,9 @@ function AppSidebar({ children }: AppSidebarProps) {
 
       <div className="mt-auto border-t p-3 sm:p-4">
         <p className="truncate px-2 pb-3 text-sm font-medium">
-          {user?.username}
+          {currentUser?.username}
         </p>
-        {isAdmin(user) && (
+        {isAdmin(currentUser) && (
           <>
             <RegistrationInviteManager />
             <NavLink
