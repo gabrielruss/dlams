@@ -22,7 +22,7 @@ function GameManager({ collectionId, games, canWrite }: GameManagerProps) {
     startAdding,
     close,
   } = useItemDrawer({ type: "game", items: games })
-  const consoleLabelOptions = useConsoleLabels(canWrite)
+  const { consoleLabels } = useConsoleLabels(canWrite)
   const gameNameInputRef = useRef<HTMLInputElement>(null)
 
   return (
@@ -47,7 +47,7 @@ function GameManager({ collectionId, games, canWrite }: GameManagerProps) {
             <GameDrawerContent
               collectionId={collectionId}
               openedGame={openedGame}
-              consoleLabelOptions={consoleLabelOptions}
+              consoleLabelOptions={consoleLabels}
               nameInputRef={gameNameInputRef}
               onClose={close}
             />

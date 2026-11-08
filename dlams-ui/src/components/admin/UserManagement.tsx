@@ -13,7 +13,7 @@ import {
 import useAdminUsers from "./useAdminUsers"
 
 function UserManagement() {
-  const { data: currentUser } = useCurrentUser()
+  const { currentUser } = useCurrentUser()
   const {
     users,
     isPending,

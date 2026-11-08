@@ -24,6 +24,7 @@ function useCollectionLinks(collectionId: number) {
   return {
     links: linksQuery.data?.links ?? [],
     isPending: linksQuery.isPending,
+    isError: linksQuery.isError,
     error: linksQuery.error,
     createMutation,
     deleteMutation,

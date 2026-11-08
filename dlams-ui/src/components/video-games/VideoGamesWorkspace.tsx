@@ -13,14 +13,14 @@ function VideoGamesWorkspace({ collection }: VideoGamesWorkspaceProps) {
   const { consoles, games, isPending, error } = useVideoGamesCollection(
     collection.id,
   )
-  const { data: user } = useCurrentUser()
+  const { currentUser } = useCurrentUser()
   const canWrite = canWriteCollection(collection.access)
 
   if (isPending) return <p>Loading collection items...</p>
 
   return (
     <div className="flex flex-col gap-5">
-      {isSandbox(user) && (
+      {isSandbox(currentUser) && (
         <p className="rounded-md border p-3 text-sm">
           You are currently in a demo session. All data you add will be reset in
           30 minutes. Enjoy :)

@@ -95,7 +95,9 @@ function useCollections() {
     selectedCollection,
     selectedCollectionId,
     setSelectedCollectionId,
-    collectionsQuery,
+    isPending: collectionsQuery.isPending,
+    isError: collectionsQuery.isError,
+    error: collectionsQuery.error,
     createCollectionMutation,
   }
 }

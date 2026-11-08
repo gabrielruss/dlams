@@ -14,7 +14,7 @@ interface AppSidebarProps {
 }
 
 function AppSidebar({ children }: AppSidebarProps) {
-  const { data: user } = useCurrentUser()
+  const { currentUser } = useCurrentUser()
   const logoutMutation = useLogout()
 
   const location = useLocation()
@@ -27,9 +27,9 @@ function AppSidebar({ children }: AppSidebarProps) {
 
       <div className="mt-auto border-t p-3 sm:p-4">
         <p className="truncate px-2 pb-3 text-sm font-medium">
-          {user?.username}
+          {currentUser?.username}
         </p>
-        {isAdmin(user) && (
+        {isAdmin(currentUser) && (
           <>
             <RegistrationInviteManager />
             <NavLink

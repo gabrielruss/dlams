@@ -24,7 +24,7 @@ function ConsoleManager({
     startAdding,
     close,
   } = useItemDrawer({ type: "console", items: consoles })
-  const consoleLabelOptions = useConsoleLabels(canWrite)
+  const { consoleLabels } = useConsoleLabels(canWrite)
 
   return (
     <section className="flex flex-col gap-4 rounded-lg border p-4">
@@ -48,7 +48,7 @@ function ConsoleManager({
             <ConsoleDrawerContent
               collectionId={collectionId}
               openedConsole={openedConsole}
-              consoleLabelOptions={consoleLabelOptions}
+              consoleLabelOptions={consoleLabels}
               onClose={close}
             />
           </DrawerContent>

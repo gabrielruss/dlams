@@ -8,14 +8,10 @@ interface VideoGameCollectionStatsProps {
 function VideoGameCollectionStats({
   collection,
 }: VideoGameCollectionStatsProps) {
-  const {
-    data: stats,
-    isPending,
-    isError,
-    error,
-  } = useVideoGameCollectionStats(collection.id)
+  const { collectionStats, isPending, isError, error } =
+    useVideoGameCollectionStats(collection.id)
 
-  if (!stats) {
+  if (!collectionStats) {
     return (
       <span
         className={
@@ -25,7 +21,7 @@ function VideoGameCollectionStats({
       >
         {isPending
           ? "Loading stats..."
-          : isError
+          : error
             ? `Stats unavailable: ${error.message}`
             : "Stats unavailable"}
       </span>
@@ -35,11 +31,12 @@ function VideoGameCollectionStats({
   return (
     <span className="flex flex-wrap gap-x-3 text-xs text-muted-foreground">
       <span>
-        {stats.game_count} {stats.game_count === 1 ? "game" : "games"}
+        {collectionStats.game_count}{" "}
+        {collectionStats.game_count === 1 ? "game" : "games"}
       </span>
       <span>
-        {stats.console_count}{" "}
-        {stats.console_count === 1 ? "console" : "consoles"}
+        {collectionStats.console_count}{" "}
+        {collectionStats.console_count === 1 ? "console" : "consoles"}
       </span>
     </span>
   )

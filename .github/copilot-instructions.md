@@ -258,7 +258,9 @@ cached copy.
   `error`. Not the raw query result, and not a bare value that drops the
   loading and error state. If the name is hard to match, the hook is
   probably doing two jobs: split it rather than stretch the name (decided
-  2026-11-02; older hooks are converted in plan item 6e).
+  2026-11-02; every query hook follows it since 2026-11-07). The returned
+  object loses TanStack's type narrowing, so guard `error.message` with
+  `error &&`, not `isError &&`.
 - Mutations invalidate the affected keys in `onSuccess` (return the promise).
   Await invalidations so the mutation remains pending until affected views
   have refreshed. Changes to sharing or grants must invalidate both the
