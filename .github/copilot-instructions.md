@@ -140,6 +140,9 @@ cached copy.
   up via a query. Prefer URL params (route or search params) for state that
   should survive refresh or be shareable. The selected collection ID is in
   the URL search params; collection data is queried by TanStack Query.
+  App paths come from `lib/routes.ts` (`routes.login`,
+  `sharedCollectionPath(token)`) and search param names from
+  `lib/urlParams.ts`; never type a path as a string (decided 2026-11-08).
 - **Auth**: the HTTP-only session cookie is managed by the browser/API; the
   current-user profile from the API is server state in TanStack Query.
 - **Form drafts**: keep in local component/form state (React Hook Form for

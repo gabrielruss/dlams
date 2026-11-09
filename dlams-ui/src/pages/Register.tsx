@@ -9,6 +9,7 @@ import { Field, FieldError, FieldLabel } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import { useRegister } from "@/components/auth/hooks/useAuthQueries"
 import { registerSchema, type RegisterFormValues } from "@/schemas/auth"
+import { routes } from "@/lib/routes"
 
 function Register() {
   const registerMutation = useRegister()
@@ -59,7 +60,7 @@ function Register() {
           {registerMutation.isSuccess ? (
             <div className="flex flex-col gap-4">
               <p role="status">Account created. You can now log in.</p>
-              <Link className={buttonVariants()} to="/login">
+              <Link className={buttonVariants()} to={routes.login}>
                 Go to login
               </Link>
             </div>
@@ -166,7 +167,7 @@ function Register() {
                   : "Create account"}
               </Button>
               <p className="text-center text-sm">
-                <Link className="underline" to="/login">
+                <Link className="underline" to={routes.login}>
                   Back to login
                 </Link>
               </p>

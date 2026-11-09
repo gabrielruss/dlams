@@ -351,12 +351,13 @@ this order; everything else under "Next up" waits.
    `useFitOnResize` to `src/hooks/` (second commit, moves and imports only).
    Left as is (owner): `useCollections` does three jobs; `useItemDrawer`
    keeps its UI name because it is accurate.
-4. Route paths in one place (owner, 2026-11-08; own branch): the five app
-   paths are typed as strings 19 times (`App.tsx`, pages, `AppSidebar`,
-   `HomeLink`), and the share and invite links build URLs by hand. Add
-   `lib/routes.ts` with an `as const` object (`routes.login`, ...) and
-   `sharedCollectionPath(token)`, like `lib/urlParams.ts`. Not an `enum`:
-   `erasableSyntaxOnly` forbids them.
+4. **Done 2026-11-08 on `route-paths`** (branched from `hook-consistency`;
+   merge that first). Route paths in one place: `lib/routes.ts` holds the
+   five app paths in an `as const` object (`routes.login`, ...) and
+   `sharedCollectionPath(token)` (React Router's `generatePath`); every
+   `Route`, `Link`, `Navigate`, and `navigate`, plus the share and invite
+   URLs, use it. Not an `enum`: `erasableSyntaxOnly` forbids them. Tests
+   still pass literal URLs to `renderApp`.
 5. Known issues that show in a walkthrough: the "[object Object]" 422
    message, the large-chunk build warning, deploy not gated on CI, the
    orphaned `dlams-fastapi/.env.example`.

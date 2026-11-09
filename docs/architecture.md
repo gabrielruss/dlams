@@ -243,7 +243,8 @@ dlams-ui/src/
     ui/                      shadcn/ui primitives (button, calendar, drawer,
                              field, popover, select, ...)
   lib/api/                   fetch client and one module per resource
-  lib/                       queryClient, permissions, dates, utils
+  lib/                       queryClient, permissions, dates, routes (app
+                             paths), urlParams, utils
   schemas/, types/           zod schemas and shared TypeScript types
   test/                      test setup, MSW server, renderApp, axe helper
 ```

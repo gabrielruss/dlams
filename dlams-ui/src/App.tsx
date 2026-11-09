@@ -3,11 +3,12 @@ import { AdminUsers, Register, Login, Home, SharedCollection } from "./pages"
 import { useCurrentUser } from "./components/auth/hooks/useAuthQueries"
 import { Button } from "./components/ui/button"
 import { isAdmin } from "./lib/permissions"
+import { routes } from "./lib/routes"
 
 function App() {
   return (
     <Routes>
-      <Route path="/s/:token" element={<SharedCollection />} />
+      <Route path={routes.sharedCollection} element={<SharedCollection />} />
       <Route path="*" element={<SessionRoutes />} />
     </Routes>
   )
@@ -38,28 +39,34 @@ function SessionRoutes() {
   return (
     <Routes>
       <Route
-        path="/"
-        element={currentUser ? <Home /> : <Navigate to="/login" replace />}
+        path={routes.home}
+        element={
+          currentUser ? <Home /> : <Navigate to={routes.login} replace />
+        }
       />
       <Route
-        path="/admin/users"
+        path={routes.adminUsers}
         element={
           !currentUser ? (
-            <Navigate to="/login" replace />
+            <Navigate to={routes.login} replace />
           ) : isAdmin(currentUser) ? (
             <AdminUsers />
           ) : (
-            <Navigate to="/" replace />
+            <Navigate to={routes.home} replace />
           )
         }
       />
       <Route
-        path="/login"
-        element={currentUser ? <Navigate to="/" replace /> : <Login />}
+        path={routes.login}
+        element={
+          currentUser ? <Navigate to={routes.home} replace /> : <Login />
+        }
       />
       <Route
-        path="/register"
-        element={currentUser ? <Navigate to="/" replace /> : <Register />}
+        path={routes.register}
+        element={
+          currentUser ? <Navigate to={routes.home} replace /> : <Register />
+        }
       />
     </Routes>
   )

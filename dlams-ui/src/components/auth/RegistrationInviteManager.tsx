@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/drawer"
 import { Field, FieldLabel } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
+import { routes } from "@/lib/routes"
 
 function RegistrationInviteManager() {
   const invitationMutation = useCreateRegistrationInvitation()
@@ -20,7 +21,7 @@ function RegistrationInviteManager() {
   const [copied, setCopied] = useState(false)
   const invitation = invitationMutation.data
   const invitationUrl = invitation
-    ? `${window.location.origin}/register#invite=${encodeURIComponent(
+    ? `${window.location.origin}${routes.register}#invite=${encodeURIComponent(
         invitation.invitation_code,
       )}`
     : ""
