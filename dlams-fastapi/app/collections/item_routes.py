@@ -4,7 +4,7 @@ from fastapi import APIRouter
 
 from app.auth.utils import CurrentUser
 from app.collections.schemas import ItemListResponse
-from app.collections.video_games_items import owned_video_game_items
+from app.collections.video_games.items import owned_video_game_items
 from app.utils import DbSession
 
 router = APIRouter(prefix="/items", tags=["search"])

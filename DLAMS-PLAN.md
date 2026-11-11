@@ -727,7 +727,9 @@ In order. Items 1 to 7 are the path to the portfolio milestone.
    `get_owned_collection` exist, and `collections/routes.py` (collections,
    grants, links), `shared_routes.py`, and `permissions.py` follow them.
    Still to do:
-   - **One package per collection type** (owner, 2026-11-06;
+   - **One package per collection type** (backend move done 2026-11-11 on
+     `backend-consistency`, moves and imports only; 95 tests and Ruff
+     pass; the UI move is still to do) (owner, 2026-11-06;
      `docs/decisions.md`): move `video_games_routes.py`,
      `video_games_schemas.py`, and `video_games_items.py` into
      `app/collections/video_games/` (`routes.py`, `schemas.py`,

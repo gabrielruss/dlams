@@ -11,8 +11,8 @@ from sqlalchemy.orm import Session
 from app.collections.routes import create_link, delete_link
 from app.collections.schemas import LinkCreate
 from app.collections.shared_routes import read_shared_collection
-from app.collections.video_games_routes import create_console, create_game
-from app.collections.video_games_schemas import ConsoleCreate, GameCreate
+from app.collections.video_games.routes import create_console, create_game
+from app.collections.video_games.schemas import ConsoleCreate, GameCreate
 from app.db import Base
 from app.models import Collection, User
 from app.models.video_games import VideoGameCondition

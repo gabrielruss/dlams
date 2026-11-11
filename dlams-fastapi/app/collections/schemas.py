@@ -5,7 +5,7 @@ from enum import Enum
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from app.collections.video_games_schemas import ConsoleResponse, GameResponse
+from app.collections.video_games.schemas import ConsoleResponse, GameResponse
 from app.models.collection import CollectionAccess, CollectionType
 
 

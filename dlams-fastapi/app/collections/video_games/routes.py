@@ -11,7 +11,7 @@ from app.collections.permissions import (
     ReadableCollection,
     get_writable_collection,
 )
-from app.collections.video_games_schemas import (
+from app.collections.video_games.schemas import (
     ConsoleCreate,
     ConsoleLabelListResponse,
     ConsoleLabelResponse,

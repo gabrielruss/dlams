@@ -7,7 +7,7 @@ os.environ.setdefault("SECRET_KEY", "test-only-secret")
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 
-from app.collections.video_games_routes import list_video_game_collection_stats
+from app.collections.video_games.routes import list_video_game_collection_stats
 from app.db import Base
 from app.models import (
     Collection,

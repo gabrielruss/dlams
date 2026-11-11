@@ -10,13 +10,13 @@ from app.auth.routes import router as auth_router
 from app.collections.item_routes import router as items_router
 from app.collections.routes import router as collections_router
 from app.collections.shared_routes import router as shared_router
-from app.collections.video_games_routes import (
+from app.collections.video_games.routes import (
     labels_router as console_labels_router,
 )
-from app.collections.video_games_routes import (
+from app.collections.video_games.routes import (
     router as video_games_router,
 )
-from app.collections.video_games_routes import (
+from app.collections.video_games.routes import (
     stats_router as video_game_stats_router,
 )
 

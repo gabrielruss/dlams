@@ -10,7 +10,7 @@ from pydantic import ValidationError
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 
-from app.collections.video_games_routes import (
+from app.collections.video_games.routes import (
     create_console,
     create_game,
     delete_console,
@@ -20,7 +20,7 @@ from app.collections.video_games_routes import (
     update_console,
     update_game,
 )
-from app.collections.video_games_schemas import (
+from app.collections.video_games.schemas import (
     ConsoleCreate,
     ConsoleUpdate,
     GameCreate,
