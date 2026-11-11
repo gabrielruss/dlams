@@ -91,8 +91,6 @@ never appended to. History lives in git and `docs/decisions.md`.
     `?item=<type>-<id>` (an item's drawer); names and the item format are
     in `lib/urlParams.ts`. Picking a sidebar collection drops `q` and
     `item`.
-  - `_console_response` and `_game_response` still run one label query per
-    row (fix in 6d); `/items` does not use them.
   - Share links are not an access level: `/shared/{token}` looks the token up
     and returns read-only data. `OwnedCollection` guards managing links, not
     reading them.
@@ -741,13 +739,13 @@ In order. Items 1 to 7 are the path to the portfolio milestone.
      item 11. UI as a separate step: `lib/api/consoles.ts`, `games.ts`,
      `consoleLabels.ts`, `videoGameStats.ts`, and `types/videoGames.ts`
      into the video-game feature folder.
-   - `video_games_routes.py`: 15 `db.query()` calls, `Depends(...)` defaults,
-     and split it into console and game modules. The list helpers and
-     routes (`collection_consoles`, `collection_games`, `list_consoles`,
-     `list_games`) were converted 2026-10-31. Fix the extra query per row:
-     `_console_response` and `_game_response` each query the row's label,
-     so listing 30 games costs 31 queries; select the label with the row
-     (`select(Console, ConsoleLabel).join(...)`) instead.
+   - **Done 2026-11-11 on `backend-consistency`:** `video_games/routes.py`
+     split into `console_routes.py`, `game_routes.py`, `label_routes.py`
+     (`GET /console-labels` and the label helpers both item types use), and
+     `stats_routes.py`; every `db.query()` is `select()`, every dependency
+     an alias. Lists select the label with the row: 30 games or consoles
+     now take 1 query instead of 31 (counted with a throwaway script). 95
+     tests and Ruff pass.
    - `app/auth/` (`routes.py`, `admin_routes.py`, the rest of `utils.py`):
      `Depends(...)` defaults to aliases, missing types.
    - `app/db.py`: `declarative_base()` to `DeclarativeBase`.

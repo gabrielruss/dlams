@@ -4,7 +4,8 @@ from fastapi import APIRouter, HTTPException, status
 from sqlalchemy import select
 
 from app.collections.schemas import SharedCollectionResponse
-from app.collections.video_games.routes import collection_consoles, collection_games
+from app.collections.video_games.console_routes import collection_consoles
+from app.collections.video_games.game_routes import collection_games
 from app.models import Collection, CollectionLink, CollectionType
 from app.utils import DbSession
 

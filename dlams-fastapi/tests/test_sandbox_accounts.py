@@ -22,7 +22,7 @@ from app.collections.routes import (
     list_grants,
 )
 from app.collections.schemas import CollectionCreate, GrantCreate, LinkCreate
-from app.collections.video_games.routes import create_game, delete_game
+from app.collections.video_games.game_routes import create_game, delete_game
 from app.collections.video_games.schemas import GameCreate
 from app.db import Base
 from app.models import (

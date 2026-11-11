@@ -208,8 +208,10 @@ the edge).
 Handlers are grouped by module: `app/auth/` (`routes.py`, `admin_routes.py`,
 `utils.py`, `bootstrap_admin.py`) and `app/collections/` (`routes.py`,
 `item_routes.py`, `shared_routes.py`, `permissions.py`, `schemas.py`, and
-one package per collection type: `video_games/` with `routes.py`,
-`schemas.py`, and `items.py`, the type's part of `GET /items`). Routers are registered
+one package per collection type: `video_games/` with `console_routes.py`,
+`game_routes.py`, `label_routes.py` (console labels, used by both),
+`stats_routes.py`, `schemas.py`, and `items.py`, the type's part of `GET
+/items`). Lists load each row's label in the same query. Routers are registered
 in `app/main.py`.
 
 ## Collection types
@@ -346,7 +348,7 @@ styling changes need approval (see the conventions file for the rule).
 | To change... | Start in |
 | --- | --- |
 | Who can do what to a collection | `app/collections/permissions.py` |
-| A video-game endpoint | `app/collections/video_games/routes.py` |
+| A video-game endpoint | `app/collections/video_games/` (`console_routes.py`, `game_routes.py`) |
 | The schema | `app/models/` plus a new file in `alembic/versions/` |
 | A server-data hook | `dlams-ui/src/components/<feature>/use*.ts` and `lib/api/` |
 | What a collection type renders | `components/collections/collectionWorkspaceResolver.ts` |
