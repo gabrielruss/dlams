@@ -11,7 +11,7 @@ function signInAsAdmin() {
   server.use(
     http.get(`${api}/verify`, () =>
       HttpResponse.json({
-        user: { id: "1", username: "admin", role: "admin" },
+        user: { id: 1, username: "admin", role: "admin" },
       }),
     ),
     http.get(`${api}/admin/users`, () =>

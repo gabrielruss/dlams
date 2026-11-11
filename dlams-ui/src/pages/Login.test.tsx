@@ -36,7 +36,7 @@ describe("signing in", () => {
       ),
       http.post(`${api}/demo-sessions`, () =>
         HttpResponse.json(
-          { user: { id: "9", username: "sandbox-3f9a1c2e", role: "sandbox" } },
+          { user: { id: 9, username: "sandbox-3f9a1c2e", role: "sandbox" } },
           { status: 201 },
         ),
       ),

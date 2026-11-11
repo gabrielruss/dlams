@@ -1,42 +1,57 @@
 # DLAMS plan
 
-Last updated: 2026-11-06
+Last updated: 2026-11-11
 
 The current state of the project. For why things are the way they are, see
 [`docs/decisions.md`](./docs/decisions.md). For the full history up to
 2026-10-09, see [`docs/archive/`](./docs/archive/).
 
-## Where we left off (2026-11-07)
+## Where we left off (2026-11-11)
 
 Start here in a new session. This block is rewritten at the end of a session,
 never appended to. History lives in git and `docs/decisions.md`.
 
-- **Status.** On `main`: PR #19 (accessibility audit) and PR #20 (calendar
-  dropdown focus ring). Branch `hook-consistency` holds checkpoint step 3:
-  the hook shapes (`f8bc31b`, pushed) and the hooks folder move (in the
-  working tree). Run `git status` and `git log` first: the owner commits
-  and pushes everything, and a push to `main` deploys (docs included).
-- **What was done (2026-11-06 to 11-07):**
-  - New "Checkpoint: interview 1" (due Tuesday 2026-11-10, 4 PM): no new
-    features, frontend cleanup only; backend (6d) waits.
-  - New favicon (`public/favicon.svg`, `favicon-32.png`).
-  - Accessibility: axe checks for the 6a controls; a Playwright pass in
-    WebKit and Firefox (scripts kept out of the repo); fixed focus return
-    for Add game and New collection (Base UI `initialFocus` with refs),
-    the calendar (logged `ref={ref}` edit in `components/ui/calendar.tsx`;
-    it opens on today and arrow keys work), label-in-name (`HomeLink`,
-    `ListRow`), `aria-expanded` on Open menu, and search opening on typing
-    instead of on focus. Findings and owner decisions are under item 6.
-- **What is verified.** Run by Claude on `interview-1-cleanup`: 87 UI
-  tests, typecheck, lint, format check, build. Owner-checked in a browser:
-  keyboard use, the calendar. Not checked: VoiceOver and the Simulator
-  (owner's pass), and an empty Save still focusing the name field after
-  the ref change.
+- **Status.** `main` (`58d1278`) has PRs #19 to #22 merged and deployed:
+  the accessibility audit, the calendar dropdown focus ring, hook
+  consistency with the hooks folder move, and route paths. The interview
+  was held 2026-11-10; no app changes since. Uncommitted on `main`: this
+  plan and a new `CLAUDE.md` rule (report other places that follow an old
+  code pattern; do not change them without asking). The owner moves them
+  to a branch before committing. `stash@{0}` and `stash@{1}` both hold
+  this plan's edits (already applied); the owner drops them once
+  committed. Run `git status` and `git log` first: the owner commits and
+  pushes everything, and a push to `main` deploys (docs included).
+- **What was done (2026-11-06 to 11-09):**
+  - New "Checkpoint: interview 1" (below): frontend cleanup only, no new
+    features; backend (6d) waits. Steps 1, 3, and 4 are done.
+  - Accessibility (item 6): axe checks for the 6a controls; a Playwright
+    pass in WebKit and Firefox (throwaway scripts, not kept; Playwright's
+    browsers are in `~/Library/Caches/ms-playwright`); focus return for Add game and New collection (Base UI
+    `initialFocus` with refs merged with react-hook-form's `ref`, per its
+    FAQ); the calendar opens on today, arrow keys work, and its month and
+    year dropdowns show a focus ring (two logged local edits in
+    `components/ui/calendar.tsx`); label-in-name (`HomeLink`, `ListRow`);
+    `aria-expanded` on Open menu; search opens on typing, not on focus.
+  - Every query hook returns `{ <data>, isPending, isError, error }`;
+    callers keep the hook's names; hooks live in each feature's `hooks/`
+    folder, shared ones in `src/hooks/`.
+  - `lib/routes.ts` holds every app path; no path is typed as a string.
+  - New favicon.
+- **What is verified.** Run by Claude on `main` (2026-11-09): 88 UI tests
+  (12 files), typecheck, lint, format check, build. Backend untouched since
+  PR #18 (95 tests then). Owner-checked in a browser: keyboard use
+  throughout, the calendar. Not checked: VoiceOver and the Simulator
+  (owner's pass), the calendar dropdown ring after #20, an empty Save still
+  focusing the name field after the ref change.
 - **Local test data:** the local account `delete-me` has two collections,
   one console, and one game added by the Playwright pass. Demo sandboxes
-  are capped at 10 locally; reuse one session when scripting.
-- **Next:** the "Checkpoint: interview 1" list below; no new features
-  until it is done.
+  are capped at 10 locally; reuse one signed-in session when scripting.
+  The local stack (Docker) is often off; ask before starting it.
+- **Next:** "Checkpoint: interview 1" passed 2026-11-10 (owner); nothing
+  is paused. Its unfinished steps (6b and 6c, the walkthrough known
+  issues, the two optional items) stay open. The owner picks the next
+  item; each goes on its own branch from `main`. Items found 2026-11-09
+  and 11-10 are in 6d and Known issues.
 - **Waiting on the owner:** in 6d, whether to drop the `response_model`s
   Ruff's FAST001 calls redundant; the `npm audit` items (Known issues).
 - **The `shadcn` skill** (`dlams-ui/.claude/skills/shadcn`, a link into
@@ -61,7 +76,9 @@ never appended to. History lives in git and `docs/decisions.md`.
     Share button) and `GET /console-labels` handlers. Inside a drawer,
     the tests use `element.focus()` and `user.keyboard(...)` instead of
     clicks (pointer events threw in jsdom under Vaul; not rechecked since
-    the move to Base UI); while a drawer is open the
+    the move to Base UI). Pages are lazy-loaded, and `test/setup.ts`
+    imports each one before the tests; a new page must be added there
+    too, or the first test that renders it can time out. While a drawer is open the
     page behind it is hidden from the accessibility tree, so query it with
     `hidden: true`. MemoryRouter cannot test back and forward. MSW mocks
     never return a 422.
@@ -336,33 +353,43 @@ user deletion, off-device backups, and the deferred API dependency upgrades.
 
 ## Checkpoint: interview 1
 
+**Passed 2026-11-10 (owner).** Steps 2 and 5 and the optional items were
+not done; they stay open under "Next up" (6b, 6c) and "Known issues", and
+nothing is paused any more.
+
 Set 2026-11-06 (owner). Due Tuesday 2026-11-10, 4 PM. No new features
 until this is done: the codebase should be clean enough to walk a hiring
 manager through. The role is frontend only, so the backend waits. Items in
 this order; everything else under "Next up" waits.
 
-1. Accessibility audit (6): the automated checks on the 6a controls, then
-   the owner's keyboard, VoiceOver, 200% zoom, and phone-menu pass, and the
-   `--ring` decision.
+1. **Done 2026-11-08 (PRs #19, #20).** Accessibility audit (6): findings
+   and owner decisions are under item 6. Left for the owner: VoiceOver and
+   the Simulator.
 2. Repeated styling (6b), then styling cleanup (6c).
-3. **Done 2026-11-08 on `hook-consistency`.** Frontend hook consistency
+3. **Done 2026-11-08 (PR #21).** Frontend hook consistency
    (6e): every query hook returns the standard shape (first commit,
    `f8bc31b`); then each feature's hooks moved into its `hooks/` folder and
    `useFitOnResize` to `src/hooks/` (second commit, moves and imports only).
    Left as is (owner): `useCollections` does three jobs; `useItemDrawer`
    keeps its UI name because it is accurate.
-4. **Done 2026-11-08 on `route-paths`** (branched from `hook-consistency`;
-   merge that first). Route paths in one place: `lib/routes.ts` holds the
-   five app paths in an `as const` object (`routes.login`, ...) and
+4. **Done 2026-11-08 (PR #22).** Route paths in one place: `lib/routes.ts`
+   holds the five app paths in an `as const` object (`routes.login`, ...) and
    `sharedCollectionPath(token)` (React Router's `generatePath`); every
    `Route`, `Link`, `Navigate`, and `navigate`, plus the share and invite
    URLs, use it. Not an `enum`: `erasableSyntaxOnly` forbids them. Tests
    still pass literal URLs to `renderApp`.
-5. Known issues that show in a walkthrough: the "[object Object]" 422
-   message, the large-chunk build warning, deploy not gated on CI, the
-   orphaned `dlams-fastapi/.env.example`.
+5. **Done 2026-11-11, after the checkpoint (uncommitted).** Known issues
+   that show in a walkthrough: the "[object Object]" 422 message, the
+   large-chunk build warning, deploy not gated on CI, the orphaned
+   `dlams-fastapi/.env.example`; plus the hook leftovers found 2026-11-09.
 
-Paused until after the checkpoint: backend consistency (6d), the calendar
+Optional before the interview (owner decides each, 2026-11-08): a "Skip
+to main content" link (from the top, Tab crosses every sidebar collection
+and Log out before search); an in-drawer delete confirm for consoles and
+games like `DeleteCollectionConfirm`, replacing `window.confirm` in
+`useGameDrawerContent.ts` and `useConsoleDrawerContent.ts`.
+
+Paused until after the checkpoint (unpaused 2026-11-10): backend consistency (6d), the calendar
 cut off at 200% zoom (item 6, finding 4), 9a, 10a, 10b, 10c, 11 to 15, and
 new bug-fix batches unless a bug shows in the demo.
 
@@ -722,6 +749,11 @@ In order. Items 1 to 7 are the path to the portfolio milestone.
    - `app/auth/` (`routes.py`, `admin_routes.py`, the rest of `utils.py`):
      `Depends(...)` defaults to aliases, missing types.
    - `app/db.py`: `declarative_base()` to `DeclarativeBase`.
+   - Sandbox naming (2026-11-09): the `sandbox` variable holds a `User`
+     with the sandbox role; rename it `sandbox_user`, and `create_sandbox`
+     to `create_sandbox_user`.
+   - `UserResponse` uses Pydantic v1 `class Config`; switch to
+     `model_config = ConfigDict(...)`.
    - Turn on Ruff's `FAST` rules in `pyproject.toml`. Dry run 2026-10-31
      (`ruff check . --select FAST`): 67 findings. FAST002 (non-`Annotated`
      dependency) is the rule to keep. FAST003 is a false positive when a
@@ -740,7 +772,8 @@ In order. Items 1 to 7 are the path to the portfolio milestone.
      matching `dlams-ui/src/lib/api/` module sends: the UI tests mock the API
      with MSW and will not catch a 422, so an extra field would only fail in
      the real app. Then run both test suites and try each form in a browser.
-6e. **Frontend hook consistency check** (owner, 2026-11-02). Go through
+6e. **Frontend hook consistency check. Done 2026-11-08** (PR #21; see the
+   checkpoint, step 3). Original scope (owner, 2026-11-02): Go through
    every hook in `dlams-ui/src` and check two things. First, a hook named
    for data returns that data under that name (`useOwnedItems` returns
    `ownedItems`); a name that is hard to match usually means the hook does
@@ -757,6 +790,19 @@ In order. Items 1 to 7 are the path to the portfolio milestone.
    2026-11-02): the only one over it, in `CollectionWorkspace.tsx`, was
    fixed the same day (`CollectionBody` with early returns); nine two-`?`
    chains are within the limit.
+6f. **Name query state for its data** (owner, 2026-11-11; later). A caller
+   renames a query hook's state to say whose it is, as
+   `DeleteCollectionConfirm` does (`isPending: linksPending`, `isError:
+   linksFailed`, `statsPending`). Today every other caller keeps the bare
+   `isPending`, `isError`, and `error`: `App.tsx` (`useCurrentUser`),
+   `UserManagement.tsx`, `VideoGamesWorkspace.tsx`,
+   `VideoGameCollectionStats.tsx`, `SearchResults.tsx`, `ShareLinks` in
+   `ShareCollectionDrawer.tsx`, `CollectionWorkspace.tsx` (and its
+   `CollectionBody` prop), `CollectionNavigation.tsx`, and
+   `pages/SharedCollection.tsx` (found by grep 2026-11-11). Settle first:
+   the name for `error` (`linksError`?), and whether one-hook components
+   rename too. This reverses "callers keep the hook's names" (2026-11-08),
+   so update that line and the conventions file with it.
 7. **README and a final check.** Done 2026-10-27 (owner's call). The root
    `README.md` was rewritten as the front door (no screenshots: the live demo
    shows the app and there is nothing to keep current; see
@@ -1230,11 +1276,17 @@ is next, then the sharing UI, then search.
 
 ## Known issues
 
-- A 422 from the API shows as "[object Object]" if the UI ever displays
-  it: `lib/api/client.ts` reads `detail` as a string, but FastAPI's
-  validation errors send a list (found reading the code, 2026-11-06). The
-  forms validate first, so it shows only when the UI and API rules
-  differ.
+- Styling, owner decides (found 2026-11-10): the Consoles and Games cards
+  stretch to the same height because the `lg:grid-cols-2` grid in
+  `VideoGamesWorkspace.tsx` defaults to `align-items: stretch`
+  (`items-start` lets each fit its content). Focus rings (3px box-shadow)
+  are clipped inside `overflow` parents: the top of the first sidebar
+  collection (the `<ul>` with `overflow-y-auto pl-3` has no top padding;
+  `pt-1` or `py-1` fixes it), and possibly drawer scroll areas.
+
+- A 422 shows Pydantic's own wording, without the field name (for
+  example "Value error, Last played can't be in the future"). The forms
+  validate first, so it shows only when the UI and API rules differ.
 
 - On a phone, the admin users table scrolls sideways inside its bordered box,
   and the Make template and Deactivate buttons are in the last column, so an admin
@@ -1259,13 +1311,8 @@ is next, then the sharing UI, then search.
   will be reset in 30 minutes." Sandboxes stay 7 days and their share
   links keep working, and item 8 and `docs/decisions.md` still describe
   the old notice. Waiting on the owner: keep the wording or not.
-- A push to `main` deploys even if CI fails, because the deploy workflow does
-  not wait for CI. Decide whether to gate the deploy on it later.
-- The UI build emits a Vite large-chunk warning (about 799 kB, 256 kB
-  gzipped, on 2026-11-06 after the date picker; about 647 kB on 2026-10-17,
-  over the 500 kB limit) since the Combobox added `@base-ui/react` (2026-10-16).
-  It was clear after the earlier dependency cleanup. Code-splitting would fix
-  it; not urgent.
+- The deploy runs `git pull origin main`, not the commit CI passed, so two
+  pushes close together can deploy the second before its CI finishes.
 - Backups stay on the Pi (decided 2026-10-15): a nightly dump runs at 03:15
   and keeps 14 days in `~/dlams-backups` on the host, but there is no
   off-device copy, so losing the Pi's storage loses the backups with the
@@ -1299,8 +1346,6 @@ is next, then the sharing UI, then search.
   (the Docker build uses Node 20).
 - Migration `951a8354c293` uses a PostgreSQL-only `ALTER COLUMN`, so the full
   migration chain cannot be replayed on SQLite.
-- `dlams-fastapi/.env.example` was only used by the deleted legacy
-  `docker-compose.local.yml` and is now orphaned; decide whether to remove it.
 - Direct cross-origin browser calls to the API fail without CORS. The
   supported development workflows avoid this with a same-origin Vite proxy.
 

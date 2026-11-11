@@ -1,11 +1,9 @@
-import { useQuery } from "@tanstack/react-query"
-
 import useVideoGameCollectionStats from "@/components/video-games/hooks/useVideoGameCollectionStats"
 import { Button } from "@/components/ui/button"
-import { linkListQueryOptions } from "@/lib/api/collectionLinks"
 import type { Collection } from "@/types/collections"
 import { itemTypeNames, type CountNames } from "@/types/items"
 import { describeContents } from "./describeContents"
+import useCollectionLinks from "./hooks/useCollectionLinks"
 
 const shareLinkNames: CountNames = { one: "share link", many: "share links" }
 
@@ -38,11 +36,13 @@ function DeleteCollectionConfirm({
 }: DeleteCollectionConfirmProps) {
   const { collectionStats, isPending: statsPending } =
     useVideoGameCollectionStats(collection.id)
-  const { data: linkData, isPending: linksPending } = useQuery(
-    linkListQueryOptions(collection.id),
-  )
+  const {
+    links,
+    isPending: linksPending,
+    isError: linksFailed,
+  } = useCollectionLinks(collection.id)
   const isCounting = statsPending || linksPending
-  const countsLoaded = collectionStats !== undefined && linkData !== undefined
+  const countsLoaded = collectionStats !== undefined && !linksFailed
 
   const contents = describeContents([
     {
@@ -50,7 +50,7 @@ function DeleteCollectionConfirm({
       names: itemTypeNames.console,
     },
     { count: collectionStats?.game_count ?? 0, names: itemTypeNames.game },
-    { count: linkData?.links.length ?? 0, names: shareLinkNames },
+    { count: links.length, names: shareLinkNames },
   ])
 
   return (

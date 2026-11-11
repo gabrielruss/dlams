@@ -13,7 +13,7 @@ function signInWithNoCollections() {
   server.use(
     http.get(`${api}/verify`, () =>
       HttpResponse.json({
-        user: { id: "1", username: "test-user", role: "user" },
+        user: { id: 1, username: "test-user", role: "user" },
       }),
     ),
     http.get(`${api}/collections`, () =>
@@ -101,6 +101,34 @@ describe("creating a collection", () => {
       expect(
         screen.getByRole("button", { name: "New collection" }),
       ).toHaveFocus(),
+    )
+  })
+
+  it("shows the API's validation message when it refuses the name", async () => {
+    signInWithNoCollections()
+    server.use(
+      http.post(`${api}/collections`, () =>
+        HttpResponse.json(
+          {
+            detail: [
+              {
+                type: "string_too_long",
+                loc: ["body", "name"],
+                msg: "String should have at most 100 characters",
+              },
+            ],
+          },
+          { status: 422 },
+        ),
+      ),
+    )
+
+    const { user, drawer } = await openCreateDrawer()
+    within(drawer).getByLabelText("Collection name").focus()
+    await user.keyboard("Games to sell{Enter}")
+
+    expect(await within(drawer).findByRole("alert")).toHaveTextContent(
+      "String should have at most 100 characters",
     )
   })
 

@@ -21,3 +21,13 @@ afterEach(() => {
   server.resetHandlers()
 })
 afterAll(() => server.close())
+
+beforeAll(async () => {
+  await Promise.all([
+    import("@/pages/Home"),
+    import("@/pages/Login"),
+    import("@/pages/Register"),
+    import("@/pages/AdminUsers"),
+    import("@/pages/SharedCollection"),
+  ])
+})

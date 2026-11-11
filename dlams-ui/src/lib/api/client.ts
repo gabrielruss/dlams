@@ -10,6 +10,16 @@ export class ApiError extends Error {
   }
 }
 
+type ValidationIssue = { msg: string }
+
+type ErrorResponseBody = { detail?: string | ValidationIssue[] }
+
+function messageFromErrorDetail(detail: ErrorResponseBody["detail"]) {
+  if (typeof detail === "string") return detail
+  if (Array.isArray(detail)) return detail.map((issue) => issue.msg).join(" ")
+  return undefined
+}
+
 export async function apiRequest<T>(
   endpoint: string,
   options?: RequestInit,
@@ -26,8 +36,8 @@ export async function apiRequest<T>(
   if (!response.ok) {
     let message = `Request failed (${response.status})`
     try {
-      const error: { detail?: string } = await response.json()
-      message = error.detail || message
+      const error: ErrorResponseBody = await response.json()
+      message = messageFromErrorDetail(error.detail) || message
     } catch {
       // Keep the HTTP status message if the response is not JSON.
     }

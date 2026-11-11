@@ -29,7 +29,7 @@ function signIn({
 } = {}) {
   server.use(
     http.get(`${api}/verify`, () =>
-      HttpResponse.json({ user: { id: "2", username: "test-user", role } }),
+      HttpResponse.json({ user: { id: 2, username: "test-user", role } }),
     ),
     http.get(`${api}/collections`, () =>
       HttpResponse.json({
