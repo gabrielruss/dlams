@@ -73,7 +73,8 @@ and served by `nginx:alpine`, database `postgres:15` (development uses 14).
   API never sees `/api`. CORS is not enabled.
 - **UI client.** `dlams-ui/src/lib/api/client.ts` wraps `fetch` with
   `credentials: "include"` and throws `ApiError` (message from the API's
-  `detail`). One module per resource in `lib/api/` builds on it.
+  `detail`: the string, or for a 422 the `msg` of each validation issue).
+  One module per resource in `lib/api/` builds on it.
 - **Server state.** All server data goes through TanStack Query v5
   (`lib/queryClient.ts`: 30 s stale time, no retries). Components use
   per-feature hooks (`useCollections`, `useVideoGamesCollection`,
@@ -81,7 +82,9 @@ and served by `nginx:alpine`, database `postgres:15` (development uses 14).
   patched by hand.
 - **Routing.** React Router in `App.tsx`: `/s/:token` (a share link's
   read-only page, `pages/SharedCollection.tsx`) is matched first and never
-  checks a session. Everything else goes through `SessionRoutes`: `/` (home),
+  checks a session. Each page is loaded on demand (`React.lazy` under one
+  `Suspense`), so the login and share pages do not download the collection
+  workspace. Everything else goes through `SessionRoutes`: `/` (home),
   `/login`, `/register`, `/admin/users`; it first resolves the current user;
   unauthenticated visitors are redirected to `/login`, non-admins away from
   `/admin/users`.
@@ -295,13 +298,13 @@ styling changes need approval (see the conventions file for the rule).
   on the host (see the deployment README).
 - **Deploy.** A GitHub Actions runner is installed on the Pi itself
   (self-hosted, so the Pi polls GitHub for jobs and nothing connects in to
-  it). A push to `main` triggers `.github/workflows/deploy.yml`, which runs
-  on that runner: `git pull` in the checkout, `docker compose up -d --build
-  api ui nginx`, recreate the `nginx` container (it mounts `nginx.conf` as
-  a single file, which a reload would not re-read after `git pull`), and
-  list containers. The `db` service is not
-  rebuilt. Images are built on the Pi, so builds are slow and CI does not
-  run tests or lint before deploying.
+  it). `.github/workflows/deploy.yml` runs when the CI workflow finishes
+  (`workflow_run`), only for a successful CI run of a push to `main` in
+  this repository. On that runner it does `git pull` in the checkout,
+  `docker compose up -d --build api ui nginx`, recreates the `nginx`
+  container (it mounts `nginx.conf` as a single file, which a reload would
+  not re-read after `git pull`), and lists containers. The `db` service is
+  not rebuilt. Images are built on the Pi, so builds are slow.
 - **Nginx** routes `/` to the `ui` container and `/api/` to the `api`
   container (prefix stripped). Share links: `/api/shared/` (and `/shared/` on
   the API host) are rate-limited to 30 requests a minute per address (burst

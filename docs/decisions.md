@@ -7,6 +7,25 @@ replaces it is named. Proposals and open questions live in
 
 ## Repository and delivery
 
+### The deploy waits for CI — 2026-11-11
+- `deploy.yml` runs on `workflow_run` after CI completes, and only when that
+  run succeeded, was a push (not a pull request), and came from this
+  repository, so a fork's pull request on a branch named `main` cannot
+  start it on the Pi's runner.
+- Chosen over moving the deploy job into `ci.yml` with `needs`: the two
+  workflows stay separate files, as before.
+- Not done: deploying the exact commit CI passed. The job still runs `git
+  pull origin main` (see Known issues in the plan).
+- **Supersedes** the deploy not waiting for CI (Known issues since
+  2026-10-26).
+
+### Pages load on demand — 2026-11-11
+- `App.tsx` loads each page with `React.lazy`, which cleared Vite's
+  large-chunk warning (one 803 kB file became chunks of at most 315 kB)
+  and keeps the collection workspace off the login and share pages.
+  Chosen over `manualChunks`, which would only split the same download
+  into files.
+
 ### The demo lives in the production app, on the main domain — 2026-10-17
 - Visitors use the real app at its main domain, not a separate demo site or
   subdomain. They sign in as `demo-user`, which holds the `demo` role and is

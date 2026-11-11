@@ -12,7 +12,7 @@ function signInWithCollection(access: CollectionAccess) {
   server.use(
     http.get(`${api}/verify`, () =>
       HttpResponse.json({
-        user: { id: "2", username: "test-user", role: "user" },
+        user: { id: 2, username: "test-user", role: "user" },
       }),
     ),
     http.get(`${api}/collections`, () =>

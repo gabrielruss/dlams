@@ -1,5 +1,4 @@
 import { useId, useState } from "react"
-import { useQuery } from "@tanstack/react-query"
 import { Link2 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -10,10 +9,7 @@ import {
   DrawerHeader,
   DrawerTitle,
 } from "@/components/ui/drawer"
-import {
-  linkListQueryOptions,
-  MAX_LINKS_PER_COLLECTION,
-} from "@/lib/api/collectionLinks"
+import { MAX_LINKS_PER_COLLECTION } from "@/lib/api/collectionLinks"
 import type { Collection } from "@/types/collections"
 import CreateLinkForm from "./CreateLinkForm"
 import ShareLinkRow from "./ShareLinkRow"
@@ -25,8 +21,8 @@ interface ShareCollectionDrawerProps {
 
 function ShareCollectionDrawer({ collection }: ShareCollectionDrawerProps) {
   const [isOpen, setIsOpen] = useState(false)
-  const { data } = useQuery(linkListQueryOptions(collection.id))
-  const linkCount = data?.links.length ?? 0
+  const { links } = useCollectionLinks(collection.id)
+  const linkCount = links.length
   const countId = useId()
 
   return (

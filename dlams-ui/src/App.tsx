@@ -1,16 +1,24 @@
+import { lazy, Suspense } from "react"
 import { Route, Routes, Navigate } from "react-router-dom"
-import { AdminUsers, Register, Login, Home, SharedCollection } from "./pages"
 import { useCurrentUser } from "./components/auth/hooks/useAuthQueries"
 import { Button } from "./components/ui/button"
 import { isAdmin } from "./lib/permissions"
 import { routes } from "./lib/routes"
 
+const Home = lazy(() => import("./pages/Home"))
+const Login = lazy(() => import("./pages/Login"))
+const Register = lazy(() => import("./pages/Register"))
+const AdminUsers = lazy(() => import("./pages/AdminUsers"))
+const SharedCollection = lazy(() => import("./pages/SharedCollection"))
+
 function App() {
   return (
-    <Routes>
-      <Route path={routes.sharedCollection} element={<SharedCollection />} />
-      <Route path="*" element={<SessionRoutes />} />
-    </Routes>
+    <Suspense fallback={<p>Loading...</p>}>
+      <Routes>
+        <Route path={routes.sharedCollection} element={<SharedCollection />} />
+        <Route path="*" element={<SessionRoutes />} />
+      </Routes>
+    </Suspense>
   )
 }
 

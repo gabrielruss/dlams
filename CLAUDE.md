@@ -36,3 +36,6 @@ Rules that are easy to miss:
   smallest edit and add it to the list of local edits in
   `.github/copilot-instructions.md`.
 - Do not claim a check passed unless it was run.
+- When a change introduces or changes a code pattern, search the codebase for
+  existing code that follows the old pattern and report each place to the
+  owner. Do not update those places without asking.

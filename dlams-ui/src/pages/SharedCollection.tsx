@@ -1,8 +1,8 @@
 import { useState } from "react"
-import { useQuery } from "@tanstack/react-query"
 import { useParams } from "react-router-dom"
 
 import HomeLink from "@/components/HomeLink"
+import useSharedCollection from "@/components/collections/hooks/useSharedCollection"
 import SearchField from "@/components/search/SearchField"
 import useListSearch from "@/components/search/hooks/useListSearch"
 import ConsoleList from "@/components/video-games/ConsoleList"
@@ -11,7 +11,6 @@ import {
   consoleSearchable,
   gameSearchable,
 } from "@/components/video-games/videoGameOptions"
-import { sharedCollectionQueryOptions } from "@/lib/api/sharedCollections"
 import { collectionTypeNames } from "@/types/collections"
 import type { ConsoleRecord, GameRecord } from "@/types/videoGames"
 
@@ -27,12 +26,10 @@ function matchSummary(query: string, shown: number, total: number) {
 
 function SharedCollection() {
   const { token = "" } = useParams()
-  const { data, isPending, error } = useQuery(
-    sharedCollectionQueryOptions(token),
-  )
+  const { sharedCollection, isPending, error } = useSharedCollection(token)
   const [query, setQuery] = useState("")
-  const allConsoles = data?.consoles ?? noConsoles
-  const allGames = data?.games ?? noGames
+  const allConsoles = sharedCollection?.consoles ?? noConsoles
+  const allGames = sharedCollection?.games ?? noGames
   const consoles = useListSearch(allConsoles, consoleSearchable, query)
   const games = useListSearch(allGames, gameSearchable, query)
   const searching = query.trim() !== ""
@@ -55,15 +52,15 @@ function SharedCollection() {
           className="relative block h-[4.75rem] shrink-0 border-b"
           wordmarkClassName="absolute inset-x-4 inset-y-0"
         />
-        {data && (
+        {sharedCollection && (
           <div className="flex flex-col gap-1 p-4">
-            <p className="font-medium">{data.name}</p>
+            <p className="font-medium">{sharedCollection.name}</p>
             <p className="text-xs text-muted-foreground">
-              {collectionTypeNames[data.type]}
+              {collectionTypeNames[sharedCollection.type]}
             </p>
             <ItemCounts
-              consoles={data.consoles.length}
-              games={data.games.length}
+              consoles={sharedCollection.consoles.length}
+              games={sharedCollection.games.length}
             />
           </div>
         )}
@@ -72,21 +69,21 @@ function SharedCollection() {
         <div className="mx-auto flex w-full max-w-6xl flex-col gap-5 p-4 md:p-6">
           {isPending ? (
             <p>Loading collection...</p>
-          ) : error ? (
+          ) : !sharedCollection ? (
             <div role="alert" className="flex flex-col gap-2">
               <h1 className="text-2xl font-semibold">Nothing to see here</h1>
-              <p>{error.message}</p>
+              <p>{error && error.message}</p>
             </div>
           ) : (
             <>
               <div className="flex flex-col gap-1">
                 <h1 className="text-2xl font-semibold md:text-3xl">
-                  {data.name}
+                  {sharedCollection.name}
                 </h1>
                 <div className="md:hidden">
                   <ItemCounts
-                    consoles={data.consoles.length}
-                    games={data.games.length}
+                    consoles={sharedCollection.consoles.length}
+                    games={sharedCollection.games.length}
                   />
                 </div>
               </div>

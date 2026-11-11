@@ -1,5 +1,0 @@
-export { default as Register } from "./Register"
-export { default as Login } from "./Login"
-export { default as Home } from "./Home"
-export { default as AdminUsers } from "./AdminUsers"
-export { default as SharedCollection } from "./SharedCollection"
