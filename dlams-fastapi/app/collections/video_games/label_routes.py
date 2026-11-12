@@ -3,13 +3,13 @@ from sqlalchemy import func, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
-from app.auth.utils import CurrentUser
+from app.auth.utils import CurrentUserDep
 from app.collections.video_games.schemas import (
     ConsoleLabelListResponse,
     ConsoleLabelResponse,
 )
 from app.models import Console, ConsoleLabel, Game
-from app.utils import DbSession
+from app.utils import DbSessionDep
 
 console_labels_router = APIRouter(prefix="/console-labels", tags=["video games"])
 
@@ -75,8 +75,8 @@ def get_or_create_label(
 
 @console_labels_router.get("", response_model=ConsoleLabelListResponse)
 def list_console_labels(
-    db: DbSession,
-    current_user: CurrentUser,
+    db: DbSessionDep,
+    current_user: CurrentUserDep,
 ) -> ConsoleLabelListResponse:
     """The signed-in user's console labels, for the console and game forms."""
     labels = db.scalars(

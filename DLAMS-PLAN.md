@@ -92,7 +92,7 @@ never appended to. History lives in git and `docs/decisions.md`.
     in `lib/urlParams.ts`. Picking a sidebar collection drops `q` and
     `item`.
   - Share links are not an access level: `/shared/{token}` looks the token up
-    and returns read-only data. `OwnedCollection` guards managing links, not
+    and returns read-only data. `OwnedCollectionDep` guards managing links, not
     reading them.
   - New code follows the conventions file even inside an unconverted file:
     shadcn components, the form pattern, query hooks returning a named
@@ -746,18 +746,25 @@ In order. Items 1 to 7 are the path to the portfolio milestone.
      an alias. Lists select the label with the row: 30 games or consoles
      now take 1 query instead of 31 (counted with a throwaway script). 95
      tests and Ruff pass.
-   - `app/auth/` (`routes.py`, `admin_routes.py`, the rest of `utils.py`):
-     `Depends(...)` defaults to aliases, missing types.
-   - `app/db.py`: `declarative_base()` to `DeclarativeBase`.
-   - Sandbox naming (2026-11-09): the `sandbox` variable holds a `User`
-     with the sandbox role; rename it `sandbox_user`, and `create_sandbox`
-     to `create_sandbox_user`.
-   - `UserResponse` uses Pydantic v1 `class Config`; switch to
-     `model_config = ConfigDict(...)`.
+   - **Done 2026-11-11 on `backend-consistency`:** `app/auth/` uses the
+     `DbSessionDep` and `CurrentUserDep` aliases, with return types on
+     `login` and `verify_user` (all six aliases got the `Dep` suffix), and
+     `get_user_by_username` uses `select()`; `db.py`'s
+     `Base` is a `DeclarativeBase`; `create_sandbox` is
+     `create_sandbox_user` and its `User` variables are `sandbox_user` (app
+     code only); all five `class Config` blocks in `auth/schemas.py` are
+     `ConfigDict`. Every router is named for what it serves
+     (`auth_router`, `collections_router`, ...), so `main.py` imports them
+     without `as`. `Depends(` now appears only in the alias definitions. 95
+     tests and Ruff pass.
+     Left for the owner (2026-11-11): tests still name sandbox `User`s
+     `sandbox` (`test_sandbox_accounts.py`, `test_collection_links.py`,
+     `test_admin_password_reset.py`); `delete_sandbox` and
+     `_sandbox_to_replace` take or return a `User` too.
    - Turn on Ruff's `FAST` rules in `pyproject.toml`. Dry run 2026-10-31
      (`ruff check . --select FAST`): 67 findings. FAST002 (non-`Annotated`
      dependency) is the rule to keep. FAST003 is a false positive when a
-     dependency reads the path parameter (`OwnedCollection`); ignore it.
+     dependency reads the path parameter (`OwnedCollectionDep`); ignore it.
      FAST001 flags `response_model` that repeats the return type; decide
      whether to drop those or ignore the rule (the conventions currently
      ask for `response_model`). Its fixes are unsafe and can reorder
@@ -1040,7 +1047,7 @@ is next, then the sharing UI, then search.
      only, no other user's items, the type-neutral shape).
 8b. **Edit and delete collections** (owner, 2026-10-31). Today a
    collection can only be created: the API has no update or delete route
-   and the UI has no control for either. Owner only (`WritableCollection`),
+   and the UI has no control for either. Owner only (`WritableCollectionDep`),
    sandboxes included for their own. Edit is a rename (the type stays
    fixed), using the form pattern. Delete confirms first with the
    red-outline destructive button, and says how many consoles, games, and
@@ -1059,7 +1066,7 @@ is next, then the sharing UI, then search.
    `extra="forbid"`, trimmed, blank is 422) and `DELETE /collections/{id}`
    deletes the links, grants, games, and consoles explicitly, then the
    collection, then the owner's labels its items used that nothing else
-   uses now. Both depend on `WritableCollection`. 7 tests in
+   uses now. Both depend on `WritableCollectionDep`. 7 tests in
    `test_collection_edit_delete.py`.
    **UI data layer built 2026-11-02 (uncommitted, no screen uses it
    yet):** `collectionsApi.update` and `.delete`, `CollectionUpdate` in

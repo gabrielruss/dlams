@@ -1,13 +1,13 @@
 from fastapi import APIRouter
 from sqlalchemy import func, or_, select
 
-from app.auth.utils import CurrentUser
+from app.auth.utils import CurrentUserDep
 from app.collections.video_games.schemas import (
     VideoGameCollectionStats,
     VideoGameCollectionStatsListResponse,
 )
 from app.models import Collection, CollectionGrant, CollectionType, Console, Game
-from app.utils import DbSession
+from app.utils import DbSessionDep
 
 video_game_stats_router = APIRouter(prefix="/collections", tags=["video games"])
 
@@ -17,8 +17,8 @@ video_game_stats_router = APIRouter(prefix="/collections", tags=["video games"])
     response_model=VideoGameCollectionStatsListResponse,
 )
 def list_video_game_collection_stats(
-    db: DbSession,
-    current_user: CurrentUser,
+    db: DbSessionDep,
+    current_user: CurrentUserDep,
 ) -> VideoGameCollectionStatsListResponse:
     shared_collection_ids = select(CollectionGrant.collection_id).where(
         CollectionGrant.user_id == current_user.id

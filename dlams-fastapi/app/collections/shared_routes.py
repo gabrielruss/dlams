@@ -7,13 +7,13 @@ from app.collections.schemas import SharedCollectionResponse
 from app.collections.video_games.console_routes import collection_consoles
 from app.collections.video_games.game_routes import collection_games
 from app.models import Collection, CollectionLink, CollectionType
-from app.utils import DbSession
+from app.utils import DbSessionDep
 
-router = APIRouter(prefix="/shared", tags=["share links"])
+shared_router = APIRouter(prefix="/shared", tags=["share links"])
 
 
-@router.get("/{token}", response_model=SharedCollectionResponse)
-def read_shared_collection(token: str, db: DbSession) -> SharedCollectionResponse:
+@shared_router.get("/{token}", response_model=SharedCollectionResponse)
+def read_shared_collection(token: str, db: DbSessionDep) -> SharedCollectionResponse:
     collection = db.scalar(
         select(Collection)
         .join(CollectionLink, CollectionLink.collection_id == Collection.id)

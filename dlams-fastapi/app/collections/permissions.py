@@ -6,9 +6,9 @@ from fastapi import Depends, HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.auth.utils import CurrentUser
+from app.auth.utils import CurrentUserDep
 from app.models import Collection, CollectionAccess, CollectionGrant, User
-from app.utils import DbSession
+from app.utils import DbSessionDep
 
 
 def _not_found() -> HTTPException:
@@ -40,8 +40,8 @@ def get_collection_access(
 
 def get_collection_with_access(
     collection_id: int,
-    db: DbSession,
-    current_user: CurrentUser,
+    db: DbSessionDep,
+    current_user: CurrentUserDep,
 ) -> tuple[Collection, CollectionAccess]:
     """Return a collection and the user's access, or 404 when they have none."""
     collection = db.get(Collection, collection_id)
@@ -57,8 +57,8 @@ def get_collection_with_access(
 
 def get_readable_collection(
     collection_id: int,
-    db: DbSession,
-    current_user: CurrentUser,
+    db: DbSessionDep,
+    current_user: CurrentUserDep,
 ) -> Collection:
     """Return a collection the signed-in user owns or has a grant to read."""
     collection, _ = get_collection_with_access(collection_id, db, current_user)
@@ -67,8 +67,8 @@ def get_readable_collection(
 
 def get_writable_collection(
     collection_id: int,
-    db: DbSession,
-    current_user: CurrentUser,
+    db: DbSessionDep,
+    current_user: CurrentUserDep,
 ) -> Collection:
     """Return a collection the signed-in user owns. Shared collections are read-only."""
     collection, access = get_collection_with_access(collection_id, db, current_user)
@@ -82,8 +82,8 @@ def get_writable_collection(
 
 def get_owned_collection(
     collection_id: int,
-    db: DbSession,
-    current_user: CurrentUser,
+    db: DbSessionDep,
+    current_user: CurrentUserDep,
 ) -> Collection:
     """Return a collection the signed-in user owns, for managing who can see it.
     Anyone else gets 404, so a reader cannot tell these routes exist for them."""
@@ -98,9 +98,9 @@ def get_owned_collection(
     return collection
 
 
-CollectionWithAccess = Annotated[
+CollectionWithAccessDep = Annotated[
     tuple[Collection, CollectionAccess], Depends(get_collection_with_access)
 ]
-ReadableCollection = Annotated[Collection, Depends(get_readable_collection)]
-WritableCollection = Annotated[Collection, Depends(get_writable_collection)]
-OwnedCollection = Annotated[Collection, Depends(get_owned_collection)]
+ReadableCollectionDep = Annotated[Collection, Depends(get_readable_collection)]
+WritableCollectionDep = Annotated[Collection, Depends(get_writable_collection)]
+OwnedCollectionDep = Annotated[Collection, Depends(get_owned_collection)]

@@ -11,7 +11,7 @@ from sqlalchemy.orm import Session
 
 from app.auth.admin_routes import set_user_role
 from app.auth.routes import create_demo_session, logout
-from app.auth.sandbox import MAX_SANDBOXES, create_sandbox
+from app.auth.sandbox import MAX_SANDBOXES, create_sandbox_user
 from app.auth.schemas import AdminUserRoleUpdate
 from app.collections.permissions import get_writable_collection
 from app.collections.routes import (
@@ -144,13 +144,13 @@ class SandboxAccountTests(unittest.TestCase):
         create_link(LinkCreate(name=None), self.sandbox_collection(sandbox), self.db)
 
     def fill_slots(self) -> list[User]:
-        return [create_sandbox(self.db) for _ in range(MAX_SANDBOXES)]
+        return [create_sandbox_user(self.db) for _ in range(MAX_SANDBOXES)]
 
     def test_the_demo_is_busy_when_every_sandbox_is_mid_session(self) -> None:
         self.fill_slots()
 
         with self.assertRaises(HTTPException) as raised:
-            create_sandbox(self.db)
+            create_sandbox_user(self.db)
 
         self.assertEqual(raised.exception.status_code, 503)
         self.assertEqual(self.count(User, User.role == UserRole.SANDBOX.value), 10)
@@ -166,7 +166,7 @@ class SandboxAccountTests(unittest.TestCase):
         self.age(newer, hours=1)
         replaced, kept = older.username, oldest_with_link.username
 
-        create_sandbox(self.db)
+        create_sandbox_user(self.db)
 
         self.assertEqual(self.count(User, User.username == replaced), 0)
         self.assertEqual(self.count(User, User.username == kept), 1)
@@ -182,20 +182,20 @@ class SandboxAccountTests(unittest.TestCase):
             self.share(sandbox)
         replaced = older.username
 
-        create_sandbox(self.db)
+        create_sandbox_user(self.db)
 
         self.assertEqual(self.count(User, User.username == replaced), 0)
         self.assertEqual(self.count(User, User.username == newer.username), 1)
         self.assertEqual(self.count(CollectionLink), 1)
 
     def test_deletes_sandboxes_older_than_seven_days(self) -> None:
-        expired = create_sandbox(self.db)
-        finished = create_sandbox(self.db)
+        expired = create_sandbox_user(self.db)
+        finished = create_sandbox_user(self.db)
         self.age(expired, days=7, minutes=1)
         self.age(finished, hours=1)
         expired_username = expired.username
 
-        create_sandbox(self.db)
+        create_sandbox_user(self.db)
 
         self.assertEqual(self.count(User, User.username == expired_username), 0)
         self.assertEqual(self.count(User, User.username == finished.username), 1)
@@ -208,12 +208,12 @@ class SandboxAccountTests(unittest.TestCase):
         self.db.commit()
 
         with self.assertRaises(HTTPException) as raised:
-            create_sandbox(self.db)
+            create_sandbox_user(self.db)
 
         self.assertEqual(raised.exception.status_code, 503)
 
     def test_limits_a_sandbox_to_three_collections(self) -> None:
-        sandbox = create_sandbox(self.db)
+        sandbox = create_sandbox_user(self.db)
         for name in ("Second", "Third"):
             create_collection(CollectionCreate(name=name), self.db, sandbox)
 
@@ -223,7 +223,7 @@ class SandboxAccountTests(unittest.TestCase):
         self.assertEqual(raised.exception.status_code, 403)
 
     def test_limits_a_sandbox_to_thirty_items_including_the_copied_ones(self) -> None:
-        sandbox = create_sandbox(self.db)
+        sandbox = create_sandbox_user(self.db)
         collection = self.sandbox_collection(sandbox)
         for index in range(27):
             self.add_game(collection, f"Game {index}")
@@ -244,7 +244,7 @@ class SandboxAccountTests(unittest.TestCase):
         self.assertEqual(self.count(Game, Game.collection_id == collection.id), 31)
 
     def test_a_sandbox_cannot_share(self) -> None:
-        sandbox = create_sandbox(self.db)
+        sandbox = create_sandbox_user(self.db)
         collection = self.sandbox_collection(sandbox)
 
         for attempt in (
@@ -259,7 +259,7 @@ class SandboxAccountTests(unittest.TestCase):
             self.assertEqual(raised.exception.status_code, 403)
 
     def test_no_one_can_share_with_a_sandbox(self) -> None:
-        sandbox = create_sandbox(self.db)
+        sandbox = create_sandbox_user(self.db)
         collection = Collection(owner_id=self.member.id, name="Shelf")
         self.db.add(collection)
         self.db.commit()
@@ -275,7 +275,7 @@ class SandboxAccountTests(unittest.TestCase):
         self.assertEqual(raised.exception.status_code, 404)
 
     def test_deleting_copied_items_leaves_the_template_untouched(self) -> None:
-        sandbox = create_sandbox(self.db)
+        sandbox = create_sandbox_user(self.db)
         collection = self.sandbox_collection(sandbox)
         game_ids = self.db.scalars(
             select(Game.id).where(Game.collection_id == collection.id)
@@ -290,7 +290,7 @@ class SandboxAccountTests(unittest.TestCase):
         )
 
     def test_a_sandbox_cannot_write_to_the_template(self) -> None:
-        sandbox = create_sandbox(self.db)
+        sandbox = create_sandbox_user(self.db)
 
         with self.assertRaises(HTTPException) as raised:
             get_writable_collection(self.template_collection.id, self.db, sandbox)
@@ -298,7 +298,7 @@ class SandboxAccountTests(unittest.TestCase):
         self.assertEqual(raised.exception.status_code, 404)
 
     def test_signing_out_keeps_the_sandbox_and_its_links(self) -> None:
-        sandbox = create_sandbox(self.db)
+        sandbox = create_sandbox_user(self.db)
         self.share(sandbox)
 
         logout(Response())
@@ -307,7 +307,7 @@ class SandboxAccountTests(unittest.TestCase):
         self.assertEqual(self.count(CollectionLink), 1)
 
     def test_an_admin_cannot_change_a_sandbox_role(self) -> None:
-        sandbox = create_sandbox(self.db)
+        sandbox = create_sandbox_user(self.db)
 
         with self.assertRaises(HTTPException) as raised:
             set_user_role(

@@ -143,14 +143,14 @@ Two independent layers:
 
    FastAPI dependencies in `permissions.py` implement this, and routes
    declare them in their signature through `Annotated` aliases.
-   `get_collection_with_access` (`CollectionWithAccess`) loads the
+   `get_collection_with_access` (`CollectionWithAccessDep`) loads the
    collection and the user's access; `get_readable_collection`
-   (`ReadableCollection`) and `get_writable_collection`
-   (`WritableCollection`, owner only; a grant reader gets 403) build on it.
-   `get_owned_collection` (`OwnedCollection`) is owner only and answers
+   (`ReadableCollectionDep`) and `get_writable_collection`
+   (`WritableCollectionDep`, owner only; a grant reader gets 403) build on it.
+   `get_owned_collection` (`OwnedCollectionDep`) is owner only and answers
    everyone else with 404; the grant and link routes use it. A user with no
    access gets 404, not 403, so collection ids are not discoverable.
-   `DbSession` and `CurrentUser` are the aliases for the database session and
+   `DbSessionDep` and `CurrentUserDep` are the aliases for the database session and
    the signed-in user. The UI mirrors write access through
    `lib/permissions.ts` (`canWriteCollection`, `isAdmin`); admin checks go
    through `isAdmin` in the UI and `require_admin` in the API, never a raw

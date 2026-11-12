@@ -3,7 +3,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.auth.sandbox import check_item_limit
-from app.collections.permissions import ReadableCollection, WritableCollection
+from app.collections.permissions import ReadableCollectionDep, WritableCollectionDep
 from app.collections.video_games.label_routes import (
     delete_label_if_unused,
     get_label,
@@ -16,7 +16,7 @@ from app.collections.video_games.schemas import (
     ConsoleUpdate,
 )
 from app.models import Collection, Console, ConsoleLabel, VideoGameCondition
-from app.utils import DbSession
+from app.utils import DbSessionDep
 
 consoles_router = APIRouter(prefix="/collections/{collection_id}", tags=["video games"])
 
@@ -64,8 +64,8 @@ def collection_consoles(db: Session, collection_id: int) -> list[ConsoleResponse
 )
 def create_console(
     request: ConsoleCreate,
-    collection: WritableCollection,
-    db: DbSession,
+    collection: WritableCollectionDep,
+    db: DbSessionDep,
 ) -> ConsoleResponse:
     check_item_limit(db, collection)
     label = get_or_create_label(db, collection.owner_id, request.label)
@@ -84,8 +84,8 @@ def create_console(
 
 @consoles_router.get("/consoles", response_model=ConsoleListResponse)
 def list_consoles(
-    collection: ReadableCollection,
-    db: DbSession,
+    collection: ReadableCollectionDep,
+    db: DbSessionDep,
 ) -> ConsoleListResponse:
     return ConsoleListResponse(consoles=collection_consoles(db, collection.id))
 
@@ -94,8 +94,8 @@ def list_consoles(
 def update_console(
     console_id: int,
     request: ConsoleUpdate,
-    collection: WritableCollection,
-    db: DbSession,
+    collection: WritableCollectionDep,
+    db: DbSessionDep,
 ) -> ConsoleResponse:
     console = _get_collection_console(db, collection, console_id)
 
@@ -129,8 +129,8 @@ def update_console(
 )
 def delete_console(
     console_id: int,
-    collection: WritableCollection,
-    db: DbSession,
+    collection: WritableCollectionDep,
+    db: DbSessionDep,
 ) -> Response:
     console = _get_collection_console(db, collection, console_id)
     label = get_label(db, console.console_label_id)

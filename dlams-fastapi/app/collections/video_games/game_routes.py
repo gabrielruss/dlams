@@ -3,7 +3,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.auth.sandbox import check_item_limit
-from app.collections.permissions import ReadableCollection, WritableCollection
+from app.collections.permissions import ReadableCollectionDep, WritableCollectionDep
 from app.collections.video_games.label_routes import (
     delete_label_if_unused,
     get_label,
@@ -16,7 +16,7 @@ from app.collections.video_games.schemas import (
     GameUpdate,
 )
 from app.models import Collection, ConsoleLabel, Game, VideoGameCondition
-from app.utils import DbSession
+from app.utils import DbSessionDep
 
 games_router = APIRouter(prefix="/collections/{collection_id}", tags=["video games"])
 
@@ -72,8 +72,8 @@ def collection_games(db: Session, collection_id: int) -> list[GameResponse]:
 )
 def create_game(
     request: GameCreate,
-    collection: WritableCollection,
-    db: DbSession,
+    collection: WritableCollectionDep,
+    db: DbSessionDep,
 ) -> GameResponse:
     check_item_limit(db, collection)
     name = _required_game_name(request.name)
@@ -95,8 +95,8 @@ def create_game(
 
 @games_router.get("/games", response_model=GameListResponse)
 def list_games(
-    collection: ReadableCollection,
-    db: DbSession,
+    collection: ReadableCollectionDep,
+    db: DbSessionDep,
 ) -> GameListResponse:
     return GameListResponse(games=collection_games(db, collection.id))
 
@@ -105,8 +105,8 @@ def list_games(
 def update_game(
     game_id: int,
     request: GameUpdate,
-    collection: WritableCollection,
-    db: DbSession,
+    collection: WritableCollectionDep,
+    db: DbSessionDep,
 ) -> GameResponse:
     game = _get_collection_game(db, collection, game_id)
     name = _required_game_name(request.name)
@@ -128,8 +128,8 @@ def update_game(
 @games_router.delete("/games/{game_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_game(
     game_id: int,
-    collection: WritableCollection,
-    db: DbSession,
+    collection: WritableCollectionDep,
+    db: DbSessionDep,
 ) -> Response:
     game = _get_collection_game(db, collection, game_id)
     label = get_label(db, game.console_label_id)

@@ -87,12 +87,12 @@ def _sandbox_to_replace(db: Session) -> User | None:
     ).first()
 
 
-def _copy_template(db: Session, template: User, sandbox: User) -> None:
+def _copy_template(db: Session, template: User, sandbox_user: User) -> None:
     labels: dict[int, ConsoleLabel] = {}
     for label in db.scalars(
         select(ConsoleLabel).where(ConsoleLabel.user_id == template.id)
     ).all():
-        labels[label.id] = ConsoleLabel(user_id=sandbox.id, name=label.name)
+        labels[label.id] = ConsoleLabel(user_id=sandbox_user.id, name=label.name)
         db.add(labels[label.id])
     db.flush()
 
@@ -103,7 +103,7 @@ def _copy_template(db: Session, template: User, sandbox: User) -> None:
     ).all()
     for collection in collections:
         copy = Collection(
-            owner_id=sandbox.id,
+            owner_id=sandbox_user.id,
             name=collection.name,
             type=collection.type,
         )
@@ -141,7 +141,7 @@ def _copy_template(db: Session, template: User, sandbox: User) -> None:
             )
 
 
-def create_sandbox(db: Session) -> User:
+def create_sandbox_user(db: Session) -> User:
     """Copy the demo template into a new sandbox account."""
     delete_expired_sandboxes(db)
     db.commit()
@@ -175,17 +175,17 @@ def create_sandbox(db: Session) -> User:
             detail="The demo is not available right now.",
         )
 
-    sandbox = User(
+    sandbox_user = User(
         username=f"sandbox-{secrets.token_hex(4)}",
         hashed_password=pwd_context.hash(uuid.uuid4().hex),
         role=UserRole.SANDBOX.value,
     )
-    db.add(sandbox)
+    db.add(sandbox_user)
     db.flush()
-    _copy_template(db, template, sandbox)
+    _copy_template(db, template, sandbox_user)
     db.commit()
-    db.refresh(sandbox)
-    return sandbox
+    db.refresh(sandbox_user)
+    return sandbox_user
 
 
 def check_collection_limit(db: Session, user: User) -> None:
