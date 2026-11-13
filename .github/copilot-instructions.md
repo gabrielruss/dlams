@@ -343,7 +343,7 @@ test and which kind.
 ## Backend (FastAPI + SQLAlchemy)
 
 - Follow PEP 8. Use modern type hints (`X | None`, built-in generics) and annotate handlers and helpers.
-- Pydantic v2 schemas with explicit request/response contracts and `response_model` where a response is defined.
+- Pydantic v2 schemas with explicit request/response contracts. A route declares its response with its return type annotation; set `response_model` only when it differs from the return type. Ruff's FAST001 and FAST002 enforce this and the `Annotated` rule (decided 2026-11-13).
 - Request schemas (the bodies routes accept) extend `RequestSchema` (`app/schemas.py`), which sets `extra="forbid"`, so an undeclared field is a 422 instead of being silently dropped (decided 2026-10-31; base class 2026-11-13). Response schemas extend `BaseModel`. Every request schema follows this, and `tests/test_request_schemas.py` lists each one with the body the UI sends; add a new request schema there.
 - Organize routers, schemas, services, and tests by resource. Keep console and game endpoints in separate modules.
 - Keep handlers thin: handle HTTP concerns, validation, authorization, and orchestration. Extract substantial or reused domain logic into a service/helper; do not add a service layer for trivial one-off operations.

@@ -31,7 +31,7 @@ def _get_user_or_404(db: Session, user_id: int) -> User:
     return user
 
 
-@admin_users_router.get("", response_model=AdminUserListResponse)
+@admin_users_router.get("")
 def list_users(
     db: DbSessionDep,
     current_user: CurrentUserDep,
@@ -44,7 +44,7 @@ def list_users(
     )
 
 
-@admin_users_router.post("/{user_id}/deactivate", response_model=AdminUserResponse)
+@admin_users_router.post("/{user_id}/deactivate")
 def deactivate_user(
     user_id: int,
     db: DbSessionDep,
@@ -63,7 +63,7 @@ def deactivate_user(
     return AdminUserResponse.model_validate(user)
 
 
-@admin_users_router.post("/{user_id}/activate", response_model=AdminUserResponse)
+@admin_users_router.post("/{user_id}/activate")
 def activate_user(
     user_id: int,
     db: DbSessionDep,
@@ -77,7 +77,7 @@ def activate_user(
     return AdminUserResponse.model_validate(user)
 
 
-@admin_users_router.put("/{user_id}/role", response_model=AdminUserResponse)
+@admin_users_router.put("/{user_id}/role")
 def set_user_role(
     user_id: int,
     request: AdminUserRoleUpdate,
@@ -107,7 +107,7 @@ def set_user_role(
     return AdminUserResponse.model_validate(user)
 
 
-@admin_users_router.put("/{user_id}/password", response_model=AdminUserResponse)
+@admin_users_router.put("/{user_id}/password")
 def reset_user_password(
     user_id: int,
     request: AdminPasswordReset,

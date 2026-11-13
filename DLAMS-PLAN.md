@@ -52,8 +52,8 @@ never appended to. History lives in git and `docs/decisions.md`.
   issues, the two optional items) stay open. The owner picks the next
   item; each goes on its own branch from `main`. Items found 2026-11-09
   and 11-10 are in 6d and Known issues.
-- **Waiting on the owner:** in 6d, whether to drop the `response_model`s
-  Ruff's FAST001 calls redundant; the `npm audit` items (Known issues).
+- **Waiting on the owner:** in 6d, whether to turn on Ruff's FAST003 with a
+  per-file ignore; the `npm audit` items (Known issues).
 - **The `shadcn` skill** (`dlams-ui/.claude/skills/shadcn`, a link into
   `.agents/skills/`) loads once a session opens a file under `dlams-ui/`,
   not at startup. Its `rules/forms.md` and `rules/base-vs-radix.md` were
@@ -760,14 +760,16 @@ In order. Items 1 to 7 are the path to the portfolio milestone.
      The tests' sandbox `User` variables are `sandbox_user` too, and
      `delete_sandbox` and `_sandbox_to_replace` are `delete_sandbox_user`
      and `_sandbox_user_to_replace` (2026-11-12).
-   - Turn on Ruff's `FAST` rules in `pyproject.toml`. Dry run 2026-10-31
-     (`ruff check . --select FAST`): 67 findings. FAST002 (non-`Annotated`
-     dependency) is the rule to keep. FAST003 is a false positive when a
-     dependency reads the path parameter (`OwnedCollectionDep`); ignore it.
-     FAST001 flags `response_model` that repeats the return type; decide
-     whether to drop those or ignore the rule (the conventions currently
-     ask for `response_model`). Its fixes are unsafe and can reorder
-     parameters the tests pass by position, so review and re-run the tests.
+   - **Done 2026-11-13 on `backend-consistency`:** Ruff selects `FAST001`
+     and `FAST002` (not the whole `FAST` group). FAST002 (dependency not
+     `Annotated`) had no findings. FAST001's fix removed the 27
+     `response_model=` arguments that repeated the return type; the
+     OpenAPI schema is identical before and after, and 98 tests and Ruff
+     pass. FAST003 is undecided (owner thinking, 2026-11-13): it flags the 9
+     routes in `app/collections/routes.py` that get `collection_id` through
+     a dependency (false positives; Ruff does not read router prefixes, so
+     the video-game routes are not flagged). Options: a per-file ignore for
+     that file, or leave it off.
    - **Done 2026-11-12 on `backend-consistency`:** `extra="forbid"` on
      every request schema. Seven were missing it: `LoginRequest`,
      `CollectionCreate`, `GrantCreate`, `ConsoleCreate`, `ConsoleUpdate`,

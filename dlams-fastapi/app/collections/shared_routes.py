@@ -12,7 +12,7 @@ from app.utils import DbSessionDep
 shared_router = APIRouter(prefix="/shared", tags=["share links"])
 
 
-@shared_router.get("/{token}", response_model=SharedCollectionResponse)
+@shared_router.get("/{token}")
 def read_shared_collection(token: str, db: DbSessionDep) -> SharedCollectionResponse:
     collection = db.scalar(
         select(Collection)

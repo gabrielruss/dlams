@@ -67,7 +67,6 @@ def collection_games(db: Session, collection_id: int) -> list[GameResponse]:
 
 @games_router.post(
     "/games",
-    response_model=GameResponse,
     status_code=status.HTTP_201_CREATED,
 )
 def create_game(
@@ -93,7 +92,7 @@ def create_game(
     return _game_response(game, label)
 
 
-@games_router.get("/games", response_model=GameListResponse)
+@games_router.get("/games")
 def list_games(
     collection: ReadableCollectionDep,
     db: DbSessionDep,
@@ -101,7 +100,7 @@ def list_games(
     return GameListResponse(games=collection_games(db, collection.id))
 
 
-@games_router.put("/games/{game_id}", response_model=GameResponse)
+@games_router.put("/games/{game_id}")
 def update_game(
     game_id: int,
     request: GameUpdate,

@@ -10,7 +10,7 @@ from app.utils import DbSessionDep
 items_router = APIRouter(prefix="/items", tags=["search"])
 
 
-@items_router.get("", response_model=ItemListResponse)
+@items_router.get("")
 def list_owned_items(
     db: DbSessionDep, current_user: CurrentUserDep
 ) -> ItemListResponse:

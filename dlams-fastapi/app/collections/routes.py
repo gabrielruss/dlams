@@ -61,7 +61,6 @@ def _collection_response(
 
 @collections_router.post(
     "",
-    response_model=CollectionResponse,
     status_code=status.HTTP_201_CREATED,
 )
 def create_collection(
@@ -81,7 +80,7 @@ def create_collection(
     return _collection_response(collection, CollectionAccess.OWNER)
 
 
-@collections_router.get("", response_model=CollectionListResponse)
+@collections_router.get("")
 def list_collections(
     db: DbSessionDep,
     current_user: CurrentUserDep,
@@ -107,13 +106,13 @@ def list_collections(
     return CollectionListResponse(collections=collections)
 
 
-@collections_router.get("/{collection_id}", response_model=CollectionResponse)
+@collections_router.get("/{collection_id}")
 def read_collection(found: CollectionWithAccessDep) -> CollectionResponse:
     collection, access = found
     return _collection_response(collection, access)
 
 
-@collections_router.put("/{collection_id}", response_model=CollectionResponse)
+@collections_router.put("/{collection_id}")
 def update_collection(
     request: CollectionUpdate,
     collection: WritableCollectionDep,
@@ -166,7 +165,6 @@ def delete_collection(collection: WritableCollectionDep, db: DbSessionDep) -> No
 
 @collections_router.post(
     "/{collection_id}/grants",
-    response_model=GrantResponse,
     status_code=status.HTTP_201_CREATED,
 )
 def create_grant(
@@ -205,7 +203,7 @@ def create_grant(
     return GrantResponse(user_id=target.id, username=target.username)
 
 
-@collections_router.get("/{collection_id}/grants", response_model=GrantListResponse)
+@collections_router.get("/{collection_id}/grants")
 def list_grants(
     collection: OwnedCollectionDep,
     db: DbSessionDep,
@@ -253,7 +251,6 @@ def delete_grant(
 
 @collections_router.post(
     "/{collection_id}/links",
-    response_model=LinkResponse,
     status_code=status.HTTP_201_CREATED,
 )
 def create_link(
@@ -286,7 +283,7 @@ def create_link(
     return LinkResponse.model_validate(link)
 
 
-@collections_router.get("/{collection_id}/links", response_model=LinkListResponse)
+@collections_router.get("/{collection_id}/links")
 def list_links(
     collection: OwnedCollectionDep,
     db: DbSessionDep,

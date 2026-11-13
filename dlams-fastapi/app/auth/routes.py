@@ -100,7 +100,6 @@ def register(user: RegisterRequest, db: DbSessionDep) -> dict[str, str]:
 
 @auth_router.post(
     "/invitations",
-    response_model=RegistrationInvitationResponse,
     status_code=status.HTTP_201_CREATED,
 )
 def create_registration_invitation(
@@ -128,7 +127,7 @@ def create_registration_invitation(
     )
 
 
-@auth_router.post("/login", response_model=AuthResponse)
+@auth_router.post("/login")
 def login(
     response: Response,
     login_data: LoginRequest,
@@ -174,7 +173,6 @@ def login(
 
 @auth_router.post(
     "/demo-sessions",
-    response_model=AuthResponse,
     status_code=status.HTTP_201_CREATED,
 )
 def create_demo_session(
@@ -204,7 +202,7 @@ def logout(response: Response) -> Response:
     return response
 
 
-@auth_router.get("/verify", response_model=AuthResponse)
+@auth_router.get("/verify")
 async def verify_user(current_user: CurrentUserDep) -> AuthResponse:
     """Verify current user is auth'd"""
     return AuthResponse(

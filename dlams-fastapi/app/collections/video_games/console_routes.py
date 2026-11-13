@@ -59,7 +59,6 @@ def collection_consoles(db: Session, collection_id: int) -> list[ConsoleResponse
 
 @consoles_router.post(
     "/consoles",
-    response_model=ConsoleResponse,
     status_code=status.HTTP_201_CREATED,
 )
 def create_console(
@@ -82,7 +81,7 @@ def create_console(
     return _console_response(console, label)
 
 
-@consoles_router.get("/consoles", response_model=ConsoleListResponse)
+@consoles_router.get("/consoles")
 def list_consoles(
     collection: ReadableCollectionDep,
     db: DbSessionDep,
@@ -90,7 +89,7 @@ def list_consoles(
     return ConsoleListResponse(consoles=collection_consoles(db, collection.id))
 
 
-@consoles_router.put("/consoles/{console_id}", response_model=ConsoleResponse)
+@consoles_router.put("/consoles/{console_id}")
 def update_console(
     console_id: int,
     request: ConsoleUpdate,

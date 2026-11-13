@@ -73,7 +73,7 @@ def get_or_create_label(
     return label
 
 
-@console_labels_router.get("", response_model=ConsoleLabelListResponse)
+@console_labels_router.get("")
 def list_console_labels(
     db: DbSessionDep,
     current_user: CurrentUserDep,

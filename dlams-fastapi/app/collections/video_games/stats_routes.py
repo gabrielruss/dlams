@@ -12,10 +12,7 @@ from app.utils import DbSessionDep
 video_game_stats_router = APIRouter(prefix="/collections", tags=["video games"])
 
 
-@video_game_stats_router.get(
-    "/video-game-stats",
-    response_model=VideoGameCollectionStatsListResponse,
-)
+@video_game_stats_router.get("/video-game-stats")
 def list_video_game_collection_stats(
     db: DbSessionDep,
     current_user: CurrentUserDep,
