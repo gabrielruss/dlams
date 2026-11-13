@@ -1,4 +1,4 @@
-import type { GameRecord } from "@/types/videoGames"
+import type { GameRecord } from "@/components/video-games/types"
 import ListRow from "@/components/collections/ListRow"
 import { isoDateToMonthDayYear } from "@/lib/dates"
 

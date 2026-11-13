@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query"
 
-import { videoGameCollectionStatsQueryOptions } from "@/lib/api/videoGameStats"
+import { videoGameCollectionStatsQueryOptions } from "@/components/video-games/api/videoGameStats"
 
 function useVideoGameCollectionStats(collectionId: number) {
   const { data, isPending, isError, error } = useQuery({

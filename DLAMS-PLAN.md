@@ -6,54 +6,49 @@ The current state of the project. For why things are the way they are, see
 [`docs/decisions.md`](./docs/decisions.md). For the full history up to
 2026-10-09, see [`docs/archive/`](./docs/archive/).
 
-## Where we left off (2026-11-11)
+## Where we left off (2026-11-13)
 
 Start here in a new session. This block is rewritten at the end of a session,
 never appended to. History lives in git and `docs/decisions.md`.
 
-- **Status.** `main` (`58d1278`) has PRs #19 to #22 merged and deployed:
-  the accessibility audit, the calendar dropdown focus ring, hook
-  consistency with the hooks folder move, and route paths. The interview
-  was held 2026-11-10; no app changes since. Uncommitted on `main`: this
-  plan and a new `CLAUDE.md` rule (report other places that follow an old
-  code pattern; do not change them without asking). The owner moves them
-  to a branch before committing. `stash@{0}` and `stash@{1}` both hold
-  this plan's edits (already applied); the owner drops them once
-  committed. Run `git status` and `git log` first: the owner commits and
-  pushes everything, and a push to `main` deploys (docs included).
-- **What was done (2026-11-06 to 11-09):**
-  - New "Checkpoint: interview 1" (below): frontend cleanup only, no new
-    features; backend (6d) waits. Steps 1, 3, and 4 are done.
-  - Accessibility (item 6): axe checks for the 6a controls; a Playwright
-    pass in WebKit and Firefox (throwaway scripts, not kept; Playwright's
-    browsers are in `~/Library/Caches/ms-playwright`); focus return for Add game and New collection (Base UI
-    `initialFocus` with refs merged with react-hook-form's `ref`, per its
-    FAQ); the calendar opens on today, arrow keys work, and its month and
-    year dropdowns show a focus ring (two logged local edits in
-    `components/ui/calendar.tsx`); label-in-name (`HomeLink`, `ListRow`);
-    `aria-expanded` on Open menu; search opens on typing, not on focus.
-  - Every query hook returns `{ <data>, isPending, isError, error }`;
-    callers keep the hook's names; hooks live in each feature's `hooks/`
-    folder, shared ones in `src/hooks/`.
-  - `lib/routes.ts` holds every app path; no path is typed as a string.
-  - New favicon.
-- **What is verified.** Run by Claude on `main` (2026-11-09): 88 UI tests
-  (12 files), typecheck, lint, format check, build. Backend untouched since
-  PR #18 (95 tests then). Owner-checked in a browser: keyboard use
-  throughout, the calendar. Not checked: VoiceOver and the Simulator
-  (owner's pass), the calendar dropdown ring after #20, an empty Save still
-  focusing the name field after the ref change.
+- **Status.** Branch `backend-consistency` holds plan item 6d, all six
+  steps; the owner is merging it. PR #23 (`tech-backlog-part1`: the 422
+  message, deploy gated on CI, lazy pages, hook leftovers) is merged.
+  "Checkpoint: interview 1" passed 2026-11-10. Run `git status` and `git
+  log` first: the owner commits and pushes everything, and a push to
+  `main` deploys (docs included).
+- **What 6d did (2026-11-11 to 11-13):**
+  - Backend: `app/collections/video_games/` split into console, game,
+    label, and stats routes; `select()` everywhere; lists load the label
+    with the row (1 query instead of 31); routers named for what they
+    serve; dependency aliases end in `Dep`; `Base` is a `DeclarativeBase`;
+    `ConfigDict` instead of `class Config`; sandbox `User`s are
+    `sandbox_user`.
+  - Request schemas extend `RequestSchema` (`app/schemas.py`,
+    `extra="forbid"`); `tests/test_request_schemas.py` checks each one
+    against the body the UI sends.
+  - Ruff selects `FAST001` and `FAST002`; the 27 redundant
+    `response_model`s are gone (OpenAPI identical). FAST003 stays off: Ruff
+    does not follow a dependency alias.
+  - UI: the video-game API modules and types moved to
+    `components/video-games/api/` and `types.ts`, an interim spot until 6g.
+- **What is verified.** Run by Claude on `backend-consistency`
+  (2026-11-13): 98 backend tests, Ruff check and format; 89 UI tests,
+  lint, format check, build. Not run: the app in a browser after 6d (log
+  in, create a collection, add and edit a console and a game; a 422 would
+  mean a request schema rejects a field the UI sends), and Alembic against
+  a real database after the `DeclarativeBase` change (runs when the API
+  starts).
 - **Local test data:** the local account `delete-me` has two collections,
   one console, and one game added by the Playwright pass. Demo sandboxes
   are capped at 10 locally; reuse one signed-in session when scripting.
   The local stack (Docker) is often off; ask before starting it.
-- **Next:** "Checkpoint: interview 1" passed 2026-11-10 (owner); nothing
-  is paused. Its unfinished steps (6b and 6c, the walkthrough known
-  issues, the two optional items) stay open. The owner picks the next
-  item; each goes on its own branch from `main`. Items found 2026-11-09
-  and 11-10 are in 6d and Known issues.
-- **Waiting on the owner:** in 6d, whether to turn on Ruff's FAST003 with a
-  per-file ignore; the `npm audit` items (Known issues).
+- **Next:** 6g, feature folders for the UI (decided 2026-11-13; its own
+  branch from `main` after the merge). Step 1 moves the shared pieces out
+  of `collections/`, `search/`, and `auth/`. Other open items: 6f (name
+  query state), 6b and 6c (styling), the walkthrough known issues.
+- **Waiting on the owner:** the `npm audit` items (Known issues); whether
+  to add a line saying Claude creates the branch to the conventions file.
 - **The `shadcn` skill** (`dlams-ui/.claude/skills/shadcn`, a link into
   `.agents/skills/`) loads once a session opens a file under `dlams-ui/`,
   not at startup. Its `rules/forms.md` and `rules/base-vs-radix.md` were
@@ -97,7 +92,7 @@ never appended to. History lives in git and `docs/decisions.md`.
   - New code follows the conventions file even inside an unconverted file:
     shadcn components, the form pattern, query hooks returning a named
     object, at most two `?` in a ternary chain, `Annotated` aliases,
-    `select()`, `extra="forbid"` on request schemas. The 6a grep lists raw
+    `select()`, request schemas extending `RequestSchema`. The 6a grep lists raw
     form elements left in older code.
   - Generated shadcn files need the owner's approval to edit (local edits to
     `components/ui/drawer.tsx` and `combobox.tsx` are listed in
@@ -738,7 +733,11 @@ In order. Items 1 to 7 are the path to the portfolio milestone.
      (Alembic and `Base` find tables there). The sandbox copier moves with
      item 11. UI as a separate step: `lib/api/consoles.ts`, `games.ts`,
      `consoleLabels.ts`, `videoGameStats.ts`, and `types/videoGames.ts`
-     into the video-game feature folder.
+     into the video-game feature folder. **UI done 2026-11-13 on
+     `backend-consistency`:** moved with `git mv` to
+     `components/video-games/api/` and `components/video-games/types.ts`,
+     imports updated, `types/index.ts` no longer re-exports them (nothing
+     used it). Lint, format, build, and 89 UI tests pass.
    - **Done 2026-11-11 on `backend-consistency`:** `video_games/routes.py`
      split into `console_routes.py`, `game_routes.py`, `label_routes.py`
      (`GET /console-labels` and the label helpers both item types use), and
@@ -765,11 +764,11 @@ In order. Items 1 to 7 are the path to the portfolio milestone.
      `Annotated`) had no findings. FAST001's fix removed the 27
      `response_model=` arguments that repeated the return type; the
      OpenAPI schema is identical before and after, and 98 tests and Ruff
-     pass. FAST003 is undecided (owner thinking, 2026-11-13): it flags the 9
-     routes in `app/collections/routes.py` that get `collection_id` through
-     a dependency (false positives; Ruff does not read router prefixes, so
-     the video-game routes are not flagged). Options: a per-file ignore for
-     that file, or leave it off.
+     pass. FAST003 stays off (owner, 2026-11-13): it flags the 9 routes in
+     `app/collections/routes.py` that get `collection_id` through a
+     dependency alias. Ruff follows an inline `Depends(...)` into the
+     dependency but not a type alias, so these are false positives; the
+     owner chose no per-file ignore.
    - **Done 2026-11-12 on `backend-consistency`:** `extra="forbid"` on
      every request schema. Seven were missing it: `LoginRequest`,
      `CollectionCreate`, `GrantCreate`, `ConsoleCreate`, `ConsoleUpdate`,
@@ -813,6 +812,81 @@ In order. Items 1 to 7 are the path to the portfolio milestone.
    the name for `error` (`linksError`?), and whether one-hook components
    rename too. This reverses "callers keep the hook's names" (2026-11-08),
    so update that line and the conventions file with it.
+6g. **Feature folders for the UI** (owner, 2026-11-13; its own branch after
+   `backend-consistency`). Decided in `docs/decisions.md` ("UI code is
+   grouped by feature"): with about seven collection types expected
+   (video games, books, shoes, board games, CDs, movies and TV, maybe
+   trading cards), each type's code lives in one folder instead of being
+   spread across `lib/api/`, `components/`, `hooks/`, `types/`, and
+   `schemas/`. Follows Bulletproof React's layout. Target:
+   ```
+   src/
+     main.tsx
+     app/        App.tsx, AppSidebar.tsx, pages/  (may import features)
+     features/
+       admin/        UserManagement, hooks/, api/adminUsers.ts, types.ts
+       auth/         RegistrationInviteManager, hooks/ (invitation), schemas.ts
+       collections/  workspace, navigation, drawers, links, stats, hooks/,
+                     api/ (collections, collectionLinks, sharedCollections),
+                     schemas.ts
+       search/       as now
+       video-games/  as now, plus schemas.ts (consoles and games)
+     components/ ui/, BrandLogo, FitText, HomeLink, Wordmark, ListRow,
+                 ItemActions, ItemDetailRows  (shared only)
+     hooks/      useFitOnResize, useItemDrawer, useSearchMode, the session
+                 hooks from useAuthQueries
+     lib/        api/ (client, auth, items), dates, permissions,
+                 queryClient, routes, urlParams, utils
+     types/      user, auth, collections, items  (shared only)
+     test/
+   ```
+   Rules: a feature has components at its root, `hooks/` and `api/`
+   folders, and single `types.ts` and `schemas.ts` files, only the parts
+   it needs. Imports go one way: shared code (`components/`, `hooks/`,
+   `lib/`, `types/`) never imports a feature, features do not import each
+   other, and `app/` may import anything. The deepest path is
+   `features/<type>/hooks/<file>`, three folders under `src/` (the React
+   docs suggest at most three or four).
+   Audit of the current tree (2026-11-13): 20 imports break the
+   direction rule; moving shared pieces out of features fixes all but the
+   collection-type dispatch.
+   - Shared pieces living in a feature: `ListRow`, `ItemActions`,
+     `ItemDetailRows`, `useItemDrawer` (in `collections/`, used by every
+     type and by search); `useSearchMode` (in `search/`, used by
+     `CollectionNavigation` and `Home`); `useCurrentUser`, `useLogin`,
+     `useLogout`, `useRegister`, `useStartDemoSession` (in `auth/`, used by
+     `admin/`, `video-games/`, `AppSidebar`, and the login and register
+     pages). Only `useCreateRegistrationInvitation` stays in `auth/`.
+   - Shared code importing a feature: `lib/api/sharedCollections.ts`
+     (video-game types), `schemas/consoles.ts` and `games.ts`
+     (`videoGameConditions`; fixed by moving them into
+     `features/video-games/schemas.ts`), `AppSidebar` (fixed by moving it
+     to `app/`).
+   - Feature-only code in shared folders: `lib/api/adminUsers.ts` and
+     `types/adminUsers.ts` (admin); `lib/api/collections.ts`,
+     `collectionLinks.ts`, `sharedCollections.ts`, `schemas/collections.ts`,
+     and `collectionLinks.ts` (collections); `schemas/auth.ts` (auth).
+   - Left as the one exception until item 11: `collections/` imports
+     `video-games/` to pick each type's pieces (`collectionWorkspaceResolver`,
+     `CollectionStats`, `DeleteCollectionConfirm`, the stats and label keys
+     in `useCollections` and `useManageCollection`, and the shared
+     collection's console and game types). The owner chose (2026-11-03)
+     to settle the type-neutral versions when the second type is built;
+     Bulletproof's answer is to compose features in `app/`.
+   Steps, each reviewed alone:
+   1. Move the shared pieces out of `collections/`, `search/`, and
+      `auth/` into `components/` and `hooks/`.
+   2. Move `components/<feature>/` to `features/<feature>/`, and each
+      feature's API modules, types, and schemas into it. This also moves
+      `components/video-games/api/` and `types.ts` (6d's interim spot).
+   3. Create `app/` with `App.tsx`, `AppSidebar.tsx`, and `pages/`.
+   4. Enforce the direction rule with ESLint's built-in
+      `no-restricted-imports` (no package needed), with the collection-type
+      exception listed by file.
+   5. Update `docs/architecture.md` (tree, the "where things go" table),
+      the conventions file, and `test/setup.ts`'s page imports.
+   Lint, format, build, and the UI tests after each step; moves use `git
+   mv`.
 7. **README and a final check.** Done 2026-10-27 (owner's call). The root
    `README.md` was rewritten as the front door (no screenshots: the live demo
    shows the app and there is nothing to keep current; see

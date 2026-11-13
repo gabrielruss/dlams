@@ -1,6 +1,9 @@
-import { apiRequest } from "./client"
+import { apiRequest } from "@/lib/api/client"
 import { queryOptions } from "@tanstack/react-query"
-import type { ConsoleCreate, ConsoleRecord } from "@/types/videoGames"
+import type {
+  ConsoleCreate,
+  ConsoleRecord,
+} from "@/components/video-games/types"
 
 export const consoleKeys = {
   all: ["consoles"] as const,

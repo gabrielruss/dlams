@@ -8,7 +8,7 @@ import {
 import {
   type VideoGameCondition,
   videoGameConditions,
-} from "@/types/videoGames"
+} from "@/components/video-games/types"
 
 interface ConditionSelectProps {
   id: string

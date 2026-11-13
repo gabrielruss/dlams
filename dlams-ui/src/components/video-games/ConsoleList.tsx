@@ -1,4 +1,4 @@
-import type { ConsoleRecord } from "@/types/videoGames"
+import type { ConsoleRecord } from "@/components/video-games/types"
 import ListRow from "@/components/collections/ListRow"
 import { consoleName } from "./videoGameOptions"
 

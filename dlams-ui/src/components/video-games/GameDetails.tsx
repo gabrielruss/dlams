@@ -1,5 +1,5 @@
 import ItemDetailRows from "@/components/collections/ItemDetailRows"
-import type { GameRecord } from "@/types/videoGames"
+import type { GameRecord } from "@/components/video-games/types"
 import { isoDateToMonthDayYear } from "@/lib/dates"
 
 interface GameDetailsProps {

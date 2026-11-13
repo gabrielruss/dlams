@@ -1,5 +1,5 @@
 import ItemDetailRows from "@/components/collections/ItemDetailRows"
-import type { ConsoleRecord } from "@/types/videoGames"
+import type { ConsoleRecord } from "@/components/video-games/types"
 
 interface ConsoleDetailsProps {
   consoleRecord: ConsoleRecord

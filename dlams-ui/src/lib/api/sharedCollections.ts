@@ -1,7 +1,7 @@
 import { apiRequest } from "./client"
 import { queryOptions } from "@tanstack/react-query"
 import type { CollectionType } from "@/types/collections"
-import type { ConsoleRecord, GameRecord } from "@/types/videoGames"
+import type { ConsoleRecord, GameRecord } from "@/components/video-games/types"
 
 export interface SharedCollection {
   name: string

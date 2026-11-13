@@ -1,6 +1,6 @@
 import * as z from "zod"
 
-import { videoGameConditions } from "@/types/videoGames"
+import { videoGameConditions } from "@/components/video-games/types"
 
 export const consoleFormSchema = z.object({
   label: z

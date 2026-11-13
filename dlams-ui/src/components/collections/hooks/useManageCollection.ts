@@ -1,9 +1,9 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 
 import { collectionKeys, collectionsApi } from "@/lib/api/collections"
-import { consoleLabelKeys } from "@/lib/api/consoleLabels"
+import { consoleLabelKeys } from "@/components/video-games/api/consoleLabels"
 import { itemKeys } from "@/lib/api/items"
-import { videoGameStatsKeys } from "@/lib/api/videoGameStats"
+import { videoGameStatsKeys } from "@/components/video-games/api/videoGameStats"
 
 function useManageCollection(collectionId: number) {
   const queryClient = useQueryClient()

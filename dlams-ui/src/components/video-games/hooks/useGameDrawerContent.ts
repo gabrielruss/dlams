@@ -3,9 +3,9 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { useForm } from "react-hook-form"
 
-import { gamesApi } from "@/lib/api/games"
+import { gamesApi } from "@/components/video-games/api/games"
 import { gameFormSchema, type GameFormValues } from "@/schemas/games"
-import type { GameCreate, GameRecord } from "@/types/videoGames"
+import type { GameCreate, GameRecord } from "@/components/video-games/types"
 import { invalidateVideoGameCollection } from "../invalidateVideoGameCollection"
 
 interface UseGameDrawerContentOptions {

@@ -1,7 +1,7 @@
 import * as z from "zod"
 
 import { isAfterToday } from "@/lib/dates"
-import { videoGameConditions } from "@/types/videoGames"
+import { videoGameConditions } from "@/components/video-games/types"
 
 export const gameFormSchema = z.object({
   name: z

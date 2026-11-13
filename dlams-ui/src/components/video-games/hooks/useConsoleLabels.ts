@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query"
 
-import { consoleLabelListQueryOptions } from "@/lib/api/consoleLabels"
+import { consoleLabelListQueryOptions } from "@/components/video-games/api/consoleLabels"
 
 function useConsoleLabels(enabled: boolean) {
   const { data, isPending, isError, error } = useQuery({

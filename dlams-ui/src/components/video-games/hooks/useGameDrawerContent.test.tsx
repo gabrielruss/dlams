@@ -5,7 +5,7 @@ import { http, HttpResponse } from "msw"
 import { describe, expect, it, vi } from "vitest"
 
 import { server } from "@/test/server"
-import type { GameRecord } from "@/types/videoGames"
+import type { GameRecord } from "@/components/video-games/types"
 import useGameDrawerContent from "./useGameDrawerContent"
 
 const api = "http://localhost/api"

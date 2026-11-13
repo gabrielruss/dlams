@@ -74,7 +74,9 @@ and served by `nginx:alpine`, database `postgres:15` (development uses 14).
 - **UI client.** `dlams-ui/src/lib/api/client.ts` wraps `fetch` with
   `credentials: "include"` and throws `ApiError` (message from the API's
   `detail`: the string, or for a 422 the `msg` of each validation issue).
-  One module per resource in `lib/api/` builds on it.
+  One module per shared resource in `lib/api/` builds on it; a collection
+  type keeps its own API modules and types in its feature folder
+  (`components/video-games/api/`, `components/video-games/types.ts`).
 - **Server state.** All server data goes through TanStack Query v5
   (`lib/queryClient.ts`: 30 s stale time, no retries). Components use
   per-feature hooks (`useCollections`, `useVideoGamesCollection`,
@@ -247,10 +249,12 @@ dlams-ui/src/
                              open)
     search/                  search bar, results panel, matcher, hooks
     video-games/             console and game managers, drawer content,
-                             forms, details, workspace, hooks
+                             forms, details, workspace, hooks; api/ has the
+                             consoles, games, console label, and stats
+                             modules; types.ts has the video-game types
     ui/                      shadcn/ui primitives (button, calendar, drawer,
                              field, popover, select, ...)
-  lib/api/                   fetch client and one module per resource
+  lib/api/                   fetch client and one module per shared resource
   lib/                       queryClient, permissions, dates, routes (app
                              paths), urlParams, utils
   schemas/, types/           zod schemas and shared TypeScript types
@@ -350,7 +354,7 @@ styling changes need approval (see the conventions file for the rule).
 | Who can do what to a collection | `app/collections/permissions.py` |
 | A video-game endpoint | `app/collections/video_games/` (`console_routes.py`, `game_routes.py`) |
 | The schema | `app/models/` plus a new file in `alembic/versions/` |
-| A server-data hook | `dlams-ui/src/components/<feature>/use*.ts` and `lib/api/` |
+| A server-data hook | `dlams-ui/src/components/<feature>/hooks/use*.ts`, and `lib/api/` or the feature's `api/` |
 | What a collection type renders | `components/collections/collectionWorkspaceResolver.ts` |
 | Search | `dlams-ui/src/components/search/`, `app/collections/item_routes.py` and `video_games/items.py` |
 | How an item's drawer opens and closes | `components/collections/hooks/useItemDrawer.ts`, `useOpenItem.ts`, `lib/urlParams.ts`; what it shows: `components/video-games/*DrawerContent*` |

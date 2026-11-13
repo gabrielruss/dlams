@@ -1,6 +1,6 @@
-import { apiRequest } from "./client"
+import { apiRequest } from "@/lib/api/client"
 import { queryOptions } from "@tanstack/react-query"
-import type { GameCreate, GameRecord } from "@/types/videoGames"
+import type { GameCreate, GameRecord } from "@/components/video-games/types"
 
 export const gameKeys = {
   all: ["games"] as const,

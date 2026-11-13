@@ -1,4 +1,4 @@
-import type { ConsoleRecord, GameRecord } from "@/types/videoGames"
+import type { ConsoleRecord, GameRecord } from "@/components/video-games/types"
 
 export function consoleName(consoleRecord: ConsoleRecord) {
   return consoleRecord.edition

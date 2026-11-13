@@ -7,7 +7,7 @@ import {
   collectionListQueryOptions,
   collectionsApi,
 } from "@/lib/api/collections"
-import { videoGameStatsKeys } from "@/lib/api/videoGameStats"
+import { videoGameStatsKeys } from "@/components/video-games/api/videoGameStats"
 import { COLLECTION_PARAM, ITEM_PARAM, SEARCH_PARAM } from "@/lib/urlParams"
 import { defaultCollectionType } from "@/types/collections"
 

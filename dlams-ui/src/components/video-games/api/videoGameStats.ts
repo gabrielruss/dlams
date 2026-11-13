@@ -1,6 +1,6 @@
-import { apiRequest } from "./client"
+import { apiRequest } from "@/lib/api/client"
 import { queryOptions } from "@tanstack/react-query"
-import type { VideoGameCollectionStats } from "@/types/videoGames"
+import type { VideoGameCollectionStats } from "@/components/video-games/types"
 
 export const videoGameStatsKeys = {
   all: ["video-game-collection-stats"] as const,

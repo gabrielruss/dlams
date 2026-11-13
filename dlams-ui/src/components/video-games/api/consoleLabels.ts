@@ -1,7 +1,7 @@
 import { queryOptions } from "@tanstack/react-query"
 
-import type { ConsoleLabel } from "@/types/videoGames"
-import { apiRequest } from "./client"
+import type { ConsoleLabel } from "@/components/video-games/types"
+import { apiRequest } from "@/lib/api/client"
 
 export const consoleLabelKeys = {
   all: ["console-labels"] as const,

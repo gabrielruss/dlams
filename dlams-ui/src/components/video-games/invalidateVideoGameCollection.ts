@@ -1,10 +1,10 @@
 import type { QueryClient } from "@tanstack/react-query"
 
-import { consoleKeys } from "@/lib/api/consoles"
-import { consoleLabelKeys } from "@/lib/api/consoleLabels"
-import { gameKeys } from "@/lib/api/games"
+import { consoleKeys } from "@/components/video-games/api/consoles"
+import { consoleLabelKeys } from "@/components/video-games/api/consoleLabels"
+import { gameKeys } from "@/components/video-games/api/games"
 import { itemKeys } from "@/lib/api/items"
-import { videoGameStatsKeys } from "@/lib/api/videoGameStats"
+import { videoGameStatsKeys } from "@/components/video-games/api/videoGameStats"
 
 export async function invalidateVideoGameCollection(
   queryClient: QueryClient,

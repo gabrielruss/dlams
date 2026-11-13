@@ -12,7 +12,7 @@ import {
   gameSearchable,
 } from "@/components/video-games/videoGameOptions"
 import { collectionTypeNames } from "@/types/collections"
-import type { ConsoleRecord, GameRecord } from "@/types/videoGames"
+import type { ConsoleRecord, GameRecord } from "@/components/video-games/types"
 
 const noConsoles: ConsoleRecord[] = []
 const noGames: GameRecord[] = []

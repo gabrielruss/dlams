@@ -3,9 +3,12 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { useForm } from "react-hook-form"
 
-import { consolesApi } from "@/lib/api/consoles"
+import { consolesApi } from "@/components/video-games/api/consoles"
 import { consoleFormSchema, type ConsoleFormValues } from "@/schemas/consoles"
-import type { ConsoleCreate, ConsoleRecord } from "@/types/videoGames"
+import type {
+  ConsoleCreate,
+  ConsoleRecord,
+} from "@/components/video-games/types"
 import { invalidateVideoGameCollection } from "../invalidateVideoGameCollection"
 
 interface UseConsoleDrawerContentOptions {
