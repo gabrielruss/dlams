@@ -84,7 +84,7 @@ never appended to. History lives in git and `docs/decisions.md`.
     never return a 422.
   - Backend tests call route functions directly against SQLite, which does
     not enforce foreign keys; delete child rows explicitly (as
-    `delete_sandbox` and `delete_collection` do) and test that. Routes take
+    `delete_sandbox_user` and `delete_collection` do) and test that. Routes take
     the collection from a dependency, so tests pass the collection in and
     test access rules on the dependency functions.
   - URL state: `?collection=`, `?q=` (search open, even empty), and
@@ -757,10 +757,9 @@ In order. Items 1 to 7 are the path to the portfolio milestone.
      (`auth_router`, `collections_router`, ...), so `main.py` imports them
      without `as`. `Depends(` now appears only in the alias definitions. 95
      tests and Ruff pass.
-     Left for the owner (2026-11-11): tests still name sandbox `User`s
-     `sandbox` (`test_sandbox_accounts.py`, `test_collection_links.py`,
-     `test_admin_password_reset.py`); `delete_sandbox` and
-     `_sandbox_to_replace` take or return a `User` too.
+     The tests' sandbox `User` variables are `sandbox_user` too, and
+     `delete_sandbox` and `_sandbox_to_replace` are `delete_sandbox_user`
+     and `_sandbox_user_to_replace` (2026-11-12).
    - Turn on Ruff's `FAST` rules in `pyproject.toml`. Dry run 2026-10-31
      (`ruff check . --select FAST`): 67 findings. FAST002 (non-`Annotated`
      dependency) is the rule to keep. FAST003 is a false positive when a
@@ -769,16 +768,18 @@ In order. Items 1 to 7 are the path to the portfolio milestone.
      whether to drop those or ignore the rule (the conventions currently
      ask for `response_model`). Its fixes are unsafe and can reorder
      parameters the tests pass by position, so review and re-run the tests.
-   - `extra="forbid"` on every request schema (decided 2026-10-31; only
-     `LinkCreate` has it). The other ten: `LoginRequest`,
-     `RegisterRequest`, `AdminUserRoleUpdate`, `AdminPasswordReset`
-     (`auth/schemas.py`), `CollectionCreate`, `GrantCreate`
-     (`collections/schemas.py`), `ConsoleCreate`, `ConsoleUpdate`,
-     `GameCreate`, `GameUpdate` (`video_games_schemas.py`). For each, first
-     compare the body the
-     matching `dlams-ui/src/lib/api/` module sends: the UI tests mock the API
-     with MSW and will not catch a 422, so an extra field would only fail in
-     the real app. Then run both test suites and try each form in a browser.
+   - **Done 2026-11-12 on `backend-consistency`:** `extra="forbid"` on
+     every request schema. Seven were missing it: `LoginRequest`,
+     `CollectionCreate`, `GrantCreate`, `ConsoleCreate`, `ConsoleUpdate`,
+     `GameCreate`, `GameUpdate`. Each body in `dlams-ui/src/lib/api/` was
+     checked: login, collection create, and the console and game drawers
+     send exactly the schema's fields; nothing in the UI calls the grant
+     endpoints. `tests/test_request_schemas.py` sends every request schema
+     its UI body and the body plus an unknown field (fails on the seven
+     without the change). 2026-11-13: request schemas extend one
+     `RequestSchema` base (`app/schemas.py`) that sets `extra="forbid"`,
+     instead of a `model_config` line each; the test also checks each one
+     extends it. 98 tests and Ruff pass. Not yet tried in a browser.
 6e. **Frontend hook consistency check. Done 2026-11-08** (PR #21; see the
    checkpoint, step 3). Original scope (owner, 2026-11-02): Go through
    every hook in `dlams-ui/src` and check two things. First, a hook named
@@ -867,7 +868,7 @@ is next, then the sharing UI, then search.
       cascades from the collection; applied to production on the
       2026-10-31 deploy); `GET`, `POST`, `DELETE` under
       `/collections/{id}/links`, owner only, sandboxes included, at most 5;
-      `delete_sandbox` deletes links first; 9 tests in
+      `delete_sandbox_user` deletes links first; 9 tests in
       `test_collection_links.py`. UI: a Share button on the selected
       collection's heading (owners, sandboxes included) opens
       `ShareCollectionDrawer` (with `CreateLinkForm` and `ShareLinkRow`):
@@ -895,7 +896,7 @@ is next, then the sharing UI, then search.
    3. **Seven-day sandboxes.** Deployed 2026-10-31.
       `SANDBOX_LIFETIME` is 7 days and `SANDBOX_SESSION` 30 minutes; a full
       demo deletes the oldest sandbox past its session, one without links
-      first (`_sandbox_to_replace`), else answers "busy"; `logout` is back to
+      first (`_sandbox_user_to_replace`), else answers "busy"; `logout` is back to
       only clearing the cookie. The demo notice now says the visitor can't
       get back after signing out or 30 minutes, and links keep working for
       7 days. 15 sandbox tests.
@@ -1056,7 +1057,7 @@ is next, then the sharing UI, then search.
    the owner and stay: delete the ones no longer used, as
    `_delete_label_if_unused` does for single items. SQLite in the tests does
    not enforce foreign keys, so delete child rows explicitly (as
-   `delete_sandbox` does) and test it. After a delete, the sidebar selects
+   `delete_sandbox_user` does) and test it. After a delete, the sidebar selects
    the first remaining collection (the existing URL effect does this) and
    the collection list and stats queries are invalidated. Where the
    controls sit (the collection heading beside Share, or the sidebar row)
@@ -1171,7 +1172,7 @@ is next, then the sharing UI, then search.
    yourself or another admin). Constraints: console labels and
    `registration_invitations.created_by_id` are `RESTRICT`, so a plain delete
    of a user with data or issued invitations fails (decision "Admins can
-   deactivate a user; delete is deferred"); `delete_sandbox` already deletes
+   deactivate a user; delete is deferred"); `delete_sandbox_user` already deletes
    one user's data in a working order and is a starting point. Backups stay
    on the Pi and a hard delete cannot be undone, so the UI confirms first
    with the red-outline destructive button.

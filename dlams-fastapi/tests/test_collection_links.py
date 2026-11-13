@@ -10,7 +10,7 @@ from pydantic import ValidationError
 from sqlalchemy import create_engine, func, select
 from sqlalchemy.orm import Session
 
-from app.auth.sandbox import delete_sandbox
+from app.auth.sandbox import delete_sandbox_user
 from app.collections.permissions import get_owned_collection
 from app.collections.routes import create_link, delete_link, list_links
 from app.collections.schemas import LinkCreate
@@ -128,14 +128,14 @@ class CollectionLinkTests(unittest.TestCase):
             LinkCreate(name="x" * 51)
 
     def test_a_sandbox_shares_by_link_and_its_links_go_with_it(self) -> None:
-        sandbox = User(
+        sandbox_user = User(
             username="sandbox-1234abcd",
             hashed_password="hash",
             role=UserRole.SANDBOX.value,
         )
-        self.db.add(sandbox)
+        self.db.add(sandbox_user)
         self.db.flush()
-        sandbox_collection = Collection(owner_id=sandbox.id, name="Demo shelf")
+        sandbox_collection = Collection(owner_id=sandbox_user.id, name="Demo shelf")
         self.db.add(sandbox_collection)
         self.db.commit()
         self.create("mine")
@@ -143,7 +143,7 @@ class CollectionLinkTests(unittest.TestCase):
         self.create("demo link", collection=sandbox_collection)
         self.assertEqual(self.link_count(), 2)
 
-        delete_sandbox(self.db, sandbox)
+        delete_sandbox_user(self.db, sandbox_user)
         self.db.commit()
         self.assertEqual(self.link_count(), 1)
 

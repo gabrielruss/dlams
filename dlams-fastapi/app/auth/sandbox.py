@@ -38,7 +38,7 @@ def is_sandbox(user: User) -> bool:
     return user.role == UserRole.SANDBOX.value
 
 
-def delete_sandbox(db: Session, user: User) -> None:
+def delete_sandbox_user(db: Session, user: User) -> None:
     """Delete a sandbox account and everything it owns. The caller commits."""
     collection_ids = db.scalars(
         select(Collection.id).where(Collection.owner_id == user.id)
@@ -63,14 +63,14 @@ def delete_expired_sandboxes(db: Session) -> None:
         )
     ).all()
     for user in expired:
-        delete_sandbox(db, user)
+        delete_sandbox_user(db, user)
 
 
 def _now() -> datetime:
     return datetime.now(UTC).replace(tzinfo=None)
 
 
-def _sandbox_to_replace(db: Session) -> User | None:
+def _sandbox_user_to_replace(db: Session) -> User | None:
     """The sandbox to delete for a new one: the oldest whose session is over,
     preferring one without share links. None while every sandbox is in use."""
     has_links = exists().where(
@@ -155,13 +155,13 @@ def create_sandbox_user(db: Session) -> User:
         or 0
     )
     if active >= MAX_SANDBOXES:
-        replaced = _sandbox_to_replace(db)
+        replaced = _sandbox_user_to_replace(db)
         if replaced is None:
             raise HTTPException(
                 status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
                 detail="The demo is busy. Try again in a few minutes.",
             )
-        delete_sandbox(db, replaced)
+        delete_sandbox_user(db, replaced)
         db.commit()
 
     template = db.scalars(

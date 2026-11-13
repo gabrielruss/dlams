@@ -6,6 +6,7 @@ from typing import Annotated
 from pydantic import AfterValidator, BaseModel, Field
 
 from app.models.video_games import VideoGameCondition
+from app.schemas import RequestSchema
 
 
 def _not_in_the_future(value: date) -> date:
@@ -17,13 +18,13 @@ def _not_in_the_future(value: date) -> date:
 LastPlayedDate = Annotated[date, AfterValidator(_not_in_the_future)]
 
 
-class ConsoleCreate(BaseModel):
+class ConsoleCreate(RequestSchema):
     label: str = Field(min_length=1, max_length=100)
     edition: str | None = Field(default=None, max_length=100)
     condition: VideoGameCondition
 
 
-class ConsoleUpdate(BaseModel):
+class ConsoleUpdate(RequestSchema):
     label: str = Field(min_length=1, max_length=100)
     edition: str | None = Field(default=None, max_length=100)
     condition: VideoGameCondition
@@ -50,7 +51,7 @@ class ConsoleLabelListResponse(BaseModel):
     labels: list[ConsoleLabelResponse]
 
 
-class GameCreate(BaseModel):
+class GameCreate(RequestSchema):
     name: str = Field(min_length=1, max_length=200)
     condition: VideoGameCondition
     console_label: str = Field(min_length=1, max_length=100)
@@ -58,7 +59,7 @@ class GameCreate(BaseModel):
     completed: bool = False
 
 
-class GameUpdate(BaseModel):
+class GameUpdate(RequestSchema):
     name: str = Field(min_length=1, max_length=200)
     condition: VideoGameCondition
     console_label: str = Field(min_length=1, max_length=100)

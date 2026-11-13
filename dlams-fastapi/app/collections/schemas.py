@@ -7,16 +7,15 @@ from pydantic import BaseModel, ConfigDict, Field
 
 from app.collections.video_games.schemas import ConsoleResponse, GameResponse
 from app.models.collection import CollectionAccess, CollectionType
+from app.schemas import RequestSchema
 
 
-class CollectionCreate(BaseModel):
+class CollectionCreate(RequestSchema):
     name: str = Field(min_length=1, max_length=100)
     type: CollectionType = CollectionType.VIDEO_GAME
 
 
-class CollectionUpdate(BaseModel):
-    model_config = ConfigDict(extra="forbid")
-
+class CollectionUpdate(RequestSchema):
     name: str = Field(min_length=1, max_length=100)
 
 
@@ -28,7 +27,7 @@ class CollectionResponse(BaseModel):
     access: CollectionAccess
 
 
-class GrantCreate(BaseModel):
+class GrantCreate(RequestSchema):
     username: str = Field(min_length=1)
 
 
@@ -45,9 +44,7 @@ class CollectionListResponse(BaseModel):
     collections: list[CollectionResponse]
 
 
-class LinkCreate(BaseModel):
-    model_config = ConfigDict(extra="forbid")
-
+class LinkCreate(RequestSchema):
     name: str | None = Field(default=None, max_length=50)
 
 

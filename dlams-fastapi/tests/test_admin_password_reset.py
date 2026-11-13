@@ -66,15 +66,15 @@ class AdminPasswordResetTests(unittest.TestCase):
             hashed_password="hashed-password",
             role=UserRole.ADMIN.value,
         )
-        sandbox = User(
+        sandbox_user = User(
             username="sandbox-1234abcd",
             hashed_password="hashed-password",
             role=UserRole.SANDBOX.value,
         )
-        self.db.add_all([other_admin, sandbox])
+        self.db.add_all([other_admin, sandbox_user])
         self.db.commit()
 
-        for target in (other_admin, sandbox):
+        for target in (other_admin, sandbox_user):
             with self.subTest(target=target.username):
                 with self.assertRaises(HTTPException) as raised:
                     self.reset(target, self.admin)
