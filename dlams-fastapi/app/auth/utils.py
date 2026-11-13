@@ -9,11 +9,12 @@ from typing import Annotated, Any
 from fastapi import Depends, HTTPException, Request, status
 from jose import JWTError, jwt
 from passlib.context import CryptContext
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.config import SECRET_KEY
 from app.models import User, UserRole
-from app.utils import DbSession
+from app.utils import DbSessionDep
 
 # Set up bcrypt context for password hashing
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -24,10 +25,10 @@ ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
 def get_user_by_username(username: str, db: Session) -> User | None:
     """Get user from db by username"""
-    return db.query(User).filter(User.username == username).first()
+    return db.scalar(select(User).where(User.username == username))
 
 
-def get_current_user(request: Request, db: DbSession) -> User:
+def get_current_user(request: Request, db: DbSessionDep) -> User:
     """Verify JWT from cookie"""
     token = request.cookies.get("access_token")
 
@@ -69,7 +70,7 @@ def get_current_user(request: Request, db: DbSession) -> User:
     return user
 
 
-CurrentUser = Annotated[User, Depends(get_current_user)]
+CurrentUserDep = Annotated[User, Depends(get_current_user)]
 
 
 def require_admin(current_user: User) -> None:

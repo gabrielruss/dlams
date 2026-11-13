@@ -6,12 +6,13 @@ This file contains the Pydantic models for the authentication module.
 from datetime import datetime
 from typing import Literal
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 from app.models import UserRole
+from app.schemas import RequestSchema
 
 
-class LoginRequest(BaseModel):
+class LoginRequest(RequestSchema):
     """Class representing the login request."""
 
     username: str
@@ -24,9 +25,6 @@ class RegisterRequest(LoginRequest):
     username: str = Field(min_length=4, max_length=100)
     password: str = Field(min_length=6, max_length=30)
     invitation_code: str = Field(min_length=1, max_length=200)
-
-    class Config:
-        extra = "forbid"
 
 
 class RegistrationInvitationResponse(BaseModel):
@@ -45,10 +43,8 @@ class UserResponse(BaseModel):
     created_at: datetime
     role: UserRole
 
-    class Config:
-        """Allows Pydantic to work with SQLAlchemy models"""
-
-        from_attributes = True
+    # Allows Pydantic to work with SQLAlchemy models
+    model_config = ConfigDict(from_attributes=True)
 
 
 class AuthResponse(BaseModel):
@@ -67,28 +63,20 @@ class AdminUserResponse(BaseModel):
     is_active: bool
     created_at: datetime
 
-    class Config:
-        """Allows Pydantic to work with SQLAlchemy models"""
-
-        from_attributes = True
+    # Allows Pydantic to work with SQLAlchemy models
+    model_config = ConfigDict(from_attributes=True)
 
 
-class AdminUserRoleUpdate(BaseModel):
+class AdminUserRoleUpdate(RequestSchema):
     """Roles an admin can assign here. `admin` is never assignable."""
 
     role: Literal["user", "template"]
 
-    class Config:
-        extra = "forbid"
 
-
-class AdminPasswordReset(BaseModel):
+class AdminPasswordReset(RequestSchema):
     """A new password set by an admin, with the same rules as registration."""
 
     password: str = Field(min_length=6, max_length=30)
-
-    class Config:
-        extra = "forbid"
 
 
 class AdminUserListResponse(BaseModel):

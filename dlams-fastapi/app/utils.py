@@ -21,4 +21,4 @@ def get_db() -> Iterator[Session]:
         db.close()
 
 
-DbSession = Annotated[Session, Depends(get_db)]
+DbSessionDep = Annotated[Session, Depends(get_db)]

@@ -4,7 +4,7 @@ Admin-only user management: list users, deactivate and reactivate accounts,
 switch an account between the `user` and `template` roles, and reset passwords.
 """
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
@@ -14,11 +14,11 @@ from app.auth.schemas import (
     AdminUserResponse,
     AdminUserRoleUpdate,
 )
-from app.auth.utils import get_current_user, pwd_context, require_admin
+from app.auth.utils import CurrentUserDep, pwd_context, require_admin
 from app.models import User, UserRole
-from app.utils import get_db
+from app.utils import DbSessionDep
 
-router = APIRouter(prefix="/admin/users", tags=["admin"])
+admin_users_router = APIRouter(prefix="/admin/users", tags=["admin"])
 
 
 def _get_user_or_404(db: Session, user_id: int) -> User:
@@ -31,10 +31,10 @@ def _get_user_or_404(db: Session, user_id: int) -> User:
     return user
 
 
-@router.get("", response_model=AdminUserListResponse)
+@admin_users_router.get("")
 def list_users(
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    db: DbSessionDep,
+    current_user: CurrentUserDep,
 ) -> AdminUserListResponse:
     """List every account. Admin only."""
     require_admin(current_user)
@@ -44,11 +44,11 @@ def list_users(
     )
 
 
-@router.post("/{user_id}/deactivate", response_model=AdminUserResponse)
+@admin_users_router.post("/{user_id}/deactivate")
 def deactivate_user(
     user_id: int,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    db: DbSessionDep,
+    current_user: CurrentUserDep,
 ) -> AdminUserResponse:
     """Block a user from logging in and from using existing sessions."""
     require_admin(current_user)
@@ -63,11 +63,11 @@ def deactivate_user(
     return AdminUserResponse.model_validate(user)
 
 
-@router.post("/{user_id}/activate", response_model=AdminUserResponse)
+@admin_users_router.post("/{user_id}/activate")
 def activate_user(
     user_id: int,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    db: DbSessionDep,
+    current_user: CurrentUserDep,
 ) -> AdminUserResponse:
     """Restore a deactivated user's access."""
     require_admin(current_user)
@@ -77,12 +77,12 @@ def activate_user(
     return AdminUserResponse.model_validate(user)
 
 
-@router.put("/{user_id}/role", response_model=AdminUserResponse)
+@admin_users_router.put("/{user_id}/role")
 def set_user_role(
     user_id: int,
     request: AdminUserRoleUpdate,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    db: DbSessionDep,
+    current_user: CurrentUserDep,
 ) -> AdminUserResponse:
     """Switch an account between regular and template. Templates can only read."""
     require_admin(current_user)
@@ -107,12 +107,12 @@ def set_user_role(
     return AdminUserResponse.model_validate(user)
 
 
-@router.put("/{user_id}/password", response_model=AdminUserResponse)
+@admin_users_router.put("/{user_id}/password")
 def reset_user_password(
     user_id: int,
     request: AdminPasswordReset,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    db: DbSessionDep,
+    current_user: CurrentUserDep,
 ) -> AdminUserResponse:
     """Set a new password for a regular, template, or the admin's own account."""
     require_admin(current_user)

@@ -567,7 +567,7 @@ seven-day sandboxes. Build steps are item 8 in `DLAMS-PLAN.md`.
   error messages automatically, and keeps validation in one typed place.
 - **Backend:** dependencies are `Annotated` aliases; collection access is
   declared in the route signature through the `permissions.py` dependencies
-  (`OwnedCollection` added for grants and links); queries use `select()`,
+  (`OwnedCollectionDep` added for grants and links); queries use `select()`,
   never `db.query()`; request schemas set `extra="forbid"` so an unknown
   field is a 422, not silently dropped.
 - Reason: the owner found new code copying old patterns (raw buttons beside

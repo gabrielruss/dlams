@@ -6,7 +6,7 @@ This file contains db setup stuff.
 import os
 
 from sqlalchemy import create_engine
-from sqlalchemy.orm import declarative_base, sessionmaker
+from sqlalchemy.orm import DeclarativeBase, sessionmaker
 
 DATABASE_URL = os.environ.get("DATABASE_URL")
 
@@ -25,5 +25,7 @@ engine = create_engine(DATABASE_URL)
 # so you make changes to the db, then send them to session db, then commit to make perm
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
+
 # Base class for all models in sqlalchemy
-Base = declarative_base()
+class Base(DeclarativeBase):
+    pass

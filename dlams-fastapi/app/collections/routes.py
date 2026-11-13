@@ -10,11 +10,11 @@ from app.auth.sandbox import (
     is_sandbox,
     reject_sandbox_sharing,
 )
-from app.auth.utils import CurrentUser
+from app.auth.utils import CurrentUserDep
 from app.collections.permissions import (
-    CollectionWithAccess,
-    OwnedCollection,
-    WritableCollection,
+    CollectionWithAccessDep,
+    OwnedCollectionDep,
+    WritableCollectionDep,
 )
 from app.collections.schemas import (
     CollectionCreate,
@@ -39,9 +39,9 @@ from app.models import (
     Game,
     User,
 )
-from app.utils import DbSession
+from app.utils import DbSessionDep
 
-router = APIRouter(prefix="/collections", tags=["collections"])
+collections_router = APIRouter(prefix="/collections", tags=["collections"])
 
 MAX_LINKS_PER_COLLECTION = 5
 
@@ -59,15 +59,14 @@ def _collection_response(
     )
 
 
-@router.post(
+@collections_router.post(
     "",
-    response_model=CollectionResponse,
     status_code=status.HTTP_201_CREATED,
 )
 def create_collection(
     request: CollectionCreate,
-    db: DbSession,
-    current_user: CurrentUser,
+    db: DbSessionDep,
+    current_user: CurrentUserDep,
 ) -> CollectionResponse:
     check_collection_limit(db, current_user)
     collection = Collection(
@@ -81,10 +80,10 @@ def create_collection(
     return _collection_response(collection, CollectionAccess.OWNER)
 
 
-@router.get("", response_model=CollectionListResponse)
+@collections_router.get("")
 def list_collections(
-    db: DbSession,
-    current_user: CurrentUser,
+    db: DbSessionDep,
+    current_user: CurrentUserDep,
 ) -> CollectionListResponse:
     owned = db.scalars(
         select(Collection)
@@ -107,17 +106,17 @@ def list_collections(
     return CollectionListResponse(collections=collections)
 
 
-@router.get("/{collection_id}", response_model=CollectionResponse)
-def read_collection(found: CollectionWithAccess) -> CollectionResponse:
+@collections_router.get("/{collection_id}")
+def read_collection(found: CollectionWithAccessDep) -> CollectionResponse:
     collection, access = found
     return _collection_response(collection, access)
 
 
-@router.put("/{collection_id}", response_model=CollectionResponse)
+@collections_router.put("/{collection_id}")
 def update_collection(
     request: CollectionUpdate,
-    collection: WritableCollection,
-    db: DbSession,
+    collection: WritableCollectionDep,
+    db: DbSessionDep,
 ) -> CollectionResponse:
     name = request.name.strip()
     if not name:
@@ -131,8 +130,8 @@ def update_collection(
     return _collection_response(collection, CollectionAccess.OWNER)
 
 
-@router.delete("/{collection_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_collection(collection: WritableCollection, db: DbSession) -> None:
+@collections_router.delete("/{collection_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_collection(collection: WritableCollectionDep, db: DbSessionDep) -> None:
     label_ids = set(
         db.scalars(
             select(Console.console_label_id).where(
@@ -164,16 +163,15 @@ def delete_collection(collection: WritableCollection, db: DbSession) -> None:
     db.commit()
 
 
-@router.post(
+@collections_router.post(
     "/{collection_id}/grants",
-    response_model=GrantResponse,
     status_code=status.HTTP_201_CREATED,
 )
 def create_grant(
     request: GrantCreate,
-    collection: OwnedCollection,
-    db: DbSession,
-    current_user: CurrentUser,
+    collection: OwnedCollectionDep,
+    db: DbSessionDep,
+    current_user: CurrentUserDep,
 ) -> GrantResponse:
     reject_sandbox_sharing(current_user)
     target = db.scalar(select(User).where(User.username == request.username))
@@ -205,11 +203,11 @@ def create_grant(
     return GrantResponse(user_id=target.id, username=target.username)
 
 
-@router.get("/{collection_id}/grants", response_model=GrantListResponse)
+@collections_router.get("/{collection_id}/grants")
 def list_grants(
-    collection: OwnedCollection,
-    db: DbSession,
-    current_user: CurrentUser,
+    collection: OwnedCollectionDep,
+    db: DbSessionDep,
+    current_user: CurrentUserDep,
 ) -> GrantListResponse:
     reject_sandbox_sharing(current_user)
     users = db.scalars(
@@ -225,15 +223,15 @@ def list_grants(
     )
 
 
-@router.delete(
+@collections_router.delete(
     "/{collection_id}/grants/{user_id}",
     status_code=status.HTTP_204_NO_CONTENT,
 )
 def delete_grant(
     user_id: int,
-    collection: OwnedCollection,
-    db: DbSession,
-    current_user: CurrentUser,
+    collection: OwnedCollectionDep,
+    db: DbSessionDep,
+    current_user: CurrentUserDep,
 ) -> None:
     reject_sandbox_sharing(current_user)
     grant = db.scalar(
@@ -251,15 +249,14 @@ def delete_grant(
     db.commit()
 
 
-@router.post(
+@collections_router.post(
     "/{collection_id}/links",
-    response_model=LinkResponse,
     status_code=status.HTTP_201_CREATED,
 )
 def create_link(
     request: LinkCreate,
-    collection: OwnedCollection,
-    db: DbSession,
+    collection: OwnedCollectionDep,
+    db: DbSessionDep,
 ) -> LinkResponse:
     count = (
         db.scalar(
@@ -286,10 +283,10 @@ def create_link(
     return LinkResponse.model_validate(link)
 
 
-@router.get("/{collection_id}/links", response_model=LinkListResponse)
+@collections_router.get("/{collection_id}/links")
 def list_links(
-    collection: OwnedCollection,
-    db: DbSession,
+    collection: OwnedCollectionDep,
+    db: DbSessionDep,
 ) -> LinkListResponse:
     links = db.scalars(
         select(CollectionLink)
@@ -300,14 +297,14 @@ def list_links(
     return LinkListResponse(links=[LinkResponse.model_validate(link) for link in links])
 
 
-@router.delete(
+@collections_router.delete(
     "/{collection_id}/links/{link_id}",
     status_code=status.HTTP_204_NO_CONTENT,
 )
 def delete_link(
     link_id: int,
-    collection: OwnedCollection,
-    db: DbSession,
+    collection: OwnedCollectionDep,
+    db: DbSessionDep,
 ) -> None:
     link = db.scalar(
         select(CollectionLink).where(

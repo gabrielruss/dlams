@@ -52,8 +52,8 @@ never appended to. History lives in git and `docs/decisions.md`.
   issues, the two optional items) stay open. The owner picks the next
   item; each goes on its own branch from `main`. Items found 2026-11-09
   and 11-10 are in 6d and Known issues.
-- **Waiting on the owner:** in 6d, whether to drop the `response_model`s
-  Ruff's FAST001 calls redundant; the `npm audit` items (Known issues).
+- **Waiting on the owner:** in 6d, whether to turn on Ruff's FAST003 with a
+  per-file ignore; the `npm audit` items (Known issues).
 - **The `shadcn` skill** (`dlams-ui/.claude/skills/shadcn`, a link into
   `.agents/skills/`) loads once a session opens a file under `dlams-ui/`,
   not at startup. Its `rules/forms.md` and `rules/base-vs-radix.md` were
@@ -84,17 +84,15 @@ never appended to. History lives in git and `docs/decisions.md`.
     never return a 422.
   - Backend tests call route functions directly against SQLite, which does
     not enforce foreign keys; delete child rows explicitly (as
-    `delete_sandbox` and `delete_collection` do) and test that. Routes take
+    `delete_sandbox_user` and `delete_collection` do) and test that. Routes take
     the collection from a dependency, so tests pass the collection in and
     test access rules on the dependency functions.
   - URL state: `?collection=`, `?q=` (search open, even empty), and
     `?item=<type>-<id>` (an item's drawer); names and the item format are
     in `lib/urlParams.ts`. Picking a sidebar collection drops `q` and
     `item`.
-  - `_console_response` and `_game_response` still run one label query per
-    row (fix in 6d); `/items` does not use them.
   - Share links are not an access level: `/shared/{token}` looks the token up
-    and returns read-only data. `OwnedCollection` guards managing links, not
+    and returns read-only data. `OwnedCollectionDep` guards managing links, not
     reading them.
   - New code follows the conventions file even inside an unconverted file:
     shadcn components, the form pattern, query hooks returning a named
@@ -727,7 +725,9 @@ In order. Items 1 to 7 are the path to the portfolio milestone.
    `get_owned_collection` exist, and `collections/routes.py` (collections,
    grants, links), `shared_routes.py`, and `permissions.py` follow them.
    Still to do:
-   - **One package per collection type** (owner, 2026-11-06;
+   - **One package per collection type** (backend move done 2026-11-11 on
+     `backend-consistency`, moves and imports only; 95 tests and Ruff
+     pass; the UI move is still to do) (owner, 2026-11-06;
      `docs/decisions.md`): move `video_games_routes.py`,
      `video_games_schemas.py`, and `video_games_items.py` into
      `app/collections/video_games/` (`routes.py`, `schemas.py`,
@@ -739,39 +739,49 @@ In order. Items 1 to 7 are the path to the portfolio milestone.
      item 11. UI as a separate step: `lib/api/consoles.ts`, `games.ts`,
      `consoleLabels.ts`, `videoGameStats.ts`, and `types/videoGames.ts`
      into the video-game feature folder.
-   - `video_games_routes.py`: 15 `db.query()` calls, `Depends(...)` defaults,
-     and split it into console and game modules. The list helpers and
-     routes (`collection_consoles`, `collection_games`, `list_consoles`,
-     `list_games`) were converted 2026-10-31. Fix the extra query per row:
-     `_console_response` and `_game_response` each query the row's label,
-     so listing 30 games costs 31 queries; select the label with the row
-     (`select(Console, ConsoleLabel).join(...)`) instead.
-   - `app/auth/` (`routes.py`, `admin_routes.py`, the rest of `utils.py`):
-     `Depends(...)` defaults to aliases, missing types.
-   - `app/db.py`: `declarative_base()` to `DeclarativeBase`.
-   - Sandbox naming (2026-11-09): the `sandbox` variable holds a `User`
-     with the sandbox role; rename it `sandbox_user`, and `create_sandbox`
-     to `create_sandbox_user`.
-   - `UserResponse` uses Pydantic v1 `class Config`; switch to
-     `model_config = ConfigDict(...)`.
-   - Turn on Ruff's `FAST` rules in `pyproject.toml`. Dry run 2026-10-31
-     (`ruff check . --select FAST`): 67 findings. FAST002 (non-`Annotated`
-     dependency) is the rule to keep. FAST003 is a false positive when a
-     dependency reads the path parameter (`OwnedCollection`); ignore it.
-     FAST001 flags `response_model` that repeats the return type; decide
-     whether to drop those or ignore the rule (the conventions currently
-     ask for `response_model`). Its fixes are unsafe and can reorder
-     parameters the tests pass by position, so review and re-run the tests.
-   - `extra="forbid"` on every request schema (decided 2026-10-31; only
-     `LinkCreate` has it). The other ten: `LoginRequest`,
-     `RegisterRequest`, `AdminUserRoleUpdate`, `AdminPasswordReset`
-     (`auth/schemas.py`), `CollectionCreate`, `GrantCreate`
-     (`collections/schemas.py`), `ConsoleCreate`, `ConsoleUpdate`,
-     `GameCreate`, `GameUpdate` (`video_games_schemas.py`). For each, first
-     compare the body the
-     matching `dlams-ui/src/lib/api/` module sends: the UI tests mock the API
-     with MSW and will not catch a 422, so an extra field would only fail in
-     the real app. Then run both test suites and try each form in a browser.
+   - **Done 2026-11-11 on `backend-consistency`:** `video_games/routes.py`
+     split into `console_routes.py`, `game_routes.py`, `label_routes.py`
+     (`GET /console-labels` and the label helpers both item types use), and
+     `stats_routes.py`; every `db.query()` is `select()`, every dependency
+     an alias. Lists select the label with the row: 30 games or consoles
+     now take 1 query instead of 31 (counted with a throwaway script). 95
+     tests and Ruff pass.
+   - **Done 2026-11-11 on `backend-consistency`:** `app/auth/` uses the
+     `DbSessionDep` and `CurrentUserDep` aliases, with return types on
+     `login` and `verify_user` (all six aliases got the `Dep` suffix), and
+     `get_user_by_username` uses `select()`; `db.py`'s
+     `Base` is a `DeclarativeBase`; `create_sandbox` is
+     `create_sandbox_user` and its `User` variables are `sandbox_user` (app
+     code only); all five `class Config` blocks in `auth/schemas.py` are
+     `ConfigDict`. Every router is named for what it serves
+     (`auth_router`, `collections_router`, ...), so `main.py` imports them
+     without `as`. `Depends(` now appears only in the alias definitions. 95
+     tests and Ruff pass.
+     The tests' sandbox `User` variables are `sandbox_user` too, and
+     `delete_sandbox` and `_sandbox_to_replace` are `delete_sandbox_user`
+     and `_sandbox_user_to_replace` (2026-11-12).
+   - **Done 2026-11-13 on `backend-consistency`:** Ruff selects `FAST001`
+     and `FAST002` (not the whole `FAST` group). FAST002 (dependency not
+     `Annotated`) had no findings. FAST001's fix removed the 27
+     `response_model=` arguments that repeated the return type; the
+     OpenAPI schema is identical before and after, and 98 tests and Ruff
+     pass. FAST003 is undecided (owner thinking, 2026-11-13): it flags the 9
+     routes in `app/collections/routes.py` that get `collection_id` through
+     a dependency (false positives; Ruff does not read router prefixes, so
+     the video-game routes are not flagged). Options: a per-file ignore for
+     that file, or leave it off.
+   - **Done 2026-11-12 on `backend-consistency`:** `extra="forbid"` on
+     every request schema. Seven were missing it: `LoginRequest`,
+     `CollectionCreate`, `GrantCreate`, `ConsoleCreate`, `ConsoleUpdate`,
+     `GameCreate`, `GameUpdate`. Each body in `dlams-ui/src/lib/api/` was
+     checked: login, collection create, and the console and game drawers
+     send exactly the schema's fields; nothing in the UI calls the grant
+     endpoints. `tests/test_request_schemas.py` sends every request schema
+     its UI body and the body plus an unknown field (fails on the seven
+     without the change). 2026-11-13: request schemas extend one
+     `RequestSchema` base (`app/schemas.py`) that sets `extra="forbid"`,
+     instead of a `model_config` line each; the test also checks each one
+     extends it. 98 tests and Ruff pass. Not yet tried in a browser.
 6e. **Frontend hook consistency check. Done 2026-11-08** (PR #21; see the
    checkpoint, step 3). Original scope (owner, 2026-11-02): Go through
    every hook in `dlams-ui/src` and check two things. First, a hook named
@@ -860,7 +870,7 @@ is next, then the sharing UI, then search.
       cascades from the collection; applied to production on the
       2026-10-31 deploy); `GET`, `POST`, `DELETE` under
       `/collections/{id}/links`, owner only, sandboxes included, at most 5;
-      `delete_sandbox` deletes links first; 9 tests in
+      `delete_sandbox_user` deletes links first; 9 tests in
       `test_collection_links.py`. UI: a Share button on the selected
       collection's heading (owners, sandboxes included) opens
       `ShareCollectionDrawer` (with `CreateLinkForm` and `ShareLinkRow`):
@@ -888,7 +898,7 @@ is next, then the sharing UI, then search.
    3. **Seven-day sandboxes.** Deployed 2026-10-31.
       `SANDBOX_LIFETIME` is 7 days and `SANDBOX_SESSION` 30 minutes; a full
       demo deletes the oldest sandbox past its session, one without links
-      first (`_sandbox_to_replace`), else answers "busy"; `logout` is back to
+      first (`_sandbox_user_to_replace`), else answers "busy"; `logout` is back to
       only clearing the cookie. The demo notice now says the visitor can't
       get back after signing out or 30 minutes, and links keep working for
       7 days. 15 sandbox tests.
@@ -1040,7 +1050,7 @@ is next, then the sharing UI, then search.
      only, no other user's items, the type-neutral shape).
 8b. **Edit and delete collections** (owner, 2026-10-31). Today a
    collection can only be created: the API has no update or delete route
-   and the UI has no control for either. Owner only (`WritableCollection`),
+   and the UI has no control for either. Owner only (`WritableCollectionDep`),
    sandboxes included for their own. Edit is a rename (the type stays
    fixed), using the form pattern. Delete confirms first with the
    red-outline destructive button, and says how many consoles, games, and
@@ -1049,7 +1059,7 @@ is next, then the sharing UI, then search.
    the owner and stay: delete the ones no longer used, as
    `_delete_label_if_unused` does for single items. SQLite in the tests does
    not enforce foreign keys, so delete child rows explicitly (as
-   `delete_sandbox` does) and test it. After a delete, the sidebar selects
+   `delete_sandbox_user` does) and test it. After a delete, the sidebar selects
    the first remaining collection (the existing URL effect does this) and
    the collection list and stats queries are invalidated. Where the
    controls sit (the collection heading beside Share, or the sidebar row)
@@ -1059,7 +1069,7 @@ is next, then the sharing UI, then search.
    `extra="forbid"`, trimmed, blank is 422) and `DELETE /collections/{id}`
    deletes the links, grants, games, and consoles explicitly, then the
    collection, then the owner's labels its items used that nothing else
-   uses now. Both depend on `WritableCollection`. 7 tests in
+   uses now. Both depend on `WritableCollectionDep`. 7 tests in
    `test_collection_edit_delete.py`.
    **UI data layer built 2026-11-02 (uncommitted, no screen uses it
    yet):** `collectionsApi.update` and `.delete`, `CollectionUpdate` in
@@ -1164,7 +1174,7 @@ is next, then the sharing UI, then search.
    yourself or another admin). Constraints: console labels and
    `registration_invitations.created_by_id` are `RESTRICT`, so a plain delete
    of a user with data or issued invitations fails (decision "Admins can
-   deactivate a user; delete is deferred"); `delete_sandbox` already deletes
+   deactivate a user; delete is deferred"); `delete_sandbox_user` already deletes
    one user's data in a working order and is a starting point. Backups stay
    on the Pi and a hard delete cannot be undone, so the UI confirms first
    with the red-outline destructive button.

@@ -7,12 +7,11 @@ import hashlib
 import secrets
 from datetime import UTC, datetime, timedelta
 
-from fastapi import APIRouter, Depends, HTTPException, Response, status
+from fastapi import APIRouter, HTTPException, Response, status
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
-from sqlalchemy.orm import Session
 
-from app.auth.sandbox import create_sandbox
+from app.auth.sandbox import create_sandbox_user
 from app.auth.schemas import (
     AuthResponse,
     LoginRequest,
@@ -22,17 +21,17 @@ from app.auth.schemas import (
 )
 from app.auth.utils import (
     ACCESS_TOKEN_EXPIRE_MINUTES,
+    CurrentUserDep,
     create_access_token,
-    get_current_user,
     get_user_by_username,
     pwd_context,
     require_admin,
 )
 from app.config import COOKIE_SECURE
 from app.models import RegistrationInvitation, User, UserRole
-from app.utils import get_db
+from app.utils import DbSessionDep
 
-router = APIRouter()
+auth_router = APIRouter()
 
 
 def _set_session_cookie(response: Response, username: str) -> None:
@@ -51,8 +50,8 @@ def _set_session_cookie(response: Response, username: str) -> None:
     )
 
 
-@router.post("/register")
-def register(user: RegisterRequest, db: Session = Depends(get_db)) -> dict[str, str]:
+@auth_router.post("/register")
+def register(user: RegisterRequest, db: DbSessionDep) -> dict[str, str]:
     """Create a regular account using a valid, unused invitation."""
     now = datetime.now(UTC)
     invitation_hash = hashlib.sha256(user.invitation_code.encode("utf-8")).hexdigest()
@@ -99,14 +98,13 @@ def register(user: RegisterRequest, db: Session = Depends(get_db)) -> dict[str, 
     return {"message": "User created successfully"}
 
 
-@router.post(
+@auth_router.post(
     "/invitations",
-    response_model=RegistrationInvitationResponse,
     status_code=status.HTTP_201_CREATED,
 )
 def create_registration_invitation(
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    db: DbSessionDep,
+    current_user: CurrentUserDep,
 ) -> RegistrationInvitationResponse:
     """Create a seven-day, single-use registration invitation for an admin."""
     require_admin(current_user)
@@ -129,12 +127,12 @@ def create_registration_invitation(
     )
 
 
-@router.post("/login", response_model=AuthResponse)
+@auth_router.post("/login")
 def login(
     response: Response,
     login_data: LoginRequest,
-    db: Session = Depends(get_db),
-):
+    db: DbSessionDep,
+) -> AuthResponse:
     """
     Handle user login.
 
@@ -173,25 +171,24 @@ def login(
     )
 
 
-@router.post(
+@auth_router.post(
     "/demo-sessions",
-    response_model=AuthResponse,
     status_code=status.HTTP_201_CREATED,
 )
 def create_demo_session(
     response: Response,
-    db: Session = Depends(get_db),
+    db: DbSessionDep,
 ) -> AuthResponse:
     """Sign the visitor into a fresh copy of the demo account for one session."""
-    sandbox = create_sandbox(db)
-    _set_session_cookie(response, sandbox.username)
+    sandbox_user = create_sandbox_user(db)
+    _set_session_cookie(response, sandbox_user.username)
     return AuthResponse(
         message="Demo session started",
-        user=UserResponse.model_validate(sandbox),
+        user=UserResponse.model_validate(sandbox_user),
     )
 
 
-@router.post("/logout", status_code=status.HTTP_204_NO_CONTENT)
+@auth_router.post("/logout", status_code=status.HTTP_204_NO_CONTENT)
 def logout(response: Response) -> Response:
     """Clear the authentication cookie for this browser session."""
     response.delete_cookie(
@@ -205,15 +202,17 @@ def logout(response: Response) -> Response:
     return response
 
 
-@router.get("/verify", response_model=AuthResponse)
-async def verify_user(current_user: User = Depends(get_current_user)):
+@auth_router.get("/verify")
+async def verify_user(current_user: CurrentUserDep) -> AuthResponse:
     """Verify current user is auth'd"""
-    return AuthResponse(message="Verify successful", user=current_user)
+    return AuthResponse(
+        message="Verify successful", user=UserResponse.model_validate(current_user)
+    )
 
 
-@router.get("/protected")
+@auth_router.get("/protected")
 async def protected_route(
-    current_user: User = Depends(get_current_user),
+    current_user: CurrentUserDep,
 ) -> dict[str, str]:
     """Test route to check if protected routes are working"""
     return {

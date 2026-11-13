@@ -143,14 +143,14 @@ Two independent layers:
 
    FastAPI dependencies in `permissions.py` implement this, and routes
    declare them in their signature through `Annotated` aliases.
-   `get_collection_with_access` (`CollectionWithAccess`) loads the
+   `get_collection_with_access` (`CollectionWithAccessDep`) loads the
    collection and the user's access; `get_readable_collection`
-   (`ReadableCollection`) and `get_writable_collection`
-   (`WritableCollection`, owner only; a grant reader gets 403) build on it.
-   `get_owned_collection` (`OwnedCollection`) is owner only and answers
+   (`ReadableCollectionDep`) and `get_writable_collection`
+   (`WritableCollectionDep`, owner only; a grant reader gets 403) build on it.
+   `get_owned_collection` (`OwnedCollectionDep`) is owner only and answers
    everyone else with 404; the grant and link routes use it. A user with no
    access gets 404, not 403, so collection ids are not discoverable.
-   `DbSession` and `CurrentUser` are the aliases for the database session and
+   `DbSessionDep` and `CurrentUserDep` are the aliases for the database session and
    the signed-in user. The UI mirrors write access through
    `lib/permissions.ts` (`canWriteCollection`, `isAdmin`); admin checks go
    through `isAdmin` in the UI and `require_admin` in the API, never a raw
@@ -207,16 +207,21 @@ the edge).
 
 Handlers are grouped by module: `app/auth/` (`routes.py`, `admin_routes.py`,
 `utils.py`, `bootstrap_admin.py`) and `app/collections/` (`routes.py`,
-`video_games_routes.py`, `item_routes.py` with `video_games_items.py`,
-`permissions.py`, schemas). Routers are registered
+`item_routes.py`, `shared_routes.py`, `permissions.py`, `schemas.py`, and
+one package per collection type: `video_games/` with `console_routes.py`,
+`game_routes.py`, `label_routes.py` (console labels, used by both),
+`stats_routes.py`, `schemas.py`, and `items.py`, the type's part of `GET
+/items`). Lists load each row's label in the same query. Routers are registered
 in `app/main.py`.
 
 ## Collection types
 
 A collection has a `type`, and everything type-specific hangs off it.
 
-- **Backend:** type-specific routes and models live beside the generic
-  collection code (`video_games_*`). The type is constrained in the database.
+- **Backend:** a type's routes, schemas, and search items live in its own
+  package under `app/collections/` (`video_games/`); its models stay in
+  `app/models/`, where Alembic finds every table. The type is constrained in
+  the database.
 - **Frontend:** `collectionWorkspaceResolver.ts` maps a collection type to its
   workspace component through a typed registry. Adding a type means adding
   its workspace and stats renderer there; the compiler flags a missing entry.
@@ -343,10 +348,10 @@ styling changes need approval (see the conventions file for the rule).
 | To change... | Start in |
 | --- | --- |
 | Who can do what to a collection | `app/collections/permissions.py` |
-| A video-game endpoint | `app/collections/video_games_routes.py` |
+| A video-game endpoint | `app/collections/video_games/` (`console_routes.py`, `game_routes.py`) |
 | The schema | `app/models/` plus a new file in `alembic/versions/` |
 | A server-data hook | `dlams-ui/src/components/<feature>/use*.ts` and `lib/api/` |
 | What a collection type renders | `components/collections/collectionWorkspaceResolver.ts` |
-| Search | `dlams-ui/src/components/search/`, `app/collections/item_routes.py` and `video_games_items.py` |
+| Search | `dlams-ui/src/components/search/`, `app/collections/item_routes.py` and `video_games/items.py` |
 | How an item's drawer opens and closes | `components/collections/hooks/useItemDrawer.ts`, `useOpenItem.ts`, `lib/urlParams.ts`; what it shows: `components/video-games/*DrawerContent*` |
 | Dev or deploy wiring | `dlams-deployment/`, root `Makefile`, `.github/workflows/deploy.yml` |
