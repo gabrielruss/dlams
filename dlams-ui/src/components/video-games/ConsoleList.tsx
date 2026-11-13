@@ -1,5 +1,5 @@
 import type { ConsoleRecord } from "@/components/video-games/types"
-import ListRow from "@/components/collections/ListRow"
+import ListRow from "@/components/ListRow"
 import { consoleName } from "./videoGameOptions"
 
 interface ConsoleListProps {

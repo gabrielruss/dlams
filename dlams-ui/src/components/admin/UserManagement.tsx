@@ -1,4 +1,4 @@
-import { useCurrentUser } from "@/components/auth/hooks/useAuthQueries"
+import { useCurrentUser } from "@/hooks/useAuthQueries"
 import { Button } from "@/components/ui/button"
 import { isAdmin, isTemplate } from "@/lib/permissions"
 import {

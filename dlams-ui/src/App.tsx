@@ -1,6 +1,6 @@
 import { lazy, Suspense } from "react"
 import { Route, Routes, Navigate } from "react-router-dom"
-import { useCurrentUser } from "./components/auth/hooks/useAuthQueries"
+import { useCurrentUser } from "@/hooks/useAuthQueries"
 import { Button } from "./components/ui/button"
 import { isAdmin } from "./lib/permissions"
 import { routes } from "./lib/routes"

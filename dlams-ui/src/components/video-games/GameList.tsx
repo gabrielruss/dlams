@@ -1,5 +1,5 @@
 import type { GameRecord } from "@/components/video-games/types"
-import ListRow from "@/components/collections/ListRow"
+import ListRow from "@/components/ListRow"
 import { isoDateToMonthDayYear } from "@/lib/dates"
 
 interface GameListProps {

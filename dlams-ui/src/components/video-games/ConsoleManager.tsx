@@ -1,4 +1,4 @@
-import useItemDrawer from "@/components/collections/hooks/useItemDrawer"
+import useItemDrawer from "@/hooks/useItemDrawer"
 import { Button } from "@/components/ui/button"
 import { Drawer, DrawerContent } from "@/components/ui/drawer"
 import type { ConsoleRecord } from "@/components/video-games/types"

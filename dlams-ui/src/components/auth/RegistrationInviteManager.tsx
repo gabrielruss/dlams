@@ -1,7 +1,7 @@
 import { useState } from "react"
 import { UserPlus } from "lucide-react"
 
-import { useCreateRegistrationInvitation } from "@/components/auth/hooks/useAuthQueries"
+import useCreateRegistrationInvitation from "@/components/auth/hooks/useCreateRegistrationInvitation"
 import { Button } from "@/components/ui/button"
 import {
   Drawer,

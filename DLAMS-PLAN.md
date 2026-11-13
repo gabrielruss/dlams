@@ -875,7 +875,14 @@ In order. Items 1 to 7 are the path to the portfolio milestone.
      Bulletproof's answer is to compose features in `app/`.
    Steps, each reviewed alone:
    1. Move the shared pieces out of `collections/`, `search/`, and
-      `auth/` into `components/` and `hooks/`.
+      `auth/` into `components/` and `hooks/`. **Done 2026-11-13 on
+      `ui-feature-folders`:** `ListRow`, `ItemActions`, `ItemDetailRows`
+      to `components/`; `useItemDrawer`, `useOpenItem` (which
+      `useItemDrawer` uses), `useSearchMode`, and `useAuthQueries` to
+      `hooks/`; `useCreateRegistrationInvitation` split into its own file
+      in `components/auth/hooks/`. Lint, format, build, and 89 UI tests
+      pass. Left: the shared-code imports that steps 2 and 3 fix, and the
+      collection-type exception.
    2. Move `components/<feature>/` to `features/<feature>/`, and each
       feature's API modules, types, and schemas into it. This also moves
       `components/video-games/api/` and `types.ts` (6d's interim spot).

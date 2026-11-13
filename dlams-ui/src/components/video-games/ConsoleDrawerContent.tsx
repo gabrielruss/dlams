@@ -1,4 +1,4 @@
-import ItemActions from "@/components/collections/ItemActions"
+import ItemActions from "@/components/ItemActions"
 import { Button } from "@/components/ui/button"
 import { DrawerClose, DrawerHeader, DrawerTitle } from "@/components/ui/drawer"
 import type { ConsoleRecord } from "@/components/video-games/types"

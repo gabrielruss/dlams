@@ -1,5 +1,5 @@
 import type { Collection } from "@/types/collections"
-import { useCurrentUser } from "@/components/auth/hooks/useAuthQueries"
+import { useCurrentUser } from "@/hooks/useAuthQueries"
 import { canWriteCollection, isSandbox } from "@/lib/permissions"
 import ConsoleManager from "./ConsoleManager"
 import GameManager from "./GameManager"

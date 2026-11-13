@@ -6,10 +6,7 @@ import HomeLink from "@/components/HomeLink"
 import { Button, buttonVariants } from "@/components/ui/button"
 import { Drawer, DrawerContent, DrawerTitle } from "@/components/ui/drawer"
 import RegistrationInviteManager from "@/components/auth/RegistrationInviteManager"
-import {
-  useCurrentUser,
-  useLogout,
-} from "@/components/auth/hooks/useAuthQueries"
+import { useCurrentUser, useLogout } from "@/hooks/useAuthQueries"
 import { isAdmin } from "@/lib/permissions"
 import { routes } from "@/lib/routes"
 

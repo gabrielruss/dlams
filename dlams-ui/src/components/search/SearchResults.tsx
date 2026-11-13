@@ -1,11 +1,11 @@
 import { useMemo } from "react"
 
-import ListRow from "@/components/collections/ListRow"
+import ListRow from "@/components/ListRow"
 import { Button } from "@/components/ui/button"
 import type { OwnedItem } from "@/types/items"
 import { buildSearchEntries, searchEntries } from "./searchEntries"
 import useOwnedItems from "./hooks/useOwnedItems"
-import useSearchMode from "./hooks/useSearchMode"
+import useSearchMode from "@/hooks/useSearchMode"
 
 const MAX_RESULTS = 50
 

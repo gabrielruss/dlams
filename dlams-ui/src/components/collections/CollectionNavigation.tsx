@@ -1,7 +1,7 @@
 import { Plus } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
-import useSearchMode from "@/components/search/hooks/useSearchMode"
+import useSearchMode from "@/hooks/useSearchMode"
 import CollectionStats from "./CollectionStats"
 import CreateCollectionDrawer from "./CreateCollectionDrawer"
 import useCollections from "./hooks/useCollections"

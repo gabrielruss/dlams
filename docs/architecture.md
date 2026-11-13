@@ -237,16 +237,18 @@ dlams-ui/src/
   App.tsx, main.tsx          routing, providers
   pages/                     Home, Login, Register, AdminUsers,
                              SharedCollection (the /s/:token link page)
-  hooks/                     shared hooks (useFitOnResize)
+  hooks/                     shared hooks: useFitOnResize, useAuthQueries
+                             (current user, login, logout, register, demo
+                             session), useSearchMode, useItemDrawer and
+                             useOpenItem (which item's drawer is open)
   components/
     AppSidebar.tsx           collections, invite drawer, admin link, logout
-    auth/                    login/register forms, invite drawer, auth hooks
+    ListRow.tsx              the item row every type and search use;
+                             ItemActions.tsx and ItemDetailRows.tsx beside it
+    auth/                    invite drawer; hooks/ has the invitation hook
     admin/                   user management table and hook
     collections/             navigation, workspace dispatch, stats, the Create,
-                             Share, and Edit collection drawers, ListRow (the item
-                             row any type uses), ItemActions and ItemDetailRows;
-                             hooks/ has useItemDrawer and useOpenItem (what's
-                             open)
+                             Share, and Edit collection drawers, hooks
     search/                  search bar, results panel, matcher, hooks
     video-games/             console and game managers, drawer content,
                              forms, details, workspace, hooks; api/ has the
@@ -357,5 +359,5 @@ styling changes need approval (see the conventions file for the rule).
 | A server-data hook | `dlams-ui/src/components/<feature>/hooks/use*.ts`, and `lib/api/` or the feature's `api/` |
 | What a collection type renders | `components/collections/collectionWorkspaceResolver.ts` |
 | Search | `dlams-ui/src/components/search/`, `app/collections/item_routes.py` and `video_games/items.py` |
-| How an item's drawer opens and closes | `components/collections/hooks/useItemDrawer.ts`, `useOpenItem.ts`, `lib/urlParams.ts`; what it shows: `components/video-games/*DrawerContent*` |
+| How an item's drawer opens and closes | `hooks/useItemDrawer.ts`, `useOpenItem.ts`, `lib/urlParams.ts`; what it shows: `components/video-games/*DrawerContent*` |
 | Dev or deploy wiring | `dlams-deployment/`, root `Makefile`, `.github/workflows/deploy.yml` |

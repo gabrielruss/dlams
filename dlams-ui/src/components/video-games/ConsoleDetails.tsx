@@ -1,4 +1,4 @@
-import ItemDetailRows from "@/components/collections/ItemDetailRows"
+import ItemDetailRows from "@/components/ItemDetailRows"
 import type { ConsoleRecord } from "@/components/video-games/types"
 
 interface ConsoleDetailsProps {

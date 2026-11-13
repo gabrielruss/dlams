@@ -44,12 +44,6 @@ export function useRegister() {
   })
 }
 
-export function useCreateRegistrationInvitation() {
-  return useMutation({
-    mutationFn: authApi.createRegistrationInvitation,
-  })
-}
-
 export function useLogout() {
   const queryClient = useQueryClient()
 
