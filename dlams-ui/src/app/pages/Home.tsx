@@ -1,5 +1,5 @@
 import CollectionWorkspace from "@/features/collections/CollectionWorkspace"
-import AppSidebar from "@/components/AppSidebar"
+import AppSidebar from "@/app/AppSidebar"
 import CollectionNavigation from "@/features/collections/CollectionNavigation"
 import SearchBar from "@/features/search/SearchBar"
 import SearchResults from "@/features/search/SearchResults"

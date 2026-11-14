@@ -1,7 +1,7 @@
 import { ArrowLeft } from "lucide-react"
 import { Link } from "react-router-dom"
 
-import AppSidebar from "@/components/AppSidebar"
+import AppSidebar from "@/app/AppSidebar"
 import UserManagement from "@/features/admin/UserManagement"
 import { routes } from "@/lib/routes"
 

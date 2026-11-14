@@ -309,7 +309,7 @@ test and which kind.
 - Put a test beside the feature it covers, named for it (for example
   `features/video-games/VideoGamesWorkspace.test.tsx`), so each collection
   type keeps its own tests. Cross-cutting flows such as sign-in live with their
-  page (`pages/Login.test.tsx`).
+  page (`app/pages/Login.test.tsx`).
 - Accessibility: `expectNoViolations(container)` from `src/test/axe.ts` runs
   axe on rendered markup. Add it to the test for a screen rather than writing
   separate accessibility tests. jsdom cannot check color contrast, so that rule

@@ -1,9 +1,9 @@
 import { lazy, Suspense } from "react"
 import { Route, Routes, Navigate } from "react-router-dom"
 import { useCurrentUser } from "@/hooks/useAuthQueries"
-import { Button } from "./components/ui/button"
-import { isAdmin } from "./lib/permissions"
-import { routes } from "./lib/routes"
+import { Button } from "@/components/ui/button"
+import { isAdmin } from "@/lib/permissions"
+import { routes } from "@/lib/routes"
 
 const Home = lazy(() => import("./pages/Home"))
 const Login = lazy(() => import("./pages/Login"))

@@ -82,8 +82,8 @@ and served by `nginx:alpine`, database `postgres:15` (development uses 14).
   per-feature hooks (`useCollections`, `useVideoGamesCollection`,
   `useAdminUsers`, ...). After a write, queries are invalidated rather than
   patched by hand.
-- **Routing.** React Router in `App.tsx`: `/s/:token` (a share link's
-  read-only page, `pages/SharedCollection.tsx`) is matched first and never
+- **Routing.** React Router in `app/App.tsx`: `/s/:token` (a share link's
+  read-only page, `app/pages/SharedCollection.tsx`) is matched first and never
   checks a session. Each page is loaded on demand (`React.lazy` under one
   `Suspense`), so the login and share pages do not download the collection
   workspace. Everything else goes through `SessionRoutes`: `/` (home),
@@ -234,8 +234,12 @@ A collection has a `type`, and everything type-specific hangs off it.
 
 ```
 dlams-ui/src/
-  App.tsx, main.tsx          routing, providers
-  pages/                     Home, Login, Register, AdminUsers,
+  main.tsx                   providers
+  app/                       composes features; the only place that may
+                             import them all
+    App.tsx                  routing
+    AppSidebar.tsx           collections, invite drawer, admin link, logout
+    pages/                   Home, Login, Register, AdminUsers,
                              SharedCollection (the /s/:token link page)
   hooks/                     shared hooks: useFitOnResize, useAuthQueries
                              (current user, login, logout, register, demo
@@ -256,7 +260,6 @@ dlams-ui/src/
                              consoles, games, console label, and stats
                              modules; types.ts and schemas.ts
   components/                shared components only
-    AppSidebar.tsx           collections, invite drawer, admin link, logout
     ListRow.tsx              the item row every type and search use;
                              ItemActions.tsx and ItemDetailRows.tsx beside it
     ui/                      shadcn/ui primitives (button, calendar, drawer,
@@ -288,7 +291,7 @@ and marks the selected one with a red bar. Its header is a fitted
 `D.L.A.M.S.` wordmark linking home (`components/HomeLink.tsx`, around
 `components/Wordmark.tsx`, built on `components/FitText.tsx`). Below the `md` breakpoint the sidebar becomes a top
 bar with a menu button that opens the same contents in a left drawer
-(`components/AppSidebar.tsx`). The login page draws a decorative "DON'T LOOK
+(`app/AppSidebar.tsx`). The login page draws a decorative "DON'T LOOK
 AT MY STUFF" logo (`components/BrandLogo.tsx`): behind the card on wide screens
 and above it on phones. Both fitted components share the
 `hooks/useFitOnResize.ts` hook; the

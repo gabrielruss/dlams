@@ -808,7 +808,7 @@ In order. Items 1 to 7 are the path to the portfolio milestone.
    `VideoGameCollectionStats.tsx`, `SearchResults.tsx`, `ShareLinks` in
    `ShareCollectionDrawer.tsx`, `CollectionWorkspace.tsx` (and its
    `CollectionBody` prop), `CollectionNavigation.tsx`, and
-   `pages/SharedCollection.tsx` (found by grep 2026-11-11). Settle first:
+   `app/pages/SharedCollection.tsx` (found by grep 2026-11-11). Settle first:
    the name for `error` (`linksError`?), and whether one-hook components
    rename too. This reverses "callers keep the hook's names" (2026-11-08),
    so update that line and the conventions file with it.
@@ -896,6 +896,12 @@ In order. Items 1 to 7 are the path to the portfolio milestone.
       `AppSidebar` (step 3) and the 7 collection-type imports in
       `features/collections/` (`sharedCollections.ts` among them).
    3. Create `app/` with `App.tsx`, `AppSidebar.tsx`, and `pages/`.
+      **Done 2026-11-13 on `ui-feature-folders`:** moved with `git mv`;
+      `main.tsx` stays in `src/` (Vite's entry in `index.html`);
+      `test/setup.ts` and `test/renderApp.tsx` import from `@/app/`. Shared
+      code imports nothing from `features/` or `app/`; the 7
+      collection-type imports are the only ones left against the rule.
+      Lint, format, build, and 89 UI tests pass.
    4. Enforce the direction rule with ESLint's built-in
       `no-restricted-imports` (no package needed), with the collection-type
       exception listed by file.
