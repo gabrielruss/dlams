@@ -8,7 +8,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Field, FieldError, FieldLabel } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import { useRegister } from "@/hooks/useAuthQueries"
-import { registerSchema, type RegisterFormValues } from "@/schemas/auth"
+import {
+  registerSchema,
+  type RegisterFormValues,
+} from "@/features/auth/schemas"
 import { routes } from "@/lib/routes"
 
 function Register() {

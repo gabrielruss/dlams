@@ -192,7 +192,7 @@ cached copy.
   one-off presentation state without a readability benefit.
 - Every submitted form, even a one-field one, uses one pattern (decided
   2026-10-31; every form follows it since 2026-11-06):
-  1. A zod schema in `src/schemas/<feature>.ts` with limits matching the
+  1. A zod schema in the feature's `schemas.ts` (`src/features/<feature>/schemas.ts`) with limits matching the
      API, and `type <Name>FormValues = z.infer<typeof schema>`.
   2. `useForm<Values>({ resolver: zodResolver(schema), defaultValues })`,
      in the feature hook when there is one, otherwise in the component.
@@ -219,7 +219,7 @@ cached copy.
   and types easy to locate, but do not force unrelated responsibilities into
   one file or folder. Share code only when it is genuinely shared. A
   feature's hooks live in its `hooks/` folder
-  (`components/collections/hooks/`); hooks shared across features live in
+  (`features/collections/hooks/`); hooks shared across features live in
   `src/hooks/` (decided 2026-11-06).
 - When repeated component styles emerge across several instances, extract
   them into a reusable component when the behavior and semantics are also
@@ -307,7 +307,7 @@ test and which kind.
 - Mock as little as possible. Mock at the network boundary (MSW) or for things
   that cannot run in a test, not the app's own modules or hooks.
 - Put a test beside the feature it covers, named for it (for example
-  `components/video-games/VideoGamesWorkspace.test.tsx`), so each collection
+  `features/video-games/VideoGamesWorkspace.test.tsx`), so each collection
   type keeps its own tests. Cross-cutting flows such as sign-in live with their
   page (`pages/Login.test.tsx`).
 - Accessibility: `expectNoViolations(container)` from `src/test/axe.ts` runs

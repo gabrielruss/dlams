@@ -886,6 +886,15 @@ In order. Items 1 to 7 are the path to the portfolio milestone.
    2. Move `components/<feature>/` to `features/<feature>/`, and each
       feature's API modules, types, and schemas into it. This also moves
       `components/video-games/api/` and `types.ts` (6d's interim spot).
+      **Done 2026-11-13 on `ui-feature-folders`:** the five feature
+      folders are in `features/`; admin, collections, and auth got their
+      API modules, types, and schemas; `schemas/collectionLinks.ts` merged
+      into `features/collections/schemas.ts` and `schemas/games.ts` into
+      `features/video-games/schemas.ts`; `src/schemas/` is gone;
+      `types/index.ts` no longer re-exports admin types. Lint, format,
+      build, and 89 UI tests pass. Imports left against the rule:
+      `AppSidebar` (step 3) and the 7 collection-type imports in
+      `features/collections/` (`sharedCollections.ts` among them).
    3. Create `app/` with `App.tsx`, `AppSidebar.tsx`, and `pages/`.
    4. Enforce the direction rule with ESLint's built-in
       `no-restricted-imports` (no package needed), with the collection-type

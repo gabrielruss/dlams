@@ -2,7 +2,7 @@ import { Controller, useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { loginSchema, type LoginFormValues } from "@/schemas/auth"
+import { loginSchema, type LoginFormValues } from "@/features/auth/schemas"
 import { Link, useNavigate } from "react-router-dom"
 import { Field, FieldError, FieldLabel } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"

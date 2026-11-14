@@ -1,8 +1,8 @@
-import CollectionWorkspace from "@/components/collections/CollectionWorkspace"
+import CollectionWorkspace from "@/features/collections/CollectionWorkspace"
 import AppSidebar from "@/components/AppSidebar"
-import CollectionNavigation from "@/components/collections/CollectionNavigation"
-import SearchBar from "@/components/search/SearchBar"
-import SearchResults from "@/components/search/SearchResults"
+import CollectionNavigation from "@/features/collections/CollectionNavigation"
+import SearchBar from "@/features/search/SearchBar"
+import SearchResults from "@/features/search/SearchResults"
 import useSearchMode from "@/hooks/useSearchMode"
 
 function Home() {

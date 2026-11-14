@@ -74,9 +74,9 @@ and served by `nginx:alpine`, database `postgres:15` (development uses 14).
 - **UI client.** `dlams-ui/src/lib/api/client.ts` wraps `fetch` with
   `credentials: "include"` and throws `ApiError` (message from the API's
   `detail`: the string, or for a 422 the `msg` of each validation issue).
-  One module per shared resource in `lib/api/` builds on it; a collection
-  type keeps its own API modules and types in its feature folder
-  (`components/video-games/api/`, `components/video-games/types.ts`).
+  One module per shared resource in `lib/api/` (auth, items) builds on it;
+  each feature keeps its own API modules in its `api/` folder
+  (`features/video-games/api/`, `features/collections/api/`).
 - **Server state.** All server data goes through TanStack Query v5
   (`lib/queryClient.ts`: 30 s stale time, no retries). Components use
   per-feature hooks (`useCollections`, `useVideoGamesCollection`,
@@ -241,25 +241,31 @@ dlams-ui/src/
                              (current user, login, logout, register, demo
                              session), useSearchMode, useItemDrawer and
                              useOpenItem (which item's drawer is open)
-  components/
-    AppSidebar.tsx           collections, invite drawer, admin link, logout
-    ListRow.tsx              the item row every type and search use;
-                             ItemActions.tsx and ItemDetailRows.tsx beside it
-    auth/                    invite drawer; hooks/ has the invitation hook
-    admin/                   user management table and hook
+  features/                  one folder per feature: components at its root,
+                             hooks/ and api/ folders, types.ts, schemas.ts
+                             (only the parts it needs)
+    admin/                   user management table, hook, API, types
+    auth/                    invite drawer, invitation hook, login and
+                             register schemas
     collections/             navigation, workspace dispatch, stats, the Create,
-                             Share, and Edit collection drawers, hooks
+                             Share, and Edit collection drawers, hooks; api/
+                             has collections, links, and shared collections
     search/                  search bar, results panel, matcher, hooks
     video-games/             console and game managers, drawer content,
                              forms, details, workspace, hooks; api/ has the
                              consoles, games, console label, and stats
-                             modules; types.ts has the video-game types
+                             modules; types.ts and schemas.ts
+  components/                shared components only
+    AppSidebar.tsx           collections, invite drawer, admin link, logout
+    ListRow.tsx              the item row every type and search use;
+                             ItemActions.tsx and ItemDetailRows.tsx beside it
     ui/                      shadcn/ui primitives (button, calendar, drawer,
                              field, popover, select, ...)
-  lib/api/                   fetch client and one module per shared resource
+  lib/api/                   fetch client, auth, and items (shared resources)
   lib/                       queryClient, permissions, dates, routes (app
                              paths), urlParams, utils
-  schemas/, types/           zod schemas and shared TypeScript types
+  types/                     shared TypeScript types (user, auth,
+                             collections, items)
   test/                      test setup, MSW server, renderApp, axe helper
 ```
 
@@ -356,8 +362,8 @@ styling changes need approval (see the conventions file for the rule).
 | Who can do what to a collection | `app/collections/permissions.py` |
 | A video-game endpoint | `app/collections/video_games/` (`console_routes.py`, `game_routes.py`) |
 | The schema | `app/models/` plus a new file in `alembic/versions/` |
-| A server-data hook | `dlams-ui/src/components/<feature>/hooks/use*.ts`, and `lib/api/` or the feature's `api/` |
-| What a collection type renders | `components/collections/collectionWorkspaceResolver.ts` |
-| Search | `dlams-ui/src/components/search/`, `app/collections/item_routes.py` and `video_games/items.py` |
-| How an item's drawer opens and closes | `hooks/useItemDrawer.ts`, `useOpenItem.ts`, `lib/urlParams.ts`; what it shows: `components/video-games/*DrawerContent*` |
+| A server-data hook | `dlams-ui/src/features/<feature>/hooks/use*.ts`, and the feature's `api/` (or `lib/api/` if shared) |
+| What a collection type renders | `features/collections/collectionWorkspaceResolver.ts` |
+| Search | `dlams-ui/src/features/search/`, `app/collections/item_routes.py` and `video_games/items.py` |
+| How an item's drawer opens and closes | `hooks/useItemDrawer.ts`, `useOpenItem.ts`, `lib/urlParams.ts`; what it shows: `features/video-games/*DrawerContent*` |
 | Dev or deploy wiring | `dlams-deployment/`, root `Makefile`, `.github/workflows/deploy.yml` |

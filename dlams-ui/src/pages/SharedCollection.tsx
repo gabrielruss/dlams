@@ -2,17 +2,17 @@ import { useState } from "react"
 import { useParams } from "react-router-dom"
 
 import HomeLink from "@/components/HomeLink"
-import useSharedCollection from "@/components/collections/hooks/useSharedCollection"
-import SearchField from "@/components/search/SearchField"
-import useListSearch from "@/components/search/hooks/useListSearch"
-import ConsoleList from "@/components/video-games/ConsoleList"
-import GameList from "@/components/video-games/GameList"
+import useSharedCollection from "@/features/collections/hooks/useSharedCollection"
+import SearchField from "@/features/search/SearchField"
+import useListSearch from "@/features/search/hooks/useListSearch"
+import ConsoleList from "@/features/video-games/ConsoleList"
+import GameList from "@/features/video-games/GameList"
 import {
   consoleSearchable,
   gameSearchable,
-} from "@/components/video-games/videoGameOptions"
+} from "@/features/video-games/videoGameOptions"
 import { collectionTypeNames } from "@/types/collections"
-import type { ConsoleRecord, GameRecord } from "@/components/video-games/types"
+import type { ConsoleRecord, GameRecord } from "@/features/video-games/types"
 
 const noConsoles: ConsoleRecord[] = []
 const noGames: GameRecord[] = []

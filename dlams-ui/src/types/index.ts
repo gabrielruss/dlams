@@ -1,5 +1,4 @@
 export * from "./user"
 export * from "./auth"
 export * from "./collections"
-export * from "./adminUsers"
 export * from "./items"
