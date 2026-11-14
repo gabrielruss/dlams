@@ -7,6 +7,23 @@ replaces it is named. Proposals and open questions live in
 
 ## Repository and delivery
 
+### UI code is grouped by feature — 2026-11-13
+- Each feature, and each collection type, keeps its components, hooks,
+  API modules, types, and schemas in `src/features/<feature>/`. Shared
+  code lives in `components/`, `hooks/`, `lib/`, and `types/`, and never
+  imports a feature; features do not import each other; `src/app/`
+  composes them. Layout and steps are plan item 6g.
+- Reason: about seven collection types are expected. Grouped by file type,
+  each type would be spread across five folders and each folder would
+  list seven types; grouped by feature, adding a type is one folder. Both
+  layouts are three folders deep. Follows Bulletproof React's project
+  structure and import rules; Feature-Sliced Design gives the same
+  import rule; the React docs suggest at most three or four nested
+  folders.
+- Chosen over `lib/api/video-games/` plus `types/videoGames.ts` (grouped by
+  file type), and over keeping feature folders under `components/`, which
+  reads as if API code were components.
+
 ### The deploy waits for CI — 2026-11-11
 - `deploy.yml` runs on `workflow_run` after CI completes, and only when that
   run succeeded, was a push (not a pull request), and came from this

@@ -74,14 +74,16 @@ and served by `nginx:alpine`, database `postgres:15` (development uses 14).
 - **UI client.** `dlams-ui/src/lib/api/client.ts` wraps `fetch` with
   `credentials: "include"` and throws `ApiError` (message from the API's
   `detail`: the string, or for a 422 the `msg` of each validation issue).
-  One module per resource in `lib/api/` builds on it.
+  One module per shared resource in `lib/api/` (auth, items) builds on it;
+  each feature keeps its own API modules in its `api/` folder
+  (`features/video-games/api/`, `features/collections/api/`).
 - **Server state.** All server data goes through TanStack Query v5
   (`lib/queryClient.ts`: 30 s stale time, no retries). Components use
   per-feature hooks (`useCollections`, `useVideoGamesCollection`,
   `useAdminUsers`, ...). After a write, queries are invalidated rather than
   patched by hand.
-- **Routing.** React Router in `App.tsx`: `/s/:token` (a share link's
-  read-only page, `pages/SharedCollection.tsx`) is matched first and never
+- **Routing.** React Router in `app/App.tsx`: `/s/:token` (a share link's
+  read-only page, `app/pages/SharedCollection.tsx`) is matched first and never
   checks a session. Each page is loaded on demand (`React.lazy` under one
   `Suspense`), so the login and share pages do not download the collection
   workspace. Everything else goes through `SessionRoutes`: `/` (home),
@@ -232,33 +234,51 @@ A collection has a `type`, and everything type-specific hangs off it.
 
 ```
 dlams-ui/src/
-  App.tsx, main.tsx          routing, providers
-  pages/                     Home, Login, Register, AdminUsers,
-                             SharedCollection (the /s/:token link page)
-  hooks/                     shared hooks (useFitOnResize)
-  components/
+  main.tsx                   providers
+  app/                       composes features; the only place that may
+                             import them all
+    App.tsx                  routing
     AppSidebar.tsx           collections, invite drawer, admin link, logout
-    auth/                    login/register forms, invite drawer, auth hooks
-    admin/                   user management table and hook
+    pages/                   Home, Login, Register, AdminUsers,
+                             SharedCollection (the /s/:token link page)
+  hooks/                     shared hooks: useFitOnResize, useAuthQueries
+                             (current user, login, logout, register, demo
+                             session), useSearchMode, useItemDrawer and
+                             useOpenItem (which item's drawer is open)
+  features/                  one folder per feature: components at its root,
+                             hooks/ and api/ folders, types.ts, schemas.ts
+                             (only the parts it needs)
+    admin/                   user management table, hook, API, types
+    auth/                    invite drawer, invitation hook, login and
+                             register schemas
     collections/             navigation, workspace dispatch, stats, the Create,
-                             Share, and Edit collection drawers, ListRow (the item
-                             row any type uses), ItemActions and ItemDetailRows;
-                             hooks/ has useItemDrawer and useOpenItem (what's
-                             open)
+                             Share, and Edit collection drawers, hooks; api/
+                             has collections, links, and shared collections
     search/                  search bar, results panel, matcher, hooks
     video-games/             console and game managers, drawer content,
-                             forms, details, workspace, hooks
+                             forms, details, workspace, hooks; api/ has the
+                             consoles, games, console label, and stats
+                             modules; types.ts and schemas.ts
+  components/                shared components only
+    ListRow.tsx              the item row every type and search use;
+                             ItemActions.tsx and ItemDetailRows.tsx beside it
     ui/                      shadcn/ui primitives (button, calendar, drawer,
                              field, popover, select, ...)
-  lib/api/                   fetch client and one module per resource
+  lib/api/                   fetch client, auth, and items (shared resources)
   lib/                       queryClient, permissions, dates, routes (app
                              paths), urlParams, utils
-  schemas/, types/           zod schemas and shared TypeScript types
+  types/                     shared TypeScript types (user, auth,
+                             collections, items)
   test/                      test setup, MSW server, renderApp, axe helper
 ```
 
 Each feature keeps its hooks in a `hooks/` folder inside it. Tests
-(`*.test.tsx`) sit beside the code they cover.
+(`*.test.tsx`) sit beside the code they cover. Imports go one way: shared
+code never imports `features/` or `app/`, and a feature never imports
+`app/` or another feature. ESLint's `no-restricted-imports` enforces it
+(`dlams-ui/eslint.config.js`). The one exception is the `collections/`
+files that pick each collection type's pieces, which import
+`video-games/` until plan item 11.
 
 Forms open in right-side drawers. Every drawer has the same layout: a
 header with the title and Close only; item actions (Delete, with its trash icon)
@@ -276,7 +296,7 @@ and marks the selected one with a red bar. Its header is a fitted
 `D.L.A.M.S.` wordmark linking home (`components/HomeLink.tsx`, around
 `components/Wordmark.tsx`, built on `components/FitText.tsx`). Below the `md` breakpoint the sidebar becomes a top
 bar with a menu button that opens the same contents in a left drawer
-(`components/AppSidebar.tsx`). The login page draws a decorative "DON'T LOOK
+(`app/AppSidebar.tsx`). The login page draws a decorative "DON'T LOOK
 AT MY STUFF" logo (`components/BrandLogo.tsx`): behind the card on wide screens
 and above it on phones. Both fitted components share the
 `hooks/useFitOnResize.ts` hook; the
@@ -350,8 +370,8 @@ styling changes need approval (see the conventions file for the rule).
 | Who can do what to a collection | `app/collections/permissions.py` |
 | A video-game endpoint | `app/collections/video_games/` (`console_routes.py`, `game_routes.py`) |
 | The schema | `app/models/` plus a new file in `alembic/versions/` |
-| A server-data hook | `dlams-ui/src/components/<feature>/use*.ts` and `lib/api/` |
-| What a collection type renders | `components/collections/collectionWorkspaceResolver.ts` |
-| Search | `dlams-ui/src/components/search/`, `app/collections/item_routes.py` and `video_games/items.py` |
-| How an item's drawer opens and closes | `components/collections/hooks/useItemDrawer.ts`, `useOpenItem.ts`, `lib/urlParams.ts`; what it shows: `components/video-games/*DrawerContent*` |
+| A server-data hook | `dlams-ui/src/features/<feature>/hooks/use*.ts`, and the feature's `api/` (or `lib/api/` if shared) |
+| What a collection type renders | `features/collections/collectionWorkspaceResolver.ts` |
+| Search | `dlams-ui/src/features/search/`, `app/collections/item_routes.py` and `video_games/items.py` |
+| How an item's drawer opens and closes | `hooks/useItemDrawer.ts`, `useOpenItem.ts`, `lib/urlParams.ts`; what it shows: `features/video-games/*DrawerContent*` |
 | Dev or deploy wiring | `dlams-deployment/`, root `Makefile`, `.github/workflows/deploy.yml` |

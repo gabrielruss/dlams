@@ -6,7 +6,7 @@ import { queryClient } from "./lib/queryClient"
 import "@fontsource-variable/fira-code"
 import "@fontsource-variable/poltawski-nowy"
 import "./index.css"
-import App from "./App.tsx"
+import App from "./app/App.tsx"
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>

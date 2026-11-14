@@ -24,10 +24,10 @@ afterAll(() => server.close())
 
 beforeAll(async () => {
   await Promise.all([
-    import("@/pages/Home"),
-    import("@/pages/Login"),
-    import("@/pages/Register"),
-    import("@/pages/AdminUsers"),
-    import("@/pages/SharedCollection"),
+    import("@/app/pages/Home"),
+    import("@/app/pages/Login"),
+    import("@/app/pages/Register"),
+    import("@/app/pages/AdminUsers"),
+    import("@/app/pages/SharedCollection"),
   ])
 })

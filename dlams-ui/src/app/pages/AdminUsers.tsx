@@ -1,0 +1,31 @@
+import { ArrowLeft } from "lucide-react"
+import { Link } from "react-router-dom"
+
+import AppSidebar from "@/app/AppSidebar"
+import UserManagement from "@/features/admin/UserManagement"
+import { routes } from "@/lib/routes"
+
+function AdminUsers() {
+  return (
+    <div className="flex min-h-screen flex-col md:flex-row">
+      <AppSidebar />
+      <main className="min-w-0 flex-1">
+        <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 p-4 md:p-6">
+          <Link
+            className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"
+            to={routes.home}
+          >
+            <ArrowLeft aria-hidden="true" className="size-4" />
+            Back to collections
+          </Link>
+          <header>
+            <h1 className="text-2xl font-semibold md:text-3xl">Users</h1>
+          </header>
+          <UserManagement />
+        </div>
+      </main>
+    </div>
+  )
+}
+
+export default AdminUsers
