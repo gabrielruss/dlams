@@ -221,6 +221,20 @@ cached copy.
   feature's hooks live in its `hooks/` folder
   (`features/collections/hooks/`); hooks shared across features live in
   `src/hooks/` (decided 2026-11-06).
+- Feature folders (decided 2026-11-13, `docs/decisions.md`): each feature
+  lives in `src/features/<feature>/` with its components at the root,
+  `hooks/` and `api/` folders, and single `types.ts` and `schemas.ts` files,
+  only the parts it needs. Shared code lives in `src/components/`,
+  `src/hooks/`, `src/lib/`, and `src/types/`; `src/app/` (routing, the
+  sidebar, pages) composes features. Imports go one way: shared code never
+  imports `features/` or `app/`, and a feature never imports `app/` or
+  another feature. ESLint's `no-restricted-imports` enforces this in
+  `dlams-ui/eslint.config.js`; a new feature or collection type goes in its
+  `features` list. The one allowed exception is
+  `collectionTypeDispatchFiles`: the `collections/` files that pick each
+  collection type's pieces may import `video-games/`, until plan item 11
+  makes them type-neutral. Import across folders with `@/` paths; the rule
+  matches `@/` imports only.
 - When repeated component styles emerge across several instances, extract
   them into a reusable component when the behavior and semantics are also
   shared. Avoid premature abstraction for one-off or merely similar styling.

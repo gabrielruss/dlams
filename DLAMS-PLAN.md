@@ -905,6 +905,15 @@ In order. Items 1 to 7 are the path to the portfolio milestone.
    4. Enforce the direction rule with ESLint's built-in
       `no-restricted-imports` (no package needed), with the collection-type
       exception listed by file.
+      **Done 2026-11-13 on `ui-feature-folders`:** `eslint.config.js`
+      has a block for shared folders (no `@/features` or `@/app`), one
+      block per entry in its `features` list (no `@/app`, no other
+      feature), and `collectionTypeDispatchFiles` (6 files, 7 imports)
+      that may also import `video-games/`. Checked with sample imports
+      through `eslint --stdin`: 8 forbidden cases fail (type-only imports
+      too), 3 allowed cases pass; the codebase lints clean. Only `@/`
+      imports are matched; a relative `../../features/` path would slip
+      through.
    5. Update `docs/architecture.md` (tree, the "where things go" table),
       the conventions file, and `test/setup.ts`'s page imports.
    Lint, format, build, and the UI tests after each step; moves use `git
