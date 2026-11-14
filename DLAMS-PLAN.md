@@ -11,42 +11,44 @@ The current state of the project. For why things are the way they are, see
 Start here in a new session. This block is rewritten at the end of a session,
 never appended to. History lives in git and `docs/decisions.md`.
 
-- **Status.** Branch `backend-consistency` holds plan item 6d, all six
-  steps; the owner is merging it. PR #23 (`tech-backlog-part1`: the 422
-  message, deploy gated on CI, lazy pages, hook leftovers) is merged.
-  "Checkpoint: interview 1" passed 2026-11-10. Run `git status` and `git
-  log` first: the owner commits and pushes everything, and a push to
-  `main` deploys (docs included).
-- **What 6d did (2026-11-11 to 11-13):**
-  - Backend: `app/collections/video_games/` split into console, game,
-    label, and stats routes; `select()` everywhere; lists load the label
-    with the row (1 query instead of 31); routers named for what they
-    serve; dependency aliases end in `Dep`; `Base` is a `DeclarativeBase`;
-    `ConfigDict` instead of `class Config`; sandbox `User`s are
-    `sandbox_user`.
-  - Request schemas extend `RequestSchema` (`app/schemas.py`,
-    `extra="forbid"`); `tests/test_request_schemas.py` checks each one
-    against the body the UI sends.
-  - Ruff selects `FAST001` and `FAST002`; the 27 redundant
-    `response_model`s are gone (OpenAPI identical). FAST003 stays off: Ruff
-    does not follow a dependency alias.
-  - UI: the video-game API modules and types moved to
-    `components/video-games/api/` and `types.ts`, an interim spot until 6g.
-- **What is verified.** Run by Claude on `backend-consistency`
-  (2026-11-13): 98 backend tests, Ruff check and format; 89 UI tests,
-  lint, format check, build. Not run: the app in a browser after 6d (log
-  in, create a collection, add and edit a console and a game; a 422 would
-  mean a request schema rejects a field the UI sends), and Alembic against
-  a real database after the `DeclarativeBase` change (runs when the API
-  starts).
+- **Status.** Branch `ui-feature-folders` holds the end of 6d (the
+  video-game UI modules) and all of 6g, committed by the owner step by
+  step; not yet merged. PR #24 (`backend-consistency`, 6d's backend
+  steps) is merged and deployed (CI and the Pi deploy passed
+  2026-11-13). Run `git status` and `git log` first: the owner commits and
+  pushes everything, and a push to `main` deploys (docs included). `gh` is
+  installed and logged in (`gh pr status`, `gh pr checks`, `gh run list`).
+- **What 6g did:** the UI is grouped by feature (`docs/decisions.md`, "UI
+  code is grouped by feature"). `src/features/<feature>/` holds each
+  feature's components, `hooks/`, `api/`, `types.ts`, and `schemas.ts`;
+  `src/app/` holds `App.tsx`, `AppSidebar.tsx`, and `pages/`; shared code
+  is in `components/`, `hooks/`, `lib/`, and `types/`; `src/schemas/` is
+  gone. ESLint's `no-restricted-imports` enforces the import direction,
+  with `collectionTypeDispatchFiles` (6 files in `features/collections/`
+  that import `video-games/`) as the one exception until item 11.
+- **What 6d did (merged in #24):** video-game routes split by item; every
+  query uses `select()`; lists load the label with the row; routers named
+  for what they serve; dependency aliases end in `Dep`; `DeclarativeBase`;
+  `ConfigDict`; request schemas extend `RequestSchema`
+  (`extra="forbid"`), checked by `tests/test_request_schemas.py`; Ruff's
+  `FAST001` and `FAST002` (FAST003 stays off: Ruff does not follow a
+  dependency alias).
+- **What is verified.** Run by Claude on `ui-feature-folders`
+  (2026-11-13): 89 UI tests, lint, format check, build after each 6g step
+  (step 4 changed only the lint config: lint and format); the lint rule
+  checked with sample imports through `eslint --stdin`. Backend: 98 tests
+  and Ruff before #24. Not run: the app in a browser since 6d. On the live
+  site after #24, check log in, create a collection, and add and edit a
+  console and a game (a 422 would mean a request schema rejects a field the
+  UI sends).
 - **Local test data:** the local account `delete-me` has two collections,
   one console, and one game added by the Playwright pass. Demo sandboxes
   are capped at 10 locally; reuse one signed-in session when scripting.
   The local stack (Docker) is often off; ask before starting it.
-- **Next:** 6g, feature folders for the UI (decided 2026-11-13; its own
-  branch from `main` after the merge). Step 1 moves the shared pieces out
-  of `collections/`, `search/`, and `auth/`. Other open items: 6f (name
-  query state), 6b and 6c (styling), the walkthrough known issues.
+- **Next:** the owner merges `ui-feature-folders` and picks the next
+  item, on its own branch from `main`. Open: 6f (name query state), 6b and
+  6c (styling), the walkthrough known issues, item 11 (further collection
+  types, which also removes the lint exception).
 - **Waiting on the owner:** the `npm audit` items (Known issues); whether
   to add a line saying Claude creates the branch to the conventions file.
 - **The `shadcn` skill** (`dlams-ui/.claude/skills/shadcn`, a link into
@@ -812,8 +814,8 @@ In order. Items 1 to 7 are the path to the portfolio milestone.
    the name for `error` (`linksError`?), and whether one-hook components
    rename too. This reverses "callers keep the hook's names" (2026-11-08),
    so update that line and the conventions file with it.
-6g. **Feature folders for the UI** (owner, 2026-11-13; its own branch after
-   `backend-consistency`). Decided in `docs/decisions.md` ("UI code is
+6g. **Feature folders for the UI. Done 2026-11-13** on `ui-feature-folders`
+   (owner, 2026-11-13; its own branch after `backend-consistency`). Decided in `docs/decisions.md` ("UI code is
    grouped by feature"): with about seven collection types expected
    (video games, books, shoes, board games, CDs, movies and TV, maybe
    trading cards), each type's code lives in one folder instead of being
@@ -918,6 +920,10 @@ In order. Items 1 to 7 are the path to the portfolio milestone.
       the conventions file, and `test/setup.ts`'s page imports.
    Lint, format, build, and the UI tests after each step; moves use `git
    mv`.
+      Step 5 done 2026-11-13: `docs/architecture.md` (tree, client, where
+      things go, the import rule), the conventions file (form schemas,
+      feature folders), and `test/setup.ts` were updated in the steps
+      above; a final sweep found stale paths only in dated history.
 7. **README and a final check.** Done 2026-10-27 (owner's call). The root
    `README.md` was rewritten as the front door (no screenshots: the live demo
    shows the app and there is nothing to keep current; see

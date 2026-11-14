@@ -273,7 +273,12 @@ dlams-ui/src/
 ```
 
 Each feature keeps its hooks in a `hooks/` folder inside it. Tests
-(`*.test.tsx`) sit beside the code they cover.
+(`*.test.tsx`) sit beside the code they cover. Imports go one way: shared
+code never imports `features/` or `app/`, and a feature never imports
+`app/` or another feature. ESLint's `no-restricted-imports` enforces it
+(`dlams-ui/eslint.config.js`). The one exception is the `collections/`
+files that pick each collection type's pieces, which import
+`video-games/` until plan item 11.
 
 Forms open in right-side drawers. Every drawer has the same layout: a
 header with the title and Close only; item actions (Delete, with its trash icon)
