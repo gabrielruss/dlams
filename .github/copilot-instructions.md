@@ -192,7 +192,7 @@ cached copy.
   one-off presentation state without a readability benefit.
 - Every submitted form, even a one-field one, uses one pattern (decided
   2026-10-31; every form follows it since 2026-11-06):
-  1. A zod schema in `src/schemas/<feature>.ts` with limits matching the
+  1. A zod schema in the feature's `schemas.ts` (`src/features/<feature>/schemas.ts`) with limits matching the
      API, and `type <Name>FormValues = z.infer<typeof schema>`.
   2. `useForm<Values>({ resolver: zodResolver(schema), defaultValues })`,
      in the feature hook when there is one, otherwise in the component.
@@ -219,8 +219,22 @@ cached copy.
   and types easy to locate, but do not force unrelated responsibilities into
   one file or folder. Share code only when it is genuinely shared. A
   feature's hooks live in its `hooks/` folder
-  (`components/collections/hooks/`); hooks shared across features live in
+  (`features/collections/hooks/`); hooks shared across features live in
   `src/hooks/` (decided 2026-11-06).
+- Feature folders (decided 2026-11-13, `docs/decisions.md`): each feature
+  lives in `src/features/<feature>/` with its components at the root,
+  `hooks/` and `api/` folders, and single `types.ts` and `schemas.ts` files,
+  only the parts it needs. Shared code lives in `src/components/`,
+  `src/hooks/`, `src/lib/`, and `src/types/`; `src/app/` (routing, the
+  sidebar, pages) composes features. Imports go one way: shared code never
+  imports `features/` or `app/`, and a feature never imports `app/` or
+  another feature. ESLint's `no-restricted-imports` enforces this in
+  `dlams-ui/eslint.config.js`; a new feature or collection type goes in its
+  `features` list. The one allowed exception is
+  `collectionTypeDispatchFiles`: the `collections/` files that pick each
+  collection type's pieces may import `video-games/`, until plan item 11
+  makes them type-neutral. Import across folders with `@/` paths; the rule
+  matches `@/` imports only.
 - When repeated component styles emerge across several instances, extract
   them into a reusable component when the behavior and semantics are also
   shared. Avoid premature abstraction for one-off or merely similar styling.
@@ -307,9 +321,9 @@ test and which kind.
 - Mock as little as possible. Mock at the network boundary (MSW) or for things
   that cannot run in a test, not the app's own modules or hooks.
 - Put a test beside the feature it covers, named for it (for example
-  `components/video-games/VideoGamesWorkspace.test.tsx`), so each collection
+  `features/video-games/VideoGamesWorkspace.test.tsx`), so each collection
   type keeps its own tests. Cross-cutting flows such as sign-in live with their
-  page (`pages/Login.test.tsx`).
+  page (`app/pages/Login.test.tsx`).
 - Accessibility: `expectNoViolations(container)` from `src/test/axe.ts` runs
   axe on rendered markup. Add it to the test for a screen rather than writing
   separate accessibility tests. jsdom cannot check color contrast, so that rule
@@ -343,7 +357,7 @@ test and which kind.
 ## Backend (FastAPI + SQLAlchemy)
 
 - Follow PEP 8. Use modern type hints (`X | None`, built-in generics) and annotate handlers and helpers.
-- Pydantic v2 schemas with explicit request/response contracts. A route declares its response with its return type annotation; set `response_model` only when it differs from the return type. Ruff's FAST001 and FAST002 enforce this and the `Annotated` rule (decided 2026-11-13).
+- Pydantic v2 schemas with explicit request/response contracts. A route declares its response with its return type annotation; set `response_model` only when it differs from the return type. Ruff's FAST001 and FAST002 enforce this and the `Annotated` rule (decided 2026-11-13). FAST003 is off: Ruff does not follow a dependency alias, so routes that get a path parameter through one (`OwnedCollectionDep`) are false positives.
 - Request schemas (the bodies routes accept) extend `RequestSchema` (`app/schemas.py`), which sets `extra="forbid"`, so an undeclared field is a 422 instead of being silently dropped (decided 2026-10-31; base class 2026-11-13). Response schemas extend `BaseModel`. Every request schema follows this, and `tests/test_request_schemas.py` lists each one with the body the UI sends; add a new request schema there.
 - Organize routers, schemas, services, and tests by resource. Keep console and game endpoints in separate modules.
 - Keep handlers thin: handle HTTP concerns, validation, authorization, and orchestration. Extract substantial or reused domain logic into a service/helper; do not add a service layer for trivial one-off operations.

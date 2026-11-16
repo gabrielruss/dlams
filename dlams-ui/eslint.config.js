@@ -5,6 +5,32 @@ import reactRefresh from "eslint-plugin-react-refresh"
 import tseslint from "typescript-eslint"
 import { defineConfig, globalIgnores } from "eslint/config"
 
+const features = ["admin", "auth", "collections", "search", "video-games"]
+
+const collectionTypeDispatchFiles = [
+  "src/features/collections/CollectionStats.tsx",
+  "src/features/collections/DeleteCollectionConfirm.tsx",
+  "src/features/collections/collectionWorkspaceResolver.ts",
+  "src/features/collections/hooks/useCollections.ts",
+  "src/features/collections/hooks/useManageCollection.ts",
+  "src/features/collections/api/sharedCollections.ts",
+]
+
+const appImports = {
+  group: ["@/app", "@/app/**"],
+  message: "Only src/app may compose pages and the sidebar.",
+}
+
+const featureImports = (feature) => ({
+  group: [`@/features/${feature}`, `@/features/${feature}/**`],
+  message:
+    "A feature does not import another feature; move shared code to components/, hooks/, lib/, or types/, or compose in src/app.",
+})
+
+const restrictImports = (patterns) => ({
+  "no-restricted-imports": ["error", { patterns }],
+})
+
 export default defineConfig([
   globalIgnores(["dist", ".agents", ".claude"]),
   {
@@ -28,5 +54,32 @@ export default defineConfig([
     rules: {
       "react-refresh/only-export-components": "off",
     },
+  },
+  {
+    files: ["src/{components,hooks,lib,types}/**/*.{ts,tsx}"],
+    rules: restrictImports([
+      appImports,
+      {
+        group: ["@/features", "@/features/**"],
+        message:
+          "Shared code does not import features; pass what it needs in, or compose in src/app.",
+      },
+    ]),
+  },
+  ...features.map((feature) => ({
+    files: [`src/features/${feature}/**/*.{ts,tsx}`],
+    rules: restrictImports([
+      appImports,
+      ...features.filter((other) => other !== feature).map(featureImports),
+    ]),
+  })),
+  {
+    files: collectionTypeDispatchFiles,
+    rules: restrictImports([
+      appImports,
+      ...features
+        .filter((other) => !["collections", "video-games"].includes(other))
+        .map(featureImports),
+    ]),
   },
 ])
