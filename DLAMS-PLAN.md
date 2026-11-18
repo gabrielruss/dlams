@@ -6,18 +6,19 @@ The current state of the project. For why things are the way they are, see
 [`docs/decisions.md`](./docs/decisions.md). For the full history up to
 2026-10-09, see [`docs/archive/`](./docs/archive/).
 
-## Where we left off (2026-11-13)
+## Where we left off (2026-11-15)
 
 Start here in a new session. This block is rewritten at the end of a session,
 never appended to. History lives in git and `docs/decisions.md`.
 
-- **Status.** Branch `ui-feature-folders` holds the end of 6d (the
-  video-game UI modules) and all of 6g, committed by the owner step by
-  step; not yet merged. PR #24 (`backend-consistency`, 6d's backend
-  steps) is merged and deployed (CI and the Pi deploy passed
-  2026-11-13). Run `git status` and `git log` first: the owner commits and
-  pushes everything, and a push to `main` deploys (docs included). `gh` is
-  installed and logged in (`gh pr status`, `gh pr checks`, `gh run list`).
+- **Status (2026-11-15).** 6d (PR #24, deployed) and 6g (PR #25) are merged;
+  #25's deploy was not checked. Branch `walkthrough-fixes` (uncommitted) fixes the walkthrough
+  known issues: the sidebar focus ring (`pt-1`), the Consoles/Games cards
+  sized to their content (`items-start`), the demo notice wording, and
+  422s shown in UI-written text under their fields (`docs/decisions.md`,
+  "The UI writes the text for API validation errors"). Run `git status`
+  and `git log` first: the owner commits and pushes everything, and a push
+  to `main` deploys (docs included). `gh` is installed and logged in.
 - **What 6g did:** the UI is grouped by feature (`docs/decisions.md`, "UI
   code is grouped by feature"). `src/features/<feature>/` holds each
   feature's components, `hooks/`, `api/`, `types.ts`, and `schemas.ts`;
@@ -45,10 +46,10 @@ never appended to. History lives in git and `docs/decisions.md`.
   one console, and one game added by the Playwright pass. Demo sandboxes
   are capped at 10 locally; reuse one signed-in session when scripting.
   The local stack (Docker) is often off; ask before starting it.
-- **Next:** the owner merges `ui-feature-folders` and picks the next
-  item, on its own branch from `main`. Open: 6f (name query state), 6b and
-  6c (styling), the walkthrough known issues, item 11 (further collection
-  types, which also removes the lint exception).
+- **Next:** the owner merges `walkthrough-fixes` and picks the next item,
+  on its own branch from `main`. Open: 6f (name query state), 6b and 6c
+  (styling), item 11 (further collection types, which also removes the
+  lint exception).
 - **Waiting on the owner:** the `npm audit` items (Known issues); whether
   to add a line saying Claude creates the branch to the conventions file.
 - **The `shadcn` skill** (`dlams-ui/.claude/skills/shadcn`, a link into
@@ -1397,18 +1398,6 @@ is next, then the sharing UI, then search.
 
 ## Known issues
 
-- Styling, owner decides (found 2026-11-10): the Consoles and Games cards
-  stretch to the same height because the `lg:grid-cols-2` grid in
-  `VideoGamesWorkspace.tsx` defaults to `align-items: stretch`
-  (`items-start` lets each fit its content). Focus rings (3px box-shadow)
-  are clipped inside `overflow` parents: the top of the first sidebar
-  collection (the `<ul>` with `overflow-y-auto pl-3` has no top padding;
-  `pt-1` or `py-1` fixes it), and possibly drawer scroll areas.
-
-- A 422 shows Pydantic's own wording, without the field name (for
-  example "Value error, Last played can't be in the future"). The forms
-  validate first, so it shows only when the UI and API rules differ.
-
 - On a phone, the admin users table scrolls sideways inside its bordered box,
   and the Make template and Deactivate buttons are in the last column, so an admin
   swipes right to reach them. Checked by reading the code on 2026-10-23, not
@@ -1428,10 +1417,6 @@ is next, then the sharing UI, then search.
   shadcn's `Input` uses `text-base md:text-sm`, so converting these forms
   (item 6a) should fix it. Converted 2026-11-06; not yet checked on an
   iPhone or in the Simulator.
-- The demo notice in `VideoGamesWorkspace.tsx` now says "All data you add
-  will be reset in 30 minutes." Sandboxes stay 7 days and their share
-  links keep working, and item 8 and `docs/decisions.md` still describe
-  the old notice. Waiting on the owner: keep the wording or not.
 - The deploy runs `git pull origin main`, not the commit CI passed, so two
   pushes close together can deploy the second before its CI finishes.
 - Backups stay on the Pi (decided 2026-10-15): a nightly dump runs at 03:15

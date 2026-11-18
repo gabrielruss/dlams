@@ -10,6 +10,7 @@ import {
   linkNameSchema,
   type LinkNameFormValues,
 } from "@/features/collections/schemas"
+import { setFieldErrorsFromApi } from "@/lib/formErrors"
 import type useCollectionLinks from "./hooks/useCollectionLinks"
 
 interface CreateLinkFormProps {
@@ -38,6 +39,7 @@ function CreateLinkForm({
   const createLink = ({ name }: LinkNameFormValues) => {
     createMutation.mutate(name || null, {
       onSuccess: () => setIsNaming(false),
+      onError: (error) => setFieldErrorsFromApi(form, error),
     })
   }
 

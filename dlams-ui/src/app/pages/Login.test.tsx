@@ -82,7 +82,7 @@ describe("signing in", () => {
       await screen.findByRole("heading", { name: "Retro game shelf" }),
     ).toBeInTheDocument()
     expect(
-      await screen.findByText(/You are currently in a demo session/),
+      await screen.findByText(/You are in a demo session/),
     ).toBeInTheDocument()
     expect(screen.getByRole("button", { name: "Add game" })).toBeInTheDocument()
   })

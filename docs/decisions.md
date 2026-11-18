@@ -501,6 +501,21 @@ seven-day sandboxes. Build steps are item 8 in `DLAMS-PLAN.md`.
 
 ## Code and UI conventions
 
+### The UI writes the text for API validation errors — 2026-11-15
+- A 422's `detail` is parsed into field issues: the field from `loc`, and
+  text the UI writes from the error's `type` and `ctx` ("Must be 200
+  characters or fewer"). Forms show each under its field with
+  react-hook-form's `setError`; the form-level message is a fixed sentence.
+  Our own validators' messages (`ValueError` in a Pydantic validator) are
+  shown without Pydantic's "Value error, " prefix, so they must be written
+  for the user. An error type the UI has no text for gets only the fixed
+  sentence.
+- Reason: the owner wants no unfriendly messages. The API returns
+  machine-readable errors and the UI owns the wording, as zod already does
+  for the same limits; react-hook-form documents `setError` for server
+  errors. Rewriting messages in a FastAPI exception handler was rejected:
+  it would put UI wording in the API.
+
 ### Each collection type gets its own package, nested under collections — 2026-11-06
 - Backend: `app/collections/video_games/`, and later `app/collections/books/`
   and so on, instead of `video_games_*.py` files beside the shared

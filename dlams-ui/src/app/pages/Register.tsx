@@ -12,6 +12,7 @@ import {
   registerSchema,
   type RegisterFormValues,
 } from "@/features/auth/schemas"
+import { setFieldErrorsFromApi } from "@/lib/formErrors"
 import { routes } from "@/lib/routes"
 
 function Register() {
@@ -44,11 +45,15 @@ function Register() {
     password,
     invitationCode,
   }: RegisterFormValues) => {
-    registerMutation.mutate({
-      username,
-      password,
-      invitation_code: invitationCode,
-    })
+    registerMutation.mutate(
+      { username, password, invitation_code: invitationCode },
+      {
+        onError: (error) =>
+          setFieldErrorsFromApi(form, error, {
+            invitation_code: "invitationCode",
+          }),
+      },
+    )
   }
 
   return (

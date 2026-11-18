@@ -72,8 +72,12 @@ and served by `nginx:alpine`, database `postgres:15` (development uses 14).
   development) strip the `/api` prefix before forwarding to FastAPI, so the
   API never sees `/api`. CORS is not enabled.
 - **UI client.** `dlams-ui/src/lib/api/client.ts` wraps `fetch` with
-  `credentials: "include"` and throws `ApiError` (message from the API's
-  `detail`: the string, or for a 422 the `msg` of each validation issue).
+  `credentials: "include"` and throws `ApiError`. A string `detail` is its
+  message. A 422 gets a fixed message and `fieldIssues`: each validation
+  error's field (from `loc`) with UI-written text built from its `type` and
+  `ctx` (`lib/api/fieldIssues.ts`); Pydantic's own `msg` is never shown.
+  Forms put those under their fields with `setFieldErrorsFromApi`
+  (`lib/formErrors.ts`).
   One module per shared resource in `lib/api/` (auth, items) builds on it;
   each feature keeps its own API modules in its `api/` folder
   (`features/video-games/api/`, `features/collections/api/`).

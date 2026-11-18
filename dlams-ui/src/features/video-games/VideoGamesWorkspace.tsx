@@ -22,8 +22,8 @@ function VideoGamesWorkspace({ collection }: VideoGamesWorkspaceProps) {
     <div className="flex flex-col gap-5">
       {isSandbox(currentUser) && (
         <p className="rounded-md border p-3 text-sm">
-          You are currently in a demo session. All data you add will be reset in
-          30 minutes. Enjoy :)
+          You are in a demo session. It ends after 30 minutes; anything you
+          share stays viewable by link for 7 days, then it is deleted.
         </p>
       )}
       {!canWrite && (
@@ -39,7 +39,7 @@ function VideoGamesWorkspace({ collection }: VideoGamesWorkspaceProps) {
           {error.message}
         </p>
       )}
-      <div className="grid gap-5 lg:grid-cols-2">
+      <div className="grid items-start gap-5 lg:grid-cols-2">
         <ConsoleManager
           collectionId={collection.id}
           consoles={consoles}

@@ -104,7 +104,7 @@ describe("creating a collection", () => {
     )
   })
 
-  it("shows the API's validation message when it refuses the name", async () => {
+  it("shows its own text under the name when the API refuses it", async () => {
     signInWithNoCollections()
     server.use(
       http.post(`${api}/collections`, () =>
@@ -115,6 +115,7 @@ describe("creating a collection", () => {
                 type: "string_too_long",
                 loc: ["body", "name"],
                 msg: "String should have at most 100 characters",
+                ctx: { max_length: 100 },
               },
             ],
           },
@@ -127,9 +128,12 @@ describe("creating a collection", () => {
     within(drawer).getByLabelText("Collection name").focus()
     await user.keyboard("Games to sell{Enter}")
 
-    expect(await within(drawer).findByRole("alert")).toHaveTextContent(
-      "String should have at most 100 characters",
-    )
+    expect(
+      await within(drawer).findByText("Must be 100 characters or fewer"),
+    ).toBeInTheDocument()
+    expect(
+      within(drawer).queryByText(/String should have/),
+    ).not.toBeInTheDocument()
   })
 
   it("asks for a name instead of sending a blank one", async () => {

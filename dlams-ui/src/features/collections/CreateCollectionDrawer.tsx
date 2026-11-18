@@ -16,6 +16,7 @@ import {
   collectionNameSchema,
   type CollectionNameFormValues,
 } from "@/features/collections/schemas"
+import { setFieldErrorsFromApi } from "@/lib/formErrors"
 import useCollections from "./hooks/useCollections"
 
 interface CreateCollectionDrawerProps {
@@ -50,6 +51,7 @@ function CreateCollectionDrawer({
         form.reset()
         setIsOpen(false)
       },
+      onError: (error) => setFieldErrorsFromApi(form, error),
     })
   }
 

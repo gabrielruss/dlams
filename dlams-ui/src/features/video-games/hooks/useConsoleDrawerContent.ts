@@ -9,6 +9,7 @@ import {
   type ConsoleFormValues,
 } from "@/features/video-games/schemas"
 import type { ConsoleCreate, ConsoleRecord } from "@/features/video-games/types"
+import { setFieldErrorsFromApi } from "@/lib/formErrors"
 import { invalidateVideoGameCollection } from "../invalidateVideoGameCollection"
 
 interface UseConsoleDrawerContentOptions {
@@ -89,7 +90,10 @@ function useConsoleDrawerContent({
     }
     saveMutation.mutate(
       { id: shownConsole?.id ?? null, data },
-      { onSuccess: leaveForm },
+      {
+        onSuccess: leaveForm,
+        onError: (error) => setFieldErrorsFromApi(form, error),
+      },
     )
   }
 

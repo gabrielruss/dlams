@@ -54,7 +54,7 @@ function CollectionNavigation() {
           No collections yet.
         </p>
       ) : (
-        <ul className="min-h-0 flex-1 overflow-y-auto pl-3">
+        <ul className="min-h-0 flex-1 overflow-y-auto pt-1 pl-3">
           {collections.map((collection) => {
             const selected =
               !isSearching && collection.id === selectedCollectionId

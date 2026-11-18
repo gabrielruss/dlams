@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { useLogin, useStartDemoSession } from "@/hooks/useAuthQueries"
 import BrandLogo from "@/components/BrandLogo"
+import { setFieldErrorsFromApi } from "@/lib/formErrors"
 import { routes } from "@/lib/routes"
 
 function Login() {
@@ -26,7 +27,10 @@ function Login() {
 
   const onFormSubmit = (data: LoginFormValues) => {
     demoSessionMutation.reset()
-    loginMutation.mutate(data, { onSuccess: () => navigate(routes.home) })
+    loginMutation.mutate(data, {
+      onSuccess: () => navigate(routes.home),
+      onError: (error) => setFieldErrorsFromApi(form, error),
+    })
   }
 
   const isBusy =
