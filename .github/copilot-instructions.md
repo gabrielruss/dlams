@@ -205,6 +205,13 @@ cached copy.
      Ids are `<form>-<field>` (`login-username`), unique on the page. No raw
      `<label>`.
   4. A mutation's error shows in a `<p role="alert">` below the fields.
+     The submit's `mutate` passes `onError: (error) =>
+     setFieldErrorsFromApi(form, error)` (`lib/formErrors.ts`), so a 422
+     shows under its field. An API field with the same name as a form field
+     maps itself; list only the renamed ones (`{ console_label:
+     "consoleLabel" }`). UI text for a validation error type lives in
+     `lib/api/fieldIssues.ts`; never show Pydantic's `msg` (decided
+     2026-11-15).
   5. Submit is a default `Button`, disabled and relabeled ("Creating...")
      while pending; cancel is `variant="outline"`.
   Standalone controls that are not submitted (a search field, a selector)

@@ -1,22 +1,37 @@
+import {
+  fieldIssuesFromValidationErrors,
+  type FieldIssue,
+  type ValidationIssue,
+} from "./fieldIssues"
+
 const API_URL = import.meta.env.VITE_API_URL
+
+export const rejectedValuesMessage =
+  "Some values weren't accepted. Check the form and try again."
 
 export class ApiError extends Error {
   readonly status: number
+  readonly fieldIssues: FieldIssue[]
 
-  constructor(message: string, status: number) {
+  constructor(message: string, status: number, fieldIssues: FieldIssue[] = []) {
     super(message)
     this.name = "ApiError"
     this.status = status
+    this.fieldIssues = fieldIssues
   }
 }
 
-type ValidationIssue = { msg: string }
-
 type ErrorResponseBody = { detail?: string | ValidationIssue[] }
 
-function messageFromErrorDetail(detail: ErrorResponseBody["detail"]) {
-  if (typeof detail === "string") return detail
-  if (Array.isArray(detail)) return detail.map((issue) => issue.msg).join(" ")
+function apiErrorFromResponseBody(body: ErrorResponseBody, status: number) {
+  if (typeof body.detail === "string") return new ApiError(body.detail, status)
+  if (Array.isArray(body.detail)) {
+    return new ApiError(
+      rejectedValuesMessage,
+      status,
+      fieldIssuesFromValidationErrors(body.detail),
+    )
+  }
   return undefined
 }
 
@@ -34,14 +49,17 @@ export async function apiRequest<T>(
   })
 
   if (!response.ok) {
-    let message = `Request failed (${response.status})`
+    let error = new ApiError(
+      `Request failed (${response.status})`,
+      response.status,
+    )
     try {
-      const error: ErrorResponseBody = await response.json()
-      message = messageFromErrorDetail(error.detail) || message
+      const body: ErrorResponseBody = await response.json()
+      error = apiErrorFromResponseBody(body, response.status) ?? error
     } catch {
       // Keep the HTTP status message if the response is not JSON.
     }
-    throw new ApiError(message, response.status)
+    throw error
   }
 
   if (response.status === 204) {

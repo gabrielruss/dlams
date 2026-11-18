@@ -115,6 +115,47 @@ describe("editing a collection", () => {
     expect(requests.renamedTo).toBe("")
   })
 
+  it("shows the API's rejection under the field in its own words", async () => {
+    signIn()
+    server.use(
+      http.put(`${api}/collections/1`, () =>
+        HttpResponse.json(
+          {
+            detail: [
+              {
+                type: "string_too_long",
+                loc: ["body", "name"],
+                msg: "String should have at most 100 characters",
+                ctx: { max_length: 100 },
+              },
+            ],
+          },
+          { status: 422 },
+        ),
+      ),
+    )
+    const { user, drawer } = await openEditDrawer()
+
+    within(drawer).getByLabelText("Collection name").focus()
+    await user.keyboard("{Enter}")
+
+    expect(
+      await within(drawer).findByText("Must be 100 characters or fewer"),
+    ).toBeInTheDocument()
+    expect(within(drawer).getByLabelText("Collection name")).toHaveAttribute(
+      "aria-invalid",
+      "true",
+    )
+    expect(
+      within(drawer).getByText(
+        "Some values weren't accepted. Check the form and try again.",
+      ),
+    ).toBeInTheDocument()
+    expect(
+      within(drawer).queryByText(/String should have/),
+    ).not.toBeInTheDocument()
+  })
+
   it("says what goes with the collection, then deletes it", async () => {
     const requests = signIn()
     const { user, drawer } = await openEditDrawer()

@@ -9,6 +9,7 @@ import {
   type GameFormValues,
 } from "@/features/video-games/schemas"
 import type { GameCreate, GameRecord } from "@/features/video-games/types"
+import { setFieldErrorsFromApi } from "@/lib/formErrors"
 import { invalidateVideoGameCollection } from "../invalidateVideoGameCollection"
 
 interface UseGameDrawerContentOptions {
@@ -91,7 +92,14 @@ function useGameDrawerContent({
     }
     saveMutation.mutate(
       { id: shownGame?.id ?? null, data },
-      { onSuccess: leaveForm },
+      {
+        onSuccess: leaveForm,
+        onError: (error) =>
+          setFieldErrorsFromApi(form, error, {
+            console_label: "consoleLabel",
+            last_played: "lastPlayed",
+          }),
+      },
     )
   }
 

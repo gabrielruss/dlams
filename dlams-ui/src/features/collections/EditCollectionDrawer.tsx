@@ -18,6 +18,7 @@ import {
   collectionNameSchema,
   type CollectionNameFormValues,
 } from "@/features/collections/schemas"
+import { setFieldErrorsFromApi } from "@/lib/formErrors"
 import type { Collection } from "@/types/collections"
 import DeleteCollectionConfirm from "./DeleteCollectionConfirm"
 import useManageCollection from "./hooks/useManageCollection"
@@ -44,7 +45,10 @@ function EditCollectionDrawer({ collection }: EditCollectionDrawerProps) {
   }
 
   const rename = ({ name }: CollectionNameFormValues) => {
-    renameMutation.mutate(name, { onSuccess: () => setIsOpen(false) })
+    renameMutation.mutate(name, {
+      onSuccess: () => setIsOpen(false),
+      onError: (error) => setFieldErrorsFromApi(form, error),
+    })
   }
 
   return (
