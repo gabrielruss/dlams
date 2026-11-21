@@ -3,6 +3,7 @@ import { Controller, type UseFormReturn } from "react-hook-form"
 
 import DrawerBody from "@/components/DrawerBody"
 import DrawerFooterBar from "@/components/DrawerFooterBar"
+import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Field, FieldError, FieldLabel } from "@/components/ui/field"
@@ -130,9 +131,9 @@ function GameForm({
           )}
         />
         {formError && (
-          <p role="alert" className="text-sm text-destructive">
-            {formError}
-          </p>
+          <Alert variant="destructive">
+            <AlertDescription>{formError}</AlertDescription>
+          </Alert>
         )}
       </DrawerBody>
       <DrawerFooterBar>

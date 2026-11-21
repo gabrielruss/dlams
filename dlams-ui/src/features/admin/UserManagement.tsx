@@ -1,4 +1,5 @@
 import { useCurrentUser } from "@/hooks/useAuthQueries"
+import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import { isAdmin, isTemplate } from "@/lib/permissions"
 import {
@@ -32,9 +33,11 @@ function UserManagement() {
 
   if (isError) {
     return (
-      <p role="alert" className="text-sm text-destructive">
-        {error?.message ?? "Could not load users"}
-      </p>
+      <Alert variant="destructive">
+        <AlertDescription>
+          {error?.message ?? "Could not load users"}
+        </AlertDescription>
+      </Alert>
     )
   }
 
@@ -47,9 +50,9 @@ function UserManagement() {
         account into a temporary sandbox account for each visitor.
       </p>
       {actionError && (
-        <p role="alert" className="text-sm text-destructive">
-          {actionError.message}
-        </p>
+        <Alert variant="destructive">
+          <AlertDescription>{actionError.message}</AlertDescription>
+        </Alert>
       )}
       {completedAction && (
         <p role="status" className="text-sm">

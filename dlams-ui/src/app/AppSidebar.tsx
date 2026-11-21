@@ -3,6 +3,7 @@ import { LogOut, Menu, Users } from "lucide-react"
 import { NavLink, useLocation } from "react-router-dom"
 
 import HomeLink from "@/components/HomeLink"
+import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Button, buttonVariants } from "@/components/ui/button"
 import { Drawer, DrawerContent, DrawerTitle } from "@/components/ui/drawer"
 import RegistrationInviteManager from "@/features/auth/RegistrationInviteManager"
@@ -46,9 +47,9 @@ function AppSidebar({ children }: AppSidebarProps) {
           </>
         )}
         {logoutMutation.error && (
-          <p role="alert" className="px-2 pb-3 text-sm text-destructive">
-            {logoutMutation.error.message}
-          </p>
+          <Alert variant="destructive" className="mb-3">
+            <AlertDescription>{logoutMutation.error.message}</AlertDescription>
+          </Alert>
         )}
         <Button
           className="w-full justify-start"

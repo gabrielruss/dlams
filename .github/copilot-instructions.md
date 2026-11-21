@@ -158,12 +158,12 @@ cached copy.
   are left outside `components/ui/` since 2026-11-06; the 6a consistency
   check in the plan should print nothing). If no installed component fits,
   give the owner the install command and wait.
-  A notice or a load error that stands on its own is an `Alert` with an
-  `AlertDescription` (shadcn's description-only form): `variant="destructive"`
-  for errors, which keeps the Alert's own `role="alert"`, and `role="note"`
-  for static notices (demo, read-only), so a screen reader does not announce
-  them as alerts on every render (2026-11-21, plan item 6b). A form's
-  mutation error stays a `<p role="alert">` below its fields.
+  Notices and errors are an `Alert` with an `AlertDescription` (shadcn's
+  description-only form): `variant="destructive"` for errors (load errors
+  and mutation errors alike), which keeps the Alert's own `role="alert"`,
+  and `role="note"` for static notices (demo, read-only), so a screen reader
+  does not announce them as alerts on every render (2026-11-21, plan item
+  6b).
   Destructive final actions are `<Button variant="outline"
   className="border-destructive text-destructive">`, not the solid
   `destructive` variant; the button that starts a delete (before its
@@ -210,7 +210,8 @@ cached copy.
      then `{fieldState.invalid && <FieldError errors={[fieldState.error]} />}`.
      Ids are `<form>-<field>` (`login-username`), unique on the page. No raw
      `<label>`.
-  4. A mutation's error shows in a `<p role="alert">` below the fields.
+  4. A mutation's error shows below the fields as `<Alert
+     variant="destructive"><AlertDescription>`.
      The submit's `mutate` passes `onError: (error) =>
      setFieldErrorsFromApi(form, error)` (`lib/formErrors.ts`), so a 422
      shows under its field. An API field with the same name as a form field

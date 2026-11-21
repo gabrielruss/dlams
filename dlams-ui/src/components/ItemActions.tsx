@@ -1,5 +1,6 @@
 import { Pencil, Trash2 } from "lucide-react"
 
+import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 
 interface ItemActionsProps {
@@ -37,9 +38,9 @@ function ItemActions({
         </Button>
       </div>
       {deleteError && (
-        <p role="alert" className="self-stretch text-sm text-destructive">
-          {deleteError}
-        </p>
+        <Alert variant="destructive">
+          <AlertDescription>{deleteError}</AlertDescription>
+        </Alert>
       )}
     </div>
   )

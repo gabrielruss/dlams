@@ -3,6 +3,7 @@ import { Link2 } from "lucide-react"
 
 import DrawerBody from "@/components/DrawerBody"
 import DrawerTitleBar from "@/components/DrawerTitleBar"
+import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import { Drawer, DrawerContent } from "@/components/ui/drawer"
 import { MAX_LINKS_PER_COLLECTION } from "@/features/collections/api/collectionLinks"
@@ -69,9 +70,9 @@ function ShareLinks({ collectionId }: ShareLinksProps) {
         disabled={isPending}
       />
       {actionError && (
-        <p role="alert" className="text-sm text-destructive">
-          {actionError.message}
-        </p>
+        <Alert variant="destructive">
+          <AlertDescription>{actionError.message}</AlertDescription>
+        </Alert>
       )}
       {isPending ? (
         <p className="text-sm">Loading links...</p>

@@ -4,6 +4,7 @@ import { UserPlus } from "lucide-react"
 import DrawerBody from "@/components/DrawerBody"
 import DrawerTitleBar from "@/components/DrawerTitleBar"
 import useCreateRegistrationInvitation from "@/features/auth/hooks/useCreateRegistrationInvitation"
+import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import { Drawer, DrawerContent } from "@/components/ui/drawer"
 import { Field, FieldLabel } from "@/components/ui/field"
@@ -72,9 +73,11 @@ function RegistrationInviteManager() {
                 : "Create invitation"}
             </Button>
             {invitationMutation.error && (
-              <p role="alert" className="text-sm text-destructive">
-                {invitationMutation.error.message}
-              </p>
+              <Alert variant="destructive">
+                <AlertDescription>
+                  {invitationMutation.error.message}
+                </AlertDescription>
+              </Alert>
             )}
             {invitation && (
               <>
@@ -100,9 +103,9 @@ function RegistrationInviteManager() {
                   {copied ? "Invitation link copied" : "Copy invitation link"}
                 </Button>
                 {copyError && (
-                  <p role="alert" className="text-sm text-destructive">
-                    {copyError}
-                  </p>
+                  <Alert variant="destructive">
+                    <AlertDescription>{copyError}</AlertDescription>
+                  </Alert>
                 )}
               </>
             )}

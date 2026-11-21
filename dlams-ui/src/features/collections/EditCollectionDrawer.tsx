@@ -6,6 +6,7 @@ import { Pencil, Trash2 } from "lucide-react"
 import DrawerBody from "@/components/DrawerBody"
 import DrawerFooterBar from "@/components/DrawerFooterBar"
 import DrawerTitleBar from "@/components/DrawerTitleBar"
+import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import { Drawer, DrawerContent } from "@/components/ui/drawer"
 import { Field, FieldError, FieldLabel } from "@/components/ui/field"
@@ -104,9 +105,11 @@ function EditCollectionDrawer({ collection }: EditCollectionDrawerProps) {
                   )}
                 />
                 {renameMutation.error && (
-                  <p role="alert" className="text-sm text-destructive">
-                    {renameMutation.error.message}
-                  </p>
+                  <Alert variant="destructive">
+                    <AlertDescription>
+                      {renameMutation.error.message}
+                    </AlertDescription>
+                  </Alert>
                 )}
               </>
             )}

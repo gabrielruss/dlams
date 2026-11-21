@@ -716,9 +716,11 @@ In order. Items 1 to 7 are the path to the portfolio milestone.
    body went from `gap-3` to `gap-4`. **Then the notices** (2026-11-21;
    owner installed `alert`): the demo, read-only, and shared-page notices
    and the workspace, collection, and search load errors are `Alert` +
-   `AlertDescription` (4 files). Still open, owner to pick: a destructive outline `Button` variant (4 places, would
-   edit `button.tsx`), an `ErrorMessage` for the 13 `role="alert"` error
-   lines, a `PageHeading` (4), the Consoles/Games section (own
+   `AlertDescription` (4 files). **Then the mutation errors** (same day):
+   the 14 `<p role="alert" className="text-sm text-destructive">` lines
+   are `Alert variant="destructive"` (12 files). Still open, owner to
+   pick: a destructive outline `Button` variant (4 places, would edit
+   `button.tsx`), a `PageHeading` (4), the Consoles/Games section (own
    component or `Card`), and a shared page shell, sidebar frame, and
    counts line between `AppSidebar`/`Home`/`AdminUsers` and
    `SharedCollection`.

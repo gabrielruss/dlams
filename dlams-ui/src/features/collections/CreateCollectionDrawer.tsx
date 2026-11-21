@@ -4,6 +4,7 @@ import { Controller, useForm } from "react-hook-form"
 
 import DrawerBody from "@/components/DrawerBody"
 import DrawerTitleBar from "@/components/DrawerTitleBar"
+import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import { Drawer, DrawerContent } from "@/components/ui/drawer"
 import { Field, FieldError, FieldLabel } from "@/components/ui/field"
@@ -93,9 +94,11 @@ function CreateCollectionDrawer({
                 )}
               />
               {createCollectionMutation.error && (
-                <p role="alert" className="text-sm text-destructive">
-                  {createCollectionMutation.error.message}
-                </p>
+                <Alert variant="destructive">
+                  <AlertDescription>
+                    {createCollectionMutation.error.message}
+                  </AlertDescription>
+                </Alert>
               )}
               <Button
                 type="submit"
