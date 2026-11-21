@@ -41,7 +41,7 @@ function AppSidebar({ children }: AppSidebarProps) {
               })}
               to={routes.adminUsers}
             >
-              <Users aria-hidden="true" />
+              <Users data-icon="inline-start" aria-hidden="true" />
               Manage users
             </NavLink>
           </>
@@ -58,7 +58,7 @@ function AppSidebar({ children }: AppSidebarProps) {
           onClick={() => logoutMutation.mutate()}
           disabled={logoutMutation.isPending}
         >
-          <LogOut aria-hidden="true" />
+          <LogOut data-icon="inline-start" aria-hidden="true" />
           {logoutMutation.isPending ? "Logging out..." : "Log out"}
         </Button>
       </div>

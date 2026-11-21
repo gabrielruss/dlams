@@ -1425,9 +1425,8 @@ is next, then the sharing UI, then search.
   `components/ui` file now matches the `base-nova` registry apart from the
   logged local edits (`calendar.tsx` also keeps a small older focus ring), so buttons, inputs, the
   select (`ConditionSelect.tsx` no longer forces the old 36px), and the
-  console combobox are all 32px and `rounded-lg`. Left: the new button
-  pads icons by
-  `data-icon="inline-start"`, which none of our buttons set (7 files).
+  console combobox are all 32px and `rounded-lg`. The 8 icons that sit
+  before button text have `data-icon="inline-start"` (6 files).
 - On a phone, the admin users table scrolls sideways inside its bordered box,
   and the Make template and Deactivate buttons are in the last column, so an admin
   swipes right to reach them. Checked by reading the code on 2026-10-23, not

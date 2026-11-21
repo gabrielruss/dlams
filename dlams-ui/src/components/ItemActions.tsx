@@ -22,7 +22,7 @@ function ItemActions({
     <div className="flex flex-col items-end gap-2">
       <div className="flex items-center gap-2">
         <Button type="button" variant="outline" onClick={onEdit}>
-          <Pencil aria-hidden="true" />
+          <Pencil data-icon="inline-start" aria-hidden="true" />
           Edit
         </Button>
         <Button
@@ -32,7 +32,7 @@ function ItemActions({
           disabled={isDeleting}
           onClick={onDelete}
         >
-          <Trash2 aria-hidden="true" />
+          <Trash2 data-icon="inline-start" aria-hidden="true" />
           Delete
         </Button>
       </div>

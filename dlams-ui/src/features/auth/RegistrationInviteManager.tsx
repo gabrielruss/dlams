@@ -52,7 +52,7 @@ function RegistrationInviteManager() {
         type="button"
         onClick={() => setIsOpen(true)}
       >
-        <UserPlus aria-hidden="true" />
+        <UserPlus data-icon="inline-start" aria-hidden="true" />
         Invite someone
       </Button>
       <Drawer open={isOpen} swipeDirection="right" onOpenChange={setIsOpen}>

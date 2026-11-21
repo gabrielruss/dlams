@@ -31,7 +31,7 @@ function ShareCollectionDrawer({ collection }: ShareCollectionDrawerProps) {
           aria-describedby={linkCount > 0 ? countId : undefined}
           onClick={() => setIsOpen(true)}
         >
-          <Link2 aria-hidden="true" />
+          <Link2 data-icon="inline-start" aria-hidden="true" />
           Share
         </Button>
         {linkCount > 0 && (

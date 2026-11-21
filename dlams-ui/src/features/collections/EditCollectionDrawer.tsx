@@ -51,7 +51,7 @@ function EditCollectionDrawer({ collection }: EditCollectionDrawerProps) {
   return (
     <Drawer open={isOpen} swipeDirection="right" onOpenChange={setIsOpen}>
       <Button type="button" variant="outline" onClick={open}>
-        <Pencil aria-hidden="true" />
+        <Pencil data-icon="inline-start" aria-hidden="true" />
         Edit
       </Button>
       <DrawerContent>

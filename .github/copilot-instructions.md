@@ -267,6 +267,10 @@ cached copy.
   and Close button), `DrawerBody` (the scrolling area), and, for a form with
   pinned buttons, `DrawerFooterBar`, all in `src/components/` (2026-11-19,
   plan item 6b).
+- An icon before a button's text gets `data-icon="inline-start"` (after
+  it, `inline-end`), which the `base-nova` button uses for its padding;
+  an icon-only button uses `size="icon"` and no `data-icon` (shadcn's icon
+  rule; 2026-11-21).
 - A page's `h1` is `PageHeading` (`src/components/PageHeading.tsx`;
   2026-11-21, plan item 6b).
 - UI permission gating is UX only; the API enforces authorization.
