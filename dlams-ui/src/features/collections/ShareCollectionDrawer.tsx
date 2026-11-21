@@ -1,14 +1,10 @@
 import { useId, useState } from "react"
 import { Link2 } from "lucide-react"
 
+import DrawerBody from "@/components/DrawerBody"
+import DrawerTitleBar from "@/components/DrawerTitleBar"
 import { Button } from "@/components/ui/button"
-import {
-  Drawer,
-  DrawerClose,
-  DrawerContent,
-  DrawerHeader,
-  DrawerTitle,
-} from "@/components/ui/drawer"
+import { Drawer, DrawerContent } from "@/components/ui/drawer"
 import { MAX_LINKS_PER_COLLECTION } from "@/features/collections/api/collectionLinks"
 import type { Collection } from "@/types/collections"
 import CreateLinkForm from "./CreateLinkForm"
@@ -44,23 +40,10 @@ function ShareCollectionDrawer({ collection }: ShareCollectionDrawerProps) {
         )}
       </div>
       <DrawerContent>
-        <DrawerHeader className="flex-row items-center justify-between border-b pb-4">
-          <DrawerTitle className="text-xl">Share {collection.name}</DrawerTitle>
-          <DrawerClose
-            render={
-              <Button
-                type="button"
-                variant="outline"
-                aria-label="Close drawer"
-              />
-            }
-          >
-            Close
-          </DrawerClose>
-        </DrawerHeader>
-        <div className="min-h-0 flex-1 overflow-y-auto p-5">
+        <DrawerTitleBar title={`Share ${collection.name}`} />
+        <DrawerBody>
           <ShareLinks collectionId={collection.id} />
-        </div>
+        </DrawerBody>
       </DrawerContent>
     </Drawer>
   )

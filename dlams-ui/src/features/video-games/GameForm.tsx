@@ -1,9 +1,10 @@
 import type { RefObject } from "react"
 import { Controller, type UseFormReturn } from "react-hook-form"
 
+import DrawerBody from "@/components/DrawerBody"
+import DrawerFooterBar from "@/components/DrawerFooterBar"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
-import { DrawerFooter } from "@/components/ui/drawer"
 import { Field, FieldError, FieldLabel } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import type { GameFormValues } from "@/features/video-games/schemas"
@@ -37,7 +38,7 @@ function GameForm({
       onSubmit={form.handleSubmit(onSave)}
       className="flex min-h-0 flex-1 flex-col"
     >
-      <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto p-5">
+      <DrawerBody>
         <Controller
           control={form.control}
           name="name"
@@ -133,15 +134,15 @@ function GameForm({
             {formError}
           </p>
         )}
-      </div>
-      <DrawerFooter className="border-t pt-4">
+      </DrawerBody>
+      <DrawerFooterBar>
         <Button type="submit" disabled={isSaving}>
           {isSaving ? "Saving..." : "Save game"}
         </Button>
         <Button type="button" variant="outline" onClick={onCancel}>
           Cancel
         </Button>
-      </DrawerFooter>
+      </DrawerFooterBar>
     </form>
   )
 }

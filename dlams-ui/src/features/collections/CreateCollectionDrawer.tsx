@@ -2,14 +2,10 @@ import { type ReactNode, useRef, useState } from "react"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Controller, useForm } from "react-hook-form"
 
+import DrawerBody from "@/components/DrawerBody"
+import DrawerTitleBar from "@/components/DrawerTitleBar"
 import { Button } from "@/components/ui/button"
-import {
-  Drawer,
-  DrawerClose,
-  DrawerContent,
-  DrawerHeader,
-  DrawerTitle,
-} from "@/components/ui/drawer"
+import { Drawer, DrawerContent } from "@/components/ui/drawer"
 import { Field, FieldError, FieldLabel } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import {
@@ -66,21 +62,8 @@ function CreateCollectionDrawer({
         }}
       >
         <DrawerContent initialFocus={nameInputRef}>
-          <DrawerHeader className="flex-row items-center justify-between border-b pb-4">
-            <DrawerTitle className="text-xl">Create collection</DrawerTitle>
-            <DrawerClose
-              render={
-                <Button
-                  type="button"
-                  variant="outline"
-                  aria-label="Close drawer"
-                />
-              }
-            >
-              Close
-            </DrawerClose>
-          </DrawerHeader>
-          <div className="min-h-0 flex-1 overflow-y-auto p-5">
+          <DrawerTitleBar title="Create collection" />
+          <DrawerBody>
             <form
               onSubmit={form.handleSubmit(createCollection)}
               className="flex flex-col gap-4"
@@ -123,7 +106,7 @@ function CreateCollectionDrawer({
                   : "Create collection"}
               </Button>
             </form>
-          </div>
+          </DrawerBody>
         </DrawerContent>
       </Drawer>
     </>

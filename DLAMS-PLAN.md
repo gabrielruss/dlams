@@ -709,6 +709,18 @@ In order. Items 1 to 7 are the path to the portfolio milestone.
    general `FormSelectTrigger` only if a non-condition select appears. Likewise `border-input` on the
    outline `Button` used as the date picker's trigger
    (`LastPlayedPicker.tsx`), if another button-as-field appears.
+   **Counted 2026-11-19** (branch `repeated-styling`): 10 candidates
+   reported to the owner. Picked first: the drawer header and the drawer
+   body and footer, now `DrawerTitleBar`, `DrawerBody`, and
+   `DrawerFooterBar` in `src/components/` (8 files). The invite drawer's
+   body went from `gap-3` to `gap-4`. Still open, owner to pick after
+   seeing these: a destructive outline `Button` variant (4 places, would
+   edit `button.tsx`), an `ErrorMessage` for the 13 `role="alert"` error
+   lines, a `PageHeading` (4), shadcn `Alert` for the 6 notices (needs
+   `npx shadcn@latest add alert`), the Consoles/Games section (own
+   component or `Card`), and a shared page shell, sidebar frame, and
+   counts line between `AppSidebar`/`Home`/`AdminUsers` and
+   `SharedCollection`.
 6c. **Styling cleanup** (owner, 2026-10-31; after 6a and 6b). A styling
    change, so the owner sets the scope first. Candidates: classes made
    redundant by the shadcn components (overrides that repeat a variant's own

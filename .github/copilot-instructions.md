@@ -260,6 +260,10 @@ cached copy.
   (`CreateCollectionDrawer`). It does not live inside the screen that shows
   the trigger (decided 2026-11-06). Item drawers, which open from `?item=`,
   keep their content component and hook instead.
+- Inside `DrawerContent`, a drawer uses `DrawerTitleBar title={...}` (title
+  and Close button), `DrawerBody` (the scrolling area), and, for a form with
+  pinned buttons, `DrawerFooterBar`, all in `src/components/` (2026-11-19,
+  plan item 6b).
 - UI permission gating is UX only; the API enforces authorization.
 
 ### Server state with TanStack Query

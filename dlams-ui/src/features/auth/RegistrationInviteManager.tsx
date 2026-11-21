@@ -1,15 +1,11 @@
 import { useState } from "react"
 import { UserPlus } from "lucide-react"
 
+import DrawerBody from "@/components/DrawerBody"
+import DrawerTitleBar from "@/components/DrawerTitleBar"
 import useCreateRegistrationInvitation from "@/features/auth/hooks/useCreateRegistrationInvitation"
 import { Button } from "@/components/ui/button"
-import {
-  Drawer,
-  DrawerClose,
-  DrawerContent,
-  DrawerHeader,
-  DrawerTitle,
-} from "@/components/ui/drawer"
+import { Drawer, DrawerContent } from "@/components/ui/drawer"
 import { Field, FieldLabel } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import { routes } from "@/lib/routes"
@@ -60,21 +56,8 @@ function RegistrationInviteManager() {
       </Button>
       <Drawer open={isOpen} swipeDirection="right" onOpenChange={setIsOpen}>
         <DrawerContent>
-          <DrawerHeader className="flex-row items-center justify-between border-b pb-4">
-            <DrawerTitle className="text-xl">Invite someone</DrawerTitle>
-            <DrawerClose
-              render={
-                <Button
-                  type="button"
-                  variant="outline"
-                  aria-label="Close drawer"
-                />
-              }
-            >
-              Close
-            </DrawerClose>
-          </DrawerHeader>
-          <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto p-5">
+          <DrawerTitleBar title="Invite someone" />
+          <DrawerBody>
             <p className="text-sm text-muted-foreground">
               Each invitation can create one account and expires after seven
               days.
@@ -123,7 +106,7 @@ function RegistrationInviteManager() {
                 )}
               </>
             )}
-          </div>
+          </DrawerBody>
         </DrawerContent>
       </Drawer>
     </>
