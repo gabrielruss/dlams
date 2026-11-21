@@ -1,3 +1,4 @@
+import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import { canWriteCollection } from "@/lib/permissions"
 import type { Collection } from "@/types/collections"
@@ -61,12 +62,9 @@ function CollectionWorkspace() {
         )}
       </header>
       {error && (
-        <p
-          role="alert"
-          className="rounded-md border border-destructive p-3 text-sm"
-        >
-          {error.message}
-        </p>
+        <Alert variant="destructive">
+          <AlertDescription>{error.message}</AlertDescription>
+        </Alert>
       )}
       <CollectionBody isPending={isPending} collection={collection} />
     </section>

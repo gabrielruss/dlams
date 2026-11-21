@@ -1,3 +1,4 @@
+import { Alert, AlertDescription } from "@/components/ui/alert"
 import type { Collection } from "@/types/collections"
 import { useCurrentUser } from "@/hooks/useAuthQueries"
 import { canWriteCollection, isSandbox } from "@/lib/permissions"
@@ -21,23 +22,22 @@ function VideoGamesWorkspace({ collection }: VideoGamesWorkspaceProps) {
   return (
     <div className="flex flex-col gap-5">
       {isSandbox(currentUser) && (
-        <p className="rounded-md border p-3 text-sm">
-          You are in a demo session. It ends after 30 minutes; anything you
-          share stays viewable by link for 7 days, then it is deleted.
-        </p>
+        <Alert role="note">
+          <AlertDescription>
+            You are in a demo session. It ends after 30 minutes; anything you
+            share stays viewable by link for 7 days, then it is deleted.
+          </AlertDescription>
+        </Alert>
       )}
       {!canWrite && (
-        <p className="rounded-md border p-3 text-sm">
-          This collection is read-only.
-        </p>
+        <Alert role="note">
+          <AlertDescription>This collection is read-only.</AlertDescription>
+        </Alert>
       )}
       {error && (
-        <p
-          role="alert"
-          className="rounded-md border border-destructive p-3 text-sm"
-        >
-          {error.message}
-        </p>
+        <Alert variant="destructive">
+          <AlertDescription>{error.message}</AlertDescription>
+        </Alert>
       )}
       <div className="grid items-start gap-5 lg:grid-cols-2">
         <ConsoleManager

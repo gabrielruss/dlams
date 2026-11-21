@@ -1,6 +1,7 @@
 import { useMemo } from "react"
 
 import ListRow from "@/components/ListRow"
+import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import type { OwnedItem } from "@/types/items"
 import { buildSearchEntries, searchEntries } from "./searchEntries"
@@ -55,12 +56,9 @@ function SearchResults() {
         </Button>
       </header>
       {isError && (
-        <p
-          role="alert"
-          className="rounded-md border border-destructive p-3 text-sm"
-        >
-          {error?.message}
-        </p>
+        <Alert variant="destructive">
+          <AlertDescription>{error?.message}</AlertDescription>
+        </Alert>
       )}
       {results.length > 0 && (
         <ul aria-label="Search results" className="divide-y">

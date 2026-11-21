@@ -2,6 +2,7 @@ import { useState } from "react"
 import { useParams } from "react-router-dom"
 
 import HomeLink from "@/components/HomeLink"
+import { Alert, AlertDescription } from "@/components/ui/alert"
 import useSharedCollection from "@/features/collections/hooks/useSharedCollection"
 import SearchField from "@/features/search/SearchField"
 import useListSearch from "@/features/search/hooks/useListSearch"
@@ -87,9 +88,11 @@ function SharedCollection() {
                   />
                 </div>
               </div>
-              <p className="rounded-md border p-3 text-sm">
-                You're looking at someone's stuff. This view is read-only.
-              </p>
+              <Alert role="note">
+                <AlertDescription>
+                  You're looking at someone's stuff. This view is read-only.
+                </AlertDescription>
+              </Alert>
               <div role="search" className="flex flex-col gap-2">
                 <SearchField
                   label="Search this collection"
