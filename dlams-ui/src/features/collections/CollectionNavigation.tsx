@@ -66,7 +66,7 @@ function CollectionNavigation() {
                   aria-pressed={selected}
                   aria-current={selected ? "true" : undefined}
                   onClick={() => setSelectedCollectionId(collection.id)}
-                  className={`h-auto w-full flex-col items-stretch justify-start gap-2 rounded-none border-r-4 py-3 pr-3 pl-0 text-left text-base font-normal whitespace-normal transition-colors hover:bg-transparent ${
+                  className={`h-auto w-full flex-col items-stretch justify-start gap-2 rounded-none border-0 border-r-4 py-3 pr-3 pl-0 text-left text-base font-normal whitespace-normal transition-colors hover:bg-transparent ${
                     selected
                       ? "border-red text-sidebar-primary hover:text-sidebar-primary"
                       : "border-transparent text-sidebar-foreground hover:text-sidebar-primary"
