@@ -41,7 +41,7 @@ function ConditionSelect({
     >
       <SelectTrigger
         id={id}
-        className="w-full rounded-md pl-3 text-base data-[size=default]:h-9 md:text-sm"
+        className="w-full text-base md:text-sm"
         aria-invalid={invalid}
       >
         <SelectValue />

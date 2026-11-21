@@ -30,15 +30,11 @@ Applies across the DLAMS workspace. Project-local conventions take precedence wh
     toolbar instead of behind it (it measured `lvh` 739, `svh` 699). If it is
     lost, the pinned Save / Cancel footer is cut off on iPhones; tests do not
     catch it. Re-evaluate with plan item 15 (phone-friendly drawers).
-  In `components/ui/combobox.tsx`:
-  - The unused `children` in `ComboboxChipsInput` was removed (2026-10-18) so
-    lint passes; a reinstall brings that lint error back.
-  - `ComboboxTrigger` has `aria-label="Show options"` (2026-10-26), so the
-    dropdown-arrow button has an accessible name. If it is lost, the axe tests
-    for the Add console and Add game drawers fail.
-  - `ComboboxInput` uses `render={<ComboboxTrigger />}` on `InputGroupButton`
-    (2026-11-04, the Base UI `Button` has no `asChild`; matches the base
-    registry). If it is lost, `tsc` fails on `asChild`.
+  In `components/ui/combobox.tsx` (reinstalled from `base-nova` 2026-11-21;
+  the `ComboboxChipsInput` and `render` edits are now upstream):
+  - `ComboboxTrigger` has `aria-label="Show options"` (2026-10-26, re-applied
+    2026-11-21), so the dropdown-arrow button has an accessible name. If it
+    is lost, the axe tests for the Add console and Add game drawers fail.
   In `components/ui/calendar.tsx`:
   - `CalendarDayButton` passes its `ref` to `Button` (2026-11-07). The
     generated file makes the ref to focus the active day but never attaches

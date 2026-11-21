@@ -706,7 +706,10 @@ In order. Items 1 to 7 are the path to the portfolio milestone.
    match our fields (`w-full rounded-md pl-3 text-base
    data-[size=default]:h-9 md:text-sm`). Resolved 2026-11-06: both item
    forms use `ConditionSelect.tsx`, which holds them once; extract a
-   general `FormSelectTrigger` only if a non-condition select appears. Likewise `border-input` on the
+   general `FormSelectTrigger` only if a non-condition select appears.
+   **2026-11-21:** after the inputs moved to `base-nova` (32px,
+   `rounded-lg`), the trigger keeps only `w-full text-base md:text-sm`.
+   Likewise `border-input` on the
    outline `Button` used as the date picker's trigger
    (`LastPlayedPicker.tsx`), if another button-as-field appears.
    **Counted 2026-11-19** (branch `repeated-styling`): 10 candidates
@@ -1418,15 +1421,13 @@ is next, then the sharing UI, then search.
 
 ## Known issues
 
-- Button update side effects, owner decides (found 2026-11-21, not yet
-  seen in a browser): the new `base-nova` `button.tsx` makes every button
-  32px tall (`h-8`) and `rounded-lg`, while `Input` is still 36px (`h-9`)
-  and `rounded-md`. Buttons beside fields are now shorter, and the date
-  picker's trigger (a `Button` styled as a field in `LastPlayedPicker.tsx`)
-  is shorter than the other game form fields. The new button pads icons by
+- Button update follow-ups (2026-11-21, not yet seen in a browser): every
+  `components/ui` file now matches the `base-nova` registry apart from the
+  logged local edits (`calendar.tsx` also keeps a small older focus ring), so buttons, inputs, the
+  select (`ConditionSelect.tsx` no longer forces the old 36px), and the
+  console combobox are all 32px and `rounded-lg`. Left: the new button
+  pads icons by
   `data-icon="inline-start"`, which none of our buttons set (7 files).
-  Options: update `input.tsx` and `select.tsx` the same way, or size the
-  picker trigger to match.
 - On a phone, the admin users table scrolls sideways inside its bordered box,
   and the Make template and Deactivate buttons are in the last column, so an admin
   swipes right to reach them. Checked by reading the code on 2026-10-23, not
