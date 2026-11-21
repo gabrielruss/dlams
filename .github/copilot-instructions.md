@@ -271,6 +271,8 @@ cached copy.
   and Close button), `DrawerBody` (the scrolling area), and, for a form with
   pinned buttons, `DrawerFooterBar`, all in `src/components/` (2026-11-19,
   plan item 6b).
+- A page's `h1` is `PageHeading` (`src/components/PageHeading.tsx`;
+  2026-11-21, plan item 6b).
 - UI permission gating is UX only; the API enforces authorization.
 
 ### Server state with TanStack Query

@@ -1,6 +1,7 @@
 import { useMemo } from "react"
 
 import ListRow from "@/components/ListRow"
+import PageHeading from "@/components/PageHeading"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import type { OwnedItem } from "@/types/items"
@@ -40,9 +41,7 @@ function SearchResults() {
     <section className="flex flex-col gap-5 duration-200 animate-in fade-in slide-in-from-top-2 motion-reduce:animate-none">
       <header className="flex flex-wrap items-start justify-between gap-3">
         <div className="flex flex-col gap-1">
-          <h1 className="text-2xl font-semibold md:text-3xl">
-            Results in all collections
-          </h1>
+          <PageHeading>Results in all collections</PageHeading>
           <p role="status" className="text-sm text-muted-foreground">
             {isPending
               ? "Loading items..."

@@ -2,6 +2,7 @@ import { useState } from "react"
 import { useParams } from "react-router-dom"
 
 import HomeLink from "@/components/HomeLink"
+import PageHeading from "@/components/PageHeading"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import useSharedCollection from "@/features/collections/hooks/useSharedCollection"
 import SearchField from "@/features/search/SearchField"
@@ -72,15 +73,13 @@ function SharedCollection() {
             <p>Loading collection...</p>
           ) : !sharedCollection ? (
             <div role="alert" className="flex flex-col gap-2">
-              <h1 className="text-2xl font-semibold">Nothing to see here</h1>
+              <PageHeading>Nothing to see here</PageHeading>
               <p>{error && error.message}</p>
             </div>
           ) : (
             <>
               <div className="flex flex-col gap-1">
-                <h1 className="text-2xl font-semibold md:text-3xl">
-                  {sharedCollection.name}
-                </h1>
+                <PageHeading>{sharedCollection.name}</PageHeading>
                 <div className="md:hidden">
                   <ItemCounts
                     consoles={sharedCollection.consoles.length}

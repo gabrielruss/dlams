@@ -718,9 +718,11 @@ In order. Items 1 to 7 are the path to the portfolio milestone.
    and the workspace, collection, and search load errors are `Alert` +
    `AlertDescription` (4 files). **Then the mutation errors** (same day):
    the 14 `<p role="alert" className="text-sm text-destructive">` lines
-   are `Alert variant="destructive"` (12 files). Still open, owner to
-   pick: a destructive outline `Button` variant (4 places, would edit
-   `button.tsx`), a `PageHeading` (4), the Consoles/Games section (own
+   are `Alert variant="destructive"` (12 files). **Then `PageHeading`**
+   (same day): the 5 page `h1`s, including the shared page's "Nothing to
+   see here", which gained `md:text-3xl`. Still open, owner to pick: a
+   destructive outline `Button` variant (4 places, would edit
+   `button.tsx`), the Consoles/Games section (own
    component or `Card`), and a shared page shell, sidebar frame, and
    counts line between `AppSidebar`/`Home`/`AdminUsers` and
    `SharedCollection`.

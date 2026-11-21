@@ -1,6 +1,7 @@
 import { ArrowLeft } from "lucide-react"
 import { Link } from "react-router-dom"
 
+import PageHeading from "@/components/PageHeading"
 import AppSidebar from "@/app/AppSidebar"
 import UserManagement from "@/features/admin/UserManagement"
 import { routes } from "@/lib/routes"
@@ -19,7 +20,7 @@ function AdminUsers() {
             Back to collections
           </Link>
           <header>
-            <h1 className="text-2xl font-semibold md:text-3xl">Users</h1>
+            <PageHeading>Users</PageHeading>
           </header>
           <UserManagement />
         </div>
