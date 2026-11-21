@@ -1,5 +1,6 @@
 import { Plus } from "lucide-react"
 
+import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import useSearchMode from "@/hooks/useSearchMode"
 import CollectionStats from "./CollectionStats"
@@ -40,9 +41,9 @@ function CollectionNavigation() {
       </div>
 
       {error && (
-        <p role="alert" className="px-3 pb-2 text-xs text-destructive">
-          {error.message}
-        </p>
+        <Alert variant="destructive" className="mx-3 mb-2 w-auto">
+          <AlertDescription>{error.message}</AlertDescription>
+        </Alert>
       )}
 
       {isPending ? (

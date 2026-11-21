@@ -721,7 +721,10 @@ In order. Items 1 to 7 are the path to the portfolio milestone.
    and the workspace, collection, and search load errors are `Alert` +
    `AlertDescription` (4 files). **Then the mutation errors** (same day):
    the 14 `<p role="alert" className="text-sm text-destructive">` lines
-   are `Alert variant="destructive"` (12 files). **Then `PageHeading`**
+   are `Alert variant="destructive"` (12 files), and later the same day
+   the last four (the session failure, with Retry in `AlertAction`; the
+   dead share link; the copy fallback; the sidebar's collections error),
+   so no hand-written `role="alert"` is left. **Then `PageHeading`**
    (same day): the 5 page `h1`s, including the shared page's "Nothing to
    see here", which gained `md:text-3xl`. **Then the destructive buttons**
    (same day): the owner updated `button.tsx` to the current `base-nova`

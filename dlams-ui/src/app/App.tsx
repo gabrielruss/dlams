@@ -1,6 +1,7 @@
 import { lazy, Suspense } from "react"
 import { Route, Routes, Navigate } from "react-router-dom"
 import { useCurrentUser } from "@/hooks/useAuthQueries"
+import { Alert, AlertAction, AlertDescription } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import { isAdmin } from "@/lib/permissions"
 import { routes } from "@/lib/routes"
@@ -29,17 +30,16 @@ function SessionRoutes() {
   if (error) {
     return (
       <main className="p-6">
-        <p role="alert" className="text-destructive">
-          Could not verify your session: {error.message}
-        </p>
-        <Button
-          className="mt-3"
-          type="button"
-          variant="outline"
-          onClick={() => refetch()}
-        >
-          Retry
-        </Button>
+        <Alert variant="destructive">
+          <AlertDescription>
+            Could not verify your session: {error.message}
+          </AlertDescription>
+          <AlertAction>
+            <Button type="button" variant="outline" onClick={() => refetch()}>
+              Retry
+            </Button>
+          </AlertAction>
+        </Alert>
       </main>
     )
   }

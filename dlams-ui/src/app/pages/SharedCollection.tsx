@@ -72,10 +72,14 @@ function SharedCollection() {
           {isPending ? (
             <p>Loading collection...</p>
           ) : !sharedCollection ? (
-            <div role="alert" className="flex flex-col gap-2">
+            <>
               <PageHeading>Nothing to see here</PageHeading>
-              <p>{error && error.message}</p>
-            </div>
+              {error && (
+                <Alert variant="destructive">
+                  <AlertDescription>{error.message}</AlertDescription>
+                </Alert>
+              )}
+            </>
           ) : (
             <>
               <div className="flex flex-col gap-1">
