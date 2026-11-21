@@ -164,12 +164,12 @@ cached copy.
   and `role="note"` for static notices (demo, read-only), so a screen reader
   does not announce them as alerts on every render (2026-11-21, plan item
   6b).
-  Destructive final actions are `<Button variant="outline"
-  className="border-destructive text-destructive">`, not the solid
-  `destructive` variant; the button that starts a delete (before its
-  confirm) uses the same red outline (2026-11-06). Every Close, of a
-  drawer or the search panel, is `variant="outline"` at the default size
-  (36px, like every other button; no button uses `size="sm"`); a main
+  Destructive final actions are `<Button variant="destructive">` (the
+  tinted red of the current `base-nova` button, updated 2026-11-21; it was
+  a red outline before), and so is the button that starts a delete
+  (before its confirm). Every Close, of a drawer or the search panel, is
+  `variant="outline"` at the default size (32px since the 2026-11-21
+  button update, like every other button; no button uses `size="sm"`); a main
   action is the default `Button`, with no extra hover or cursor classes
   (`index.css` sets the pointer cursor). Deleting from a drawer starts at the top right of
   the item area, never in the drawer header beside Close (decided

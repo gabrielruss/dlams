@@ -720,9 +720,12 @@ In order. Items 1 to 7 are the path to the portfolio milestone.
    the 14 `<p role="alert" className="text-sm text-destructive">` lines
    are `Alert variant="destructive"` (12 files). **Then `PageHeading`**
    (same day): the 5 page `h1`s, including the shared page's "Nothing to
-   see here", which gained `md:text-3xl`. Still open, owner to pick: a
-   destructive outline `Button` variant (4 places, would edit
-   `button.tsx`), the Consoles/Games section (own
+   see here", which gained `md:text-3xl`. **Then the destructive buttons**
+   (same day): the owner updated `button.tsx` to the current `base-nova`
+   version, and the 4 red-outline buttons use `variant="destructive"`.
+   The update also changed every button (32px instead of 36px,
+   `rounded-lg`, new hover colors); see Known issues. Still open, owner to
+   pick: the Consoles/Games section (own
    component or `Card`), and a shared page shell, sidebar frame, and
    counts line between `AppSidebar`/`Home`/`AdminUsers` and
    `SharedCollection`.
@@ -1415,6 +1418,15 @@ is next, then the sharing UI, then search.
 
 ## Known issues
 
+- Button update side effects, owner decides (found 2026-11-21, not yet
+  seen in a browser): the new `base-nova` `button.tsx` makes every button
+  32px tall (`h-8`) and `rounded-lg`, while `Input` is still 36px (`h-9`)
+  and `rounded-md`. Buttons beside fields are now shorter, and the date
+  picker's trigger (a `Button` styled as a field in `LastPlayedPicker.tsx`)
+  is shorter than the other game form fields. The new button pads icons by
+  `data-icon="inline-start"`, which none of our buttons set (7 files).
+  Options: update `input.tsx` and `select.tsx` the same way, or size the
+  picker trigger to match.
 - On a phone, the admin users table scrolls sideways inside its bordered box,
   and the Make template and Deactivate buttons are in the last column, so an admin
   swipes right to reach them. Checked by reading the code on 2026-10-23, not

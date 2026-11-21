@@ -26,9 +26,8 @@ function ItemActions({
           Edit
         </Button>
         <Button
-          className="border-destructive text-destructive"
           type="button"
-          variant="outline"
+          variant="destructive"
           aria-label={`Delete ${typeName}`}
           disabled={isDeleting}
           onClick={onDelete}

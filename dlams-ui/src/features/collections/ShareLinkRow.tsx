@@ -58,9 +58,8 @@ function ShareLinkRow({ link, isDeleting, onDelete }: ShareLinkRowProps) {
           </p>
           <div className="flex flex-col gap-2">
             <Button
-              className="border-destructive text-destructive"
               type="button"
-              variant="outline"
+              variant="destructive"
               disabled={isDeleting}
               onClick={onDelete}
             >
@@ -89,9 +88,8 @@ function ShareLinkRow({ link, isDeleting, onDelete }: ShareLinkRowProps) {
             {copied ? "Link copied" : ""}
           </span>
           <Button
-            className="border-destructive text-destructive"
             type="button"
-            variant="outline"
+            variant="destructive"
             aria-label={`Delete link for ${label}`}
             onClick={() => setIsConfirming(true)}
           >

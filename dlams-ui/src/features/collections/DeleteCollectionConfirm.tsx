@@ -68,9 +68,8 @@ function DeleteCollectionConfirm({
       )}
       <div className="flex flex-col gap-2">
         <Button
-          className="border-destructive text-destructive"
           type="button"
-          variant="outline"
+          variant="destructive"
           disabled={isDeleting || isCounting}
           onClick={onDelete}
         >
