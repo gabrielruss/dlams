@@ -730,10 +730,12 @@ In order. Items 1 to 7 are the path to the portfolio milestone.
    (same day): the owner updated `button.tsx` to the current `base-nova`
    version, and the 4 red-outline buttons use `variant="destructive"`.
    The update also changed every button (32px instead of 36px,
-   `rounded-lg`, new hover colors); see Known issues. Still open, owner to
+   `rounded-lg`, new hover colors); see Known issues. **Then the counts line**
+   (same day): `ItemCounts` (shared page) and the sidebar's stats both use
+   `features/video-games/VideoGameCounts.tsx`. Still open, owner to
    pick: the Consoles/Games section (own
-   component or `Card`), and a shared page shell, sidebar frame, and
-   counts line between `AppSidebar`/`Home`/`AdminUsers` and
+   component or `Card`), and a shared page shell and sidebar frame
+   between `AppSidebar`/`Home`/`AdminUsers` and
    `SharedCollection`.
 6c. **Styling cleanup** (owner, 2026-10-31; after 6a and 6b). A styling
    change, so the owner sets the scope first. Candidates: classes made

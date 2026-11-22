@@ -1,4 +1,5 @@
 import type { Collection } from "@/types/collections"
+import VideoGameCounts from "./VideoGameCounts"
 import useVideoGameCollectionStats from "./hooks/useVideoGameCollectionStats"
 
 interface VideoGameCollectionStatsProps {
@@ -29,16 +30,10 @@ function VideoGameCollectionStats({
   }
 
   return (
-    <span className="flex flex-wrap gap-x-3 text-xs text-muted-foreground">
-      <span>
-        {collectionStats.game_count}{" "}
-        {collectionStats.game_count === 1 ? "game" : "games"}
-      </span>
-      <span>
-        {collectionStats.console_count}{" "}
-        {collectionStats.console_count === 1 ? "console" : "consoles"}
-      </span>
-    </span>
+    <VideoGameCounts
+      games={collectionStats.game_count}
+      consoles={collectionStats.console_count}
+    />
   )
 }
 

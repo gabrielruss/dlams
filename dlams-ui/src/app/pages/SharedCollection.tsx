@@ -9,6 +9,7 @@ import SearchField from "@/features/search/SearchField"
 import useListSearch from "@/features/search/hooks/useListSearch"
 import ConsoleList from "@/features/video-games/ConsoleList"
 import GameList from "@/features/video-games/GameList"
+import VideoGameCounts from "@/features/video-games/VideoGameCounts"
 import {
   consoleSearchable,
   gameSearchable,
@@ -60,7 +61,7 @@ function SharedCollection() {
             <p className="text-xs text-muted-foreground">
               {collectionTypeNames[sharedCollection.type]}
             </p>
-            <ItemCounts
+            <VideoGameCounts
               consoles={sharedCollection.consoles.length}
               games={sharedCollection.games.length}
             />
@@ -85,7 +86,7 @@ function SharedCollection() {
               <div className="flex flex-col gap-1">
                 <PageHeading>{sharedCollection.name}</PageHeading>
                 <div className="md:hidden">
-                  <ItemCounts
+                  <VideoGameCounts
                     consoles={sharedCollection.consoles.length}
                     games={sharedCollection.games.length}
                   />
@@ -132,24 +133,6 @@ function SharedCollection() {
         </div>
       </main>
     </div>
-  )
-}
-
-interface ItemCountsProps {
-  consoles: number
-  games: number
-}
-
-function ItemCounts({ consoles, games }: ItemCountsProps) {
-  return (
-    <p className="flex flex-wrap gap-x-3 text-xs text-muted-foreground">
-      <span>
-        {games} {games === 1 ? "game" : "games"}
-      </span>
-      <span>
-        {consoles} {consoles === 1 ? "console" : "consoles"}
-      </span>
-    </p>
   )
 }
 
