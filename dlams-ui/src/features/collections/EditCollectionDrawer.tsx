@@ -73,9 +73,8 @@ function EditCollectionDrawer({ collection }: EditCollectionDrawerProps) {
               <>
                 <div className="flex justify-end">
                   <Button
-                    className="text-destructive"
                     type="button"
-                    variant="ghost"
+                    variant="destructive"
                     size="icon"
                     aria-label="Delete collection"
                     title="Delete collection"

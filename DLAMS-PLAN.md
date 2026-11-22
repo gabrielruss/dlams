@@ -692,7 +692,7 @@ In order. Items 1 to 7 are the path to the portfolio milestone.
    keyboard check in item 6 flags as missing on the raw buttons. Re-run the
    tests afterward; the axe checks and the `Edit`/`Delete` name tests cover
    these screens.
-6b. **Identify repeated component styling** (owner, 2026-10-31; after 6a).
+6b. **Identify repeated component styling. Done 2026-11-21** (owner, 2026-10-31; after 6a).
    Read-only first: list the Tailwind class strings repeated across
    components, where each appears, and whether the behavior and meaning are
    also shared (the extraction rule in `.github/copilot-instructions.md`,
@@ -737,10 +737,12 @@ In order. Items 1 to 7 are the path to the portfolio milestone.
    `AdminUsers`, `SharedCollection`) and `src/app/SidebarFrame.tsx` (used
    by `AppSidebar` and `SharedCollection`). The shared page now has
    `gap-6` and the app's sticky phone header (`px-2`). shadcn's `Sidebar`
-   was considered and deferred (item 17). Still open, owner to pick: the
-   Consoles/Games section (own component or `Card`), and the trash-can
-   Delete collection button (`ghost` + `text-destructive` to
-   `variant="destructive" size="icon"`).
+   was considered and deferred (item 17). **Then the last two** (same
+   day): the Consoles and Games boxes (workspace and shared page) are
+   shadcn `Card` + `CardHeader` + `CardTitle role="heading" aria-level={2}`
+   (+ `CardAction` for Add) + `CardContent`, taking the nova card's look;
+   the trash-can Delete collection button is `variant="destructive"
+   size="icon"`; the shared page's grid got `items-start`. **6b is done.**
 6c. **Styling cleanup** (owner, 2026-10-31; after 6a and 6b). A styling
    change, so the owner sets the scope first. Candidates: classes made
    redundant by the shadcn components (overrides that repeat a variant's own

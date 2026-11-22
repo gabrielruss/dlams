@@ -5,6 +5,7 @@ import PageShell from "@/app/PageShell"
 import SidebarFrame from "@/app/SidebarFrame"
 import PageHeading from "@/components/PageHeading"
 import { Alert, AlertDescription } from "@/components/ui/alert"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import useSharedCollection from "@/features/collections/hooks/useSharedCollection"
 import SearchField from "@/features/search/SearchField"
 import useListSearch from "@/features/search/hooks/useListSearch"
@@ -102,21 +103,33 @@ function SharedCollection() {
                 )}
               </p>
             </div>
-            <div className="grid gap-5 lg:grid-cols-2">
-              <section className="flex flex-col gap-4 rounded-lg border p-4">
-                <h2 className="text-xl font-semibold">Consoles</h2>
-                <ConsoleList
-                  consoles={consoles}
-                  emptyMessage={searching ? "No consoles match." : undefined}
-                />
-              </section>
-              <section className="flex flex-col gap-4 rounded-lg border p-4">
-                <h2 className="text-xl font-semibold">Games</h2>
-                <GameList
-                  games={games}
-                  emptyMessage={searching ? "No games match." : undefined}
-                />
-              </section>
+            <div className="grid items-start gap-5 lg:grid-cols-2">
+              <Card>
+                <CardHeader>
+                  <CardTitle role="heading" aria-level={2}>
+                    Consoles
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ConsoleList
+                    consoles={consoles}
+                    emptyMessage={searching ? "No consoles match." : undefined}
+                  />
+                </CardContent>
+              </Card>
+              <Card>
+                <CardHeader>
+                  <CardTitle role="heading" aria-level={2}>
+                    Games
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <GameList
+                    games={games}
+                    emptyMessage={searching ? "No games match." : undefined}
+                  />
+                </CardContent>
+              </Card>
             </div>
           </>
         )}
