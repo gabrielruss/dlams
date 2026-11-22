@@ -1,7 +1,8 @@
 import { useState } from "react"
 import { useParams } from "react-router-dom"
 
-import HomeLink from "@/components/HomeLink"
+import PageShell from "@/app/PageShell"
+import SidebarFrame from "@/app/SidebarFrame"
 import PageHeading from "@/components/PageHeading"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import useSharedCollection from "@/features/collections/hooks/useSharedCollection"
@@ -38,101 +39,89 @@ function SharedCollection() {
   const searching = query.trim() !== ""
 
   return (
-    <div className="flex min-h-screen flex-col md:flex-row">
+    <>
       <meta name="robots" content="noindex" />
       <meta name="referrer" content="no-referrer" />
-      <header className="flex h-14 shrink-0 items-center border-b bg-sidebar px-4 md:hidden">
-        <HomeLink
-          className="relative block h-9 w-40"
-          wordmarkClassName="absolute inset-0"
-        />
-      </header>
-      <aside
-        aria-label="Shared collection"
-        className="sticky top-0 hidden h-screen w-56 shrink-0 flex-col overflow-hidden border-r bg-sidebar text-sidebar-foreground sm:w-64 md:flex"
-      >
-        <HomeLink
-          className="relative block h-[4.75rem] shrink-0 border-b"
-          wordmarkClassName="absolute inset-x-4 inset-y-0"
-        />
-        {sharedCollection && (
-          <div className="flex flex-col gap-1 p-4">
-            <p className="font-medium">{sharedCollection.name}</p>
-            <p className="text-xs text-muted-foreground">
-              {collectionTypeNames[sharedCollection.type]}
-            </p>
-            <VideoGameCounts
-              consoles={sharedCollection.consoles.length}
-              games={sharedCollection.games.length}
-            />
-          </div>
-        )}
-      </aside>
-      <main className="min-w-0 flex-1">
-        <div className="mx-auto flex w-full max-w-6xl flex-col gap-5 p-4 md:p-6">
-          {isPending ? (
-            <p>Loading collection...</p>
-          ) : !sharedCollection ? (
-            <>
-              <PageHeading>Nothing to see here</PageHeading>
-              {error && (
-                <Alert variant="destructive">
-                  <AlertDescription>{error.message}</AlertDescription>
-                </Alert>
-              )}
-            </>
-          ) : (
-            <>
-              <div className="flex flex-col gap-1">
-                <PageHeading>{sharedCollection.name}</PageHeading>
-                <div className="md:hidden">
-                  <VideoGameCounts
-                    consoles={sharedCollection.consoles.length}
-                    games={sharedCollection.games.length}
-                  />
-                </div>
-              </div>
-              <Alert role="note">
-                <AlertDescription>
-                  You're looking at someone's stuff. This view is read-only.
-                </AlertDescription>
-              </Alert>
-              <div role="search" className="flex flex-col gap-2">
-                <SearchField
-                  label="Search this collection"
-                  value={query}
-                  onChange={setQuery}
-                  onEscape={() => setQuery("")}
-                />
-                <p role="status" className="text-sm text-muted-foreground">
-                  {matchSummary(
-                    query,
-                    consoles.length + games.length,
-                    allConsoles.length + allGames.length,
-                  )}
+      <PageShell
+        sidebar={
+          <SidebarFrame label="Shared collection">
+            {sharedCollection && (
+              <div className="flex flex-col gap-1 p-4">
+                <p className="font-medium">{sharedCollection.name}</p>
+                <p className="text-xs text-muted-foreground">
+                  {collectionTypeNames[sharedCollection.type]}
                 </p>
+                <VideoGameCounts
+                  consoles={sharedCollection.consoles.length}
+                  games={sharedCollection.games.length}
+                />
               </div>
-              <div className="grid gap-5 lg:grid-cols-2">
-                <section className="flex flex-col gap-4 rounded-lg border p-4">
-                  <h2 className="text-xl font-semibold">Consoles</h2>
-                  <ConsoleList
-                    consoles={consoles}
-                    emptyMessage={searching ? "No consoles match." : undefined}
-                  />
-                </section>
-                <section className="flex flex-col gap-4 rounded-lg border p-4">
-                  <h2 className="text-xl font-semibold">Games</h2>
-                  <GameList
-                    games={games}
-                    emptyMessage={searching ? "No games match." : undefined}
-                  />
-                </section>
+            )}
+          </SidebarFrame>
+        }
+      >
+        {isPending ? (
+          <p>Loading collection...</p>
+        ) : !sharedCollection ? (
+          <>
+            <PageHeading>Nothing to see here</PageHeading>
+            {error && (
+              <Alert variant="destructive">
+                <AlertDescription>{error.message}</AlertDescription>
+              </Alert>
+            )}
+          </>
+        ) : (
+          <>
+            <div className="flex flex-col gap-1">
+              <PageHeading>{sharedCollection.name}</PageHeading>
+              <div className="md:hidden">
+                <VideoGameCounts
+                  consoles={sharedCollection.consoles.length}
+                  games={sharedCollection.games.length}
+                />
               </div>
-            </>
-          )}
-        </div>
-      </main>
-    </div>
+            </div>
+            <Alert role="note">
+              <AlertDescription>
+                You're looking at someone's stuff. This view is read-only.
+              </AlertDescription>
+            </Alert>
+            <div role="search" className="flex flex-col gap-2">
+              <SearchField
+                label="Search this collection"
+                value={query}
+                onChange={setQuery}
+                onEscape={() => setQuery("")}
+              />
+              <p role="status" className="text-sm text-muted-foreground">
+                {matchSummary(
+                  query,
+                  consoles.length + games.length,
+                  allConsoles.length + allGames.length,
+                )}
+              </p>
+            </div>
+            <div className="grid gap-5 lg:grid-cols-2">
+              <section className="flex flex-col gap-4 rounded-lg border p-4">
+                <h2 className="text-xl font-semibold">Consoles</h2>
+                <ConsoleList
+                  consoles={consoles}
+                  emptyMessage={searching ? "No consoles match." : undefined}
+                />
+              </section>
+              <section className="flex flex-col gap-4 rounded-lg border p-4">
+                <h2 className="text-xl font-semibold">Games</h2>
+                <GameList
+                  games={games}
+                  emptyMessage={searching ? "No games match." : undefined}
+                />
+              </section>
+            </div>
+          </>
+        )}
+      </PageShell>
+    </>
   )
 }
 

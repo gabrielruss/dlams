@@ -732,11 +732,15 @@ In order. Items 1 to 7 are the path to the portfolio milestone.
    The update also changed every button (32px instead of 36px,
    `rounded-lg`, new hover colors); see Known issues. **Then the counts line**
    (same day): `ItemCounts` (shared page) and the sidebar's stats both use
-   `features/video-games/VideoGameCounts.tsx`. Still open, owner to
-   pick: the Consoles/Games section (own
-   component or `Card`), and a shared page shell and sidebar frame
-   between `AppSidebar`/`Home`/`AdminUsers` and
-   `SharedCollection`.
+   `features/video-games/VideoGameCounts.tsx`. **Then the page shell and
+   sidebar frame** (same day): `src/app/PageShell.tsx` (used by `Home`,
+   `AdminUsers`, `SharedCollection`) and `src/app/SidebarFrame.tsx` (used
+   by `AppSidebar` and `SharedCollection`). The shared page now has
+   `gap-6` and the app's sticky phone header (`px-2`). shadcn's `Sidebar`
+   was considered and deferred (item 17). Still open, owner to pick: the
+   Consoles/Games section (own component or `Card`), and the trash-can
+   Delete collection button (`ghost` + `text-destructive` to
+   `variant="destructive" size="icon"`).
 6c. **Styling cleanup** (owner, 2026-10-31; after 6a and 6b). A styling
    change, so the owner sets the scope first. Candidates: classes made
    redundant by the shadcn components (overrides that repeat a variant's own
@@ -1423,6 +1427,19 @@ is next, then the sharing UI, then search.
       `video_games_items.py`). Forms and the API still use `YYYY-MM-DD`.
     - Related, already in Known issues: iPhone auto-zoom on the drawer form
       fields.
+
+17. **shadcn `Sidebar`** (owner, 2026-11-21; later). Consider replacing
+    `SidebarFrame`, `AppSidebar`'s phone `Drawer`, and the collection list
+    with shadcn's `Sidebar` (`npx shadcn@latest add sidebar`; pulls in
+    `sheet`, `tooltip`, `skeleton`, `use-mobile`). Held off because its
+    strengths (desktop collapsing, ⌘B, icon mode, nested menus) are not
+    needed yet; the phone menu would move from the iPhone-checked Base UI
+    `Drawer` (with its `100svh` edit) to an untested `Sheet`; tests need a
+    `matchMedia` stub; the registry file imports `IconPlaceholder`; and
+    closing the phone sheet on navigation is not in the docs. Decide after
+    item 15's iPhone checks. If done: `collapsible="offcanvas"` with a
+    `SidebarTrigger` at every width, frame first, then the footer links as
+    `SidebarMenuButton`, then (owner decides) the collection list.
 
 ## Known issues
 

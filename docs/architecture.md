@@ -243,6 +243,8 @@ dlams-ui/src/
                              import them all
     App.tsx                  routing
     AppSidebar.tsx           collections, invite drawer, admin link, logout
+    PageShell.tsx            page layout: sidebar beside the content column
+    SidebarFrame.tsx         desktop aside and phone header, with the logo
     pages/                   Home, Login, Register, AdminUsers,
                              SharedCollection (the /s/:token link page)
   hooks/                     shared hooks: useFitOnResize, useAuthQueries

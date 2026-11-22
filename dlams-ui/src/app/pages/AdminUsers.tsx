@@ -3,29 +3,25 @@ import { Link } from "react-router-dom"
 
 import PageHeading from "@/components/PageHeading"
 import AppSidebar from "@/app/AppSidebar"
+import PageShell from "@/app/PageShell"
 import UserManagement from "@/features/admin/UserManagement"
 import { routes } from "@/lib/routes"
 
 function AdminUsers() {
   return (
-    <div className="flex min-h-screen flex-col md:flex-row">
-      <AppSidebar />
-      <main className="min-w-0 flex-1">
-        <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 p-4 md:p-6">
-          <Link
-            className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"
-            to={routes.home}
-          >
-            <ArrowLeft aria-hidden="true" className="size-4" />
-            Back to collections
-          </Link>
-          <header>
-            <PageHeading>Users</PageHeading>
-          </header>
-          <UserManagement />
-        </div>
-      </main>
-    </div>
+    <PageShell sidebar={<AppSidebar />}>
+      <Link
+        className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"
+        to={routes.home}
+      >
+        <ArrowLeft aria-hidden="true" className="size-4" />
+        Back to collections
+      </Link>
+      <header>
+        <PageHeading>Users</PageHeading>
+      </header>
+      <UserManagement />
+    </PageShell>
   )
 }
 
