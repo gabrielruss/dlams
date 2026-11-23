@@ -3,6 +3,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { Controller, useForm } from "react-hook-form"
 import { Link } from "react-router-dom"
 
+import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Button, buttonVariants } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Field, FieldError, FieldLabel } from "@/components/ui/field"
@@ -160,9 +161,11 @@ function Register() {
                 )}
               />
               {registerMutation.error && (
-                <p role="alert" className="text-sm text-destructive">
-                  {registerMutation.error.message}
-                </p>
+                <Alert variant="destructive">
+                  <AlertDescription>
+                    {registerMutation.error.message}
+                  </AlertDescription>
+                </Alert>
               )}
               <Button
                 type="submit"

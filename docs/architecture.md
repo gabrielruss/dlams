@@ -40,7 +40,7 @@ Versions are the declared ranges from `dlams-ui/package.json` and
 | Forms and validation | `react-hook-form`, `@hookform/resolvers`, `zod` 4 |
 | Styling | Tailwind CSS 4 (`@tailwindcss/vite`), `tw-animate-css`, `class-variance-authority`, `cn` |
 | Dates | `date-fns` (formatting and comparison, through `lib/dates.ts`), `react-day-picker` (the shadcn `Calendar`) |
-| Components | shadcn/ui, style `base-nova`, over Base UI (`@base-ui/react`); `shadcn` supplies `shadcn/tailwind.css`; `cn` merges classes; `lucide-react` (icons) |
+| Components | shadcn/ui, style `base-vega`, over Base UI (`@base-ui/react`); `shadcn` supplies `shadcn/tailwind.css`; `cn` merges classes; `lucide-react` (icons) |
 | Lint | ESLint 9 with `typescript-eslint`, `react-hooks`, `react-refresh` (its export rule is off under `src/components/ui/`, where the shadcn CLI writes files) |
 | Format | Prettier 3, pinned (`.prettierrc`: no semicolons; `src/components/ui/` ignored) |
 
@@ -243,6 +243,8 @@ dlams-ui/src/
                              import them all
     App.tsx                  routing
     AppSidebar.tsx           collections, invite drawer, admin link, logout
+    PageShell.tsx            page layout: sidebar beside the content column
+    SidebarFrame.tsx         desktop aside and phone header, with the logo
     pages/                   Home, Login, Register, AdminUsers,
                              SharedCollection (the /s/:token link page)
   hooks/                     shared hooks: useFitOnResize, useAuthQueries
@@ -266,8 +268,10 @@ dlams-ui/src/
   components/                shared components only
     ListRow.tsx              the item row every type and search use;
                              ItemActions.tsx and ItemDetailRows.tsx beside it
-    ui/                      shadcn/ui primitives (button, calendar, drawer,
-                             field, popover, select, ...)
+    DrawerTitleBar.tsx       drawer title and Close; DrawerBody.tsx and
+                             DrawerFooterBar.tsx beside it; PageHeading.tsx
+    ui/                      shadcn/ui primitives, base-vega style (alert,
+                             button, calendar, card, drawer, field, ...)
   lib/api/                   fetch client, auth, and items (shared resources)
   lib/                       queryClient, permissions, dates, routes (app
                              paths), urlParams, utils

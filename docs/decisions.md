@@ -536,6 +536,26 @@ seven-day sandboxes. Build steps are item 8 in `DLAMS-PLAN.md`.
   and over editing the generated `input.tsx` and `textarea.tsx` (a
   reinstall would undo it).
 
+### shadcn style is `base-vega` — 2026-11-23
+- `components.json` sets `"style": "base-vega"`, and every installed
+  component was re-added from it with `shadcn add … --overwrite` (not
+  `init` or `apply`, which would replace the theme and font). The four
+  logged local edits were re-applied (`.github/copilot-instructions.md`).
+- Reason: until 2026-11-21 most components were still the old `new-york`
+  ones (36px controls, 24px card spacing), because the switch to
+  `base-nova` used `--no-reinstall`. Updating them to `base-nova` made the
+  whole UI compact (32px, 16px card spacing), which the owner found too
+  small. `base-luma` was tried next: its fields have no border and a
+  `bg-input/50` fill, and with our darkened `--input` (below, "Muted text
+  and input borders darkened to meet contrast") the fill came out grey;
+  a borderless field cannot reach the 3:1 edge contrast either way.
+  `base-vega` is shadcn's classic look at the old sizes (36px,
+  `rounded-md`, bordered fields on a white background, 24px card spacing).
+- To check a component against the registry:
+  `https://ui.shadcn.com/r/styles/base-vega/<name>.json`.
+- **Supersedes** the style choice in "shadcn style is `base-nova`" (below);
+  its notes on keeping our theme still apply.
+
 ### shadcn style is `base-nova`, with our own theme kept — 2026-11-05
 - The project was on `new-york`, which has no Base UI version, so `shadcn add`
   kept delivering Radix components during the move to Base UI. The owner chose

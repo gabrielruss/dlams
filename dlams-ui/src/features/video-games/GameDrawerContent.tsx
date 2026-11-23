@@ -1,8 +1,8 @@
 import type { RefObject } from "react"
 
+import DrawerBody from "@/components/DrawerBody"
+import DrawerTitleBar from "@/components/DrawerTitleBar"
 import ItemActions from "@/components/ItemActions"
-import { Button } from "@/components/ui/button"
-import { DrawerClose, DrawerHeader, DrawerTitle } from "@/components/ui/drawer"
 import type { GameRecord } from "@/features/video-games/types"
 import GameDetails from "./GameDetails"
 import GameForm from "./GameForm"
@@ -40,20 +40,11 @@ function GameDrawerContent({
 
   return (
     <>
-      <DrawerHeader className="flex-row items-center justify-between border-b pb-4">
-        <DrawerTitle className="text-xl">
-          {viewedGame?.name ?? (shownGame ? "Edit game" : "Add game")}
-        </DrawerTitle>
-        <DrawerClose
-          render={
-            <Button type="button" variant="outline" aria-label="Close drawer" />
-          }
-        >
-          Close
-        </DrawerClose>
-      </DrawerHeader>
+      <DrawerTitleBar
+        title={viewedGame?.name ?? (shownGame ? "Edit game" : "Add game")}
+      />
       {viewedGame ? (
-        <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto p-5">
+        <DrawerBody>
           <ItemActions
             typeName="game"
             isDeleting={isDeleting}
@@ -62,7 +53,7 @@ function GameDrawerContent({
             onDelete={() => deleteGame(viewedGame)}
           />
           <GameDetails game={viewedGame} />
-        </div>
+        </DrawerBody>
       ) : (
         <GameForm
           form={form}

@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react"
 
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import { shareLinkUrl } from "@/features/collections/api/collectionLinks"
 import type { CollectionLink } from "@/types/collections"
@@ -45,10 +46,15 @@ function ShareLinkRow({ link, isDeleting, onDelete }: ShareLinkRowProps) {
         </p>
       </div>
       {copyStatus === "failed" && (
-        <div role="alert" className="flex flex-col gap-1 text-sm">
-          <p>Couldn't copy the link. Select it and copy it yourself:</p>
-          <p className="select-all break-all font-medium">{url}</p>
-        </div>
+        <Alert variant="destructive">
+          <AlertTitle>Couldn't copy the link</AlertTitle>
+          <AlertDescription>
+            Select it and copy it yourself:{" "}
+            <span className="block select-all break-all font-medium">
+              {url}
+            </span>
+          </AlertDescription>
+        </Alert>
       )}
       {isConfirming ? (
         <div className="flex flex-col gap-2 rounded-md border p-3">
@@ -58,9 +64,8 @@ function ShareLinkRow({ link, isDeleting, onDelete }: ShareLinkRowProps) {
           </p>
           <div className="flex flex-col gap-2">
             <Button
-              className="border-destructive text-destructive"
               type="button"
-              variant="outline"
+              variant="destructive"
               disabled={isDeleting}
               onClick={onDelete}
             >
@@ -89,9 +94,8 @@ function ShareLinkRow({ link, isDeleting, onDelete }: ShareLinkRowProps) {
             {copied ? "Link copied" : ""}
           </span>
           <Button
-            className="border-destructive text-destructive"
             type="button"
-            variant="outline"
+            variant="destructive"
             aria-label={`Delete link for ${label}`}
             onClick={() => setIsConfirming(true)}
           >

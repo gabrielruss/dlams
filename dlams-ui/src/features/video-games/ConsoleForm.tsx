@@ -1,7 +1,9 @@
 import { Controller, type UseFormReturn } from "react-hook-form"
 
+import DrawerBody from "@/components/DrawerBody"
+import DrawerFooterBar from "@/components/DrawerFooterBar"
+import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
-import { DrawerFooter } from "@/components/ui/drawer"
 import { Field, FieldError, FieldLabel } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import type { ConsoleFormValues } from "@/features/video-games/schemas"
@@ -30,7 +32,7 @@ function ConsoleForm({
       onSubmit={form.handleSubmit(onSave)}
       className="flex min-h-0 flex-1 flex-col"
     >
-      <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto p-5">
+      <DrawerBody>
         <Controller
           control={form.control}
           name="label"
@@ -85,19 +87,19 @@ function ConsoleForm({
           )}
         />
         {formError && (
-          <p role="alert" className="text-sm text-destructive">
-            {formError}
-          </p>
+          <Alert variant="destructive">
+            <AlertDescription>{formError}</AlertDescription>
+          </Alert>
         )}
-      </div>
-      <DrawerFooter className="border-t pt-4">
+      </DrawerBody>
+      <DrawerFooterBar>
         <Button type="submit" disabled={isSaving}>
           {isSaving ? "Saving..." : "Save console"}
         </Button>
         <Button type="button" variant="outline" onClick={onCancel}>
           Cancel
         </Button>
-      </DrawerFooter>
+      </DrawerFooterBar>
     </form>
   )
 }

@@ -1,5 +1,12 @@
 import useItemDrawer from "@/hooks/useItemDrawer"
 import { Button } from "@/components/ui/button"
+import {
+  Card,
+  CardAction,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
 import { Drawer, DrawerContent } from "@/components/ui/drawer"
 import type { ConsoleRecord } from "@/features/video-games/types"
 import ConsoleDrawerContent from "./ConsoleDrawerContent"
@@ -27,15 +34,19 @@ function ConsoleManager({
   const { consoleLabels } = useConsoleLabels(canWrite)
 
   return (
-    <section className="flex flex-col gap-4 rounded-lg border p-4">
-      <header className="flex items-center justify-between gap-3">
-        <h2 className="text-xl font-semibold">Consoles</h2>
+    <Card>
+      <CardHeader>
+        <CardTitle role="heading" aria-level={2}>
+          Consoles
+        </CardTitle>
         {canWrite && (
-          <Button type="button" onClick={startAdding}>
-            Add console
-          </Button>
+          <CardAction>
+            <Button type="button" onClick={startAdding}>
+              Add console
+            </Button>
+          </CardAction>
         )}
-      </header>
+      </CardHeader>
       {canWrite && (
         <Drawer
           open={isDrawerOpen}
@@ -55,11 +66,13 @@ function ConsoleManager({
         </Drawer>
       )}
 
-      <ConsoleList
-        consoles={consoles}
-        onSelect={canWrite ? openConsole : undefined}
-      />
-    </section>
+      <CardContent>
+        <ConsoleList
+          consoles={consoles}
+          onSelect={canWrite ? openConsole : undefined}
+        />
+      </CardContent>
+    </Card>
   )
 }
 

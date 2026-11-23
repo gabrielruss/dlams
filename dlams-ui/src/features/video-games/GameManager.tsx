@@ -2,6 +2,13 @@ import { useRef } from "react"
 
 import useItemDrawer from "@/hooks/useItemDrawer"
 import { Button } from "@/components/ui/button"
+import {
+  Card,
+  CardAction,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
 import { Drawer, DrawerContent } from "@/components/ui/drawer"
 import type { GameRecord } from "@/features/video-games/types"
 import GameDrawerContent from "./GameDrawerContent"
@@ -26,15 +33,19 @@ function GameManager({ collectionId, games, canWrite }: GameManagerProps) {
   const gameNameInputRef = useRef<HTMLInputElement>(null)
 
   return (
-    <section className="flex flex-col gap-4 rounded-lg border p-4">
-      <header className="flex items-center justify-between gap-3">
-        <h2 className="text-xl font-semibold">Games</h2>
+    <Card>
+      <CardHeader>
+        <CardTitle role="heading" aria-level={2}>
+          Games
+        </CardTitle>
         {canWrite && (
-          <Button type="button" onClick={startAdding}>
-            Add game
-          </Button>
+          <CardAction>
+            <Button type="button" onClick={startAdding}>
+              Add game
+            </Button>
+          </CardAction>
         )}
-      </header>
+      </CardHeader>
       {canWrite && (
         <Drawer
           open={isDrawerOpen}
@@ -54,8 +65,10 @@ function GameManager({ collectionId, games, canWrite }: GameManagerProps) {
           </DrawerContent>
         </Drawer>
       )}
-      <GameList games={games} onSelect={canWrite ? openGame : undefined} />
-    </section>
+      <CardContent>
+        <GameList games={games} onSelect={canWrite ? openGame : undefined} />
+      </CardContent>
+    </Card>
   )
 }
 

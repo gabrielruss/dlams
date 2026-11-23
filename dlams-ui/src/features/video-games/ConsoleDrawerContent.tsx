@@ -1,6 +1,6 @@
+import DrawerBody from "@/components/DrawerBody"
+import DrawerTitleBar from "@/components/DrawerTitleBar"
 import ItemActions from "@/components/ItemActions"
-import { Button } from "@/components/ui/button"
-import { DrawerClose, DrawerHeader, DrawerTitle } from "@/components/ui/drawer"
 import type { ConsoleRecord } from "@/features/video-games/types"
 import ConsoleDetails from "./ConsoleDetails"
 import ConsoleForm from "./ConsoleForm"
@@ -36,21 +36,14 @@ function ConsoleDrawerContent({
 
   return (
     <>
-      <DrawerHeader className="flex-row items-center justify-between border-b pb-4">
-        <DrawerTitle className="text-xl">
-          {viewedConsole?.label ??
-            (shownConsole ? "Edit console" : "Add console")}
-        </DrawerTitle>
-        <DrawerClose
-          render={
-            <Button type="button" variant="outline" aria-label="Close drawer" />
-          }
-        >
-          Close
-        </DrawerClose>
-      </DrawerHeader>
+      <DrawerTitleBar
+        title={
+          viewedConsole?.label ??
+          (shownConsole ? "Edit console" : "Add console")
+        }
+      />
       {viewedConsole ? (
-        <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto p-5">
+        <DrawerBody>
           <ItemActions
             typeName="console"
             isDeleting={isDeleting}
@@ -59,7 +52,7 @@ function ConsoleDrawerContent({
             onDelete={() => deleteConsole(viewedConsole)}
           />
           <ConsoleDetails consoleRecord={viewedConsole} />
-        </div>
+        </DrawerBody>
       ) : (
         <ConsoleForm
           form={form}

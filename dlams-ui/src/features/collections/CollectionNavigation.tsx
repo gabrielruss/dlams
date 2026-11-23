@@ -1,5 +1,6 @@
 import { Plus } from "lucide-react"
 
+import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import useSearchMode from "@/hooks/useSearchMode"
 import CollectionStats from "./CollectionStats"
@@ -40,9 +41,9 @@ function CollectionNavigation() {
       </div>
 
       {error && (
-        <p role="alert" className="px-3 pb-2 text-xs text-destructive">
-          {error.message}
-        </p>
+        <Alert variant="destructive" className="mx-3 mb-2 w-auto">
+          <AlertDescription>{error.message}</AlertDescription>
+        </Alert>
       )}
 
       {isPending ? (
@@ -66,7 +67,7 @@ function CollectionNavigation() {
                   aria-pressed={selected}
                   aria-current={selected ? "true" : undefined}
                   onClick={() => setSelectedCollectionId(collection.id)}
-                  className={`h-auto w-full flex-col items-stretch justify-start gap-2 rounded-none border-r-4 py-3 pr-3 pl-0 text-left text-base font-normal whitespace-normal transition-colors hover:bg-transparent ${
+                  className={`h-auto w-full flex-col items-stretch justify-start gap-2 rounded-none border-0 border-r-4 py-3 pr-3 pl-0 text-left text-base font-normal whitespace-normal transition-colors hover:bg-transparent ${
                     selected
                       ? "border-red text-sidebar-primary hover:text-sidebar-primary"
                       : "border-transparent text-sidebar-foreground hover:text-sidebar-primary"

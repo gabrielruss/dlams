@@ -24,21 +24,18 @@ Applies across the DLAMS workspace. Project-local conventions take precedence wh
   a competing component system.
 - Local edits to generated files. Re-apply these after reinstalling a
   component (run `npx shadcn@latest add <component> --diff` first to see what
-  would change). In `components/ui/drawer.tsx`:
+  would change). All four below were re-applied after the 2026-11-23
+  reinstall in `base-vega`. In `components/ui/drawer.tsx`:
   - Side drawers set `data-[swipe-axis=x]:[--drawer-content-height:100svh]`
     (2026-11-05), so on iOS 26 Safari the drawer ends above the floating
     toolbar instead of behind it (it measured `lvh` 739, `svh` 699). If it is
     lost, the pinned Save / Cancel footer is cut off on iPhones; tests do not
     catch it. Re-evaluate with plan item 15 (phone-friendly drawers).
-  In `components/ui/combobox.tsx`:
-  - The unused `children` in `ComboboxChipsInput` was removed (2026-10-18) so
-    lint passes; a reinstall brings that lint error back.
+  In `components/ui/combobox.tsx` (the `ComboboxChipsInput` and `render`
+  edits are now upstream):
   - `ComboboxTrigger` has `aria-label="Show options"` (2026-10-26), so the
-    dropdown-arrow button has an accessible name. If it is lost, the axe tests
-    for the Add console and Add game drawers fail.
-  - `ComboboxInput` uses `render={<ComboboxTrigger />}` on `InputGroupButton`
-    (2026-11-04, the Base UI `Button` has no `asChild`; matches the base
-    registry). If it is lost, `tsc` fails on `asChild`.
+    dropdown-arrow button has an accessible name. If it is lost, the axe
+    tests for the Add console and Add game drawers fail.
   In `components/ui/calendar.tsx`:
   - `CalendarDayButton` passes its `ref` to `Button` (2026-11-07). The
     generated file makes the ref to focus the active day but never attaches
@@ -158,12 +155,18 @@ cached copy.
   are left outside `components/ui/` since 2026-11-06; the 6a consistency
   check in the plan should print nothing). If no installed component fits,
   give the owner the install command and wait.
-  Destructive final actions are `<Button variant="outline"
-  className="border-destructive text-destructive">`, not the solid
-  `destructive` variant; the button that starts a delete (before its
-  confirm) uses the same red outline (2026-11-06). Every Close, of a
-  drawer or the search panel, is `variant="outline"` at the default size
-  (36px, like every other button; no button uses `size="sm"`); a main
+  Notices and errors are an `Alert` with an `AlertDescription` (shadcn's
+  description-only form): `variant="destructive"` for errors (load errors
+  and mutation errors alike), which keeps the Alert's own `role="alert"`,
+  and `role="note"` for static notices (demo, read-only), so a screen reader
+  does not announce them as alerts on every render (2026-11-21, plan item
+  6b).
+  Destructive final actions are `<Button variant="destructive">` (the
+  tinted red of the current shadcn button, updated 2026-11-21; it was
+  a red outline before), and so is the button that starts a delete
+  (before its confirm). Every Close, of a drawer or the search panel, is
+  `variant="outline"` at the default size (36px under `base-vega`, like
+  every other button; no button uses `size="sm"`); a main
   action is the default `Button`, with no extra hover or cursor classes
   (`index.css` sets the pointer cursor). Deleting from a drawer starts at the top right of
   the item area, never in the drawer header beside Close (decided
@@ -204,7 +207,8 @@ cached copy.
      then `{fieldState.invalid && <FieldError errors={[fieldState.error]} />}`.
      Ids are `<form>-<field>` (`login-username`), unique on the page. No raw
      `<label>`.
-  4. A mutation's error shows in a `<p role="alert">` below the fields.
+  4. A mutation's error shows below the fields as `<Alert
+     variant="destructive"><AlertDescription>`.
      The submit's `mutate` passes `onError: (error) =>
      setFieldErrorsFromApi(form, error)` (`lib/formErrors.ts`), so a 422
      shows under its field. An API field with the same name as a form field
@@ -260,6 +264,16 @@ cached copy.
   (`CreateCollectionDrawer`). It does not live inside the screen that shows
   the trigger (decided 2026-11-06). Item drawers, which open from `?item=`,
   keep their content component and hook instead.
+- Inside `DrawerContent`, a drawer uses `DrawerTitleBar title={...}` (title
+  and Close button), `DrawerBody` (the scrolling area), and, for a form with
+  pinned buttons, `DrawerFooterBar`, all in `src/components/` (2026-11-19,
+  plan item 6b).
+- An icon before a button's text gets `data-icon="inline-start"` (after
+  it, `inline-end`), which the shadcn button uses for its padding;
+  an icon-only button uses `size="icon"` and no `data-icon` (shadcn's icon
+  rule; 2026-11-21).
+- A page's `h1` is `PageHeading` (`src/components/PageHeading.tsx`;
+  2026-11-21, plan item 6b).
 - UI permission gating is UX only; the API enforces authorization.
 
 ### Server state with TanStack Query

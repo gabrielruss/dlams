@@ -50,7 +50,7 @@ function LastPlayedPicker({
           />
         }
       >
-        <CalendarIcon aria-hidden="true" />
+        <CalendarIcon data-icon="inline-start" aria-hidden="true" />
         {value ? isoDateToMonthDayYear(value) : "Pick a date"}
       </PopoverTrigger>
       <PopoverContent

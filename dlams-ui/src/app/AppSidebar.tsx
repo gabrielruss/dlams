@@ -2,13 +2,14 @@ import { useState, type ReactNode } from "react"
 import { LogOut, Menu, Users } from "lucide-react"
 import { NavLink, useLocation } from "react-router-dom"
 
-import HomeLink from "@/components/HomeLink"
+import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Button, buttonVariants } from "@/components/ui/button"
 import { Drawer, DrawerContent, DrawerTitle } from "@/components/ui/drawer"
 import RegistrationInviteManager from "@/features/auth/RegistrationInviteManager"
 import { useCurrentUser, useLogout } from "@/hooks/useAuthQueries"
 import { isAdmin } from "@/lib/permissions"
 import { routes } from "@/lib/routes"
+import SidebarFrame from "./SidebarFrame"
 
 interface AppSidebarProps {
   children?: ReactNode
@@ -40,15 +41,15 @@ function AppSidebar({ children }: AppSidebarProps) {
               })}
               to={routes.adminUsers}
             >
-              <Users aria-hidden="true" />
+              <Users data-icon="inline-start" aria-hidden="true" />
               Manage users
             </NavLink>
           </>
         )}
         {logoutMutation.error && (
-          <p role="alert" className="px-2 pb-3 text-sm text-destructive">
-            {logoutMutation.error.message}
-          </p>
+          <Alert variant="destructive" className="mb-3">
+            <AlertDescription>{logoutMutation.error.message}</AlertDescription>
+          </Alert>
         )}
         <Button
           className="w-full justify-start"
@@ -57,7 +58,7 @@ function AppSidebar({ children }: AppSidebarProps) {
           onClick={() => logoutMutation.mutate()}
           disabled={logoutMutation.isPending}
         >
-          <LogOut aria-hidden="true" />
+          <LogOut data-icon="inline-start" aria-hidden="true" />
           {logoutMutation.isPending ? "Logging out..." : "Log out"}
         </Button>
       </div>
@@ -66,22 +67,23 @@ function AppSidebar({ children }: AppSidebarProps) {
 
   return (
     <>
-      <header className="sticky top-0 z-30 flex h-14 shrink-0 items-center gap-2 border-b bg-sidebar px-2 text-sidebar-foreground md:hidden">
-        <Button
-          variant="ghost"
-          size="icon"
-          type="button"
-          aria-label="Open menu"
-          aria-expanded={isMenuOpen}
-          onClick={() => setMenuLocationKey(location.key)}
-        >
-          <Menu aria-hidden="true" />
-        </Button>
-        <HomeLink
-          className="relative block h-9 w-40"
-          wordmarkClassName="absolute inset-0"
-        />
-      </header>
+      <SidebarFrame
+        label="Application sidebar"
+        headerStart={
+          <Button
+            variant="ghost"
+            size="icon"
+            type="button"
+            aria-label="Open menu"
+            aria-expanded={isMenuOpen}
+            onClick={() => setMenuLocationKey(location.key)}
+          >
+            <Menu aria-hidden="true" />
+          </Button>
+        }
+      >
+        {menu}
+      </SidebarFrame>
 
       <Drawer
         open={isMenuOpen}
@@ -95,18 +97,6 @@ function AppSidebar({ children }: AppSidebarProps) {
           <div className="flex min-h-0 flex-1 flex-col">{menu}</div>
         </DrawerContent>
       </Drawer>
-
-      <aside
-        aria-label="Application sidebar"
-        className="sticky top-0 hidden h-screen w-56 shrink-0 flex-col overflow-hidden border-r bg-sidebar text-sidebar-foreground sm:w-64 md:flex"
-      >
-        <HomeLink
-          className="relative block h-[4.75rem] shrink-0 border-b"
-          wordmarkClassName="absolute inset-x-4 inset-y-0"
-        />
-
-        {menu}
-      </aside>
     </>
   )
 }

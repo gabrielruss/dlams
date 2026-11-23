@@ -3,15 +3,12 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { Controller, useForm } from "react-hook-form"
 import { Pencil, Trash2 } from "lucide-react"
 
+import DrawerBody from "@/components/DrawerBody"
+import DrawerFooterBar from "@/components/DrawerFooterBar"
+import DrawerTitleBar from "@/components/DrawerTitleBar"
+import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
-import {
-  Drawer,
-  DrawerClose,
-  DrawerContent,
-  DrawerFooter,
-  DrawerHeader,
-  DrawerTitle,
-} from "@/components/ui/drawer"
+import { Drawer, DrawerContent } from "@/components/ui/drawer"
 import { Field, FieldError, FieldLabel } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import {
@@ -54,29 +51,16 @@ function EditCollectionDrawer({ collection }: EditCollectionDrawerProps) {
   return (
     <Drawer open={isOpen} swipeDirection="right" onOpenChange={setIsOpen}>
       <Button type="button" variant="outline" onClick={open}>
-        <Pencil aria-hidden="true" />
+        <Pencil data-icon="inline-start" aria-hidden="true" />
         Edit
       </Button>
       <DrawerContent>
-        <DrawerHeader className="flex-row items-center justify-between border-b pb-4">
-          <DrawerTitle className="text-xl">Edit collection</DrawerTitle>
-          <DrawerClose
-            render={
-              <Button
-                type="button"
-                variant="outline"
-                aria-label="Close drawer"
-              />
-            }
-          >
-            Close
-          </DrawerClose>
-        </DrawerHeader>
+        <DrawerTitleBar title="Edit collection" />
         <form
           onSubmit={form.handleSubmit(rename)}
           className="flex min-h-0 flex-1 flex-col"
         >
-          <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto p-5">
+          <DrawerBody>
             {isConfirmingDelete ? (
               <DeleteCollectionConfirm
                 collection={collection}
@@ -89,9 +73,8 @@ function EditCollectionDrawer({ collection }: EditCollectionDrawerProps) {
               <>
                 <div className="flex justify-end">
                   <Button
-                    className="text-destructive"
                     type="button"
-                    variant="ghost"
+                    variant="destructive"
                     size="icon"
                     aria-label="Delete collection"
                     title="Delete collection"
@@ -121,15 +104,17 @@ function EditCollectionDrawer({ collection }: EditCollectionDrawerProps) {
                   )}
                 />
                 {renameMutation.error && (
-                  <p role="alert" className="text-sm text-destructive">
-                    {renameMutation.error.message}
-                  </p>
+                  <Alert variant="destructive">
+                    <AlertDescription>
+                      {renameMutation.error.message}
+                    </AlertDescription>
+                  </Alert>
                 )}
               </>
             )}
-          </div>
+          </DrawerBody>
           {!isConfirmingDelete && (
-            <DrawerFooter className="border-t pt-4">
+            <DrawerFooterBar>
               <Button type="submit" disabled={renameMutation.isPending}>
                 {renameMutation.isPending ? "Saving..." : "Save collection"}
               </Button>
@@ -140,7 +125,7 @@ function EditCollectionDrawer({ collection }: EditCollectionDrawerProps) {
               >
                 Cancel
               </Button>
-            </DrawerFooter>
+            </DrawerFooterBar>
           )}
         </form>
       </DrawerContent>

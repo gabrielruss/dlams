@@ -1,4 +1,5 @@
 import useVideoGameCollectionStats from "@/features/video-games/hooks/useVideoGameCollectionStats"
+import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import type { Collection } from "@/types/collections"
 import { itemTypeNames, type CountNames } from "@/types/items"
@@ -61,15 +62,14 @@ function DeleteCollectionConfirm({
         undone.
       </p>
       {error && (
-        <p role="alert" className="text-sm text-destructive">
-          {error.message}
-        </p>
+        <Alert variant="destructive">
+          <AlertDescription>{error.message}</AlertDescription>
+        </Alert>
       )}
       <div className="flex flex-col gap-2">
         <Button
-          className="border-destructive text-destructive"
           type="button"
-          variant="outline"
+          variant="destructive"
           disabled={isDeleting || isCounting}
           onClick={onDelete}
         >

@@ -1,6 +1,7 @@
 import { Controller, useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 
+import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { loginSchema, type LoginFormValues } from "@/features/auth/schemas"
 import { Link, useNavigate } from "react-router-dom"
@@ -102,9 +103,9 @@ function Login() {
               )}
             />
             {error && (
-              <div role="alert" className="text-sm text-destructive">
-                {error.message}
-              </div>
+              <Alert variant="destructive">
+                <AlertDescription>{error.message}</AlertDescription>
+              </Alert>
             )}
             <Button type="submit" className="w-full" disabled={isBusy}>
               {isBusy ? "Logging in..." : "Login"}

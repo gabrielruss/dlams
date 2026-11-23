@@ -1,3 +1,5 @@
+import PageHeading from "@/components/PageHeading"
+import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import { canWriteCollection } from "@/lib/permissions"
 import type { Collection } from "@/types/collections"
@@ -50,9 +52,7 @@ function CollectionWorkspace() {
   return (
     <section className="flex flex-col gap-5">
       <header className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-2xl font-semibold md:text-3xl">
-          {collection?.name ?? "Your collections"}
-        </h1>
+        <PageHeading>{collection?.name ?? "Your collections"}</PageHeading>
         {canWrite && (
           <div className="flex items-start gap-2">
             <EditCollectionDrawer collection={collection} />
@@ -61,12 +61,9 @@ function CollectionWorkspace() {
         )}
       </header>
       {error && (
-        <p
-          role="alert"
-          className="rounded-md border border-destructive p-3 text-sm"
-        >
-          {error.message}
-        </p>
+        <Alert variant="destructive">
+          <AlertDescription>{error.message}</AlertDescription>
+        </Alert>
       )}
       <CollectionBody isPending={isPending} collection={collection} />
     </section>

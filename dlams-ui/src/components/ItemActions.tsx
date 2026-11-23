@@ -1,5 +1,6 @@
 import { Pencil, Trash2 } from "lucide-react"
 
+import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 
 interface ItemActionsProps {
@@ -21,25 +22,24 @@ function ItemActions({
     <div className="flex flex-col items-end gap-2">
       <div className="flex items-center gap-2">
         <Button type="button" variant="outline" onClick={onEdit}>
-          <Pencil aria-hidden="true" />
+          <Pencil data-icon="inline-start" aria-hidden="true" />
           Edit
         </Button>
         <Button
-          className="border-destructive text-destructive"
           type="button"
-          variant="outline"
+          variant="destructive"
           aria-label={`Delete ${typeName}`}
           disabled={isDeleting}
           onClick={onDelete}
         >
-          <Trash2 aria-hidden="true" />
+          <Trash2 data-icon="inline-start" aria-hidden="true" />
           Delete
         </Button>
       </div>
       {deleteError && (
-        <p role="alert" className="self-stretch text-sm text-destructive">
-          {deleteError}
-        </p>
+        <Alert variant="destructive">
+          <AlertDescription>{deleteError}</AlertDescription>
+        </Alert>
       )}
     </div>
   )

@@ -1,14 +1,11 @@
 import { useId, useState } from "react"
 import { Link2 } from "lucide-react"
 
+import DrawerBody from "@/components/DrawerBody"
+import DrawerTitleBar from "@/components/DrawerTitleBar"
+import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
-import {
-  Drawer,
-  DrawerClose,
-  DrawerContent,
-  DrawerHeader,
-  DrawerTitle,
-} from "@/components/ui/drawer"
+import { Drawer, DrawerContent } from "@/components/ui/drawer"
 import { MAX_LINKS_PER_COLLECTION } from "@/features/collections/api/collectionLinks"
 import type { Collection } from "@/types/collections"
 import CreateLinkForm from "./CreateLinkForm"
@@ -34,7 +31,7 @@ function ShareCollectionDrawer({ collection }: ShareCollectionDrawerProps) {
           aria-describedby={linkCount > 0 ? countId : undefined}
           onClick={() => setIsOpen(true)}
         >
-          <Link2 aria-hidden="true" />
+          <Link2 data-icon="inline-start" aria-hidden="true" />
           Share
         </Button>
         {linkCount > 0 && (
@@ -44,23 +41,10 @@ function ShareCollectionDrawer({ collection }: ShareCollectionDrawerProps) {
         )}
       </div>
       <DrawerContent>
-        <DrawerHeader className="flex-row items-center justify-between border-b pb-4">
-          <DrawerTitle className="text-xl">Share {collection.name}</DrawerTitle>
-          <DrawerClose
-            render={
-              <Button
-                type="button"
-                variant="outline"
-                aria-label="Close drawer"
-              />
-            }
-          >
-            Close
-          </DrawerClose>
-        </DrawerHeader>
-        <div className="min-h-0 flex-1 overflow-y-auto p-5">
+        <DrawerTitleBar title={`Share ${collection.name}`} />
+        <DrawerBody>
           <ShareLinks collectionId={collection.id} />
-        </div>
+        </DrawerBody>
       </DrawerContent>
     </Drawer>
   )
@@ -86,9 +70,9 @@ function ShareLinks({ collectionId }: ShareLinksProps) {
         disabled={isPending}
       />
       {actionError && (
-        <p role="alert" className="text-sm text-destructive">
-          {actionError.message}
-        </p>
+        <Alert variant="destructive">
+          <AlertDescription>{actionError.message}</AlertDescription>
+        </Alert>
       )}
       {isPending ? (
         <p className="text-sm">Loading links...</p>
