@@ -24,17 +24,18 @@ Applies across the DLAMS workspace. Project-local conventions take precedence wh
   a competing component system.
 - Local edits to generated files. Re-apply these after reinstalling a
   component (run `npx shadcn@latest add <component> --diff` first to see what
-  would change). In `components/ui/drawer.tsx`:
+  would change). All four below were re-applied after the 2026-11-23
+  reinstall in `base-vega`. In `components/ui/drawer.tsx`:
   - Side drawers set `data-[swipe-axis=x]:[--drawer-content-height:100svh]`
     (2026-11-05), so on iOS 26 Safari the drawer ends above the floating
     toolbar instead of behind it (it measured `lvh` 739, `svh` 699). If it is
     lost, the pinned Save / Cancel footer is cut off on iPhones; tests do not
     catch it. Re-evaluate with plan item 15 (phone-friendly drawers).
-  In `components/ui/combobox.tsx` (reinstalled from `base-nova` 2026-11-21;
-  the `ComboboxChipsInput` and `render` edits are now upstream):
-  - `ComboboxTrigger` has `aria-label="Show options"` (2026-10-26, re-applied
-    2026-11-21), so the dropdown-arrow button has an accessible name. If it
-    is lost, the axe tests for the Add console and Add game drawers fail.
+  In `components/ui/combobox.tsx` (the `ComboboxChipsInput` and `render`
+  edits are now upstream):
+  - `ComboboxTrigger` has `aria-label="Show options"` (2026-10-26), so the
+    dropdown-arrow button has an accessible name. If it is lost, the axe
+    tests for the Add console and Add game drawers fail.
   In `components/ui/calendar.tsx`:
   - `CalendarDayButton` passes its `ref` to `Button` (2026-11-07). The
     generated file makes the ref to focus the active day but never attaches
@@ -161,11 +162,11 @@ cached copy.
   does not announce them as alerts on every render (2026-11-21, plan item
   6b).
   Destructive final actions are `<Button variant="destructive">` (the
-  tinted red of the current `base-nova` button, updated 2026-11-21; it was
+  tinted red of the current shadcn button, updated 2026-11-21; it was
   a red outline before), and so is the button that starts a delete
   (before its confirm). Every Close, of a drawer or the search panel, is
-  `variant="outline"` at the default size (32px since the 2026-11-21
-  button update, like every other button; no button uses `size="sm"`); a main
+  `variant="outline"` at the default size (36px under `base-vega`, like
+  every other button; no button uses `size="sm"`); a main
   action is the default `Button`, with no extra hover or cursor classes
   (`index.css` sets the pointer cursor). Deleting from a drawer starts at the top right of
   the item area, never in the drawer header beside Close (decided
@@ -268,7 +269,7 @@ cached copy.
   pinned buttons, `DrawerFooterBar`, all in `src/components/` (2026-11-19,
   plan item 6b).
 - An icon before a button's text gets `data-icon="inline-start"` (after
-  it, `inline-end`), which the `base-nova` button uses for its padding;
+  it, `inline-end`), which the shadcn button uses for its padding;
   an icon-only button uses `size="icon"` and no `data-icon` (shadcn's icon
   rule; 2026-11-21).
 - A page's `h1` is `PageHeading` (`src/components/PageHeading.tsx`;

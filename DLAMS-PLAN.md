@@ -6,56 +6,60 @@ The current state of the project. For why things are the way they are, see
 [`docs/decisions.md`](./docs/decisions.md). For the full history up to
 2026-10-09, see [`docs/archive/`](./docs/archive/).
 
-## Where we left off (2026-11-15)
+## Where we left off (2026-11-23)
 
 Start here in a new session. This block is rewritten at the end of a session,
 never appended to. History lives in git and `docs/decisions.md`.
 
-- **Status (2026-11-15).** 6d (PR #24, deployed) and 6g (PR #25) are merged;
-  #25's deploy was not checked. Branch `walkthrough-fixes` (uncommitted) fixes the walkthrough
-  known issues: the sidebar focus ring (`pt-1`), the Consoles/Games cards
-  sized to their content (`items-start`), the demo notice wording, and
-  422s shown in UI-written text under their fields (`docs/decisions.md`,
-  "The UI writes the text for API validation errors"). Run `git status`
-  and `git log` first: the owner commits and pushes everything, and a push
-  to `main` deploys (docs included). `gh` is installed and logged in.
-- **What 6g did:** the UI is grouped by feature (`docs/decisions.md`, "UI
-  code is grouped by feature"). `src/features/<feature>/` holds each
-  feature's components, `hooks/`, `api/`, `types.ts`, and `schemas.ts`;
-  `src/app/` holds `App.tsx`, `AppSidebar.tsx`, and `pages/`; shared code
-  is in `components/`, `hooks/`, `lib/`, and `types/`; `src/schemas/` is
-  gone. ESLint's `no-restricted-imports` enforces the import direction,
-  with `collectionTypeDispatchFiles` (6 files in `features/collections/`
-  that import `video-games/`) as the one exception until item 11.
-- **What 6d did (merged in #24):** video-game routes split by item; every
-  query uses `select()`; lists load the label with the row; routers named
-  for what they serve; dependency aliases end in `Dep`; `DeclarativeBase`;
-  `ConfigDict`; request schemas extend `RequestSchema`
-  (`extra="forbid"`), checked by `tests/test_request_schemas.py`; Ruff's
-  `FAST001` and `FAST002` (FAST003 stays off: Ruff does not follow a
-  dependency alias).
-- **What is verified.** Run by Claude on `ui-feature-folders`
-  (2026-11-13): 89 UI tests, lint, format check, build after each 6g step
-  (step 4 changed only the lint config: lint and format); the lint rule
-  checked with sample imports through `eslint --stdin`. Backend: 98 tests
-  and Ruff before #24. Not run: the app in a browser since 6d. On the live
-  site after #24, check log in, create a collection, and add and edit a
-  console and a game (a 422 would mean a request schema rejects a field the
-  UI sends).
+- **Status (2026-11-23).** PR #27 (`repeated-styling`, plan item 6b plus
+  the shadcn style update to `base-vega`) is open, not yet merged. Merged before it: #24 (6d), #25 (6g), #26 (the walkthrough
+  fixes and UI-written 422 text; `docs/decisions.md`, "The UI writes the
+  text for API validation errors"). Run `git status` and `git log` first:
+  the owner commits and pushes everything, and a push to `main` deploys
+  (docs included). `gh` is installed and logged in.
+- **What #27 does (6b, done):** shared pieces instead of repeated classes:
+  `DrawerTitleBar`, `DrawerBody`, `DrawerFooterBar`, `PageHeading` (in
+  `src/components/`), `PageShell` and `SidebarFrame` (in `src/app/`),
+  `VideoGameCounts` (in `features/video-games/`). Every notice and error is
+  a shadcn `Alert` (`role="note"` for static notices); no hand-written
+  `role="alert"` is left. The Consoles and Games boxes are shadcn `Card`s.
+  Destructive buttons use `variant="destructive"`; icons before button
+  text have `data-icon="inline-start"`.
+- **Style is now `base-vega`** (owner ran the CLI, 2026-11-23;
+  `docs/decisions.md`, "shadcn style is `base-vega`"): `base-nova` made the
+  UI too small and `base-luma`'s borderless grey fields failed the 3:1
+  field-edge contrast, so every component was re-added from `base-vega`
+  (36px, `rounded-md`, bordered fields, 24px card spacing). Logged local
+  edits are listed in `.github/copilot-instructions.md`: the drawer's
+  `100svh`, the combobox trigger's `aria-label`, and the calendar's `ref`
+  and month/year focus ring, all re-applied after the reinstall. The
+  sidebar's selected collection needs `border-0` because the button has a
+  border on every side.
+- **What is verified.** Run by Claude on `repeated-styling` (2026-11-21
+  to 2026-11-23): 93 UI tests, lint, format check, type check, and build
+  after each step, last after the `base-vega` reinstall and the local
+  edits.
+  Not run: the app in a browser since #25. #27 changes the look widely
+  (sizes, Alerts, Cards, red buttons, the shared page's sticky phone
+  header), so check it before merging: log in, open a collection, add and
+  edit a game (Condition select, date picker, Delete), share and edit a
+  collection, open a share link, and try the phone menu at narrow width.
+- **Next:** the owner merges #27 and picks the next item, on its own
+  branch from `main`. Open: 6c (styling cleanup; the owner sets the scope;
+  candidates now include the Card title size and the Alert look), 6f (name
+  query state), item 11 (further collection types, which also removes the
+  lint exception), item 17 (shadcn `Sidebar`, deferred until after item
+  15's iPhone checks).
+- **Waiting on the owner:** the `npm audit` items (Known issues); whether
+  to add a line saying Claude creates the branch to the conventions file.
 - **Local test data:** the local account `delete-me` has two collections,
   one console, and one game added by the Playwright pass. Demo sandboxes
   are capped at 10 locally; reuse one signed-in session when scripting.
   The local stack (Docker) is often off; ask before starting it.
-- **Next:** the owner merges `walkthrough-fixes` and picks the next item,
-  on its own branch from `main`. Open: 6f (name query state), 6b and 6c
-  (styling), item 11 (further collection types, which also removes the
-  lint exception).
-- **Waiting on the owner:** the `npm audit` items (Known issues); whether
-  to add a line saying Claude creates the branch to the conventions file.
 - **The `shadcn` skill** (`dlams-ui/.claude/skills/shadcn`, a link into
   `.agents/skills/`) loads once a session opens a file under `dlams-ui/`,
-  not at startup. Its `rules/forms.md` and `rules/base-vs-radix.md` were
-  used this session.
+  not at startup. Its `rules/` files (forms, composition, icons, styling)
+  are the guide for using the components.
 - **Testing on an iPhone without deploying:** Xcode's Simulator (`open -a
   Simulator`) reaches the Mac's `localhost`. Turn off I/O → Keyboard →
   Connect Hardware Keyboard to get the on-screen keyboard. Mac Safari's
@@ -98,16 +102,21 @@ never appended to. History lives in git and `docs/decisions.md`.
     `select()`, request schemas extending `RequestSchema`. The 6a grep lists raw
     form elements left in older code.
   - Generated shadcn files need the owner's approval to edit (local edits to
-    `components/ui/drawer.tsx` and `combobox.tsx` are listed in
-    `.github/copilot-instructions.md`). The owner runs the shadcn CLI.
+    `drawer.tsx`, `combobox.tsx`, and `calendar.tsx` are listed in
+    `.github/copilot-instructions.md`). The owner runs the shadcn CLI. To
+    see whether a file is current, compare it with
+    `https://ui.shadcn.com/r/styles/base-vega/<name>.json` (read-only);
+    the CLI's install-time rewrites (`"use client"`, import paths, icon
+    placeholders, `cn-*` marker classes) are not differences.
   - In our own components never use the `cn` helper, do not add code
     comments (but never remove or reword the owner's own comments; some
     are in `searchEntries.ts`), and never use the
     owner's name in tests or fixtures (use `test-user`, `demo-user`).
   - Styling: ask before any styling change; the owner's direct request is the
-    go-ahead. Destructive final actions are `<Button variant="outline"
-    className="border-destructive text-destructive">`; deleting from a
-    drawer starts with the trash-can icon. `red` is the brand color.
+    go-ahead. Destructive actions are `<Button variant="destructive">`;
+    deleting from a drawer starts with the trash-can icon. Notices and
+    errors are an `Alert` with `AlertDescription`. `red` is the brand
+    color.
   - Formatting: Prettier formats the UI (a hook runs it on each edited
     file); Ruff formats the backend. Run `npm run format:check` and
     `.venv/bin/ruff check .` / `.venv/bin/ruff format --check .` along with
@@ -251,7 +260,8 @@ workflow on a self-hosted runner (`.github/workflows/deploy.yml`).
 
 **Merged 2026-11-05** (PR #16; deploy not yet reported)
 
-- **Base UI** (item 5a): shadcn style `base-nova`; every `components/ui`
+- **Base UI** (item 5a): shadcn style `base-vega` (was `base-nova` until
+  2026-11-23); every `components/ui`
   wrapper on Base UI or plain HTML; Radix and Vaul removed.
 
 **Not implemented**
@@ -707,8 +717,9 @@ In order. Items 1 to 7 are the path to the portfolio milestone.
    data-[size=default]:h-9 md:text-sm`). Resolved 2026-11-06: both item
    forms use `ConditionSelect.tsx`, which holds them once; extract a
    general `FormSelectTrigger` only if a non-condition select appears.
-   **2026-11-21:** after the inputs moved to `base-nova` (32px,
-   `rounded-lg`), the trigger keeps only `w-full text-base md:text-sm`.
+   **2026-11-21:** after the inputs were updated from the registry, the
+   trigger keeps only `w-full text-base md:text-sm` (still right under
+   `base-vega`, where the select and inputs are both 36px).
    Likewise `border-input` on the
    outline `Button` used as the date picker's trigger
    (`LastPlayedPicker.tsx`), if another button-as-field appears.
@@ -729,8 +740,8 @@ In order. Items 1 to 7 are the path to the portfolio milestone.
    see here", which gained `md:text-3xl`. **Then the destructive buttons**
    (same day): the owner updated `button.tsx` to the current `base-nova`
    version, and the 4 red-outline buttons use `variant="destructive"`.
-   The update also changed every button (32px instead of 36px,
-   `rounded-lg`, new hover colors); see Known issues. **Then the counts line**
+   The update also changed every button (32px, `rounded-lg`); the style
+   later moved to `base-vega` (36px again; see Known issues). **Then the counts line**
    (same day): `ItemCounts` (shared page) and the sidebar's stats both use
    `features/video-games/VideoGameCounts.tsx`. **Then the page shell and
    sidebar frame** (same day): `src/app/PageShell.tsx` (used by `Home`,
@@ -740,7 +751,7 @@ In order. Items 1 to 7 are the path to the portfolio milestone.
    was considered and deferred (item 17). **Then the last two** (same
    day): the Consoles and Games boxes (workspace and shared page) are
    shadcn `Card` + `CardHeader` + `CardTitle role="heading" aria-level={2}`
-   (+ `CardAction` for Add) + `CardContent`, taking the nova card's look;
+   (+ `CardAction` for Add) + `CardContent`, taking the shadcn card's look;
    the trash-can Delete collection button is `variant="destructive"
    size="icon"`; the shared page's grid got `items-start`. **6b is done.**
 6c. **Styling cleanup** (owner, 2026-10-31; after 6a and 6b). A styling
@@ -1445,12 +1456,12 @@ is next, then the sharing UI, then search.
 
 ## Known issues
 
-- Button update follow-ups (2026-11-21, not yet seen in a browser): every
-  `components/ui` file now matches the `base-nova` registry apart from the
-  logged local edits (`calendar.tsx` also keeps a small older focus ring), so buttons, inputs, the
-  select (`ConditionSelect.tsx` no longer forces the old 36px), and the
-  console combobox are all 32px and `rounded-lg`. The 8 icons that sit
-  before button text have `data-icon="inline-start"` (6 files).
+- Style update follow-ups (2026-11-23, not yet seen in a browser):
+  every `components/ui` file matches the `base-vega` registry apart from
+  the four logged local edits. Buttons, inputs, the select, and the
+  console combobox are 36px and `rounded-md`; the sidebar's selected
+  collection keeps `border-0` (the button has a border on every side);
+  the 8 icons before button text have `data-icon="inline-start"`.
 - On a phone, the admin users table scrolls sideways inside its bordered box,
   and the Make template and Deactivate buttons are in the last column, so an admin
   swipes right to reach them. Checked by reading the code on 2026-10-23, not
