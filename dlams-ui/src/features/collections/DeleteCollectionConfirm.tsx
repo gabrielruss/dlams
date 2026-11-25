@@ -55,7 +55,7 @@ function DeleteCollectionConfirm({
   ])
 
   return (
-    <div className="flex flex-col gap-3 rounded-md border p-3">
+    <div className="flex flex-col gap-2 rounded-md border p-3">
       <p className="text-sm">
         Delete {collection.name}?{" "}
         {contentsMessage(isCounting, countsLoaded, contents)} This can't be

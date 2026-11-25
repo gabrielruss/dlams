@@ -766,9 +766,9 @@ In order. Items 1 to 7 are the path to the portfolio milestone.
    - Spacing that differs for no clear reason: **done 2026-11-25 on
      `styling-cleanup`:** the workspace, collection, search, and shared
      page sections and grids moved from `gap-5` to `gap-6`, matching
-     `PageShell` (build, lint, format check, and 93 UI tests pass). Still
-     open: the delete confirms are `rounded-md border p-3` with `gap-2`
-     (`ShareLinkRow`) and `gap-3` (`DeleteCollectionConfirm`).
+     `PageShell`, and `DeleteCollectionConfirm` moved from `gap-3` to
+     `gap-2`, matching `ShareLinkRow` (build, lint, format check, and 93
+     UI tests pass). The `gap-6` rule is in the conventions file.
    - **Done 2026-11-25 on `styling-cleanup`:** removed the unused `teal`
      token (`--teal` and `--color-teal` in `index.css`). Build, format
      check, and 93 UI tests pass.
