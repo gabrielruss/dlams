@@ -20,7 +20,7 @@ function VideoGamesWorkspace({ collection }: VideoGamesWorkspaceProps) {
   if (isPending) return <p>Loading collection items...</p>
 
   return (
-    <div className="flex flex-col gap-5">
+    <div className="flex flex-col gap-6">
       {isSandbox(currentUser) && (
         <Alert role="note">
           <AlertDescription>
@@ -39,7 +39,7 @@ function VideoGamesWorkspace({ collection }: VideoGamesWorkspaceProps) {
           <AlertDescription>{error.message}</AlertDescription>
         </Alert>
       )}
-      <div className="grid items-start gap-5 lg:grid-cols-2">
+      <div className="grid items-start gap-6 lg:grid-cols-2">
         <ConsoleManager
           collectionId={collection.id}
           consoles={consoles}

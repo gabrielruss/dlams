@@ -38,7 +38,7 @@ function SearchResults() {
   const results = useMemo(() => searchEntries(entries, query), [entries, query])
 
   return (
-    <section className="flex flex-col gap-5 duration-200 animate-in fade-in slide-in-from-top-2 motion-reduce:animate-none">
+    <section className="flex flex-col gap-6 duration-200 animate-in fade-in slide-in-from-top-2 motion-reduce:animate-none">
       <header className="flex flex-wrap items-start justify-between gap-3">
         <div className="flex flex-col gap-1">
           <PageHeading>Results in all collections</PageHeading>

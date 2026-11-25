@@ -103,7 +103,7 @@ function SharedCollection() {
                 )}
               </p>
             </div>
-            <div className="grid items-start gap-5 lg:grid-cols-2">
+            <div className="grid items-start gap-6 lg:grid-cols-2">
               <Card>
                 <CardHeader>
                   <CardTitle role="heading" aria-level={2}>

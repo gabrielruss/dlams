@@ -50,7 +50,7 @@ function CollectionWorkspace() {
     collection !== undefined && canWriteCollection(collection.access)
 
   return (
-    <section className="flex flex-col gap-5">
+    <section className="flex flex-col gap-6">
       <header className="flex flex-wrap items-center justify-between gap-3">
         <PageHeading>{collection?.name ?? "Your collections"}</PageHeading>
         {canWrite && (

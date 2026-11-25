@@ -11,45 +11,39 @@ The current state of the project. For why things are the way they are, see
 Start here in a new session. This block is rewritten at the end of a session,
 never appended to. History lives in git and `docs/decisions.md`.
 
-- **Status (2026-11-23).** PR #27 (`repeated-styling`, plan item 6b plus
-  the shadcn style update to `base-vega`) is open, not yet merged. Merged before it: #24 (6d), #25 (6g), #26 (the walkthrough
-  fixes and UI-written 422 text; `docs/decisions.md`, "The UI writes the
-  text for API validation errors"). Run `git status` and `git log` first:
-  the owner commits and pushes everything, and a push to `main` deploys
-  (docs included). `gh` is installed and logged in.
-- **What #27 does (6b, done):** shared pieces instead of repeated classes:
-  `DrawerTitleBar`, `DrawerBody`, `DrawerFooterBar`, `PageHeading` (in
-  `src/components/`), `PageShell` and `SidebarFrame` (in `src/app/`),
-  `VideoGameCounts` (in `features/video-games/`). Every notice and error is
-  a shadcn `Alert` (`role="note"` for static notices); no hand-written
-  `role="alert"` is left. The Consoles and Games boxes are shadcn `Card`s.
-  Destructive buttons use `variant="destructive"`; icons before button
-  text have `data-icon="inline-start"`.
-- **Style is now `base-vega`** (owner ran the CLI, 2026-11-23;
-  `docs/decisions.md`, "shadcn style is `base-vega`"): `base-nova` made the
-  UI too small and `base-luma`'s borderless grey fields failed the 3:1
-  field-edge contrast, so every component was re-added from `base-vega`
-  (36px, `rounded-md`, bordered fields, 24px card spacing). Logged local
-  edits are listed in `.github/copilot-instructions.md`: the drawer's
-  `100svh`, the combobox trigger's `aria-label`, and the calendar's `ref`
-  and month/year focus ring, all re-applied after the reinstall. The
-  sidebar's selected collection needs `border-0` because the button has a
-  border on every side.
-- **What is verified.** Run by Claude on `repeated-styling` (2026-11-21
-  to 2026-11-23): 93 UI tests, lint, format check, type check, and build
-  after each step, last after the `base-vega` reinstall and the local
-  edits.
-  Not run: the app in a browser since #25. #27 changes the look widely
-  (sizes, Alerts, Cards, red buttons, the shared page's sticky phone
-  header), so check it before merging: log in, open a collection, add and
-  edit a game (Condition select, date picker, Delete), share and edit a
-  collection, open a share link, and try the phone menu at narrow width.
-- **Next:** the owner merges #27 and picks the next item, on its own
-  branch from `main`. Open: 6c (styling cleanup; the owner sets the scope;
-  candidates now include the Card title size and the Alert look), 6f (name
-  query state), item 11 (further collection types, which also removes the
-  lint exception), item 17 (shadcn `Sidebar`, deferred until after item
-  15's iPhone checks).
+- **Status (2026-11-25).** PR #27 (`repeated-styling`: plan item 6b and
+  the shadcn style switch to `base-vega`) is merged to `main` (`bc9ba23`),
+  and the owner checked the live site (2026-11-25): good. Claude created
+  branch `styling-cleanup` from `main` for item 6c; nothing is on it but
+  this doc update. Run `git status` and `git log` first: the owner commits
+  and pushes everything, and a push to `main` deploys (docs included).
+  `gh` is installed and logged in; do not watch CI unless asked.
+- **Next: 6c, styling cleanup.** Start read-only, as 6b did: list each
+  candidate with where it is and what it would change, then the owner
+  picks (styling changes need the owner's go-ahead). Starting candidates
+  are in the 6c entry below.
+- **What #27 did:** 6b (done): `DrawerTitleBar`, `DrawerBody`,
+  `DrawerFooterBar`, `PageHeading` (`src/components/`), `PageShell` and
+  `SidebarFrame` (`src/app/`), `VideoGameCounts`
+  (`features/video-games/`); every notice and error is a shadcn `Alert`
+  (`role="note"` for static notices); the Consoles and Games boxes are
+  `Card`s; destructive buttons use `variant="destructive"`; icons before
+  button text have `data-icon="inline-start"`. Then the style moved to
+  `base-vega` (`docs/decisions.md`, "shadcn style is `base-vega`"):
+  `base-nova` was too small and `base-luma`'s borderless grey fields
+  failed the 3:1 field-edge contrast. Every `components/ui` file matches
+  the `base-vega` registry apart from the four logged local edits
+  (`.github/copilot-instructions.md`): the drawer's `100svh`, the
+  combobox trigger's `aria-label`, and the calendar's `ref` and month/year
+  focus ring. After any reinstall, re-apply them; tests catch two
+  (`ref`, `aria-label`) but not the other two.
+- **What is verified.** Run by Claude on `repeated-styling` through
+  2026-11-23: 93 UI tests, lint, format check, type check, and build,
+  last after the `base-vega` reinstall and the local edits. The owner
+  checked the live site after #27 merged (2026-11-25): good.
+- **Later items:** 6f (name query state), item 11 (further collection
+  types, which also removes the lint exception), item 17 (shadcn
+  `Sidebar`, deferred until after item 15's iPhone checks).
 - **Waiting on the owner:** the `npm audit` items (Known issues); whether
   to add a line saying Claude creates the branch to the conventions file.
 - **Local test data:** the local account `delete-me` has two collections,
@@ -761,6 +755,23 @@ In order. Items 1 to 7 are the path to the portfolio milestone.
    screens for no reason, and unused tokens (`teal` in `index.css`). Re-run
    the tests and the 6a consistency check afterward, and check the changed
    screens in a browser.
+   **Starting candidates (gathered 2026-11-23, after `base-vega`):**
+   - Overrides of a shadcn component's own typography: `DrawerTitle
+     className="text-xl"` in `DrawerTitleBar.tsx`, and `text-base
+     md:text-sm` on the select trigger in `ConditionSelect.tsx` (check
+     against vega's select and input).
+   - Sizes the switch changed: the Card title is `text-base font-medium`
+     (the old section headings were `text-xl font-semibold`); the Alert's
+     look (padding, muted text for notices).
+   - Spacing that differs for no clear reason: **done 2026-11-25 on
+     `styling-cleanup`:** the workspace, collection, search, and shared
+     page sections and grids moved from `gap-5` to `gap-6`, matching
+     `PageShell` (build, lint, format check, and 93 UI tests pass). Still
+     open: the delete confirms are `rounded-md border p-3` with `gap-2`
+     (`ShareLinkRow`) and `gap-3` (`DeleteCollectionConfirm`).
+   - **Done 2026-11-25 on `styling-cleanup`:** removed the unused `teal`
+     token (`--teal` and `--color-teal` in `index.css`). Build, format
+     check, and 93 UI tests pass.
 6d. **Backend consistency pass** (owner, 2026-10-31). The patterns are in
    `.github/copilot-instructions.md`, "Backend": `Annotated` dependency
    aliases, collection access through `permissions.py` dependencies, and

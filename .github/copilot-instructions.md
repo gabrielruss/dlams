@@ -325,6 +325,7 @@ Styling pass status: **complete** (the owner finished the mobile pass on 2026-10
 
 - Not started: add only minimal styles needed to make a feature usable, scoped to the new component. Do not change global styles, design tokens, or shared component styles.
 - Complete: ask before any CSS or styling change (global styles, tokens, component styles, Tailwind classes), even small ones. After approval, limit edits to the approved scope.
+- Page sections and the section grids use `gap-6`, matching `PageShell` (2026-11-25, plan item 6c). Write the class directly, as shadcn's styling rules do; no custom spacing utility. `grep -rn 'gap-5' dlams-ui/src` should print nothing.
 
 ## Testing
 
