@@ -55,7 +55,7 @@ function Login() {
       />
       <Card className="relative w-full max-w-md bg-card/80">
         <CardHeader>
-          <CardTitle role="heading" aria-level={1}>
+          <CardTitle role="heading" aria-level={1} className="text-xl">
             Login
           </CardTitle>
         </CardHeader>

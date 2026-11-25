@@ -36,7 +36,7 @@ function ConsoleManager({
   return (
     <Card>
       <CardHeader>
-        <CardTitle role="heading" aria-level={2}>
+        <CardTitle role="heading" aria-level={2} className="text-xl">
           Consoles
         </CardTitle>
         {canWrite && (

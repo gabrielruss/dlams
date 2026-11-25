@@ -35,7 +35,7 @@ function GameManager({ collectionId, games, canWrite }: GameManagerProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle role="heading" aria-level={2}>
+        <CardTitle role="heading" aria-level={2} className="text-xl">
           Games
         </CardTitle>
         {canWrite && (

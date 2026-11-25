@@ -760,9 +760,15 @@ In order. Items 1 to 7 are the path to the portfolio milestone.
      className="text-xl"` in `DrawerTitleBar.tsx`, and `text-base
      md:text-sm` on the select trigger in `ConditionSelect.tsx` (check
      against vega's select and input).
-   - Sizes the switch changed: the Card title is `text-base font-medium`
-     (the old section headings were `text-xl font-semibold`); the Alert's
-     look (padding, muted text for notices).
+   - **Heading scale, done 2026-11-25 on `styling-cleanup` (owner):**
+     three tiers, recorded in `.github/copilot-instructions.md`
+     (Styling). Page title is `PageHeading`; every panel title (drawer,
+     Consoles/Games cards, Login/Register cards) is `text-xl font-medium`
+     (`text-base` was tried on the drawer and was too small); label is the
+     sidebar "Collections". Build, lint, format check, and 93 UI tests
+     pass.
+   - Still open: the Alert's look under `base-vega` (padding, muted text
+     for notices); a question of taste, not cleanup.
    - Spacing that differs for no clear reason: **done 2026-11-25 on
      `styling-cleanup`:** the workspace, collection, search, and shared
      page sections and grids moved from `gap-5` to `gap-6`, matching

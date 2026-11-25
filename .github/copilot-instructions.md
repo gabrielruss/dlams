@@ -326,6 +326,7 @@ Styling pass status: **complete** (the owner finished the mobile pass on 2026-10
 - Not started: add only minimal styles needed to make a feature usable, scoped to the new component. Do not change global styles, design tokens, or shared component styles.
 - Complete: ask before any CSS or styling change (global styles, tokens, component styles, Tailwind classes), even small ones. After approval, limit edits to the approved scope.
 - Page sections and the section grids use `gap-6`, matching `PageShell` (2026-11-25, plan item 6c). Write the class directly, as shadcn's styling rules do; no custom spacing utility. `grep -rn 'gap-5' dlams-ui/src` should print nothing.
+- Headings use three sizes (2026-11-25, plan item 6c). Page title: `PageHeading` (`text-2xl md:text-3xl font-semibold`). Panel title: every drawer title and `CardTitle` gets `className="text-xl"` on its own `font-medium` (vega's `text-base` was too small); this covers the Consoles and Games cards and the Login and Register cards, which stay `aria-level={1}` because the heading level follows the page outline, not the size. Label: sidebar "Collections" (`text-sm font-semibold`). A new heading uses one of these three.
 
 ## Testing
 
